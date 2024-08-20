@@ -1,25 +1,13 @@
-var express = require('express');
-var app = express();
-var db = require('./config/db');
-var userRoutes = require('./components/user/userRoute');
+const express = require('express');
+const bodyParser = require('body-parser');
+const app = express();
+const dangkyRoutes = require('./components/user/dangky');
 
-app.use(express.static('public')); // Serve static files from the public directory
+// Sử dụng body-parser để phân tích cú pháp JSON từ yêu cầu
+app.use(bodyParser.json());
 
-// Connect to the database
-db.connect(function(err) {
-    if (err) {
-        console.error('Failed to connect to SQL: ' + err.stack);
-        return;
-    }
-    console.log('Connected to SQL successfully');
-});
-
-
-app.use('/api', userRoutes); 
-
-app.get('/', function(req, res) {
-    res.sendFile(__dirname + '/../public/'); 
-});
+// Sử dụng router đăng ký
+app.use('/api', dangkyRoutes);
 
 app.listen(3000, function() {
     console.log('Server is running on port 3000');
