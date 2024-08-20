@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../../config/db');
+const path = require('path'); // Thêm module path để xử lý đường dẫn
+
 const bcrypt = require('bcrypt'); // For password hashing
 
 function validateInput(data) {
@@ -13,6 +15,10 @@ async function recordExists(query, params) {
     const [result] = await db.query(query, params);
     return result.length > 0;
 }
+router.get('/dangky', function(req, res) {
+    res.sendFile(path.join(__dirname, '../../public/dangky.html'));
+});
+
 
 //router.post() để xử lý yêu cầu POST
 router.post('/register', async function(req, res) {
@@ -52,6 +58,16 @@ router.post('/register', async function(req, res) {
         res.status(201).json({ message: 'Đã đăng ký tài khoản người dùng thành công' });
     } catch (error) {
         console.error('Lỗi khi đăng ký :', error); 
+        res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
+});
+
+router.get('/regions', async function(req, res) {
+    try {
+        const [regions] = await db.query('SELECT region_id, region_name FROM regions');
+        res.json(regions);
+    } catch (error) {
+        console.error('Lỗi khi lấy danh sách vùng sản xuất:', error);
         res.status(500).json({ message: 'Internal server error', error: error.message });
     }
 });
