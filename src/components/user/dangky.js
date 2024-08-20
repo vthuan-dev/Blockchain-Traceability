@@ -3,7 +3,6 @@ const router = express.Router();
 const db = require('../../config/db');
 const bcrypt = require('bcrypt'); // For password hashing
 
-// Function to validate input data
 function validateInput(data) {
     const { name, email, password, phone, address, dob, gender, role_id, region_id } = data;
     const missingFields = [];
@@ -19,19 +18,16 @@ function validateInput(data) {
     return missingFields;
 }
 
-// Function to check if a record exists in the database
 async function recordExists(query, params) {
     const [result] = await db.query(query, params);
     return result.length > 0;
 }
 
-// Endpoint to handle user registration
 router.post('/register', async function(req, res) {
     const { name, email, password, phone, address, dob, gender, role_id, region_id } = req.body;
 
     console.log(req.body); // Log dữ liệu nhận được
 
-    // Log chi tiết từng trường
     console.log('name:', name);
     console.log('email:', email);
     console.log('password:', password);
