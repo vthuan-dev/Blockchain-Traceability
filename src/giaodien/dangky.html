@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng Ký Người Dùng</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .container {
+            max-width: 500px;
+            margin-top: 50px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-control {
+            padding: 5px 10px;
+        }
+        .btn {
+            padding: 10px 20px;
+        }
+        body{
+            background-image: url("/hinhanh/background-buoi.jpg");
+            background-size: cover;
+        }
+        .container {
+            max-width: 500px;
+            background-color: rgba(255, 255, 255, 0.8); /* Màu nền trắng với độ trong suốt */
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border: 1px solid #ccc; /* Thêm khung cho form */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center">Đăng Ký</h1>
+        <form id="registrationForm" class="mt-3">
+            <div class="form-group">
+                <label for="name">Họ và Tên:</label>
+                <input type="text" class="form-control" id="name" name="name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Mật Khẩu:</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+
+            <div class="form-group">
+                <label for="confirmPassword">Xác Nhận Mật Khẩu:</label>
+                <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Số Điện Thoại:</label>
+                <input type="text" class="form-control" id="phone" name="phone" required>
+            </div>
+
+            <div class="form-group">
+                <label for="address">Địa Chỉ:</label>
+                <input type="text" class="form-control" id="address" name="address" required>
+            </div>
+
+            <div class="form-group">
+                <label for="dob">Ngày Sinh:</label>
+                <input type="date" class="form-control" id="dob" name="dob" required>
+            </div>
+
+            <div class="form-group">
+                <label for="gender">Giới Tính:</label>
+                <select class="form-control" id="gender" name="gender" required>
+                    <option value="">Chọn giới tính</option>
+                    <option value="Nam">Nam</option>
+                    <option value="Nữ">Nữ</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="role">Vai Trò:</label>
+                <select class="form-control" id="role" name="role_id" required>
+                    <option value="">Chọn vai trò</option>
+                    <option value="1">Người Kiểm Duyệt</option>
+                    <option value="2">Người Sản Xuất</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="region_id">Vùng sản xuất:</label>
+                <select class="form-control" id="region_id" name="region_id" required>
+                    <option value="">Chọn vùng sản xuất</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">Đăng Ký</button>
+        </form>
+        <br>
+        <div class="dangnhap">
+            <p>Hoặc <a href="http://localhost:3000/api/dangnhap">Đăng nhap</a> nếu như bạn chưa có tài khoản</p>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS và các thư viện phụ thuộc -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            const regionSelect = document.getElementById('region_id');
+            try {
+                const response = await fetch('http://localhost:3000/api/regions');
+                const regions = await response.json();
+                regions.forEach(region => {
+                    const option = document.createElement('option');
+                    option.value = region.region_id;
+                    option.textContent = region.region_name;
+                    regionSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Lỗi khi lấy danh sách vùng sản xuất:', error);
+            }
+        });
+
+        document.getElementById('registrationForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+        
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+        
+            if (password !== confirmPassword) {
+                alert('Mật khẩu không khớp. Vui lòng thử lại.');
+                return;
+            }
+        
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
+        
+            try {
+                const response = await fetch('http://localhost:3000/api/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+        
+                if (response.ok) {
+                    alert('Đăng ký thành công');
+                } else {
+                    const errorData = await response.json();
+                    alert('Lỗi: ' + errorData.message);
+                }
+            } catch (error) {
+                console.error('Lỗi:', error);
+                alert('Lỗi khi đăng ký');
+            }
+        });
+    </script>
+</body>
+</html>
