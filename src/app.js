@@ -18,9 +18,6 @@ app.use('/api', dangkyRoutes);
 app.use('/api', dangnhapRoutes);
 
 //test
-app.get('/api/register', function(req, res) {
-    res.send('Hello World');
-});
 
 app.listen(3000, function() {
     console.log('Server is running on port 3000');
