@@ -1,0 +1,19 @@
+.thanhphan .col {
+    background-color: #59c4a9;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    padding: 15px;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.thanhphan .col:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.thanhphan .col h5 {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+.thanhphan .col p {
+    margin-bottom: 0;
+}

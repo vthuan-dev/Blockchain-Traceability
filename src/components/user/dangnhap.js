@@ -7,7 +7,7 @@ const path = require('path'); // Import module path
 
 
 router.get('/dangnhap', function(req, res) {
-    res.sendFile(path.join(__dirname, '../../public/dangnhap.html'));
+    res.sendFile(path.join(__dirname, '../../giaodien/dangnhap.html'));
 });
 
 

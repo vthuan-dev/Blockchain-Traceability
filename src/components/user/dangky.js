@@ -16,7 +16,7 @@ async function recordExists(query, params) {
     return result.length > 0;
 }
 router.get('/dangky', function(req, res) {
-    res.sendFile(path.join(__dirname, '../../public/dangky.html'));
+    res.sendFile(path.join(__dirname, '../../giaodien/dangky.html'));
 });
 
 
