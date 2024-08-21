@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng Nhập</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .container {
+            max-width: 500px;
+            margin-top: 50px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-control {
+            padding: 5px 10px;
+        }
+        .btn {
+            padding: 10px 20px;
+        }
+        body{
+            background-image: url("/hinhanh/background-buoi.jpg");
+            background-size: cover;
+        }
+        .container {
+            max-width: 500px;
+            background-color: rgba(255, 255, 255, 0.8); /* Màu nền trắng với độ trong suốt */
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border: 1px solid #ccc; /* Thêm khung cho form */
+        }
+    </style>
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center">Đăng Nhập</h1>
+        <form id="loginForm" class="mt-4">
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Mật Khẩu:</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Đăng Nhập</button>
+        </form>
+        <br>
+        <div class="dangky">
+            <p>Hoặc <a href="http://localhost:3000/api/dangky">Đăng ký</a> nếu như bạn đã có tài khoản</p>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS và các thư viện phụ thuộc -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+    
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
+    
+            try {
+                const response = await fetch('http://localhost:3000/api/dangnhap', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+    
+                if (response.ok) {
+                    alert('Đăng nhập thành công');
+                    // Chuyển hướng đến trang chính sau khi đăng nhập thành công
+                    window.location.href = '/';
+                } else {
+                    const errorData = await response.json();
+                    alert('Lỗi: ' + errorData.message);
+                }
+            } catch (error) {
+                console.error('Lỗi:', error);
+                alert('Lỗi khi đăng nhập');
+            }
+        });
+    </script>
+</body>
+</html>
