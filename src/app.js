@@ -17,6 +17,7 @@ app.use('/api', dangkyRoutes);
 // Sử dụng router đăng nhập
 app.use('/api', dangnhapRoutes);
 
+//test
 app.get('/api/register', function(req, res) {
     res.send('Hello World');
 });
