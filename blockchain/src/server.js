@@ -305,6 +305,73 @@ const contractABI =   [
         "internalType": "uint256",
         "name": "_batchId",
         "type": "uint256"
+      }
+    ],
+    "name": "getBatch",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "batchId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "batchName",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "productId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "producerId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "quantity",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "productionDate",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "expireDate",
+            "type": "uint256"
+          },
+          {
+            "internalType": "enum SupplyChain.BatchStatus",
+            "name": "status",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct SupplyChain.Batch",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_batchId",
+        "type": "uint256"
       },
       {
         "internalType": "uint256",
@@ -436,11 +503,11 @@ app.post('/createbatch', async (req, res) => {
       // Kiểm tra sản phẩm trong cơ sở dữ liệu
       db.query('SELECT * FROM products WHERE product_id = ?', [productId], (err, productResults) => {
           if (err) {
-              console.error('Error querying product:', err);
-              return res.status(500).send('Error querying product');
+              console.error('Lỗi khi truy vấn bảng products:', err);
+              return res.status(500).send('Lỗi khi truy vấn bảng products');
           }
           if (productResults.length === 0) {
-              return res.status(400).send('Invalid product ID');
+              return res.status(400).send('ID sản phẩm không hợp lệ');
           }
 
           console.log('Product found:', JSON.stringify(productResults[0], null, 2));
@@ -448,11 +515,11 @@ app.post('/createbatch', async (req, res) => {
           // Kiểm tra người dùng trong cơ sở dữ liệu
           db.query('SELECT * FROM users WHERE uid = ?', [producerId], async (err, userResults) => {
               if (err) {
-                  console.error('Error querying user:', err);
-                  return res.status(500).send('Error querying user');
+                  console.error('Lỗi khi truy vấn bảng users:', err);
+                  return res.status(500).send('Lỗi khi truy vấn bảng users');
               }
               if (userResults.length === 0) {
-                  return res.status(400).send('Invalid producer ID');
+                  return res.status(400).send('ID người dùng không hợp lệ');
               }
 
               console.log('User found:', JSON.stringify(userResults[0], null, 2));
@@ -461,7 +528,7 @@ app.post('/createbatch', async (req, res) => {
                 const accounts = await web3.eth.getAccounts();
                              console.log('Accounts:', accounts);
                 
-                // Convert numeric values to BigInt if necessary
+                // chuyển đổi giá trị gasEstimate từ number sang BigInt
                 const gasEstimate = BigInt(await contract.methods.createBatch(
                     batchName,
                     productId,
@@ -470,7 +537,7 @@ app.post('/createbatch', async (req, res) => {
                     productionDate,
                     expireDate
                 ).estimateGas({ from: accounts[0] }));
-                
+                // Gửi giao dịch tạo lô hàng 
                 const receipt = await contract.methods.createBatch(
                     batchName,
                     productId,
@@ -480,10 +547,10 @@ app.post('/createbatch', async (req, res) => {
                     expireDate
                 ).send({
                     from: accounts[0],
-                    gas: gasEstimate + BigInt(100000) // Convert additional gas to BigInt
+                    gas: gasEstimate + BigInt(100000) //  additional gas to BigInt
                 });
                 
-                // Convert BigInt values in receipt to strings
+                // Chuyển đổi giá trị BigInt trong receipt sang chuỗi
                 const receiptStringified = JSON.stringify(receipt, (key, value) =>
                     typeof value === 'bigint' ? value.toString() : value
                 );
@@ -492,7 +559,7 @@ app.post('/createbatch', async (req, res) => {
                     'Transaction receipt:', 
                     receiptStringified
                 );             
-                   res.send('Batch created successfully');
+                   res.send('Lô hàng đã được tạo thành công, được luu trữ trong blockchain');
                 } catch (err) {
                     console.error('Error creating batch:', err);
                 
@@ -505,27 +572,53 @@ app.post('/createbatch', async (req, res) => {
                       db.query('INSERT INTO batches (batch_code, product_id, quantity, production_date, expire_date) VALUES (?, ?, ?, ?, ?)', 
                       [batchCode, productId, quantity, productionDateStr, expireDateStr], (err, result) => {
                           if (err) {
-                              console.error('Error saving batch:', err);
-                              return res.status(500).send('Error saving batch');
+                              console.error('Lỗi lưu lô hàng:', err);
+                              return res.status(500).send('Lỗi lưu lô hàng');
                           }
-                          res.status(500).send('Cannot connect to Ethereum server. Batch saved in database.');
+                          res.status(500).send('Không thể kết nối với blockchain, lô hàng đã được lưu vào cơ sở dữ liệu');
                       });
                   } else {
-                      res.status(500).send('Error creating batch');
+                      res.status(500).send('Lỗi tạo lô hàng');
                   }
               }
           });
       });
   } catch (err) {
       console.error('Error:', err);
-      res.status(500).send('Error creating batch');
+      res.status(500).send('Lỗi tạo lô hàng');
   }
 });
+
+
 
 // Hàm tạo mã lô hàng duy nhất
 function generateBatchCode() {
     return 'BATCH-' + Math.random().toString(36).substr(2, 9).toUpperCase();
 }
+
+
+async function getBatch(batchId) {
+  try {
+      // Kiểm tra batchId hợp lệ
+      if (batchId <= 0) {
+          throw new Error('Invalid batchId');
+      }
+
+      const batch = await contract.methods.getBatch(batchId).call();
+      console.log('Batch:', batch);
+      return batch;
+  } catch (err) {
+      console.error('Error retrieving batch:', err);
+      throw err;
+  }
+}
+
+const batchId = 5; // Thay thế bằng batchId thực tế
+getBatch(batchId).then(batch => {
+    console.log('Lô hàng đã truy xuất:', batch);
+}).catch(err => {
+    console.error('Lỗi truy xuất lô hàng:', err);
+});
 
 app.listen(3000, () => {
     console.log('Server is running on port 3000');
