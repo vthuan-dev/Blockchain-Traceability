@@ -458,34 +458,44 @@ app.post('/createbatch', async (req, res) => {
               console.log('User found:', JSON.stringify(userResults[0], null, 2));
 
               try {
-                  const accounts = await web3.eth.getAccounts();
-                  console.log('Accounts:', accounts);
-
-                  const gasEstimate = await contract.methods.createBatch(
-                      batchName,
-                      productId,
-                      producerId,
-                      quantity,
-                      productionDate,
-                      expireDate
-                  ).estimateGas({ from: accounts[0] });
-
-                  const receipt = await contract.methods.createBatch(
-                      batchName,
-                      productId,
-                      producerId,
-                      quantity,
-                      productionDate,
-                      expireDate
-                  ).send({
-                      from: accounts[0],
-                      gas: gasEstimate + 100000 // Thêm một lượng gas dự phòng
-                  });
-
-                  console.log('Transaction receipt:', JSON.stringify(receipt, null, 2));
-                  res.send('Batch created successfully');
-              } catch (err) {
-                  console.error('Error creating batch:', err);
+                const accounts = await web3.eth.getAccounts();
+                             console.log('Accounts:', accounts);
+                
+                // Convert numeric values to BigInt if necessary
+                const gasEstimate = BigInt(await contract.methods.createBatch(
+                    batchName,
+                    productId,
+                    producerId,
+                    quantity,
+                    productionDate,
+                    expireDate
+                ).estimateGas({ from: accounts[0] }));
+                
+                const receipt = await contract.methods.createBatch(
+                    batchName,
+                    productId,
+                    producerId,
+                    quantity,
+                    productionDate,
+                    expireDate
+                ).send({
+                    from: accounts[0],
+                    gas: gasEstimate + BigInt(100000) // Convert additional gas to BigInt
+                });
+                
+                // Convert BigInt values in receipt to strings
+                const receiptStringified = JSON.stringify(receipt, (key, value) =>
+                    typeof value === 'bigint' ? value.toString() : value
+                );
+                
+                console.log(
+                    'Transaction receipt:', 
+                    receiptStringified
+                );             
+                   res.send('Batch created successfully');
+                } catch (err) {
+                    console.error('Error creating batch:', err);
+                
                   if (err.code === 'ECONNREFUSED') {
                       // Lưu trữ thông tin lô hàng vào bảng batches
                       const batchCode = generateBatchCode(); // Hàm tạo mã lô hàng duy nhất
