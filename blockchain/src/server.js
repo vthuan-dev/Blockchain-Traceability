@@ -469,7 +469,7 @@ const contractABI =   [
   }
 ];
 
-const contractAddress = '0xda45191F25bf27A93da9cC005010742887022f06'; 
+const contractAddress = '0x185E159142A949cD3f7f22d712Da36F37138a9D5'; 
 const contract = new web3.eth.Contract(contractABI, contractAddress);
 
 const db = mysql.createConnection({
@@ -499,6 +499,14 @@ contract.events.BatchCreated({
       console.log('BatchCreated event:', event);
   }
 });
+
+// hàm lấy thông tin lô hàng từ blockchain
+async function getBatch(batchId) {
+  const batch = await contract.methods.getBatch(batchId).call();
+  console.log(batch);
+}
+
+getBatch(0);
 
 app.post('/createbatch', async (req, res) => {
   const { batchName, productId, producerId, quantity, productionDate, expireDate } = req.body;
