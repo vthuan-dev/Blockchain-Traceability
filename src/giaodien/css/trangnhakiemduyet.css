@@ -162,6 +162,29 @@ body {
     display: flex;
 }
 
+/* Đảm bảo menu dropdown nằm trên cùng bên phải */
+.dropdown-menu {
+    right: 0;
+    left: auto;
+}
+
+.custom-navbar-height {
+    height: 75px;
+}
+
+.table-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.dashboard-table table, td, th {
+    border: 1px solid black;
+    border-collapse: collapse;
+    text-align: center;
+    vertical-align: center;
+}
+
 /* Tùy chỉnh các nút */
 .check-button {
     background-color: #04AA6D;
@@ -182,40 +205,16 @@ body {
   }
   
   .check-button-wide {
-    background-color: #04AA6D;
-    border: none;
-    color: white;
-    padding: 3px 8px;
-    text-align: center;
-    text-decoration: none;
     display: block;
-    font-size: 16px;
-    margin: 4px 2px;
-    cursor: pointer;
-    border-radius: 5px;
   }
   
   .check-button-wide:hover {
     background-color: #6ab04c;
   }
-  
-  .accept-button {
-    background-color: none;
-    padding: 12px 32px;
-    text-align: center;
-    display: block;
-    font-size: 16px;
-    margin: 4px 2px;
-    cursor: pointer;
-    border-radius: 5px;
-    margin: auto;
-  }
-  
-  .accept-button-big {
-    background-color: #0a78fc;
+
+  .function-button {
     border: none;
     color: white;
-    padding: 8px 8px;
     text-align: center;
     text-decoration: none;
     display: block;
@@ -223,6 +222,20 @@ body {
     margin: 4px 2px;
     cursor: pointer;
     border-radius: 5px;
+  }
+
+  .accept-button {
+    background-color: #0a78fc;
+    padding: 3px 8px;
+  }
+  
+  .accept-button:hover {
+    background-color: #6ab04c;
+  }
+  
+  .accept-button-big {
+    background-color: #0a78fc;
+    padding: 8px 8px;
   }
   
   .accept-button-big:hover {
@@ -231,16 +244,7 @@ body {
   
   .cancel-button {
     background-color: #f01445;
-    border: none;
-    color: white;
     padding: 3px 8px;
-    text-align: center;
-    text-decoration: none;
-    display: block;
-    font-size: 16px;
-    margin: 4px 2px;
-    cursor: pointer;
-    border-radius: 5px;
   }
   
   .cancel-button:hover {
@@ -249,19 +253,29 @@ body {
   
   .cancel-button-big {
     background-color: #f01445;
-    border: none;
-    color: white;
     padding: 8px 8px;
-    text-align: center;
-    text-decoration: none;
-    display: block;
-    font-size: 16px;
-    margin: 4px 2px;
-    cursor: pointer;
-    border-radius: 5px;
   }
   
   .cancel-button-big:hover {
     background-color: #6ab04c;
   }
+
+  input[type=checkbox] {
+    display: none;
+  }
   
+  .imgCheck img {
+    margin: auto;
+    transition: transform 0.25s ease;
+    cursor: zoom-in;
+    width: 20%;
+  }
+  
+  input[type=checkbox]:checked ~ label > img {
+    position: relative;
+    display: block;
+    margin: auto;
+    width: 50%; 
+    transform: scale(2);
+    cursor: zoom-out;
+  }
