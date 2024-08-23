@@ -161,3 +161,107 @@ body {
 .overlay.active {
     display: flex;
 }
+
+/* Tùy chỉnh các nút */
+.check-button {
+    background-color: #04AA6D;
+    border: none;
+    color: white;
+    padding: 3px 8px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  
+  .check-button:hover {
+    background-color: #6ab04c;
+  }
+  
+  .check-button-wide {
+    background-color: #04AA6D;
+    border: none;
+    color: white;
+    padding: 3px 8px;
+    text-align: center;
+    text-decoration: none;
+    display: block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  
+  .check-button-wide:hover {
+    background-color: #6ab04c;
+  }
+  
+  .accept-button {
+    background-color: none;
+    padding: 12px 32px;
+    text-align: center;
+    display: block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 5px;
+    margin: auto;
+  }
+  
+  .accept-button-big {
+    background-color: #0a78fc;
+    border: none;
+    color: white;
+    padding: 8px 8px;
+    text-align: center;
+    text-decoration: none;
+    display: block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  
+  .accept-button-big:hover {
+    background-color: #6ab04c;
+  }
+  
+  .cancel-button {
+    background-color: #f01445;
+    border: none;
+    color: white;
+    padding: 3px 8px;
+    text-align: center;
+    text-decoration: none;
+    display: block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  
+  .cancel-button:hover {
+    background-color: #6ab04c;
+  }
+  
+  .cancel-button-big {
+    background-color: #f01445;
+    border: none;
+    color: white;
+    padding: 8px 8px;
+    text-align: center;
+    text-decoration: none;
+    display: block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  
+  .cancel-button-big:hover {
+    background-color: #6ab04c;
+  }
+  
