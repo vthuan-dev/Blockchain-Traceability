@@ -2,7 +2,9 @@
 pragma solidity ^0.8.0;
 
 contract SupplyChain {
+    //
     enum BatchStatus { Created, PendingApproval, Approved, Rejected }
+    // tạo sự kiện để thông báo khi một batch mới được tạo
     event BatchCreated(
         uint batchId,
         string batchName,
@@ -87,6 +89,37 @@ contract SupplyChain {
 
         // Tăng giá trị batchId cho lô hàng tiếp theo
         nextBatchId++;
+    }
+        // Hàm để lấy thông tin của một lô hàng dựa trên batchId
+    function getBatch(uint _batchId) public view returns (
+        uint batchId,
+        string memory batchName,
+        uint productId,
+        uint producerId,
+        uint quantity,
+        uint productionDate,
+        uint expireDate,
+        BatchStatus status,
+        uint timestamp
+    ) {
+        require(_batchId < batches.length, "Batch does not exist");
+        Batch storage batch = batches[_batchId];
+        return (
+            batch.batchId,
+            batch.batchName,
+            batch.productId,
+            batch.producerId,
+            batch.quantity,
+            batch.productionDate,
+            batch.expireDate,
+            batch.status,
+            batch.timestamp
+        );
+    }
+
+    // Hàm để lấy danh sách tất cả các lô hàng
+    function getAllBatches() public view returns (Batch[] memory) {
+        return batches;
     }
 
     function requestApproval(uint _batchId, uint _producerId) public {
