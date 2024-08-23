@@ -5,6 +5,7 @@ const path = require('path'); // Thêm module path để xử lý đường dẫ
 
 const bcrypt = require('bcrypt'); // For password hashing
 
+
 function validateInput(data) {
     const requiredFields = ['name', 'email', 'password', 'phone', 'address', 'dob', 'gender', 'role_id', 'region_id'];
     //trả về các trường bắt buộc mà không có dữ liệu, nếu có dữ liệu thì trả về mảng rỗng

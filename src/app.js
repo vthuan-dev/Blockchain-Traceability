@@ -8,6 +8,7 @@ const dangnhapRoutes = require('./components/user/dangnhap'); // Import router �
 // Sử dụng body-parser để phân tích cú pháp JSON từ yêu cầu
 app.use(bodyParser.json());
 
+
 // Cấu hình đường dẫn tĩnh để phục vụ các tệp tĩnh
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -18,6 +19,7 @@ app.use('/api', dangkyRoutes);
 app.use('/api', dangnhapRoutes);
 
 //test
+
 
 app.listen(3000, function() {
     console.log('Server is running on port 3000');
