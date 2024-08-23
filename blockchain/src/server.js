@@ -469,7 +469,7 @@ const contractABI =   [
   }
 ];
 
-const contractAddress = '0x835a77913B27F0a8a38ADab33E1Df25A3eB445FA'; 
+const contractAddress = '0xda45191F25bf27A93da9cC005010742887022f06'; 
 const contract = new web3.eth.Contract(contractABI, contractAddress);
 
 const db = mysql.createConnection({
@@ -485,6 +485,10 @@ db.connect((err) => {
   }
   console.log('Connected to the database');
 });
+// Hàm tạo mã lô hàng duy nhất
+function generateBatchCode() {
+  return 'BATCH-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+}
 
 contract.events.BatchCreated({
   fromBlock: 0
@@ -591,12 +595,9 @@ app.post('/createbatch', async (req, res) => {
 
 
 
-// Hàm tạo mã lô hàng duy nhất
-function generateBatchCode() {
-    return 'BATCH-' + Math.random().toString(36).substr(2, 9).toUpperCase();
-}
 
 
+/*
 async function getBatch(batchId) {
   try {
       // Kiểm tra batchId hợp lệ
@@ -619,7 +620,7 @@ getBatch(batchId).then(batch => {
 }).catch(err => {
     console.error('Lỗi truy xuất lô hàng:', err);
 });
-
+*/
 app.listen(3000, () => {
     console.log('Server is running on port 3000');
 });

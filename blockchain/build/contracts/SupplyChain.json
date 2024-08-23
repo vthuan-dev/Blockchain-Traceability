@@ -15131,12 +15131,12 @@
     "5777": {
       "events": {},
       "links": {},
-      "address": "0x835a77913B27F0a8a38ADab33E1Df25A3eB445FA",
-      "transactionHash": "0x4c18e5711c6f87b95d46d7b7c352de2652981518a83ad76b6772f79bc7a9ee3d"
+      "address": "0xda45191F25bf27A93da9cC005010742887022f06",
+      "transactionHash": "0x1c834d49fbd4aa30a6a619a30b897f54e764a895e4072b57b0a006901c1d8d24"
     }
   },
   "schemaVersion": "3.4.16",
-  "updatedAt": "2024-08-22T16:56:04.825Z",
+  "updatedAt": "2024-08-23T00:13:21.583Z",
   "networkType": "ethereum",
   "devdoc": {
     "kind": "dev",
