@@ -2,6 +2,9 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const {Web3} = require('web3')
 const mysql = require('mysql');
+const path = require('path'); 
+
+
 
 
 const app = express();
@@ -469,6 +472,7 @@ const contractABI =   [
   }
 ];
 
+
 const contractAddress = '0x185E159142A949cD3f7f22d712Da36F37138a9D5'; 
 const contract = new web3.eth.Contract(contractABI, contractAddress);
 
@@ -500,13 +504,32 @@ contract.events.BatchCreated({
   }
 });
 
-// hàm lấy thông tin lô hàng từ blockchain
 async function getBatch(batchId) {
-  const batch = await contract.methods.getBatch(batchId).call();
-  console.log(batch);
+  try {
+    const batch = await contract.methods.getBatch(batchId).call();
+    // Chuyển đổi các giá trị BigInt thành chuỗi bằng JSON.stringify với hàm thay thế
+    const batchStringified = JSON.stringify(batch, (key, value) =>
+      typeof value === 'bigint' ? value.toString() : value
+    );
+    return JSON.parse(batchStringified);
+  } catch (error) {
+    console.error('Error fetching batch data:', error);
+    return null;
+  }
 }
 
-getBatch(0);
+app.get('/api/batch/:batchId', async (req, res) => {
+  const batchId = req.params.batchId;
+  const batch = await getBatch(batchId);
+  if (batch) {
+    res.json(batch);
+  } else {
+    res.status(404).send('Batch not found');
+  }
+});
+
+
+
 
 app.post('/createbatch', async (req, res) => {
   const { batchName, productId, producerId, quantity, productionDate, expireDate } = req.body;
@@ -603,32 +626,9 @@ app.post('/createbatch', async (req, res) => {
 
 
 
+app.use(express.static(path.join(__dirname, 'public')));
 
 
-/*
-async function getBatch(batchId) {
-  try {
-      // Kiểm tra batchId hợp lệ
-      if (batchId <= 0) {
-          throw new Error('Invalid batchId');
-      }
-
-      const batch = await contract.methods.getBatch(batchId).call();
-      console.log('Batch:', batch);
-      return batch;
-  } catch (err) {
-      console.error('Error retrieving batch:', err);
-      throw err;
-  }
-}
-
-const batchId = 5; // Thay thế bằng batchId thực tế
-getBatch(batchId).then(batch => {
-    console.log('Lô hàng đã truy xuất:', batch);
-}).catch(err => {
-    console.error('Lỗi truy xuất lô hàng:', err);
-});
-*/
 app.listen(3000, () => {
     console.log('Server is running on port 3000');
 });
