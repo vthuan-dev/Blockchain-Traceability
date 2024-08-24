@@ -3,6 +3,8 @@ const bodyParser = require('body-parser');
 const {Web3} = require('web3')
 const mysql = require('mysql');
 const path = require('path'); 
+const dangkyRoutes = require('./components/user/dangky');
+const dangnhapRoutes = require('./components/user/dangnhap'); // Import router đăng nhập
 
 
 
@@ -489,6 +491,13 @@ db.connect((err) => {
   }
   console.log('Connected to the database');
 });
+
+app.use('/api', dangkyRoutes);
+
+// Sử dụng router đăng nhập
+app.use('/api', dangnhapRoutes);
+
+
 // Hàm tạo mã lô hàng duy nhất
 function generateBatchCode() {
   return 'BATCH-' + Math.random().toString(36).substr(2, 9).toUpperCase();
