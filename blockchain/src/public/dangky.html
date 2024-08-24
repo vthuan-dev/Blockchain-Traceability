@@ -48,6 +48,11 @@
             </div>
 
             <div class="form-group">
+                <label for="avatar">Ảnh Đại Diện:</label>
+                <input type="file" class="form-control" id="avatar" name="avatar" accept="image/*">
+            </div>
+
+            <div class="form-group">
                 <label for="password">Mật Khẩu:</label>
                 <input type="password" class="form-control" id="password" name="password" required>
             </div>
@@ -139,26 +144,28 @@
             }
         
             const formData = new FormData(this);
-            const data = Object.fromEntries(formData.entries());
         
             try {
                 const response = await fetch('http://localhost:3000/api/register', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
+                    body: formData
                 });
         
                 if (response.ok) {
                     alert('Đăng ký thành công');
                 } else {
-                    const errorData = await response.json();
-                    alert('Lỗi: ' + errorData.message);
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.indexOf('application/json') !== -1) {
+                        const errorData = await response.json();
+                        alert('Lỗi: ' + errorData.message + '\nChi tiết: ' + JSON.stringify(errorData.errors));
+                    } else {
+                        const errorText = await response.text();
+                        alert('Lỗi không xác định: ' + errorText);
+                    }
                 }
             } catch (error) {
                 console.error('Lỗi:', error);
-                alert('Lỗi khi đăng ký');
+                alert('Lỗi khi đăng ký: ' + error.message);
             }
         });
     </script>
