@@ -14,6 +14,7 @@
     
     const storage = multer.diskStorage({
         destination: function (req, file, cb) {
+            // Sử dụng đường dẫn tương đối
             cb(null, path.join(__dirname, '../../public/uploads/avatars'));
         },
         filename: function (req, file, cb) {
