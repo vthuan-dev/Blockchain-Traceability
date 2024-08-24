@@ -1,10 +1,11 @@
-const mysql = require('mysql2/promise');
+// src/config/db.js
+import mysql from 'mysql2/promise';
 
-const pool = mysql.createPool({
-    host: 'database-1.cv20qo0q8bre.ap-southeast-2.rds.amazonaws.com',
-    user: 'admin',
-    password: '9W8RQuAdnZylXZAmb68P',
-    database: 'blockchain'
+const db = mysql.createPool({
+  host: 'database-1.cv20qo0q8bre.ap-southeast-2.rds.amazonaws.com',
+  user: 'admin',
+  password: '9W8RQuAdnZylXZAmb68P',
+  database: 'blockchain'
 });
 
-module.exports = pool;
+export default db;

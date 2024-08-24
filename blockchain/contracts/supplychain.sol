@@ -2,21 +2,26 @@
 pragma solidity ^0.8.0;
 
 contract SupplyChain {
-    //
     enum BatchStatus { Created, PendingApproval, Approved, Rejected }
-    // tạo sự kiện để thông báo khi một batch mới được tạo
+
     event BatchCreated(
         uint batchId,
         string batchName,
-        uint productId, 
-        uint producerId, 
-        uint quantity, 
+        uint productId,
+        uint producerId,
+        uint quantity,
         uint productionDate,
-        uint expireDate, 
-        uint timestamp
-           );
+        uint expireDate,
+        uint timestamp,
+        string[] imageHashes,
+        string certificateImageHash,
+        uint approverId
+    );
 
-     struct Batch {
+    event BatchApproved(uint batchId, string sscc);
+    event BatchRejected(uint batchId);
+
+    struct Batch {
         uint batchId;
         string batchName;
         uint productId;
@@ -26,28 +31,45 @@ contract SupplyChain {
         uint expireDate;
         BatchStatus status;
         uint timestamp;
+        string sscc;
+        string[] imageHashes;
+        string certificateImageHash;
+        uint approverId; // ID của nhà kiểm duyệt được chọn
     }
-
 
     struct ActivityLog {
         uint logId;
         uint batchId;
         uint userId; // ID của người dùng từ bảng users
         string activity;
-        uint timestamp;
     }
-    // dùng để lưu trữ thông tin của các batch
+
     Batch[] public batches;
     uint public nextBatchId;
-    // dùng để lưu trữ thông tin của các activity log
-    mapping(uint => ActivityLog[]) public activityLogs;
 
-    uint public batchCount;
-    uint public logCount;
-    // tạo sự kiện khi một batch mới được tạo, cập nhật trạng thái của batch, và khi một activity log mới được tạo    event BatchCreated(uint batchId, string batchName, uint productId, uint producerId, uint timestamp);
+    mapping(string => bool) private usedSSCCs;
 
-    event BatchStatusUpdated(uint batchId, BatchStatus status);
-    event ActivityLogged(uint logId, uint batchId, uint userId, string activity);
+    address public admin;
+
+    constructor(address _admin) {
+        admin = _admin;
+    }
+
+    modifier onlyAdmin() {
+        require(msg.sender == admin, "Only admin can call this function");
+        _;
+    }
+
+    modifier onlyApprover(uint _batchId) {
+        require(msg.sender == getApproverAddress(batches[_batchId].approverId), "Only the assigned approver can call this function");
+        _;
+    }
+
+    function getApproverAddress(uint _approverId) internal view returns (address) {
+        // Implement logic to get the approver's address by their ID
+        // This could be a mapping from approverId to address
+        // For example: return approvers[_approverId];
+    }
 
     function createBatch(
         string memory _batchName,
@@ -55,14 +77,17 @@ contract SupplyChain {
         uint _producerId,
         uint _quantity,
         uint _productionDate,
-        uint _expireDate
+        uint _expireDate,
+        string[] memory _imageHashes,
+        string memory _certificateImageHash,
+        uint _approverId
     ) public {
-        // Kiểm tra dữ liệu đầu vào
         require(bytes(_batchName).length > 0, "Batch name is required");
         require(_quantity > 0, "Quantity must be greater than zero");
         require(_productionDate < _expireDate, "Production date must be before expire date");
+        require(_imageHashes.length > 0, "At least one image hash is required");
+        require(bytes(_certificateImageHash).length > 0, "Certificate image hash is required");
 
-        // Tạo lô hàng mới
         batches.push(Batch({
             batchId: nextBatchId,
             batchName: _batchName,
@@ -71,11 +96,14 @@ contract SupplyChain {
             quantity: _quantity,
             productionDate: _productionDate,
             expireDate: _expireDate,
-            status: BatchStatus.Created,
-            timestamp: block.timestamp
+            status: BatchStatus.PendingApproval,
+            timestamp: block.timestamp,
+            sscc: "",
+            imageHashes: _imageHashes,
+            certificateImageHash: _certificateImageHash,
+            approverId: _approverId
         }));
 
-        // Kích hoạt sự kiện
         emit BatchCreated(
             nextBatchId,
             _batchName,
@@ -84,67 +112,53 @@ contract SupplyChain {
             _quantity,
             _productionDate,
             _expireDate,
-            block.timestamp
+            block.timestamp,
+            _imageHashes,
+            _certificateImageHash,
+            _approverId
         );
 
-        // Tăng giá trị batchId cho lô hàng tiếp theo
         nextBatchId++;
     }
-        // Hàm để lấy thông tin của một lô hàng dựa trên batchId
-    function getBatch(uint _batchId) public view returns (
-        uint batchId,
-        string memory batchName,
-        uint productId,
-        uint producerId,
-        uint quantity,
-        uint productionDate,
-        uint expireDate,
-        BatchStatus status,
-        uint timestamp
-    ) {
-        require(_batchId < batches.length, "Batch does not exist");
+
+    function approveBatch(uint _batchId, string memory _sscc) public onlyApprover(_batchId) {
         Batch storage batch = batches[_batchId];
-        return (
-            batch.batchId,
-            batch.batchName,
-            batch.productId,
-            batch.producerId,
-            batch.quantity,
-            batch.productionDate,
-            batch.expireDate,
-            batch.status,
-            batch.timestamp
-        );
+        require(batch.status == BatchStatus.PendingApproval, "Batch is not pending approval");
+
+        require(!usedSSCCs[_sscc], "SSCC has already been used");
+
+        usedSSCCs[_sscc] = true;
+
+        batch.status = BatchStatus.Approved;
+        batch.sscc = _sscc;
+        emit BatchApproved(_batchId, _sscc);
     }
 
-    // Hàm để lấy danh sách tất cả các lô hàng
-    function getAllBatches() public view returns (Batch[] memory) {
-        return batches;
+    function rejectBatch(uint _batchId) public onlyApprover(_batchId) {
+        Batch storage batch = batches[_batchId];
+        require(batch.status == BatchStatus.PendingApproval, "Batch is not pending approval");
+
+        batch.status = BatchStatus.Rejected;
+        emit BatchRejected(_batchId);
     }
 
-    function requestApproval(uint _batchId, uint _producerId) public {
-        require(batches[_batchId].batchId != 0, "Batch does not exist");
-        require(batches[_batchId].producerId == _producerId, "Only the producer can request approval");
-        require(batches[_batchId].status == BatchStatus.Created, "Batch is not in Created status");
-        batches[_batchId].status = BatchStatus.PendingApproval;
-        emit BatchStatusUpdated(_batchId, BatchStatus.PendingApproval);
-    }
+    function getPendingBatches() public view returns (Batch[] memory) {
+        uint pendingCount = 0;
+        for (uint i = 0; i < batches.length; i++) {
+            if (batches[i].status == BatchStatus.PendingApproval) {
+                pendingCount++;
+            }
+        }
 
-    function approveBatch(uint _batchId) public {
-        require(batches[_batchId].batchId != 0, "Batch does not exist");
-        require(batches[_batchId].status == BatchStatus.PendingApproval, "Batch is not in Pending Approval status");
-        batches[_batchId].status = BatchStatus.Approved;
-        emit BatchStatusUpdated(_batchId, BatchStatus.Approved);
-    }
+        Batch[] memory pendingBatches = new Batch[](pendingCount);
+        uint index = 0;
+        for (uint i = 0; i < batches.length; i++) {
+            if (batches[i].status == BatchStatus.PendingApproval) {
+                pendingBatches[index] = batches[i];
+                index++;
+            }
+        }
 
-    function logActivity(uint _batchId, uint _userId, string memory _activity) public {
-        require(batches[_batchId].batchId != 0, "Batch does not exist");
-        logCount++;
-        activityLogs[_batchId].push(ActivityLog(logCount, _batchId, _userId, _activity, block.timestamp));
-        emit ActivityLogged(logCount, _batchId, _userId, _activity);
-    }
-
-    function getActivityLogs(uint _batchId) public view returns (ActivityLog[] memory) {
-        return activityLogs[_batchId];
+        return pendingBatches;
     }
 }

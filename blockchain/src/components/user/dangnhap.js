@@ -1,15 +1,19 @@
-const express = require('express');
+import express from 'express';
+import bcrypt from 'bcrypt'; // For password hashing
+import path from 'path'; // Import module path
+import db from '../../config/db.js';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
 const router = express.Router();
-const db = require('../../config/db');
-const bcrypt = require('bcrypt'); // For password hashing
-const path = require('path'); // Import module path
 
-
+// Chuyển đổi import.meta.url thành __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 router.get('/dangnhap', function(req, res) {
     res.sendFile(path.join(__dirname, '../../public/dangnhap.html'));
 });
-
 
 // Route xử lý đăng nhập
 router.post('/dangnhap', async function(req, res) {
@@ -51,4 +55,4 @@ router.post('/dangnhap', async function(req, res) {
     }
 });
 
-module.exports = router;
+export default router;
