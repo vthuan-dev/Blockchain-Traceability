@@ -1,0 +1,267 @@
+
+/* Background color for the entire webpage */
+body {
+    background-color: #ecf0f1; /* Màu xanh lá cây nhạt */
+    color: #333; /* Màu chữ */
+    font-family: Arial, sans-serif; /* Font chữ */
+    margin: 0;
+    padding: 0;
+}
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+.custom-navbar-height {
+            height: 120px; /* Bạn có thể thay đổi giá trị này theo nhu cầu */
+}
+.card {
+    border: 1px solid #ddd;
+    
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+    animation: fadeInUp 0.5s ease-out;
+}
+
+.card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* CSS for the card image */
+.card-img-top {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+/* CSS for the card title */
+.card-title {
+    font-size: 1.25rem;
+    color: #333;
+    font-weight: bold;
+}
+
+/* CSS for the product ID */
+.sanpham-id {
+    font-size: 0.9rem;
+    color: #777;
+    margin-top: 10px;
+}
+
+/* Keyframes for fadeInUp animation */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+/* CSS for the highlighted product heading */
+.highlighted-heading {
+    font-size: 2rem;
+    color: #333;
+    text-align: center;
+    margin: 20px 0;
+    position: relative;
+    animation: fadeIn 1s ease-out;
+}
+
+/* Keyframes for fadeIn animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.highlighted-heading::after {
+    content: '';
+    display: block;
+    width: 50px;
+    height: 3px;
+    background: #ff6347;
+    margin: 10px auto 0;
+}
+
+/* Footer styles */
+.footer {
+    background-color: #91a9c0; 
+    color: #ffffff;
+    padding: 40px 0;
+    border-radius: 20px;
+    height: 220px;
+}
+
+.footer h3 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    color: #21b678;
+}
+
+.footer p {
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.footer a {
+    color: #ffffff;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer a:hover {
+    color: #ff6347;
+}
+
+.footer .col-md-4 {
+    margin-bottom: 20px;
+}
+
+.footer .social-links a {
+    display: inline-block;
+    margin-right: 10px;
+    font-size: 1.2rem;
+}
+
+/* Custom styles for the image */
+.custom-img {
+    border-radius: 10px; /* Bo tròn các góc */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Thêm bóng đổ */
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Hiệu ứng chuyển đổi */
+}
+
+.custom-img:hover {
+    transform: scale(1.05); /* Phóng to khi hover */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Tăng bóng đổ khi hover */
+}
+
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+.overlay img {
+    max-width: 90%;
+    max-height: 90%;
+}
+.overlay.active {
+    display: flex;
+}
+
+/* Tùy chỉnh các nút */
+.check-button {
+    background-color: #04AA6D;
+    border: none;
+    color: white;
+    padding: 3px 8px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  
+  .check-button:hover {
+    background-color: #6ab04c;
+  }
+  
+  .check-button-wide {
+    background-color: #04AA6D;
+    border: none;
+    color: white;
+    padding: 3px 8px;
+    text-align: center;
+    text-decoration: none;
+    display: block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  
+  .check-button-wide:hover {
+    background-color: #6ab04c;
+  }
+  
+  .accept-button {
+    background-color: none;
+    padding: 12px 32px;
+    text-align: center;
+    display: block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 5px;
+    margin: auto;
+  }
+  
+  .accept-button-big {
+    background-color: #0a78fc;
+    border: none;
+    color: white;
+    padding: 8px 8px;
+    text-align: center;
+    text-decoration: none;
+    display: block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  
+  .accept-button-big:hover {
+    background-color: #6ab04c;
+  }
+  
+  .cancel-button {
+    background-color: #f01445;
+    border: none;
+    color: white;
+    padding: 3px 8px;
+    text-align: center;
+    text-decoration: none;
+    display: block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  
+  .cancel-button:hover {
+    background-color: #6ab04c;
+  }
+  
+  .cancel-button-big {
+    background-color: #f01445;
+    border: none;
+    color: white;
+    padding: 8px 8px;
+    text-align: center;
+    text-decoration: none;
+    display: block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  
+  .cancel-button-big:hover {
+    background-color: #6ab04c;
+  }
+  

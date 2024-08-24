@@ -1,0 +1,66 @@
+
+.phone a{
+    text-decoration: none;
+    transform: translateY(50%) !important;
+}
+
+.profile-img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+.qr-code {
+    width: 100px;
+    height: 100px;
+}
+.social-icons i {
+    font-size: 24px;
+    margin: 0 10px;
+}
+
+.avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+.link-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.fw-medium {
+    transform: translateY(50%);
+}
+
+.carousel-item {
+    display: flex;
+    justify-content: space-between;
+}
+
+.carousel-item img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    border-radius: 5px;
+}
+
+@media (max-width: 768px) {
+    .carousel-item .col-md-3 {
+        flex: 0 0 33.3333%; /* Hiển thị 3 ảnh trên mỗi slide trên thiết bị nhỏ */
+    }
+}
+
+@media (min-width: 769px) {
+    .carousel-item .col-md-3 {
+        flex: 0 0 25%; /* Hiển thị 4 ảnh trên mỗi slide trên thiết bị lớn */
+    }
+}
+
+#loadMore {
+    margin-top: 15px;
+}
+
