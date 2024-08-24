@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bảng thông tin - Nhà kiểm duyệt</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/trangnhakiemduyet.css">
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+</head>
+
+<body>
+    
+    <!--<header>
+        <div class="left-header">
+            <div class="showhidebutton">
+                <i class="fas fa-bars" onclick="hideElement()"></i>
+            </div>
+        </div>
+
+        <div class="center-header">
+            <h2>TRANG NHÀ KIỂM DUYỆT</h2>
+        </div>
+
+        <div class="right-header">
+            <div class="notifications">
+                <a href="#" onclick="loadContent('thongbao.php'); hideMainContent(); hideElementMobile();"><i class="fas fa-bell"></i></a>            
+            </div>
+
+            <div class="profile">
+                <i class="fas fa-user profile-pic"></i>
+                <button class="dropbtn">Admin Name</button>
+                <div class="dropdown">
+                    <div class="dropdown-content">
+                        <a>NHÀ KIỂM DUYỆT</a><hr>
+                        <a href="#" onclick="loadContent('trangcanhan.php'); hideMainContent(); hideElementMobile();">Trang cá nhân</a>
+                        <a href="#" onclick="loadContent('caidat.php'); hideMainContent(); hideElementMobile();">Cài đặt</a>
+                        <a href="#" onclick="loadContent('dangxuat.php'); hideMainContent(); hideElementMobile();">Đăng xuất</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>-->
+    
+
+        <!-- Thanh điều hướng -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light custom-navbar-height">
+            <a class="navbar-brand" href="#">Trang nhà kiểm duyệt</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav"> <!-- Các mục điều hướng bên trái -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Quản lý lô hàng</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Thông báo</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ml-auto"> <!-- Menu dropdown bên phải -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Nguyễn Văn A
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="#">Trang cá nhân</a>
+                            <a class="dropdown-item" href="#">Cài đặt</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="#">Đăng xuất</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        
+
+    <main>
+
+        <div class="container mt-4">
+            <h5><b>Lô bưởi đang chờ xử lý</b></h5>
+            <br>
+            <div class="quantity"><h7>Danh sách có 2 dòng</h7></div>
+            <div class="dashboard-table">
+                <table>
+                    <tr>
+                        <th width="10%">Tên lô</th>
+                        <th width="10%">Nông dân</th>
+                        <th width="10%">Trạng thái xử lý</th>
+                        <th width="10%">Chức năng</th>
+                    </tr>
+
+                    <tr>
+                        <td>Lô bưởi năm roi tháng 5</td>
+                        <td>Nguyễn Văn X</td>
+                        <td>Chưa kiểm định</td>
+                        <td><div class="function-button accept-button">Kiểm tra thông tin</div></td>
+                    </tr>
+
+                    <tr>
+                        <td>Lô bưởi năm roi tháng 5</td>
+                        <td>Nguyễn Văn X</td>
+                        <td>Chưa kiểm định</td>
+                        <td><div class="function-button accept-button">Kiểm tra thông tin</></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <section id="main-content">
+            <article class="container" id="container">
+            </article>
+        </section>
+    </main>
+
+    <!-- jQuery và Bootstrap JavaScript -->
+    <!-- AOS JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <script>
+    AOS.init();
+    </script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

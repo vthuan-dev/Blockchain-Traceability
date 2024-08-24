@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang chủ</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/trangchu.css">
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/sanpham.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light custom-navbar-height">
+        <a class="navbar-brand" href="#">Trang chủ</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Sản phẩm</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Nhà sản xuất</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Vùng sản xuất</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Tin tức</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="#">Trang chủ</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Bưởi da xanh</li>
+            </ol>
+        </nav>
+        <div class="sanpham">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                            <div class="tieude text-center">
+                                <div class="row no-gutters justify-content-center">
+                                    <div class="col-md-6 col-12 mb-3 d-flex justify-content-center">
+                                        <img src="./hinhanh/buoi-dien-222.jpg" alt="" class="img-fluid custom-img" onclick="showImage(this)">
+                                    </div>
+                                </div>
+                        <div class="ten_sanpham mb-3">
+                            <h3 class="font-weight-bold">Bưởi da xanh Thới Lai</h3>
+                        </div>
+                        <div class="ma_sanpham">
+                            <h5 class="font-weight-bold">MÃ SẢN PHẨM</h5>
+                            <p>BDX12212</p>
+                            <p>Nơi trồng: Xuân Khánh, Ninh Kiều, Cần Thơ</p>
+                            <p>Gía bán hiện tại: 40.000đ/kg</p>
+                        </div>
+                    </div>
+                            <div class="thanhphan">
+                                <div class="row">
+                                    <div class="col mb-3 thongtin" data-target="thongtin">
+                                        <i class="fas fa-info-circle icon"></i> Thông tin sản phẩm
+                                    </div>
+                                    <div class="col mb-3 lienket" data-target="lienket">
+                                        <i class="fas fa-link icon"></i> Các bên có liên quan
+                                    </div>
+                                    <div class="col mb-3 xacthuc" data-target="xacthuc">
+                                        <i class="fas fa-check-circle icon"></i> Thông tin xác thực
+                                    </div>
+                                    <div class="col mb-3 lohang" data-target="lohang">
+                                        <i class="fas fa-box icon"></i> Lô hàng
+                                    </div>
+                                </div>
+                                <div class="tab-content active" id="thongtin">
+                                  <div class="chitiet">
+                                    <h2 class="product-title">Thông tin sản phẩm</h2>                                   
+                                     <div class="mota">
+                                        <h5 class="description-title">Mô tả</h5>                                                                               <p>Bưởi da xanh được đánh giá là một trong những loại cây trồng có giá trị kinh tế cao. Giống bưởi này được trồng nhiều ở các tỉnh Đồng bằng Sông Cửu Long như Bến Tre, Hậu Giang... Bưởi da xanh đã được Bộ Nông nghiệp và Phát triển nông thôn Việt Nam công nhận là giống quốc gia và đã được xuất khẩu sang nhiều nước trên thế giới.</p>
+                                        <ul>
+                                            <li>Trái bưởi da xanh có dạng hình cầu, trọng lượng trung bình từ 1,2 – 2,5 kg/trái.</li>
+                                            <li>Vỏ bưởi có màu xanh, khi chín chuyển sang hơi vàng, vỏ khá mỏng và dễ lột.</li>
+                                            <li>Tép bưởi có màu hồng đỏ, bó chặt và dễ tách khỏi vách múi.</li>
+                                            <li>Mùi thơm, vị ngọt không chua, tỷ lệ thịt/trái > 55%.</li>
+                                        </ul>
+                                    </div>
+                                    <hr>
+                                    <div class="congdung">
+                                        <h5 class="description-title">Công dụng</h5>
+                                        <ul>
+                                            <li>Giàu dưỡng chất. Quả bưởi cung cấp một lượng chất xơ cao, cùng hơn 15 loại vitamin và khoáng chất cần thiết cho sức khỏe.</li>
+                                            <li>Tăng cường hệ miễn dịch.</li>
+                                            <li>Giảm cảm giác thèm ăn.</li>
+                                            <li>Hỗ trợ điều trị bệnh cúm, sốt, sốt rét.</li>
+                                            <li>Giảm tình trạng mệt mỏi.</li>
+                                            <li>Chữa bệnh khó tiêu.</li>
+                                            <li>Giúp hạ đường huyết.</li>
+                                            <li>Đẹp da, kích thích mọc tóc.</li>
+                                        </ul>
+                                    </div>
+                                    <hr>
+                                    <div class="quytrinh">
+                                        <h5 class="description-title">Quy trình trồng trọt</h5>
+                                        <ul>
+                                            <li><strong>Chuẩn bị đất trồng</strong>: Đất cao đào hố ngang mặt đất và đắp vồng để dễ tưới trong mùa nắng, mùa mưa phá vồng để cây khỏi bị úng nước và bị chảy khi úng.</li>
+                                            <li>Kích thước liếp rộng 5-8m, chiều dài tuỳ theo kích thước vườn nhưng không nên dài quá 30m. Quanh vườn nên đào mương rộng từ 1,5 - 2m, sâu 1-1,2m và đắp bờ cao; mương nội đồng rộng từ 0,5-1m, sâu 0,8-1m. Khi đào mương nên chú ý không nên đem lớp đất phèn (nếu có) lên mặt liếp, nếu đất chua cần bón vôi để nâng pH = 5,5 - 6.</li>
+                                            <li>Nên chú ý đặt cống để điều tiết nước, hàng năm cần sửa sang liếp bằng cách bồi một lớp mỏng bùn và mở rộng mép liếp khi có thể.</li>
+                                            <li>Kích thước hố trồng: Hố trồng bưởi đào theo hình vuông, kích thước 0,6x0,6m. Khoảng cách trồng 5x5m. Trong 3, 4 năm đầu, có thể trồng xen những loại cây ngắn ngày.</li>
+                                            <li><strong>Trồng cây:</strong> Nên trồng vào đầu mùa mưa, khi xuống giống nên tỉa bớt lá. Cây giống khi trồng nên đặt thẳng đối với cây tháp hoặc cây chiết có nhánh phân bố đều. Đặt nghiêng đối với cây chiết ít nhánh, giúp các đọt bên mọc lên để tạo tán.</li>
+                                            <li><strong>Bón phân:</strong> Cây mới trồng, bón lót 10kg phân chuồng, 0,5kg phân lân, 0,2kg vôi. Lượng phân bón tuỳ thuộc vào tình trạng sinh trưởng của cây.</li>
+                                            <li><strong>Chăm sóc:</strong> Làm sạch cỏ, thăm vườn thường xuyên, tỉa bỏ các cành vượt, cành sâu bệnh. Tưới dặm nếu nắng gắt, thoát nước khi bị úng. Tỉa bớt hoa quả vào năm chúng ra quá nhiều, làm cho bưởi kiệt sức. Thu hoạch tập trung và tăng cường phân bón vào những năm được mùa.</li>
+                                            <li><strong>Phòng trừ sâu bệnh:</strong> Bệnh thối gốc, chảy mủ, bệnh loét, sâu vẽ bùa, bọ xít xanh hại quả, sâu đục thân cành.</li>
+                                        </ul>
+                                    </div>
+                                    <div class="vungsx">
+                                        <h5 class="description-title">Vùng sản xuất</h5>
+                                        <div class="card card-custom">
+                                            <img src=".\hinhanh\Vung-Buoi-Tuyen-Quan-04.jpg" class="card-img-top" alt="Vùng sản xuất">
+                                            <div class="card-body">
+                                                <h6>Vùng Thới Lai</h6>
+                                                <div class="diachi">
+                                                    <p> 121 , Đường CMT8, Thới lai, Ninh Kiều, Cần Thơ</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                  <hr>
+
+                                </div>
+                                <div class="tab-content" id="lienket">
+                                    <h2>Các bên có liên quan</h2>
+                                    <p>Đây là thông tin về các bên có liên quan.</p>
+                                </div>
+                                <div class="tab-content" id="xacthuc">
+                                    <h2>Thông tin xác thực</h2>
+                                    <p>Đây là thông tin xác thực.</p>
+                                </div>
+                                <div class="tab-content" id="lohang">
+                                    <h2>Lô hàng</h2>
+                                    <p>Đây là thông tin về lô hàng.</p>
+                                </div>
+
+                            </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    </div>
+
+    <div class="overlay" id="overlay" onclick="hideImage()">
+        <img id="overlay-img" src="" alt="">
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="js_giaodien/sanpham.js"></script>
+
+
+</body>
+</html>

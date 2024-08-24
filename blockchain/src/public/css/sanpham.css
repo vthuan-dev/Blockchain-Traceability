@@ -1,0 +1,117 @@
+.thanhphan .col {
+    background-color: #32ff7e;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    padding: 15px;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 15px;
+}
+.thanhphan .col:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 15px;
+}
+.thanhphan .col h5 {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+.thanhphan .col p {
+    margin-bottom: 0;
+}
+
+
+    .thanhphan .col {
+        text-align: center;
+    }
+    .thanhphan i {
+        font-size: 2em; 
+        display: block;
+        margin-bottom: 0.5em; 
+    }
+    .thanhphan .thongtin,
+    .thanhphan .lienket,
+    .thanhphan .xacthuc,
+    .thanhphan .lohang {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .tab-content {
+        display: none;
+    }
+    .tab-content.active {
+        display: block;
+    }
+    .icon {
+        font-size: 2em;
+        display: block;
+        margin-bottom: 0.5em;
+    }
+    .col {
+        cursor: pointer;
+        text-align: center;
+        transition: transform 0.3s;
+    }
+    .col.active {
+        transform: translateY(-10px);
+    }
+        .product-title {
+        font-family: 'Arial', sans-serif; /* Đặt phông chữ */
+        font-size: 2em; /* Kích thước chữ */
+        color: #2c3e50; /* Màu chữ */
+        text-align: center; /* Căn giữa chữ */
+        margin-top: 20px; /* Khoảng cách trên */
+        margin-bottom: 20px; /* Khoảng cách dưới */
+        padding: 10px; /* Khoảng cách bên trong */
+        border-bottom: 2px solid #3498db; /* Đường viền dưới */
+        display: inline-block; /* Hiển thị dưới dạng khối nội tuyến */
+        background-color: #ecf0f1; /* Màu nền */
+        border-radius: 5px; /* Bo góc */
+    }
+
+        .description-title {
+        font-family: 'Arial', sans-serif; /* Đặt phông chữ */
+        font-size: 1.5em; /* Kích thước chữ */
+        color: #34495e; /* Màu chữ */
+        text-align: left; /* Căn trái chữ */
+        margin-top: 15px; /* Khoảng cách trên */
+        margin-bottom: 10px; /* Khoảng cách dưới */
+        padding: 5px; /* Khoảng cách bên trong */
+        border-left: 4px solid #3498db; /* Đường viền trái */
+        background-color: #ecf0f1; /* Màu nền */
+        border-radius: 3px; /* Bo góc */
+    }
+    .card-custom {
+        border: 1px solid #dee2e6;
+        border-radius: 10px;
+        overflow: hidden;
+        transition: transform 0.3s, box-shadow 0.3s;
+        max-width: 300px; /* Đặt chiều rộng tối đa cho thẻ card */
+        margin: auto; /* Căn giữa thẻ card */
+    }
+    .card-custom:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+    .card-custom img {
+        border-bottom: 1px solid #dee2e6;
+    }
+    .card-custom .card-body {
+        padding: 20px;
+    }
+    .card-custom .description-title {
+        font-family: 'Arial', sans-serif;
+        font-size: 1.25em;
+        color: #34495e;
+        margin-bottom: 10px;
+    }
+    .card-custom p {
+        font-size: 1em;
+        color: #7f8c8d;
+    }
+    .border-blue {
+        border: 2px solid #3498db; /* Đường viền màu xanh */
+        padding: 15px; /* Khoảng cách bên trong */
+        border-radius: 10px; /* Bo góc */
+    }
