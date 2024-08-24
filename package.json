@@ -1,9 +1,10 @@
 {
   "name": "nckh-be",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "src/app.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha --require @babel/register src/test/*.test.js",
     "start": "nodemon ./src/app.js"
   },
   "keywords": [],
@@ -15,12 +16,19 @@
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",
     "express": "^4.19.2",
+    "ipfs-http-client": "^60.0.1",
+    "multer": "^1.4.5-lts.1",
     "mysql": "^2.18.1",
     "mysql2": "^3.11.0",
     "twilio": "^5.2.2",
     "web3": "^4.11.1"
   },
   "devDependencies": {
+    "@babel/preset-env": "^7.24.6",
+    "@babel/register": "^7.24.6",
+    "chai": "^5.1.1",
+    "chai-http": "^5.0.0",
+    "mocha": "^10.7.3",
     "nodemon": "^3.1.4"
   }
 }
