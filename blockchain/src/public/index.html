@@ -3,72 +3,40 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Batch Information</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f9;
-      margin: 0;
-      padding: 20px;
-    }
-    h1 {
-      text-align: center;
-      color: #333;
-    }
-    #batch-info {
-      max-width: 600px;
-      margin: 20px auto;
-      padding: 20px;
-      background-color: #fff;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      border-radius: 8px;
-    }
-    #batch-info p {
-      margin: 10px 0;
-      font-size: 16px;
-      color: #555;
-    }
-    #batch-info p span {
-      font-weight: bold;
-      color: #333;
-    }
-  </style>
+  <title>Upload and Display Image</title>
 </head>
 <body>
-  <h1>Batch Information</h1>
-  <div id="batch-info">
-    <!-- Thông tin lô hàng sẽ được hiển thị ở đây -->
-  </div>
+  <h1>Upload and Display Image</h1>
+  <form id="uploadForm" enctype="multipart/form-data">
+    <input type="file" id="fileInput" name="gf">
+    <button type="submit">Upload</button>
+  </form>
+  <div id="imageContainer"></div>
 
   <script>
-    async function displayBatchData(batchId) {
-      try {
-        console.log(`Fetching data for batch ID: ${batchId}`);
-        const response = await fetch(`/api/batch/${batchId}`);
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        const batch = await response.json();
-        console.log('Batch data:', batch);
-        const batchInfoDiv = document.getElementById('batch-info');
-        batchInfoDiv.innerHTML = `
-          <p><span>Batch ID:</span> ${batch.batchId}</p>
-          <p><span>Batch Name:</span> ${batch.batchName}</p>
-          <p><span>Product ID:</span> ${batch.productId}</p>
-          <p><span>Producer ID:</span> ${batch.producerId}</p>
-          <p><span>Quantity:</span> ${batch.quantity}</p>
-          <p><span>Production Date:</span> ${new Date(batch.productionDate * 1000).toLocaleDateString()}</p>
-          <p><span>Expire Date:</span> ${new Date(batch.expireDate * 1000).toLocaleDateString()}</p>
-          <p><span>Status:</span> ${batch.status}</p>
-          <p><span>Timestamp:</span> ${new Date(batch.timestamp * 1000).toLocaleString()}</p>
-        `;
-      } catch (error) {
-        console.error('Error fetching batch data:', error);
-      }
-    }
+    document.getElementById('uploadForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const formData = new FormData();
+      const fileInput = document.getElementById('fileInput');
+      formData.append('gf', fileInput.files[0]);
 
-    // Gọi hàm displayBatchData với batchId là 0
-    displayBatchData(0);
+      const response = await fetch('/upload', {
+        method: 'POST',
+        body: formData
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        const imageContainer = document.getElementById('imageContainer');
+        const img = document.createElement('img');
+        img.src = result.url;
+        img.alt = 'Uploaded Image';
+        imageContainer.innerHTML = '';
+        imageContainer.appendChild(img);
+      } else {
+        console.error('Error uploading file:', result.message);
+      }
+    });
   </script>
 </body>
 </html>
