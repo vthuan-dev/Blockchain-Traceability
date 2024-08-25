@@ -10,45 +10,71 @@ import { create as createIPFS } from 'ipfs-http-client';
 import fs from 'fs';
 import multer from 'multer';
 
+
+
+
+const app = express();
+app.use(bodyParser.json());
+
+const upload = multer({ dest: 'uploads/' });
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // kết nối với IPFS Infura
 
 
-const projectId = '70a7bf700e4d43d99416d55c6b557d3b';
-const projectSecret = '31HZcE5yLu+fbl7iIiFjCeg2GwKgk424JDamF+zdQrNFTNsfA+eDHQ';
-
-const auth = 'Basic ' + Buffer.from(projectId + ':' + projectSecret).toString('base64');
 
 const ipfs = createIPFS({
-  host: 'ipfs.infura.io',
+  host: 'localhost',
   port: 5001,
-  protocol: 'https',
-  headers: {
-    authorization: auth
-  }
+  protocol: 'http'
 });
-const upload = multer({ dest: 'uploads/' });
 
-async function uploadFileToIPFS(filePath) {
+
+
+async function checkIPFSConnection() {
   try {
-      const file = fs.readFileSync(filePath);
-      const result = await ipfs.add(file);
-      console.log(result);
+    const id = await ipfs.id();
+    console.log('Kết nối IPFS thành công:', id);
   } catch (error) {
-      console.error('Lỗi khi tải lên IPFS:', error);
+    console.error('Lỗi khi kết nối IPFS:', error);
   }
 }
 
-// Các phần còn lại của mã...
+
+async function uploadFileToIPFS(filePath) {
+  try {
+    console.log('Đang đọc tệp từ đường dẫn:', filePath);
+    const file = fs.readFileSync(filePath);
+    console.log('Đã đọc tệp, bắt đầu tải lên IPFS...');
+    const result = await ipfs.add(file);
+    console.log('Tải lên IPFS thành công:', result);
+    return result.path; // Trả về hash của tệp
+  } catch (error) {
+    console.error('Lỗi khi tải lên IPFS:', error);
+    throw error; // Ném lỗi để xử lý ở cấp cao hơn
+  }
+}
 
 
-const app = express();
-app.use(bodyParser.json());
+app.post('/upload', upload.single('gf'), async (req, res) => {
+  try {
+    console.log('Yêu cầu tải lên:', req.file);
+    if (!req.file) {
+      return res.status(400).json({ message: 'Không có tệp nào được tải lên' });
+    }
+    const filePath = req.file.path;
+    const ipfsHash = await uploadFileToIPFS(filePath);
+    const ipfsUrl = `https://ipfs.io/ipfs/${ipfsHash}`;
+    res.json({ url: ipfsUrl });
+  } catch (error) {
+    console.error('Lỗi khi tải lên IPFS:', error);
+    res.status(500).json({ message: 'Lỗi khi tải lên IPFS', error: error.message });
+  }
+});
 
-
-const web3 = new Web3(new Web3.providers.HttpProvider('https://sepolia.infura.io/v3/70a7bf700e4d43d99416d55c6b557d3b' + projectId));
+const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
 const contractABI =  [
   {
     "inputs": [
@@ -506,6 +532,8 @@ app.post('/createbatch', upload.fields([{ name: 'images', maxCount: 10 }, { name
   const imageHashes = [];
   let certificateImageHash = '';
 
+  console.log('Received files:', req.files); // Log các file nhận được
+
   try {
     if (!ipfs.isOnline()) {
       return res.status(500).send('IPFS is not connected');
@@ -513,29 +541,80 @@ app.post('/createbatch', upload.fields([{ name: 'images', maxCount: 10 }, { name
 
     // Tải lên các hình ảnh liên quan đến lô hàng lên IPFS
     for (const file of imageFiles) {
-      const filePath = path.join(__dirname, file.path);
+      const filePath = path.normalize(path.resolve(__dirname, file.path));
+      console.log(`Uploading file to IPFS: ${filePath}`);
       try {
-        const ipfsHash = await uploadFileToIPFS(filePath);
-        imageHashes.push(ipfsHash);
+        if (fs.existsSync(filePath)) {
+          const ipfsHash = await uploadFileToIPFS(filePath);
+          console.log(`Uploaded file hash: ${ipfsHash}`);
+          imageHashes.push(ipfsHash);
+        } else {
+          console.error(`File does not exist: ${filePath}`);
+          return res.status(500).send('File does not exist');
+        }
       } catch (err) {
         console.error('Error uploading image to IPFS:', err);
         return res.status(500).send('Error uploading image to IPFS');
       } finally {
-        fs.unlinkSync(filePath); // Xóa tệp tạm sau khi tải lên
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath); // Xóa tệp tạm sau khi tải lên
+        }
       }
     }
 
+    // Log các hash của hình ảnh
+    console.log('Image hashes:', imageHashes);
+
     // Tải lên giấy chứng nhận lên IPFS
     if (certificateFile) {
-      const filePath = path.join(__dirname, certificateFile.path);
+      const filePath = path.normalize(path.resolve(__dirname, certificateFile.path));      
+      console.log(`Uploading certificate to IPFS: ${filePath}`);
       try {
-        certificateImageHash = await uploadFileToIPFS(filePath);
+        if (fs.existsSync(filePath)) {
+          certificateImageHash = await uploadFileToIPFS(filePath);
+          console.log(`Uploaded certificate hash: ${certificateImageHash}`);
+        } else {
+          console.error(`File does not exist: ${filePath}`);
+          return res.status(500).send('File does not exist');
+        }
       } catch (err) {
         console.error('Error uploading certificate to IPFS:', err);
         return res.status(500).send('Error uploading certificate to IPFS');
       } finally {
-        fs.unlinkSync(filePath); // Xóa tệp tạm sau khi tải lên
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath); // Xóa tệp tạm sau khi tải lên
+        }
       }
+    }
+
+    // Chuyển đổi ngày thành Unix timestamp
+    const productionDateTimestamp = Math.floor(new Date(productionDate).getTime() / 1000);
+    const expireDateTimestamp = Math.floor(new Date(expireDate).getTime() / 1000);
+
+    // Kiểm tra các trường bắt buộc và trả về lỗi cụ thể
+    if (!batchName) {
+      return res.status(400).send('Thiếu thông tin bắt buộc: batchName');
+    }
+    if (!productId) {
+      return res.status(400).send('Thiếu thông tin bắt buộc: productId');
+    }
+    if (!producerId) {
+      return res.status(400).send('Thiếu thông tin bắt buộc: producerId');
+    }
+    if (!quantity) {
+      return res.status(400).send('Thiếu thông tin bắt buộc: quantity');
+    }
+    if (!productionDateTimestamp) {
+      return res.status(400).send('Thiếu thông tin bắt buộc: productionDate');
+    }
+    if (!expireDateTimestamp) {
+      return res.status(400).send('Thiếu thông tin bắt buộc: expireDate');
+    }
+    if (imageHashes.length === 0) {
+      return res.status(400).send('Thiếu thông tin bắt buộc: imageHashes');
+    }
+    if (!certificateImageHash) {
+      return res.status(400).send('Thiếu thông tin bắt buộc: certificateImageHash');
     }
 
     // Kiểm tra sản phẩm trong cơ sở dữ liệu
@@ -576,8 +655,8 @@ app.post('/createbatch', upload.fields([{ name: 'images', maxCount: 10 }, { name
         productId,
         producerId,
         quantity,
-        productionDate,
-        expireDate,
+        productionDateTimestamp, // Sử dụng Unix timestamp
+        expireDateTimestamp, // Sử dụng Unix timestamp
         imageHashes, // Thêm hash của các hình ảnh vào blockchain
         certificateImageHash // Thêm hash của giấy chứng nhận vào blockchain
       ).estimateGas({ from: accounts[0] }));
@@ -588,8 +667,8 @@ app.post('/createbatch', upload.fields([{ name: 'images', maxCount: 10 }, { name
         productId,
         producerId,
         quantity,
-        productionDate,
-        expireDate,
+        productionDateTimestamp, // Sử dụng Unix timestamp
+        expireDateTimestamp, // Sử dụng Unix timestamp
         imageHashes, // Thêm hash của các hình ảnh vào blockchain
         certificateImageHash // Thêm hash của giấy chứng nhận vào blockchain
       ).send({
@@ -614,9 +693,11 @@ app.post('/createbatch', upload.fields([{ name: 'images', maxCount: 10 }, { name
   }
 });
 
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 export default app;
 app.listen(3000, () => {
     console.log('Server is running on port 3000');
+    checkIPFSConnection();
 });
