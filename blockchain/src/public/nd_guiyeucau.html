@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bảng thông tin - Nhà kiểm duyệt</title>
+    <title>Yêu cầu kiểm duyệt - Nông dân</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/nhakiemduyet.css">
     <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
@@ -12,7 +12,7 @@
 <body>
     <!-- Thanh điều hướng -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light custom-navbar-height">
-        <a class="navbar-brand" href="#">Trang nhà kiểm duyệt</a>
+        <a class="navbar-brand" href="#">Trang nông dân</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -20,6 +20,9 @@
             <ul class="navbar-nav"> <!-- Các mục điều hướng bên trái -->
                 <li class="nav-item">
                     <a class="nav-link" href="#">Quản lý lô hàng</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Yêu cầu kiểm định</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#">Thông báo</a>
@@ -44,40 +47,55 @@
     <main>
         <div class="container mt-4">
             <div class="table-title">
-                <h5><b>Lô bưởi đang chờ xử lý</b></h5>
+                <h5><b>Yêu cầu kiểm định</b></h5>
             </div>
             <br>
-            <div class="quantity"><h7>Danh sách có 2 dòng</h7></div>
+            <div class="searchbox-filter">
+                <input class="searchbox" id="myInput" type="text" placeholder="Tìm kiếm">
+                <div class="dropdown">
+                    <button onclick="myFunction()" class="btn btn-success">Lọc</button>
+                    <div id="myDropdown" class="dropdown-content">
+                        <a href="#about">About</a>
+                        <a href="#base">Base</a>
+                        <a href="#blog">Blog</a>
+                        <a href="#contact">Contact</a>
+                        <a href="#custom">Custom</a>
+                        <a href="#support">Support</a>
+                        <a href="#tools">Tools</a>
+                    </div>
+                </div>  
+            </div>
+              
+            <p></p>
+            <div class="table-header"><div class="check-button">Thêm lô mới</div></div>
             <div class="dashboard-table">
                 <table>
-                    <thead>
-                        <tr>
-                            <th width="15%">Tên lô</th>
-                            <th width="15%">Nông dân</th>
-                            <th width="15%">Trạng thái xử lý</th>
-                            <th width="15%">Chức năng</th>
-                        </tr>
-                    </thead>
-
-                    <tbody id="d-table">
-                        <tr>
-                            <td>Lô bưởi năm roi tháng 5</td>
-                            <td>Nguyễn Văn X</td>
-                            <td>Chưa kiểm định</td>
-                            <td>
-                                <div class="function-button accept-button">Kiểm tra thông tin</div>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td>Lô bưởi năm roi tháng 7</td>
-                            <td>Nguyễn Văn A</td>
-                            <td>Đã kiểm định</td>
-                            <td>
-                                <div class="function-button accept-button">Kiểm tra thông tin</div>
-                            </td>
-                        </tr>
-                    </tbody>
+                    <tr>
+                        <th width="10%">Mã lô</th>
+                        <th width="10%">Ngày tạo</th>
+                        <th width="10%">Tên lô</th>
+                        <th width="10%">Giống bưởi</th>
+                        <th width="10%">Trạng thái xử lý</th>
+                        <th width="10%">Chức năng</th>
+                    </tr>
+        
+                    <tr>
+                        <td>AH-001</td>
+                        <td>23/5/2022</td>
+                        <td>Lô bưởi năm roi tháng 5</td>
+                        <td>Năm roi</td>
+                        <td>Chưa kiểm định</td>
+                        <td><div class="accept-button">Gửi yêu cầu</div></td>
+                    </tr>
+                    
+                    <tr>
+                        <td>AH-001</td>
+                        <td>23/5/2022</td>
+                        <td>Lô bưởi năm roi tháng 5</td>
+                        <td>Năm roi</td>
+                        <td>Chưa kiểm định</td>
+                        <td><div class="accept-button">Gửi yêu cầu</div></td>
+                    </tr>
                 </table>
             </div>
         </div>
@@ -88,7 +106,9 @@
     <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
     <script>AOS.init();</script>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="js_giaodien/sanpham.js"></script>
 </body>
 </html>
