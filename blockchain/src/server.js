@@ -8,15 +8,27 @@ import dangkyRoutes from './components/user/dangky.js';
 import dangnhapRoutes from './components/user/dangnhap.js';
 import { create as createIPFS } from 'ipfs-http-client';
 import fs from 'fs';
-import multer from 'multer'
+import multer from 'multer';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-
 // kết nối với IPFS Infura
-const ipfs = createIPFS({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' });
 
+
+const projectId = '70a7bf700e4d43d99416d55c6b557d3b';
+const projectSecret = '31HZcE5yLu+fbl7iIiFjCeg2GwKgk424JDamF+zdQrNFTNsfA+eDHQ';
+
+const auth = 'Basic ' + Buffer.from(projectId + ':' + projectSecret).toString('base64');
+
+const ipfs = createIPFS({
+  host: 'ipfs.infura.io',
+  port: 5001,
+  protocol: 'https',
+  headers: {
+    authorization: auth
+  }
+});
 const upload = multer({ dest: 'uploads/' });
 
 async function uploadFileToIPFS(filePath) {
@@ -36,7 +48,7 @@ const app = express();
 app.use(bodyParser.json());
 
 
-const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
+const web3 = new Web3(new Web3.providers.HttpProvider('https://sepolia.infura.io/v3/70a7bf700e4d43d99416d55c6b557d3b' + projectId));
 const contractABI =  [
   {
     "inputs": [
@@ -487,127 +499,124 @@ app.get('/api/batch/:batchId', async (req, res) => {
   }
 });
 
-
-
 app.post('/createbatch', upload.fields([{ name: 'images', maxCount: 10 }, { name: 'certificate', maxCount: 1 }]), async (req, res) => {
   const { batchName, productId, producerId, quantity, productionDate, expireDate } = req.body;
-  const imageFiles = req.files['images'] || [];
-  const certificateFile = req.files['certificate'] ? req.files['certificate'][0] : null;
+  const imageFiles = req.files && req.files['images'] ? req.files['images'] : [];
+  const certificateFile = req.files && req.files['certificate'] ? req.files['certificate'][0] : null;
   const imageHashes = [];
   let certificateImageHash = '';
 
   try {
-      // Tải lên các hình ảnh liên quan đến lô hàng lên IPFS
-      for (const file of imageFiles) {
-          const filePath = path.join(__dirname, file.path);
-          const ipfsHash = await uploadFileToIPFS(filePath);
-          imageHashes.push(ipfsHash);
-          fs.unlinkSync(filePath); // Xóa tệp tạm sau khi tải lên
+    if (!ipfs.isOnline()) {
+      return res.status(500).send('IPFS is not connected');
+    }
+
+    // Tải lên các hình ảnh liên quan đến lô hàng lên IPFS
+    for (const file of imageFiles) {
+      const filePath = path.join(__dirname, file.path);
+      try {
+        const ipfsHash = await uploadFileToIPFS(filePath);
+        imageHashes.push(ipfsHash);
+      } catch (err) {
+        console.error('Error uploading image to IPFS:', err);
+        return res.status(500).send('Error uploading image to IPFS');
+      } finally {
+        fs.unlinkSync(filePath); // Xóa tệp tạm sau khi tải lên
       }
+    }
 
-      // Tải lên giấy chứng nhận lên IPFS
-      if (certificateFile) {
-          const filePath = path.join(__dirname, certificateFile.path);
-          certificateImageHash = await uploadFileToIPFS(filePath);
-          fs.unlinkSync(filePath); // Xóa tệp tạm sau khi tải lên
+    // Tải lên giấy chứng nhận lên IPFS
+    if (certificateFile) {
+      const filePath = path.join(__dirname, certificateFile.path);
+      try {
+        certificateImageHash = await uploadFileToIPFS(filePath);
+      } catch (err) {
+        console.error('Error uploading certificate to IPFS:', err);
+        return res.status(500).send('Error uploading certificate to IPFS');
+      } finally {
+        fs.unlinkSync(filePath); // Xóa tệp tạm sau khi tải lên
       }
+    }
 
-      // Kiểm tra sản phẩm trong cơ sở dữ liệu
-      db.query('SELECT * FROM products WHERE product_id = ?', [productId], (err, productResults) => {
-          if (err) {
-              console.error('Lỗi khi truy vấn bảng products:', err);
-              return res.status(500).send('Lỗi khi truy vấn bảng products');
-          }
-          if (productResults.length === 0) {
-              return res.status(400).send('ID sản phẩm không hợp lệ');
-          }
-
-          console.log('Product found:', JSON.stringify(productResults[0], null, 2));
-
-          // Kiểm tra người dùng trong cơ sở dữ liệu
-          db.query('SELECT * FROM users WHERE uid = ?', [producerId], async (err, userResults) => {
-              if (err) {
-                  console.error('Lỗi khi truy vấn bảng users:', err);
-                  return res.status(500).send('Lỗi khi truy vấn bảng users');
-              }
-              if (userResults.length === 0) {
-                  return res.status(400).send('ID người dùng không hợp lệ');
-              }
-
-              console.log('User found:', JSON.stringify(userResults[0], null, 2));
-
-              try {
-                  const accounts = await web3.eth.getAccounts();
-                  console.log('Accounts:', accounts);
-
-                  // chuyển đổi giá trị gasEstimate từ number sang BigInt
-                  const gasEstimate = BigInt(await contract.methods.createBatch(
-                      batchName,
-                      productId,
-                      producerId,
-                      quantity,
-                      productionDate,
-                      expireDate,
-                      imageHashes, // Thêm hash của các hình ảnh vào blockchain
-                      certificateImageHash // Thêm hash của giấy chứng nhận vào blockchain
-                  ).estimateGas({ from: accounts[0] }));
-
-                  // Gửi giao dịch tạo lô hàng 
-                  const receipt = await contract.methods.createBatch(
-                      batchName,
-                      productId,
-                      producerId,
-                      quantity,
-                      productionDate,
-                      expireDate,
-                      imageHashes, // Thêm hash của các hình ảnh vào blockchain
-                      certificateImageHash // Thêm hash của giấy chứng nhận vào blockchain
-                  ).send({
-                      from: accounts[0],
-                      gas: gasEstimate + BigInt(100000) // Thêm gas bổ sung
-                  });
-
-                  // Chuyển đổi giá trị BigInt trong receipt sang chuỗi
-                  const receiptStringified = JSON.stringify(receipt, (key, value) =>
-                      typeof value === 'bigint' ? value.toString() : value
-                  );
-
-                  console.log('Transaction receipt:', receiptStringified);
-                  res.send('Lô hàng đã được tạo thành công, được lưu trữ trong blockchain');
-              } catch (err) {
-                  console.error('Error creating batch:', err);
-
-                  if (err.code === 'ECONNREFUSED') {
-                      // Lưu trữ thông tin lô hàng vào bảng batches
-                      const batchCode = generateBatchCode(); // Hàm tạo mã lô hàng duy nhất
-                      const productionDateStr = productionDate.toString();
-                      const expireDateStr = expireDate.toString();
-
-                      db.query('INSERT INTO batches (batch_code, product_id, quantity, production_date, expire_date, image_hashes, certificate_image_hash) VALUES (?, ?, ?, ?, ?, ?, ?)', 
-                      [batchCode, productId, quantity, productionDateStr, expireDateStr, JSON.stringify(imageHashes), certificateImageHash], (err, result) => {
-                          if (err) {
-                              console.error('Lỗi lưu lô hàng:', err);
-                              return res.status(500).send('Lỗi lưu lô hàng');
-                          }
-                          res.status(500).send('Không thể kết nối với blockchain, lô hàng đã được lưu vào cơ sở dữ liệu');
-                      });
-                  } else {
-                      res.status(500).send('Lỗi tạo lô hàng');
-                  }
-              }
-          });
+    // Kiểm tra sản phẩm trong cơ sở dữ liệu
+    const productResults = await new Promise((resolve, reject) => {
+      db.query('SELECT * FROM products WHERE product_id = ?', [productId], (err, results) => {
+        if (err) return reject(err);
+        resolve(results);
       });
+    });
+
+    if (productResults.length === 0) {
+      return res.status(400).send('ID sản phẩm không hợp lệ');
+    }
+
+    console.log('Product found:', JSON.stringify(productResults[0], null, 2));
+
+    // Kiểm tra người dùng trong cơ sở dữ liệu
+    const userResults = await new Promise((resolve, reject) => {
+      db.query('SELECT * FROM users WHERE uid = ?', [producerId], (err, results) => {
+        if (err) return reject(err);
+        resolve(results);
+      });
+    });
+
+    if (userResults.length === 0) {
+      return res.status(400).send('ID người dùng không hợp lệ');
+    }
+
+    console.log('User found:', JSON.stringify(userResults[0], null, 2));
+
+    try {
+      const accounts = await web3.eth.getAccounts();
+      console.log('Accounts:', accounts);
+
+      // chuyển đổi giá trị gasEstimate từ number sang BigInt
+      const gasEstimate = BigInt(await contract.methods.createBatch(
+        batchName,
+        productId,
+        producerId,
+        quantity,
+        productionDate,
+        expireDate,
+        imageHashes, // Thêm hash của các hình ảnh vào blockchain
+        certificateImageHash // Thêm hash của giấy chứng nhận vào blockchain
+      ).estimateGas({ from: accounts[0] }));
+
+      // Gửi giao dịch tạo lô hàng 
+      const receipt = await contract.methods.createBatch(
+        batchName,
+        productId,
+        producerId,
+        quantity,
+        productionDate,
+        expireDate,
+        imageHashes, // Thêm hash của các hình ảnh vào blockchain
+        certificateImageHash // Thêm hash của giấy chứng nhận vào blockchain
+      ).send({
+        from: accounts[0],
+        gas: gasEstimate + BigInt(100000) // Thêm gas bổ sung
+      });
+
+      // Chuyển đổi giá trị BigInt trong receipt sang chuỗi
+      const receiptStringified = JSON.stringify(receipt, (key, value) =>
+        typeof value === 'bigint' ? value.toString() : value
+      );
+
+      console.log('Transaction receipt:', receiptStringified);
+      res.send('Lô hàng đã được tạo thành công, được lưu trữ trong blockchain');
+    } catch (err) {
+      console.error('Error creating batch:', err);
+      res.status(500).send('Lỗi tạo lô hàng 1');
+    }
   } catch (err) {
-      console.error('Error:', err);
-      res.status(500).send('Lỗi tạo lô hàng');
+    console.error('Error:', err);
+    res.status(500).send('Lỗi tạo lô hàng');
   }
 });
 
-
-
 app.use(express.static(path.join(__dirname, 'public')));
 
-
+export default app;
 app.listen(3000, () => {
     console.log('Server is running on port 3000');
 });
