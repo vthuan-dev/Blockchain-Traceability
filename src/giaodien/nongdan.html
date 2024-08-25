@@ -4,201 +4,90 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bảng thông tin - Nông dân</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Baskervville&display=swap" rel="stylesheet">
-	<script src="js/scripts.js"></script>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/nhakiemduyet.css">
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
 </head>
 
 <body>
-    <header>
-        <div class="left-header">
-            <div class="showhidebutton">
-                <i class="fas fa-bars" onclick="hideElement()"></i>
-            </div>
-        </div>
-
-        <div class="center-header">
-            <h2>TRANG NÔNG DÂN</h2>
-        </div>
-
-        <div class="right-header">
-			<div class="notifications">
-                <a href="#" onclick="loadContent('thongbao.php'); hideMainContent(); hideElementMobile();"><i class="fas fa-bell"></i></a>
-            </div>
-
-            <div class="profile">
-                <i class="fas fa-user profile-pic"></i>
-                <!-- <button class="dropbtn">Admin Name</button> -->
-                <div class="dropdown">
-                    <div class="dropdown-content">
-                        <a>NÔNG DÂN</a><hr>
-                        <a href="#" onclick="loadContent('trangcanhan.php'); hideMainContent(); hideElementMobile();">Trang cá nhân</a>
-                        <a href="#" onclick="loadContent('caidat.php'); hideMainContent(); hideElementMobile();">Cài đặt</a>
-                        <a href="#" onclick="loadContent('dangxuat.php'); hideMainContent(); hideElementMobile();">Đăng xuất</a>
-                    </div>
+   <!-- Thanh điều hướng -->
+   <nav class="navbar navbar-expand-lg navbar-light bg-light custom-navbar-height">
+    <a class="navbar-brand" href="#">Trang nông dân</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav"> <!-- Các mục điều hướng bên trái -->
+            <li class="nav-item">
+                <a class="nav-link" href="#">Quản lý lô hàng</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Yêu cầu kiểm định</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Thông báo</a>
+            </li>
+        </ul>
+        <ul class="navbar-nav ml-auto"> <!-- Menu dropdown bên phải -->
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Nguyễn Văn A
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <a class="dropdown-item" href="#">Trang cá nhân</a>
+                    <a class="dropdown-item" href="#">Cài đặt</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#">Đăng xuất</a>
                 </div>
-            </div>
-        </div>  
-    </header>
+            </li>
+        </ul>
+    </div>
+    </nav>
 
     <main>
-        <nav id="left-nav">
-            <div class="welcome">
-                <p style="color: gold;">XIN CHÀO, NÔNG DÂN</p>
+        <div class="container mt-4">
+            <div class="form-title">
+                <h5><b>Quy trình đang chờ được duyệt</b></h5>
             </div>
-            
-            <div class="inner-nav">
-                <p>TRANG CHỦ</p>
-                <ul>
-                    <li><a href="nongdan.html">Bảng thông tin</a></li>
-                </ul>
-            </div>
-    
-            <div class="inner-nav">
-                <p>YÊU CẦU KIỂM ĐỊNH</p>
-                <ul>
-                    <li><a href="#" onclick="loadContent('guiyeucau.php'); hideMainContent(); hideElementMobile();">Gửi yêu cầu kiểm định</a></li>
-                </ul>
-            </div>
-    
-            <div class="inner-nav">
-                <p>QUẢN LÝ LÔ BƯỞI</p>
-                <ul>
-                    <li><a href="nongdan.html">Lô bưởi chưa được duyệt</a></li>
-                    <li><a href="#" onclick="loadContent('lobuoidaduocduyet.php'); hideMainContent(); hideElementMobile();">Lô bưởi đã được duyệt</a></li>
-                    <li><a href="#" onclick="loadContent('tatcalobuoi.php'); hideMainContent(); hideElementMobile();">Tất cả lô bưởi</a></li>
-                </ul>
-            </div>
-        </nav>
 
-        <article class="dashboard" id="dashboard">
-            <h1>Lô bưởi đang chờ được duyệt</h1>
             <br>
-            <div class="table-header"><a href="#" onclick="loadContent('themlomoi.php'); hideMainContent(); hideElementMobile();" class="check-button">Thêm lô mới</a><p>Danh sách có 10 dòng</p></div>
+            <div class="table-header"><div class="check-button">Thêm lô mới</div></div>
             <div class="dashboard-table">
                 <table>
                     <tr>
                         <th width="10%">Mã lô</th>
+                        <th width="10%">Tên sản phẩm</th>
                         <th width="10%">Ngày tạo</th>
-                        <th width="10%">Tên lô</th>
-                        <th width="10%">Giống bưởi</th>
                         <th width="10%">Trạng thái xử lý</th>
                         <th width="10%">Chức năng</th>
                     </tr>
 
                     <tr>
                         <td rowspan="2">AH-001</td>
-                        <td rowspan="2">23/5/2022</td>
-                        <td rowspan="2">Lô bưởi năm roi tháng 5</td>
                         <td rowspan="2">Năm roi</td>
+                        <td rowspan="2">23/5/2022</td>
                         <td rowspan="2">Chưa kiểm định</td>
-                        <td><a class="accept-button">Chỉnh sửa</a></td>
+                        <td><div class="function-button accept-button">Sửa</div></td>
                     </tr>
 
                     <tr>
-                        <td><a class="cancel-button">Xóa</a></td>
+                        <td><div class="function-button cancel-button">Xóa</div></td>
                     </tr>
 
                     <tr>
                         <td rowspan="2">AH-001</td>
-                        <td rowspan="2">23/5/2022</td>
-                        <td rowspan="2">Lô bưởi năm roi tháng 5</td>
                         <td rowspan="2">Năm roi</td>
-                        <td rowspan="2">Chưa kiểm định</td>
-                        <td><a class="accept-button">Chỉnh sửa</a></td>
-                    </tr>
-
-                    <tr>
-                        <td><a class="cancel-button">Xóa</a></td>
-                    </tr>
-
-                    <tr>
-                        <td rowspan="2">AH-001</td>
                         <td rowspan="2">23/5/2022</td>
-                        <td rowspan="2">Lô bưởi năm roi tháng 5</td>
-                        <td rowspan="2">Năm roi</td>
                         <td rowspan="2">Chưa kiểm định</td>
-                        <td><a class="accept-button">Chỉnh sửa</a></td>
+                        <td><div class="function-button accept-button">Sửa</div></td>
                     </tr>
 
                     <tr>
-                        <td><a class="cancel-button">Xóa</a></td>
-                    </tr>
-
-                    <tr>
-                        <td rowspan="2">AH-001</td>
-                        <td rowspan="2">23/5/2022</td>
-                        <td rowspan="2">Lô bưởi năm roi tháng 5</td>
-                        <td rowspan="2">Năm roi</td>
-                        <td rowspan="2">Chưa kiểm định</td>
-                        <td><a class="accept-button">Chỉnh sửa</a></td>
-                    </tr>
-
-                    <tr>
-                        <td><a class="cancel-button">Xóa</a></td>
-                    </tr>
-
-                    <tr>
-                        <td rowspan="2">AH-001</td>
-                        <td rowspan="2">23/5/2022</td>
-                        <td rowspan="2">Lô bưởi năm roi tháng 5</td>
-                        <td rowspan="2">Năm roi</td>
-                        <td rowspan="2">Chưa kiểm định</td>
-                        <td><a class="accept-button">Chỉnh sửa</a></td>
-                    </tr>
-
-                    <tr>
-                        <td><a class="cancel-button">Xóa</a></td>
-                    </tr>
-
-                    <tr>
-                        <td rowspan="2">AH-001</td>
-                        <td rowspan="2">23/5/2022</td>
-                        <td rowspan="2">Lô bưởi năm roi tháng 5</td>
-                        <td rowspan="2">Năm roi</td>
-                        <td rowspan="2">Chưa kiểm định</td>
-                        <td><a class="accept-button">Chỉnh sửa</a></td>
-                    </tr>
-
-                    <tr>
-                        <td><a class="cancel-button">Xóa</a></td>
-                    </tr>
-
-                    <tr>
-                        <td rowspan="2">AH-001</td>
-                        <td rowspan="2">23/5/2022</td>
-                        <td rowspan="2">Lô bưởi năm roi tháng 5</td>
-                        <td rowspan="2">Năm roi</td>
-                        <td rowspan="2">Chưa kiểm định</td>
-                        <td><a class="accept-button">Chỉnh sửa</a></td>
-                    </tr>
-
-                    <tr>
-                        <td><a class="cancel-button">Xóa</a></td>
-                    </tr>
-
-                    <tr>
-                        <td rowspan="2">AH-001</td>
-                        <td rowspan="2">23/5/2022</td>
-                        <td rowspan="2">Lô bưởi năm roi tháng 5</td>
-                        <td rowspan="2">Năm roi</td>
-                        <td rowspan="2">Chưa kiểm định</td>
-                        <td><a class="accept-button">Chỉnh sửa</a></td>
-                    </tr>
-
-                    <tr>
-                        <td><a class="cancel-button">Xóa</a></td>
+                        <td><div class=" function-button cancel-button">Xóa</div></td>
                     </tr>
                 </table>
             </div>
         </article>
-
-        <section id="main-content">
-            <article class="container" id="container">
-            </article>
-        </section>
     </main>
 </body>
 </html>
