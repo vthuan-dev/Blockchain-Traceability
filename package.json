@@ -2,7 +2,7 @@
   "name": "nckh-be",
   "version": "1.0.0",
   "main": "src/app.js",
-  "type": "module",
+  "type": "commonjs",
   "scripts": {
     "test": "mocha --require @babel/register src/test/*.test.js",
     "start": "nodemon ./src/app.js"
@@ -12,10 +12,12 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "axios": "^1.7.4",
+    "axios": "^1.7.5",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",
+    "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "form-data": "^4.0.0",
     "ipfs": "^0.66.1",
     "ipfs-cli": "^0.16.1",
     "ipfs-http-client": "^60.0.1",

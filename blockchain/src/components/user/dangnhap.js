@@ -1,17 +1,12 @@
-import express from 'express';
-import bcrypt from 'bcrypt'; // For password hashing
-import path from 'path'; // Import module path
-import db from '../../config/db.js';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+const mysql = require('mysql2/promise');
+const express = require('express');
+const bcrypt = require('bcrypt'); // For password hashing
+const path = require('path'); // Import module path
+const db = require('../../config/db.js');
 
 const router = express.Router();
 
-// Chuyển đổi import.meta.url thành __dirname
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-router.get('/dangnhap', function(req, res) {
+router.get('/dangnhap', (req, res) => {
     res.sendFile(path.join(__dirname, '../../public/dangnhap.html'));
 });
 
@@ -38,7 +33,7 @@ router.post('/dangnhap', async function(req, res) {
         }
 
         // So sánh mật khẩu người dùng nhập vào với mật khẩu đã băm
-        console.log('Password from user:', password);
+        console.log('Password from:', password);
         console.log('Hashed password from DB:', user.passwd);
         const isPasswordValid = await bcrypt.compare(password, user.passwd);
 
@@ -55,4 +50,4 @@ router.post('/dangnhap', async function(req, res) {
     }
 });
 
-export default router;
+module.exports = router;

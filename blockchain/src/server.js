@@ -1,114 +1,27 @@
-import express from 'express';
-import bodyParser from 'body-parser';
-import Web3 from 'web3';
-import mysql from 'mysql';
-import path, { dirname } from 'path';
-import { fileURLToPath } from 'url';
-import dangkyRoutes from './components/user/dangky.js';
-import dangnhapRoutes from './components/user/dangnhap.js';
-import { create as createIPFS } from 'ipfs-http-client';
-import fs from 'fs';
-import multer from 'multer';
+const express = require('express');
+const bodyParser = require('body-parser');
+const { Web3 } = require('web3');
+const mysql = require('mysql');
+const path = require('path');
+const fs = require('fs');
+const multer = require('multer');
+const axios = require('axios');
+const FormData = require('form-data');
+const dangkyRoutes = require('./components/user/dangky.js');
 
-
-
+//const dangnhapRoutes = require('./components/user/dangnhap.js');
 
 const app = express();
 app.use(bodyParser.json());
 
-const upload = multer({ dest: 'uploads/' });
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-// kết nối với IPFS Infura
+app.use('/api', dangkyRoutes); // Now dangkyRoutes is defined
+//app.use('/api', dangnhapRoutes); // Now dangkyRoutes is defined
 
 
+const infuraEndpoint = 'https://mainnet.infura.io/v3/70a7bf700e4d43d99416d55c6b557d3b';
+console.log(`Đã kết nối với endpoint của Infura: ${infuraEndpoint}`);
 
-const ipfs = createIPFS({
-  host: 'localhost',
-  port: 5001,
-  protocol: 'http'
-});
-
-
-
-async function checkIPFSConnection() {
-  try {
-    const id = await ipfs.id();
-    console.log('Kết nối IPFS thành công:', id);
-  } catch (error) {
-    console.error('Lỗi khi kết nối IPFS:', error);
-  }
-}
-
-
-async function uploadFileToIPFS(filePath) {
-  try {
-    console.log('Đang đọc tệp từ đường dẫn:', filePath);
-    const file = fs.readFileSync(filePath);
-    console.log('Đã đọc tệp, bắt đầu tải lên IPFS...');
-    const result = await ipfs.add(file);
-    console.log('Tải lên IPFS thành công:', result);
-    return result.path; // Trả về hash của tệp
-  } catch (error) {
-    console.error('Lỗi khi tải lên IPFS:', error);
-    throw error; // Ném lỗi để xử lý ở cấp cao hơn
-  }
-}
-
-
-app.post('/upload', upload.single('gf'), async (req, res) => {
-  try {
-    console.log('Yêu cầu tải lên:', req.file);
-    if (!req.file) {
-      return res.status(400).json({ message: 'Không có tệp nào được tải lên' });
-    }
-    const filePath = req.file.path;
-    const ipfsHash = await uploadFileToIPFS(filePath);
-    const ipfsUrl = `https://ipfs.io/ipfs/${ipfsHash}`;
-    res.json({ url: ipfsUrl });
-  } catch (error) {
-
-
-    
-    console.error('Lỗi khi tải lên IPFS:', error);
-    res.status(500).json({ message: 'Lỗi khi tải lên IPFS', error: error.message });
-  }
-});
-
-const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
-const contractABI =  [
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_admin",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "constructor"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "batchId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "sscc",
-        "type": "string"
-      }
-    ],
-    "name": "BatchApproved",
-    "type": "event"
-  },
+const contractABI = [
   {
     "anonymous": false,
     "inputs": [
@@ -169,7 +82,7 @@ const contractABI =  [
       {
         "indexed": false,
         "internalType": "string",
-        "name": "certificateImageHash",
+        "name": "certificateHash",
         "type": "string"
       },
       {
@@ -181,33 +94,6 @@ const contractABI =  [
     ],
     "name": "BatchCreated",
     "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "batchId",
-        "type": "uint256"
-      }
-    ],
-    "name": "BatchRejected",
-    "type": "event"
-  },
-  {
-    "inputs": [],
-    "name": "admin",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function",
-    "constant": true
   },
   {
     "inputs": [
@@ -271,7 +157,7 @@ const contractABI =  [
       },
       {
         "internalType": "string",
-        "name": "certificateImageHash",
+        "name": "certificateHash",
         "type": "string"
       },
       {
@@ -337,7 +223,7 @@ const contractABI =  [
       },
       {
         "internalType": "string",
-        "name": "_certificateImageHash",
+        "name": "_certificateHash",
         "type": "string"
       },
       {
@@ -350,156 +236,77 @@ const contractABI =  [
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_batchId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "string",
-        "name": "_sscc",
-        "type": "string"
-      }
-    ],
-    "name": "approveBatch",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_batchId",
-        "type": "uint256"
-      }
-    ],
-    "name": "rejectBatch",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getPendingBatches",
-    "outputs": [
-      {
-        "components": [
-          {
-            "internalType": "uint256",
-            "name": "batchId",
-            "type": "uint256"
-          },
-          {
-            "internalType": "string",
-            "name": "batchName",
-            "type": "string"
-          },
-          {
-            "internalType": "uint256",
-            "name": "productId",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "producerId",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "quantity",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "productionDate",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "expireDate",
-            "type": "uint256"
-          },
-          {
-            "internalType": "enum SupplyChain.BatchStatus",
-            "name": "status",
-            "type": "uint8"
-          },
-          {
-            "internalType": "uint256",
-            "name": "timestamp",
-            "type": "uint256"
-          },
-          {
-            "internalType": "string",
-            "name": "sscc",
-            "type": "string"
-          },
-          {
-            "internalType": "string[]",
-            "name": "imageHashes",
-            "type": "string[]"
-          },
-          {
-            "internalType": "string",
-            "name": "certificateImageHash",
-            "type": "string"
-          },
-          {
-            "internalType": "uint256",
-            "name": "approverId",
-            "type": "uint256"
-          }
-        ],
-        "internalType": "struct SupplyChain.Batch[]",
-        "name": "",
-        "type": "tuple[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function",
-    "constant": true
   }
 ];
+const contractAddress = '0xf5C32D998A1c53e32ac883b9b91019b714936329'; // Replace with your contract address
 
-const contractAddress = '0x96c708F7ba2773Cf315E7e4898c2b11eb61D610D'; 
+const web3 = new Web3(new Web3.providers.HttpProvider(infuraEndpoint));
+
+
+async function checkInfuraConnection() {
+  try {
+    //dấu hiệu kết nối thành công là khi không có lỗi và không bị timeout
+    await web3.eth.net.isListening();
+    console.log('Đã kết nối với Infura endpoint');
+  } catch (error) {
+    console.error('Thất bại khi kết nối với Infura:', error);
+    process.exit(1); // Exit the process with an error code
+  }
+}
+
+// Khởi tạo hợp đồng với ABI và địa chỉ hợp đồng
 const contract = new web3.eth.Contract(contractABI, contractAddress);
 
 const db = mysql.createConnection({
   host: 'database-1.cv20qo0q8bre.ap-southeast-2.rds.amazonaws.com',
   user: 'admin',
+  port: '3306',
   password: '9W8RQuAdnZylXZAmb68P',
   database: 'blockchain'
 });
+
 db.connect((err) => {
   if (err) {
-      console.error('Error connecting to the database:', err);
-      return;
+    console.error('Lỗi kết nối cơ sở dữ liệu:', err.message);
+    return;
   }
-  console.log('Connected to the database');
+  console.log('Đã kết nối cơ sở dữ liệu');
 });
 
-app.use('/api', dangkyRoutes);
-
-// Sử dụng router đăng nhập
-app.use('/api', dangnhapRoutes);
 
 
-// Hàm tạo mã lô hàng duy nhất
-function generateBatchCode() {
-  return 'BATCH-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+
+const upload = multer(); // Lưu trữ tệp trong bộ nhớ đệm
+
+
+const INFURA_PROJECT_ID = '31HZcE5yLu+fbl7iIiFjCeg2GwKgk424JDamF+zdQrNFTNsfA+eDHQ';
+
+async function uploadToIPFS(fileBuffer, fileName) {
+  const url = `https://ipfs.infura.io:5001/api/v0/add?project_id=${INFURA_PROJECT_ID}`;
+  const formData = new FormData();
+  formData.append('file', fileBuffer, fileName);
+
+  try {
+    console.log(`Bắt đầu tải lên IPFS: ${fileName}`);
+    const response = await axios.post(url, formData, {
+      headers: {
+        ...formData.getHeaders(),
+      },
+    });
+    console.log(`Tải lên thành công: ${response.data.Hash}`);
+    return response.data.Hash;
+  } catch (error) {
+    console.error('Lỗi khi tải lên IPFS:', error.response ? error.response.data : error.message);
+    throw error;
+  }
 }
-
 contract.events.BatchCreated({
   fromBlock: 0
 }, function (error, event) {
   if (error) {
-      console.error('Error listening to event:', error);
+    console.error('Error listening to event:', error);
   } else {
-      console.log('BatchCreated event:', event);
+    console.log('BatchCreated event:', event);
   }
 });
 
@@ -532,174 +339,78 @@ app.post('/createbatch', upload.fields([{ name: 'images', maxCount: 10 }, { name
   const imageFiles = req.files && req.files['images'] ? req.files['images'] : [];
   const certificateFile = req.files && req.files['certificate'] ? req.files['certificate'][0] : null;
   const imageHashes = [];
-  let certificateImageHash = '';
-
-  console.log('Received files:', req.files); // Log các file nhận được
+  let certificateHash = '';
 
   try {
-    if (!ipfs.isOnline()) {
-      return res.status(500).send('IPFS is not connected');
-    }
-
-    // Tải lên các hình ảnh liên quan đến lô hàng lên IPFS
+    // Tải lên các tệp ảnh lên IPFS và lấy hash
     for (const file of imageFiles) {
-      const filePath = path.normalize(path.resolve(__dirname, file.path));
-      console.log(`Uploading file to IPFS: ${filePath}`);
-      try {
-        if (fs.existsSync(filePath)) {
-          const ipfsHash = await uploadFileToIPFS(filePath);
-          console.log(`Uploaded file hash: ${ipfsHash}`);
-          imageHashes.push(ipfsHash);
-        } else {
-          console.error(`File does not exist: ${filePath}`);
-          return res.status(500).send('File does not exist');
-        }
-      } catch (err) {
-        console.error('Error uploading image to IPFS:', err);
-        return res.status(500).send('Error uploading image to IPFS');
-      } finally {
-        if (fs.existsSync(filePath)) {
-          fs.unlinkSync(filePath); // Xóa tệp tạm sau khi tải lên
-        }
-      }
+      const hash = await uploadToIPFS(file.buffer, file.originalname);
+      imageHashes.push(hash);
     }
 
-    // Log các hash của hình ảnh
-    console.log('Image hashes:', imageHashes);
-
-    // Tải lên giấy chứng nhận lên IPFS
+    // Tải lên giấy chứng nhận lên IPFS và lấy hash
     if (certificateFile) {
-      const filePath = path.normalize(path.resolve(__dirname, certificateFile.path));      
-      console.log(`Uploading certificate to IPFS: ${filePath}`);
-      try {
-        if (fs.existsSync(filePath)) {
-          certificateImageHash = await uploadFileToIPFS(filePath);
-          console.log(`Uploaded certificate hash: ${certificateImageHash}`);
-        } else {
-          console.error(`File does not exist: ${filePath}`);
-          return res.status(500).send('File does not exist');
-        }
-      } catch (err) {
-        console.error('Error uploading certificate to IPFS:', err);
-        return res.status(500).send('Error uploading certificate to IPFS');
-      } finally {
-        if (fs.existsSync(filePath)) {
-          fs.unlinkSync(filePath); // Xóa tệp tạm sau khi tải lên
-        }
-      }
+      certificateHash = await uploadToIPFS(certificateFile.buffer, certificateFile.originalname);
     }
 
     // Chuyển đổi ngày thành Unix timestamp
     const productionDateTimestamp = Math.floor(new Date(productionDate).getTime() / 1000);
     const expireDateTimestamp = Math.floor(new Date(expireDate).getTime() / 1000);
 
-    // Kiểm tra các trường bắt buộc và trả về lỗi cụ thể
-    if (!batchName) {
-      return res.status(400).send('Thiếu thông tin bắt buộc: batchName');
-    }
-    if (!productId) {
-      return res.status(400).send('Thiếu thông tin bắt buộc: productId');
-    }
-    if (!producerId) {
-      return res.status(400).send('Thiếu thông tin bắt buộc: producerId');
-    }
-    if (!quantity) {
-      return res.status(400).send('Thiếu thông tin bắt buộc: quantity');
-    }
-    if (!productionDateTimestamp) {
-      return res.status(400).send('Thiếu thông tin bắt buộc: productionDate');
-    }
-    if (!expireDateTimestamp) {
-      return res.status(400).send('Thiếu thông tin bắt buộc: expireDate');
-    }
-    if (imageHashes.length === 0) {
-      return res.status(400).send('Thiếu thông tin bắt buộc: imageHashes');
-    }
-    if (!certificateImageHash) {
-      return res.status(400).send('Thiếu thông tin bắt buộc: certificateImageHash');
+    // Kiểm tra các trường bắt buộc
+    if (!batchName || !productId || !producerId || !quantity || !productionDateTimestamp || !expireDateTimestamp || imageHashes.length === 0 || !certificateHash) {
+      return res.status(400).send('Thiếu thông tin bắt buộc');
     }
 
-    // Kiểm tra sản phẩm trong cơ sở dữ liệu
-    const productResults = await new Promise((resolve, reject) => {
-      db.query('SELECT * FROM products WHERE product_id = ?', [productId], (err, results) => {
-        if (err) return reject(err);
-        resolve(results);
-      });
+    // Gửi giao dịch tạo lô hàng lên blockchain
+    const accounts = await web3.eth.getAccounts();
+    const gasEstimate = await contract.methods.createBatch(
+      batchName,
+      productId,
+      producerId,
+      quantity,
+      productionDateTimestamp,
+      expireDateTimestamp,
+      imageHashes,
+      certificateHash
+    ).estimateGas({ from: accounts[0] });
+
+    await contract.methods.createBatch(
+      batchName,
+      productId,
+      producerId,
+      quantity,
+      productionDateTimestamp,
+      expireDateTimestamp,
+      imageHashes,
+      certificateHash
+    ).send({
+      from: accounts[0],
+      gas: gasEstimate + 100000
     });
 
-    if (productResults.length === 0) {
-      return res.status(400).send('ID sản phẩm không hợp lệ');
-    }
-
-    console.log('Product found:', JSON.stringify(productResults[0], null, 2));
-
-    // Kiểm tra người dùng trong cơ sở dữ liệu
-    const userResults = await new Promise((resolve, reject) => {
-      db.query('SELECT * FROM users WHERE uid = ?', [producerId], (err, results) => {
-        if (err) return reject(err);
-        resolve(results);
-      });
-    });
-
-    if (userResults.length === 0) {
-      return res.status(400).send('ID người dùng không hợp lệ');
-    }
-
-    console.log('User found:', JSON.stringify(userResults[0], null, 2));
-
-    try {
-      const accounts = await web3.eth.getAccounts();
-      console.log('Accounts:', accounts);
-
-      // chuyển đổi giá trị gasEstimate từ number sang BigInt
-      const gasEstimate = BigInt(await contract.methods.createBatch(
-        batchName,
-        productId,
-        producerId,
-        quantity,
-        productionDateTimestamp, // Sử dụng Unix timestamp
-        expireDateTimestamp, // Sử dụng Unix timestamp
-        imageHashes, // Thêm hash của các hình ảnh vào blockchain
-        certificateImageHash // Thêm hash của giấy chứng nhận vào blockchain
-      ).estimateGas({ from: accounts[0] }));
-
-      // Gửi giao dịch tạo lô hàng 
-      const receipt = await contract.methods.createBatch(
-        batchName,
-        productId,
-        producerId,
-        quantity,
-        productionDateTimestamp, // Sử dụng Unix timestamp
-        expireDateTimestamp, // Sử dụng Unix timestamp
-        imageHashes, // Thêm hash của các hình ảnh vào blockchain
-        certificateImageHash // Thêm hash của giấy chứng nhận vào blockchain
-      ).send({
-        from: accounts[0],
-        gas: gasEstimate + BigInt(100000) // Thêm gas bổ sung
-      });
-
-      // Chuyển đổi giá trị BigInt trong receipt sang chuỗi
-      const receiptStringified = JSON.stringify(receipt, (key, value) =>
-        typeof value === 'bigint' ? value.toString() : value
-      );
-
-      console.log('Transaction receipt:', receiptStringified);
-      res.send('Lô hàng đã được tạo thành công, được lưu trữ trong blockchain');
-    } catch (err) {
-      console.error('Error creating batch:', err);
-      res.status(500).send('Lỗi tạo lô hàng 1');
-    }
+    res.send('Lô hàng đã được tạo thành công, được lưu trữ trong blockchain');
   } catch (err) {
     console.error('Error:', err);
     res.status(500).send('Lỗi tạo lô hàng');
   }
 });
 
+app.post('/upload', upload.single('file'), async (req, res) => {
+  try {
+    const fileBuffer = req.file.buffer;
+    const fileName = req.file.originalname;
+    const ipfsHash = await uploadToIPFS(fileBuffer, fileName);
+    res.json({ ipfsHash });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-export default app;
-app.listen(3000, () => {
-    console.log('Server is running on port 3000');
-    checkIPFSConnection();
+app.listen(3000, async () => {
+  await checkInfuraConnection(); // Check Infura connection when the server starts
+  console.log('Server is running on port 3000');
 });
