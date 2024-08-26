@@ -1,20 +1,13 @@
-    import express from 'express';
-    import db from '../../config/db.js';
-    import path from 'path';
-    import bcrypt from 'bcrypt';
-    import multer from 'multer';
-    import { fileURLToPath } from 'url';
-    import { dirname } from 'path';
+    const express = require('express');
+    const mysql = require('mysql2/promise');
+    const path = require('path');
+    const bcrypt = require('bcrypt');
+    const multer = require('multer');
     
     const router = express.Router();
     
-    // Chuyển đổi import.meta.url thành __dirname
-    const __filename = fileURLToPath(import.meta.url);
-    const __dirname = dirname(__filename);
-    
     const storage = multer.diskStorage({
         destination: function (req, file, cb) {
-            // Sử dụng đường dẫn tương đối
             cb(null, path.join(__dirname, '../../public/uploads/avatars'));
         },
         filename: function (req, file, cb) {
@@ -87,4 +80,4 @@
         }
     });
     
-    export default router;
+    module.exports = router;

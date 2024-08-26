@@ -20,21 +20,25 @@
       const fileInput = document.getElementById('fileInput');
       formData.append('gf', fileInput.files[0]);
 
-      const response = await fetch('/upload', {
-        method: 'POST',
-        body: formData
-      });
+      try {
+        const response = await fetch('/upload', {
+          method: 'POST',
+          body: formData
+        });
 
-      const result = await response.json();
-      if (response.ok) {
-        const imageContainer = document.getElementById('imageContainer');
-        const img = document.createElement('img');
-        img.src = result.url;
-        img.alt = 'Uploaded Image';
-        imageContainer.innerHTML = '';
-        imageContainer.appendChild(img);
-      } else {
-        console.error('Error uploading file:', result.message);
+        const result = await response.json();
+        if (response.ok) {
+          const imageContainer = document.getElementById('imageContainer');
+          const img = document.createElement('img');
+          img.src = result.url;
+          img.alt = 'Uploaded Image';
+          imageContainer.innerHTML = '';
+          imageContainer.appendChild(img);
+        } else {
+          console.error('Error uploading file:', result.message);
+        }
+      } catch (error) {
+        console.error('Error:', error);
       }
     });
   </script>
