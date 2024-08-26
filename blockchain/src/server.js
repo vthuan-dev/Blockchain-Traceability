@@ -18,8 +18,6 @@ app.use('/api', dangkyRoutes); // Now dangkyRoutes is defined
 //app.use('/api', dangnhapRoutes); // Now dangkyRoutes is defined
 
 
-const infuraEndpoint = 'https://mainnet.infura.io/v3/70a7bf700e4d43d99416d55c6b557d3b';
-console.log(`Đã kết nối với endpoint của Infura: ${infuraEndpoint}`);
 
 const contractABI = [
   {
@@ -240,19 +238,8 @@ const contractABI = [
 ];
 const contractAddress = '0xf5C32D998A1c53e32ac883b9b91019b714936329'; // Replace with your contract address
 
-const web3 = new Web3(new Web3.providers.HttpProvider(infuraEndpoint));
 
 
-async function checkInfuraConnection() {
-  try {
-    //dấu hiệu kết nối thành công là khi không có lỗi và không bị timeout
-    await web3.eth.net.isListening();
-    console.log('Đã kết nối với Infura endpoint');
-  } catch (error) {
-    console.error('Thất bại khi kết nối với Infura:', error);
-    process.exit(1); // Exit the process with an error code
-  }
-}
 
 // Khởi tạo hợp đồng với ABI và địa chỉ hợp đồng
 const contract = new web3.eth.Contract(contractABI, contractAddress);
@@ -275,11 +262,9 @@ db.connect((err) => {
 
 
 
+const upload = multer(); 
 
-const upload = multer(); // Lưu trữ tệp trong bộ nhớ đệm
-
-
-const INFURA_PROJECT_ID = '31HZcE5yLu+fbl7iIiFjCeg2GwKgk424JDamF+zdQrNFTNsfA+eDHQ';
+const INFURA_PROJECT_ID = '70a7bf700e4d43d99416d55c6b557d3b31HZcE5yLu+fbl7iIiFjCeg2GwKgk424JDamF+zdQrNFTNsfA+eDHQ';
 
 async function uploadToIPFS(fileBuffer, fileName) {
   const url = `https://ipfs.infura.io:5001/api/v0/add?project_id=${INFURA_PROJECT_ID}`;
