@@ -1,0 +1,87 @@
+{
+  "name": "ipfs-daemon",
+  "version": "0.16.1",
+  "description": "JavaScript implementation of the IPFS specification",
+  "license": "Apache-2.0 OR MIT",
+  "homepage": "https://github.com/ipfs/js-ipfs/tree/master/packages/ipfs-daemon#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ipfs/js-ipfs.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ipfs/js-ipfs/issues"
+  },
+  "keywords": [
+    "IPFS"
+  ],
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=7.0.0"
+  },
+  "type": "module",
+  "types": "./dist/src/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "*": [
+        "*",
+        "dist/*",
+        "dist/src/*",
+        "dist/src/*/index"
+      ],
+      "src/*": [
+        "*",
+        "dist/*",
+        "dist/src/*",
+        "dist/src/*/index"
+      ]
+    }
+  },
+  "files": [
+    "src",
+    "dist",
+    "!dist/test",
+    "!**/*.tsbuildinfo"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./src/index.js"
+    }
+  },
+  "eslintConfig": {
+    "extends": "ipfs",
+    "parserOptions": {
+      "sourceType": "module"
+    }
+  },
+  "scripts": {
+    "lint": "aegir lint",
+    "test": "aegir test -t node",
+    "test:node": "aegir test -t node -- --exit",
+    "clean": "aegir clean",
+    "dep-check": "aegir dep-check -i ipfs-core-types -i @mapbox/node-pre-gyp",
+    "build": "aegir build --no-bundle"
+  },
+  "dependencies": {
+    "@libp2p/logger": "^2.0.5",
+    "@libp2p/webrtc-star": "^6.0.0",
+    "@mapbox/node-pre-gyp": "^1.0.5",
+    "ipfs-core": "^0.18.1",
+    "ipfs-core-types": "^0.14.1",
+    "ipfs-grpc-server": "^0.12.1",
+    "ipfs-http-gateway": "^0.13.1",
+    "ipfs-http-server": "^0.15.1",
+    "ipfs-utils": "^9.0.13",
+    "libp2p": "^0.42.0"
+  },
+  "devDependencies": {
+    "aegir": "^37.11.0",
+    "node-fetch": "^3.2.3",
+    "ws": "^8.5.0"
+  },
+  "optionalDependencies": {
+    "electron-webrtc": "^0.3.0",
+    "prom-client": "^14.0.1",
+    "wrtc": "^0.4.6"
+  }
+}

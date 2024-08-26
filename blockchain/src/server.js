@@ -69,6 +69,9 @@ app.post('/upload', upload.single('gf'), async (req, res) => {
     const ipfsUrl = `https://ipfs.io/ipfs/${ipfsHash}`;
     res.json({ url: ipfsUrl });
   } catch (error) {
+
+
+    
     console.error('Lỗi khi tải lên IPFS:', error);
     res.status(500).json({ message: 'Lỗi khi tải lên IPFS', error: error.message });
   }
@@ -461,7 +464,6 @@ const contractABI =  [
     "constant": true
   }
 ];
-
 
 const contractAddress = '0x96c708F7ba2773Cf315E7e4898c2b11eb61D610D'; 
 const contract = new web3.eth.Contract(contractABI, contractAddress);

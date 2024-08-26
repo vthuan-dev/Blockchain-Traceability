@@ -1,0 +1,115 @@
+{
+  "name": "ipfs",
+  "version": "0.66.1",
+  "description": "JavaScript implementation of the IPFS specification",
+  "license": "Apache-2.0 OR MIT",
+  "homepage": "https://github.com/ipfs/js-ipfs/tree/master/packages/ipfs#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ipfs/js-ipfs.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ipfs/js-ipfs/issues"
+  },
+  "keywords": [
+    "IPFS"
+  ],
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=7.0.0"
+  },
+  "bin": {
+    "jsipfs": "src/cli.js"
+  },
+  "type": "module",
+  "types": "./dist/src/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "*": [
+        "*",
+        "dist/*",
+        "dist/src/*",
+        "dist/src/*/index"
+      ],
+      "src/*": [
+        "*",
+        "dist/*",
+        "dist/src/*",
+        "dist/src/*/index"
+      ]
+    }
+  },
+  "files": [
+    "src",
+    "dist",
+    "!dist/test",
+    "!**/*.tsbuildinfo"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./src/index.js"
+    },
+    "./path": {
+      "types": "./src/path.d.ts",
+      "browser": "./src/path.browser.js",
+      "import": "./src/path.js"
+    }
+  },
+  "eslintConfig": {
+    "extends": "ipfs",
+    "parserOptions": {
+      "sourceType": "module"
+    }
+  },
+  "scripts": {
+    "build": "aegir build",
+    "prepublishOnly": "node scripts/update-version.js",
+    "lint": "aegir lint",
+    "test:interface:core": "aegir test -f test/interface-core.js",
+    "test:interface:client": "aegir test -f test/interface-client.js",
+    "test:interface:http-js": "aegir test -f test/interface-http-js.js",
+    "test:interface:http-go": "aegir test -f test/interface-http-go.js",
+    "test:interop": "cross-env DEBUG=$DEBUG IPFS_LOGGING=$IPFS_LOGGING IPFS_JS_EXEC=$PWD/src/cli.js KUBO_RPC_MODULE=$PWD/../ipfs-http-client/src/index.js LIBP2P_TCP_REUSEPORT=false ipfs-interop",
+    "test:external": "aegir test-dependant",
+    "clean": "aegir clean",
+    "dep-check": "aegir dep-check -i ipfs-core-types -i @types/*"
+  },
+  "dependencies": {
+    "@libp2p/logger": "^2.0.5",
+    "ipfs-cli": "^0.16.1",
+    "ipfs-core": "^0.18.1",
+    "semver": "^7.3.2",
+    "update-notifier": "^6.0.0"
+  },
+  "devDependencies": {
+    "@libp2p/webrtc-star-signalling-server": "^3.0.0",
+    "@libp2p/websockets": "^5.0.0",
+    "@types/semver": "^7.3.4",
+    "@types/update-notifier": "^6.0.1",
+    "aegir": "^37.11.0",
+    "cross-env": "^7.0.0",
+    "go-ipfs": "^0.12.0",
+    "interface-ipfs-core": "^0.158.1",
+    "ipfs-client": "^0.10.1",
+    "ipfs-core-types": "^0.14.1",
+    "ipfs-http-client": "^60.0.1",
+    "ipfs-interop": "^10.0.0",
+    "ipfs-utils": "^9.0.13",
+    "ipfsd-ctl": "^13.0.0",
+    "iso-url": "^1.0.0",
+    "kubo-rpc-client": "^3.0.0",
+    "merge-options": "^3.0.4",
+    "mock-ipfs-pinning-service": "^0.4.2",
+    "url": "^0.11.0"
+  },
+  "optionalDependencies": {
+    "electron-webrtc": "^0.3.0",
+    "wrtc": "^0.4.6"
+  },
+  "browser": {
+    "./src/cli.js": false,
+    "./src/path.js": "./src/path.browser.js",
+    "go-ipfs": false
+  }
+}
