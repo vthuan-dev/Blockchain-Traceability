@@ -14,8 +14,14 @@ contract SupplyChain {
         uint expireDate,
         uint timestamp,
         string[] imageHashes,
-        string certificateHash,
-        uint approverId
+        address approver,
+        string productionAddress
+    );
+
+    event BatchStatusUpdated(
+        uint batchId,
+        BatchStatus status,
+        uint timestamp
     );
 
     struct Batch {
@@ -30,12 +36,17 @@ contract SupplyChain {
         uint timestamp;
         string sscc;
         string[] imageHashes;
-        string certificateHash;
-        uint approverId;
+        address approver;
+        string productionAddress;
     }
 
     Batch[] public batches;
     uint public nextBatchId;
+
+    modifier onlyApprover(uint _batchId) {
+        require(msg.sender == batches[_batchId].approver, "Only the approver can perform this action");
+        _;
+    }
 
     function createBatch(
         string memory _batchName,
@@ -45,14 +56,14 @@ contract SupplyChain {
         uint _productionDate,
         uint _expireDate,
         string[] memory _imageHashes,
-        string memory _certificateHash,
-        uint _approverId
+        address _approver,
+        string memory _productionAddress
     ) public {
         require(bytes(_batchName).length > 0, "Batch name is required");
         require(_quantity > 0, "Quantity must be greater than zero");
         require(_productionDate < _expireDate, "Production date must be before expire date");
         require(_imageHashes.length > 0, "At least one image hash is required");
-        require(bytes(_certificateHash).length > 0, "Certificate hash is required");
+        require(bytes(_productionAddress).length > 0, "Production address is required");
 
         batches.push(Batch({
             batchId: nextBatchId,
@@ -66,8 +77,8 @@ contract SupplyChain {
             timestamp: block.timestamp,
             sscc: "",
             imageHashes: _imageHashes,
-            certificateHash: _certificateHash,
-            approverId: _approverId
+            approver: _approver,
+            productionAddress: _productionAddress
         }));
 
         emit BatchCreated(
@@ -80,10 +91,16 @@ contract SupplyChain {
             _expireDate,
             block.timestamp,
             _imageHashes,
-            _certificateHash,
-            _approverId
+            _approver,
+            _productionAddress
         );
 
         nextBatchId++;
+    }
+
+    function updateBatchStatus(uint _batchId, BatchStatus _status) public onlyApprover(_batchId) {
+        require(_batchId < nextBatchId, "Invalid batch ID");
+        batches[_batchId].status = _status;
+        emit BatchStatusUpdated(_batchId, _status, block.timestamp);
     }
 }
