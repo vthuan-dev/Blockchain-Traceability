@@ -15,10 +15,11 @@ const upload = multer(); // Lưu trữ tệp trong bộ nhớ đệm
 // Cấu hình AWS SDK
 // Khởi tạo đối tượng S3
 const s3Client = new S3Client({
-  region: process.env.AWS_REGION,
+  endpoint: 'https://s3.filebase.com',
+  region: process.env.FILEBASE_REGION, // Đọc giá trị region từ tệp .env
   credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    accessKeyId: 'FB77055A97DE296E0668', // Đọc giá trị access key từ tệp .env
+    secretAccessKey: 'TQQGAV3TtNLEJqEafjz5pf1rpaSwA0tpzupn9yYu', // Đọc giá trị secret key từ tệp .env
   },
 });
 
@@ -64,7 +65,7 @@ async function uploadFile(fileBuffer, fileName) {
   try {
     console.log(`Bắt đầu tải lên Filebase: ${fileName}`);
     const command = new PutObjectCommand({
-      Bucket: "truyxuat", // Đọc giá trị bucket từ tệp .env
+      Bucket: "nckh", // Đọc giá trị bucket từ tệp .env
       Key: fileName,
       Body: fileBuffer,
       ContentType: 'image/jpg', // Hoặc loại MIME phù hợp với ảnh của bạn
@@ -392,7 +393,16 @@ app.post('/createbatch', upload.fields([{ name: 'images', maxCount: 10 }, { name
         const expireDateTimestamp = Math.floor(new Date(expireDate).getTime() / 1000);
 
         // Kiểm tra các trường bắt buộc
-        if (!batchName || !productId || !producerId || !quantity || !productionDateTimestamp || !expireDateTimestamp || imageHashes.length === 0 || !certificateHash) {
+        const isBatchNameMissing = !batchName;
+        const isProductIdMissing = !productId;
+        const isProducerIdMissing = !producerId;
+        const isQuantityMissing = !quantity;
+        const isProductionDateTimestampMissing = !productionDateTimestamp;
+        const isExpireDateTimestampMissing = !expireDateTimestamp;
+        const areImageHashesMissing = imageHashes.length === 0;
+        const isCertificateHashMissing = !certificateHash;
+        
+        if (isBatchNameMissing || isProductIdMissing || isProducerIdMissing || isQuantityMissing || isProductionDateTimestampMissing || isExpireDateTimestampMissing || areImageHashesMissing || isCertificateHashMissing) {
           return res.status(400).send('Thiếu thông tin bắt buộc');
         }
 
