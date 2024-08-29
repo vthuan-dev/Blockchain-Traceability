@@ -6,6 +6,8 @@ const { Web3 } = require('web3');
 const dotenv = require('dotenv');
 const mysql = require('mysql');
 dotenv.config();
+const axios = require('axios');
+const FormData = require('form-data');
 
 const app = express();
 const upload = multer(); // Lưu trữ tệp trong bộ nhớ đệm
@@ -30,7 +32,8 @@ const db = mysql.createConnection({
   user: 'admin',
   port: '3306',
   password: '9W8RQuAdnZylXZAmb68P',
-  database: 'blockchain'
+  database: 'blockchain',
+  connectTimeout: 10000 // Tăng thời gian chờ kết nối lên 10 giây
 });
 
 db.connect((err) => {
@@ -46,9 +49,7 @@ db.connect((err) => {
 
 
 
-// Cấu hình AWS SDK với thông tin từ Filebase
-
-
+// Cấu hình AWS SDK 
 async function uploadFile(fileBuffer, fileName) {
   try {
     console.log(`Bắt đầu tải lên Filebase: ${fileName}`);
@@ -60,9 +61,12 @@ async function uploadFile(fileBuffer, fileName) {
     });
     console.log(`Bucket: ${command.input.Bucket}`); // Log giá trị của Bucket để kiểm tra
     await s3Client.send(command);
-    const fileUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
-    console.log(`Tải lên thành công: ${fileUrl}`);
-    return fileUrl;
+    console.log(`Tải lên thành công: ${fileName}`);
+    
+    // Giả sử CID được lấy từ fileName hoặc từ response của Filebase
+    const cid = fileName.split('.')[0]; // Thay thế bằng cách lấy CID thực tế từ Filebase
+    const ipfsUrl = `https://ipfs.filebase.io/ipfs/${cid}`;
+    return ipfsUrl;
   } catch (error) {
     console.error('Lỗi khi tải lên Filebase:', error.message);
     throw error;
@@ -70,7 +74,6 @@ async function uploadFile(fileBuffer, fileName) {
 }
 
 // Endpoint để kiểm tra hàm upload
-/*
 app.post('/upload', upload.single('image'), async (req, res) => {
   const file = req.file;
   if (!file) {
@@ -79,16 +82,14 @@ app.post('/upload', upload.single('image'), async (req, res) => {
 
   try {
     console.log(`Đang tải lên tệp: ${file.originalname}`);
-    const fileUrl = await uploadFile(file.buffer, file.originalname);
-    console.log(`Tệp đã được tải lên thành công: ${fileUrl}`);
-    res.send(`Tệp đã được tải lên thành công: ${fileUrl}`);
+    const ipfsUrl = await uploadFile(file.buffer, file.originalname);
+    console.log(`Tệp đã được tải lên thành công: ${ipfsUrl}`);
+    res.send({ message: 'Tệp đã được tải lên thành công', url: ipfsUrl });
   } catch (error) {
     console.error('Lỗi khi tải lên tệp:', error);
     res.status(500).send('Lỗi khi tải lên tệp');
   }
 });
-*/
-
 
 async function processFiles(files) {
   const processedFiles = {};
@@ -125,75 +126,97 @@ web3.eth.net.isListening()
   .then(() => console.log('Đã kết nối với ETH node'))
   .catch(e => console.log('Lỗi rồi', e));
 
-const contractABI = [
+const contractABI =  [
   {
-    "indexed": false,
-    "internalType": "uint256",
-    "name": "batchId",
-    "type": "uint256"
-  },
-  {
-    "indexed": false,
-    "internalType": "string",
-    "name": "batchName",
-    "type": "string"
-  },
-  {
-    "indexed": false,
-    "internalType": "uint256",
-    "name": "productId",
-    "type": "uint256"
-  },
-  {
-    "indexed": false,
-    "internalType": "uint256",
-    "name": "producerId",
-    "type": "uint256"
-  },
-  {
-    "indexed": false,
-    "internalType": "uint256",
-    "name": "quantity",
-    "type": "uint256"
-  },
-  {
-    "indexed": false,
-    "internalType": "uint256",
-    "name": "productionDate",
-    "type": "uint256"
-  },
-  {
-    "indexed": false,
-    "internalType": "uint256",
-    "name": "expireDate",
-    "type": "uint256"
-  },
-  {
-    "indexed": false,
-    "internalType": "uint256",
-    "name": "timestamp",
-    "type": "uint256"
-  },
-  {
-    "indexed": false,
-    "internalType": "string[]",
-    "name": "imageHashes",
-    "type": "string[]"
-  },
-  {
-    "indexed": false,
-    "internalType": "string",
-    "name": "certificateHash",
-    "type": "string"
-  },
-  {
-    "indexed": false,
-    "internalType": "uint256",
-    "name": "approverId",
-    "type": "uint256"
-  },
-  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "batchId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "batchName",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "productId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "producerId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "quantity",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "productionDate",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "expireDate",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "timestamp",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "approver",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "productionAddress",
+        "type": "string"
+      }
+    ],
     "name": "BatchCreated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "batchId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "enum SupplyChain.BatchStatus",
+        "name": "status",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "timestamp",
+        "type": "uint256"
+      }
+    ],
+    "name": "BatchStatusUpdated",
     "type": "event"
   },
   {
@@ -257,18 +280,19 @@ const contractABI = [
         "type": "string"
       },
       {
-        "internalType": "string",
-        "name": "certificateHash",
-        "type": "string"
+        "internalType": "address",
+        "name": "approver",
+        "type": "address"
       },
       {
-        "internalType": "uint256",
-        "name": "approverId",
-        "type": "uint256"
+        "internalType": "string",
+        "name": "productionAddress",
+        "type": "string"
       }
     ],
     "stateMutability": "view",
-    "type": "function"
+    "type": "function",
+    "constant": true
   },
   {
     "inputs": [],
@@ -281,7 +305,8 @@ const contractABI = [
       }
     ],
     "stateMutability": "view",
-    "type": "function"
+    "type": "function",
+    "constant": true
   },
   {
     "inputs": [
@@ -316,29 +341,42 @@ const contractABI = [
         "type": "uint256"
       },
       {
-        "internalType": "string[]",
-        "name": "_imageHashes",
-        "type": "string[]"
+        "internalType": "address",
+        "name": "_approver",
+        "type": "address"
       },
       {
         "internalType": "string",
-        "name": "_certificateHash",
+        "name": "_productionAddress",
         "type": "string"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_approverId",
-        "type": "uint256"
       }
     ],
     "name": "createBatch",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_batchId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "enum SupplyChain.BatchStatus",
+        "name": "_status",
+        "type": "uint8"
+      }
+    ],
+    "name": "updateBatchStatus",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   }
 ];
 
-const contractAddress = '0x8F9f4b12c30b331b64C6c78fE523c919698D21ef';
+const contractAddress = '0xcd56402fBa9e48A00e2f186032C5F2BA015844e0';
 const contract = new web3.eth.Contract(contractABI, contractAddress);
 
 // Cấu hình middleware để phân tích dữ liệu JSON và URL-encoded
@@ -353,17 +391,22 @@ function cleanKeys(obj) {
   return cleanedObj;
 }
 
+app.use(express.urlencoded({ extended: true })); // Sử dụng để phân tích dữ liệu URL-encoded
 
+app.post('/createbatch', async (req, res) => {
+  console.log('Original request body:', req.body); // Log dữ liệu gốc từ request body
 
-app.post('/createbatch', upload.fields([{ name: 'images', maxCount: 10 }]), async (req, res) => {
   const cleanedBody = cleanKeys(req.body);
   const { batchName, productId, producerId, quantity, productionDate, expireDate, productionAddress } = cleanedBody;
-  const files = req.files;
 
-  console.log('Request body:', cleanedBody); // In ra toàn bộ cleanedBody để kiểm tra
-  console.log('Request files:', req.files); // In ra toàn bộ req.files để kiểm tra
+  console.log('Cleaned request body:', cleanedBody); // Log dữ liệu đã được làm sạch
 
   try {
+    // Kiểm tra nếu request body trống
+    if (Object.keys(cleanedBody).length === 0) {
+      return res.status(400).send('Request body trống');
+    }
+
     // Kiểm tra các trường bắt buộc
     if (!batchName) return res.status(400).send('Thiếu tên lô hàng');
     if (!productId) return res.status(400).send('Thiếu mã sản phẩm');
@@ -372,81 +415,106 @@ app.post('/createbatch', upload.fields([{ name: 'images', maxCount: 10 }]), asyn
     if (!productionDate) return res.status(400).send('Thiếu ngày sản xuất');
     if (!expireDate) return res.status(400).send('Thiếu ngày hết hạn');
     if (!productionAddress) return res.status(400).send('Thiếu địa chỉ sản xuất');
-    if (!files || !files.images || files.images.length === 0) return res.status(400).send('Thiếu ảnh');
 
     // Làm sạch dữ liệu đầu vào
-    const cleanProductId = productId.trim();
-    const cleanProducerId = producerId.trim();
-    const cleanQuantity = parseInt(quantity, 10);
-    const cleanProductionDate = parseInt(productionDate, 10);
-    const cleanExpireDate = parseInt(expireDate, 10);
-    const cleanProductionAddress = productionAddress.trim();
+    const cleanProductId = productId ? productId.trim() : '';
+    const cleanProducerId = producerId ? producerId.trim() : '';
+    const cleanQuantity = quantity ? parseInt(quantity, 10) : 0;
+    const cleanProductionDate = productionDate ? new Date(productionDate).getTime() / 1000 : 0; // Chuyển đổi ngày thành Unix timestamp
+    const cleanExpireDate = expireDate ? new Date(expireDate).getTime() / 1000 : 0; // Chuyển đổi ngày thành Unix timestamp
+    const cleanProductionAddress = productionAddress ? productionAddress.trim() : '';
+
+    // Ensure all required conditions are met
+    if (!batchName || !cleanProductId || !cleanProducerId || !cleanQuantity || !cleanProductionDate || !cleanExpireDate || !cleanProductionAddress) {
+      return res.status(400).send('Invalid input parameters');
+    }
 
     console.log('Input productId:', cleanProductId);
     console.log('Input producerId:', cleanProducerId);
 
-    // Kiểm tra sự tồn tại của sản phẩm
-    const [productResults] = await db.query('SELECT product_id FROM products WHERE product_id = ?', [cleanProductId]);
-    console.log('Product query result:', productResults); // Log kết quả truy vấn sản phẩm
-    if (!productResults || productResults.length === 0) {
-      return res.status(400).send('Sản phẩm không tồn tại');
+    try {
+      // Kiểm tra sự tồn tại của sản phẩm
+      const productResults = await new Promise((resolve, reject) => {
+        db.query('SELECT * FROM products WHERE product_id = ?', [cleanProductId], (error, results) => {
+          if (error) return reject(error);
+          resolve(results);
+        });
+      });
+      console.log('Product query result:', productResults); // Log kết quả truy vấn sản phẩm
+
+      if (!Array.isArray(productResults) || productResults.length === 0) {
+        return res.status(400).send('Sản phẩm không tồn tại');
+      }
+
+      const productIdFromDb = productResults[0].product_id;
+      console.log('Database productId:', productIdFromDb);
+
+      // Kiểm tra sự tồn tại của người dùng
+      const userResults = await new Promise((resolve, reject) => {
+        db.query('SELECT uid FROM users WHERE uid = ?', [cleanProducerId], (error, results) => {
+          if (error) return reject(error);
+          resolve(results);
+        });
+      });
+      console.log('User query result:', userResults); // Log kết quả truy vấn người dùng
+
+      if (!Array.isArray(userResults) || userResults.length === 0) {
+        return res.status(400).send('Người dùng không tồn tại');
+      }
+
+      const userIdFromDb = userResults[0].uid;
+      console.log('Database userId:', userIdFromDb);
+
+      // Chuyển đổi các giá trị thành kiểu dữ liệu phù hợp
+      const productionDateTimestamp = BigInt(cleanProductionDate);
+      const expireDateTimestamp = BigInt(cleanExpireDate);
+      
+      // Lấy danh sách tài khoản từ web3
+      const accounts = await web3.eth.getAccounts();
+      console.log('Accounts:', accounts);
+
+      // Ước tính gas
+      const gasEstimate = await contract.methods.createBatch(
+        batchName,
+        cleanProductId,
+        cleanProducerId,
+        cleanQuantity,
+        productionDateTimestamp.toString(), // Chuyển đổi BigInt thành chuỗi
+        expireDateTimestamp.toString(), // Chuyển đổi BigInt thành chuỗi
+        accounts[0],
+        cleanProductionAddress
+      ).estimateGas({ from: accounts[0] });
+
+      // Chuyển đổi gasEstimate thành BigInt trước khi cộng
+      const gasEstimateBigInt = BigInt(gasEstimate);
+      const additionalGas = BigInt(100000);
+
+      // Gửi giao dịch
+      await contract.methods.createBatch(
+        batchName,
+        cleanProductId,
+        cleanProducerId,
+        cleanQuantity,
+        productionDateTimestamp.toString(), // Chuyển đổi BigInt thành chuỗi
+        expireDateTimestamp.toString(), // Chuyển đổi BigInt thành chuỗi
+        accounts[0],
+        cleanProductionAddress
+      ).send({
+        from: accounts[0],
+        gas: gasEstimateBigInt + additionalGas // Cộng hai giá trị BigInt
+      });
+
+      res.send('Lô hàng đã được tạo thành công, được lưu trữ trong blockchain');
+    } catch (error) {
+      console.error('Database query error:', error);
+      return res.status(500).send('Lỗi truy vấn cơ sở dữ liệu');
     }
-    const productIdFromDb = productResults[0].product_id;
-    console.log('Database productId:', productIdFromDb);
 
-    // Kiểm tra sự tồn tại của người dùng
-    const [userResults] = await db.query('SELECT uid FROM users WHERE uid = ?', [cleanProducerId]);
-    console.log('User query result:', userResults); // Log kết quả truy vấn người dùng
-    if (!userResults || userResults.length === 0) {
-      return res.status(400).send('Người dùng không tồn tại');
-    }
-    const userIdFromDb = userResults[0].uid;
-    console.log('Database userId:', userIdFromDb);
-
-    // Xử lý các tệp ảnh
-    const processedFiles = await processFiles(files);
-    const imageUrls = processedFiles['images'] || [];
-
-    // Chuyển đổi ngày thành Unix timestamp
-    const productionDateTimestamp = Math.floor(new Date(cleanProductionDate).getTime() / 1000);
-    const expireDateTimestamp = Math.floor(new Date(cleanExpireDate).getTime() / 1000);
-
-    // Gửi giao dịch tạo lô hàng lên blockchain
-    const accounts = await web3.eth.getAccounts();
-    const gasEstimate = await contract.methods.createBatch(
-      batchName,
-      cleanProductId,
-      cleanProducerId,
-      cleanQuantity,
-      productionDateTimestamp,
-      expireDateTimestamp,
-      imageUrls,
-      accounts[0], // Sử dụng địa chỉ của người gọi hàm làm người kiểm duyệt
-      cleanProductionAddress
-    ).estimateGas({ from: accounts[0] });
-
-    await contract.methods.createBatch(
-      batchName,
-      cleanProductId,
-      cleanProducerId,
-      cleanQuantity,
-      productionDateTimestamp,
-      expireDateTimestamp,
-      imageUrls,
-      accounts[0], // Sử dụng địa chỉ của người gọi hàm làm người kiểm duyệt
-      cleanProductionAddress
-    ).send({
-      from: accounts[0],
-      gas: gasEstimate + 100000
-    });
-
-    res.send('Lô hàng đã được tạo thành công, được lưu trữ trong blockchain');
   } catch (err) {
     console.error('Error:', err);
     res.status(500).send('Lỗi tạo lô hàng');
   }
 });
-
 
 console.log('Access Key:', process.env.FILEBASE_ACCESS_KEY);
 console.log('Secret Key:', process.env.FILEBASE_SECRET_KEY);
