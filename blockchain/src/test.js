@@ -1,5 +1,5 @@
-const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
-const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
+const { S3Client, PutObjectCommand, HeadObjectCommand } = require("@aws-sdk/client-s3");
+const { Upload } = require("@aws-sdk/lib-storage");
 const multer = require('multer');
 const express = require('express');
 const { Web3 } = require('web3');
@@ -10,20 +10,26 @@ const axios = require('axios');
 const FormData = require('form-data');
 
 const app = express();
-const upload = multer(); // Lưu trữ tệp trong bộ nhớ đệm
-
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024, // giới hạn kích thước file 5MB
+  }
+}).fields([
+  { name: 'productImage', maxCount: 1 },
+  { name: 'certificateImage', maxCount: 1 }
+]);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Cấu hình AWS SDK
-// Khởi tạo đối tượng S3
+// Cấu hình S3 client
 const s3Client = new S3Client({
   endpoint: 'https://s3.filebase.com',
-  region: process.env.FILEBASE_REGION, // Đọc giá trị region từ tệp .env
+  region: "us-east-1", // Thay đổi region nếu cần
   credentials: {
-    accessKeyId: 'FB77055A97DE296E0668', // Đọc giá trị access key từ tệp .env
-    secretAccessKey: 'TQQGAV3TtNLEJqEafjz5pf1rpaSwA0tpzupn9yYu', // Đọc giá trị secret key từ tệp .env
-  },
+    accessKeyId: "FB77055A97DE296E0668",
+    secretAccessKey: "TQQGAV3TtNLEJqEafjz5pf1rpaSwA0tpzupn9yYu"
+  }
 });
 
 
@@ -33,7 +39,7 @@ const db = mysql.createConnection({
   port: '3306',
   password: '9W8RQuAdnZylXZAmb68P',
   database: 'blockchain',
-  connectTimeout: 10000 // Tăng thời gian chờ kết nối lên 10 giây
+  connectTimeout: 10000 // Tăng thời gian chờ kết nối lên 10 giây =)
 });
 
 db.connect((err) => {
@@ -43,53 +49,79 @@ db.connect((err) => {
   }
   console.log('Đã kết nối cơ sở dữ liệu');
 });
+const { CID } = require('multiformats/cid');
+const { sha256 } = require('multiformats/hashes/sha2');
+const { base58btc } = require('multiformats/bases/base58');
 
-
-
-
-
-
-// Cấu hình AWS SDK 
+const BUCKET_NAME = 'nckh';
 async function uploadFile(fileBuffer, fileName) {
   try {
     console.log(`Bắt đầu tải lên Filebase: ${fileName}`);
-    const command = new PutObjectCommand({
-      Bucket: "nckh", // Đọc giá trị bucket từ tệp .env
+
+    const params = {
+      Bucket: BUCKET_NAME,
       Key: fileName,
-      Body: fileBuffer,
-      ContentType: 'image/jpg', // Hoặc loại MIME phù hợp với ảnh của bạn
-    });
-    console.log(`Bucket: ${command.input.Bucket}`); // Log giá trị của Bucket để kiểm tra
+      Body: fileBuffer
+    };
+
+    const command = new PutObjectCommand(params);
     await s3Client.send(command);
     console.log(`Tải lên thành công: ${fileName}`);
     
-    // Giả sử CID được lấy từ fileName hoặc từ response của Filebase
-    const cid = fileName.split('.')[0]; // Thay thế bằng cách lấy CID thực tế từ Filebase
-    const ipfsUrl = `https://ipfs.filebase.io/ipfs/${cid}`;
-    return ipfsUrl;
+    return await checkFileStatusWithRetry(fileName);
   } catch (error) {
-    console.error('Lỗi khi tải lên Filebase:', error.message);
+    console.error('Lỗi khi tải lên Filebase:', error);
     throw error;
   }
 }
 
-// Endpoint để kiểm tra hàm upload
-app.post('/upload', upload.single('image'), async (req, res) => {
-  const file = req.file;
-  if (!file) {
-    return res.status(400).send('Không có tệp nào được tải lên');
-  }
+// Hàm kiểm tra trạng thái file và lấy CID
+async function checkFileStatusWithRetry(fileName, maxRetries = 5, retryDelay = 1000) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      const params = {
+        Bucket: BUCKET_NAME,
+        Key: fileName
+      };
 
-  try {
-    console.log(`Đang tải lên tệp: ${file.originalname}`);
-    const ipfsUrl = await uploadFile(file.buffer, file.originalname);
-    console.log(`Tệp đã được tải lên thành công: ${ipfsUrl}`);
-    res.send({ message: 'Tệp đã được tải lên thành công', url: ipfsUrl });
-  } catch (error) {
-    console.error('Lỗi khi tải lên tệp:', error);
-    res.status(500).send('Lỗi khi tải lên tệp');
+      const command = new HeadObjectCommand(params);
+      const result = await s3Client.send(command);
+      console.log('Thông tin file:', result);
+      console.log(`Trạng thái file: Tồn tại`);
+      
+      const cid = result.Metadata.cid;
+      console.log(`CID từ Filebase: ${cid}`);
+      
+      const ipfsUrl = `https://ipfs.filebase.io/ipfs/${cid}`;
+      console.log(`IPFS URL: ${ipfsUrl}`);
+      
+      return { cid, ipfsUrl };
+    } catch (error) {
+      if (error.name !== 'NotFound') {
+        console.error('Lỗi khi kiểm tra trạng thái:', error);
+        throw error;
+      }
+      if (i < maxRetries - 1) {
+        console.log(`File chưa sẵn sàng, thử lại sau ${retryDelay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, retryDelay));
+      } else {
+        console.log(`Trạng thái file: Không tồn tại sau ${maxRetries} lần thử`);
+        throw new Error('File không tồn tại sau nhiều lần thử');
+      }
+    }
   }
-});
+}
+function validateAndFormatAddress(address) {
+  if (!address) {
+    throw new Error('Địa chỉ không được để trống');
+  }
+  
+  if (!web3.utils.isAddress(address)) {
+    throw new Error('Địa chỉ không hợp lệ');
+  }
+  
+  return web3.utils.toChecksumAddress(address);
+}
 
 async function processFiles(files) {
   const processedFiles = {};
@@ -126,257 +158,9 @@ web3.eth.net.isListening()
   .then(() => console.log('Đã kết nối với ETH node'))
   .catch(e => console.log('Lỗi rồi', e));
 
-const contractABI =  [
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "batchId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "batchName",
-        "type": "string"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "productId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "producerId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "quantity",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "productionDate",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "expireDate",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "timestamp",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "approver",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "productionAddress",
-        "type": "string"
-      }
-    ],
-    "name": "BatchCreated",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "batchId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "enum SupplyChain.BatchStatus",
-        "name": "status",
-        "type": "uint8"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "timestamp",
-        "type": "uint256"
-      }
-    ],
-    "name": "BatchStatusUpdated",
-    "type": "event"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "name": "batches",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "batchId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "string",
-        "name": "batchName",
-        "type": "string"
-      },
-      {
-        "internalType": "uint256",
-        "name": "productId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "producerId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "quantity",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "productionDate",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "expireDate",
-        "type": "uint256"
-      },
-      {
-        "internalType": "enum SupplyChain.BatchStatus",
-        "name": "status",
-        "type": "uint8"
-      },
-      {
-        "internalType": "uint256",
-        "name": "timestamp",
-        "type": "uint256"
-      },
-      {
-        "internalType": "string",
-        "name": "sscc",
-        "type": "string"
-      },
-      {
-        "internalType": "address",
-        "name": "approver",
-        "type": "address"
-      },
-      {
-        "internalType": "string",
-        "name": "productionAddress",
-        "type": "string"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function",
-    "constant": true
-  },
-  {
-    "inputs": [],
-    "name": "nextBatchId",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function",
-    "constant": true
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "string",
-        "name": "_batchName",
-        "type": "string"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_productId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_producerId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_quantity",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_productionDate",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_expireDate",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "_approver",
-        "type": "address"
-      },
-      {
-        "internalType": "string",
-        "name": "_productionAddress",
-        "type": "string"
-      }
-    ],
-    "name": "createBatch",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_batchId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "enum SupplyChain.BatchStatus",
-        "name": "_status",
-        "type": "uint8"
-      }
-    ],
-    "name": "updateBatchStatus",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  }
-];
+const contractABI = require('../build/contracts/TraceabilityContract.json').abi;
 
-const contractAddress = '0xcd56402fBa9e48A00e2f186032C5F2BA015844e0';
+const contractAddress = '0x99e83fb3b2b0cA606A4587CcBE7590Da2e2E7228';
 const contract = new web3.eth.Contract(contractABI, contractAddress);
 
 // Cấu hình middleware để phân tích dữ liệu JSON và URL-encoded
@@ -393,134 +177,185 @@ function cleanKeys(obj) {
 
 app.use(express.urlencoded({ extended: true })); // Sử dụng để phân tích dữ liệu URL-encoded
 
-app.post('/createbatch', async (req, res) => {
-  console.log('Original request body:', req.body); // Log dữ liệu gốc từ request body
+// Thêm hàm này vào đầu file, sau phần import và cấu hình
+async function getEthereumAddressFromId(id) {
+  return new Promise((resolve, reject) => {
+    db.query('SELECT ethereum_address FROM users WHERE id = ?', [id], (error, results) => {
+      if (error) {
+        console.error('Database query error:', error);
+        reject(error);
+      } else if (results.length > 0 && results[0].ethereum_address) {
+        console.log(`Địa chỉ Ethereum cho ID ${id}:`, results[0].ethereum_address);
+        resolve(results[0].ethereum_address);
+      } else {
+        console.log(`Không tìm thấy địa chỉ Ethereum cho ID ${id}`);
+        reject(new Error(`Không tìm thấy địa chỉ Ethereum cho ID ${id}`));
+      }
+    });
+  });
+}
+async function checkProductExists(productId) {
+  return new Promise((resolve, reject) => {
+    db.query('SELECT * FROM products WHERE product_id = ?', [productId], (error, results) => {
+      if (error) return reject(error);
+      resolve(results.length > 0);
+    });
+  });
+}
 
-  const cleanedBody = cleanKeys(req.body);
-  const { batchName, productId, producerId, quantity, productionDate, expireDate, productionAddress } = cleanedBody;
+async function checkUserExists(userId) {
+  return new Promise((resolve, reject) => {
+    db.query('SELECT * FROM users WHERE uid = ?', [userId], (error, results) => {
+      if (error) return reject(error);
+      resolve(results.length > 0);
+    });
+  });
+}
 
-  console.log('Cleaned request body:', cleanedBody); // Log dữ liệu đã được làm sạch
+// Route handler cho việc tạo lô hàng
+app.post('/createbatch', upload, async (req, res) => {
+  console.log('Received body:', req.body);
+  console.log('Received files:', req.files);
+
+  const { sscc, quantity, farmPlotNumber, productId } = req.body;
 
   try {
-    // Kiểm tra nếu request body trống
-    if (Object.keys(cleanedBody).length === 0) {
-      return res.status(400).send('Request body trống');
-    }
-
     // Kiểm tra các trường bắt buộc
-    if (!batchName) return res.status(400).send('Thiếu tên lô hàng');
-    if (!productId) return res.status(400).send('Thiếu mã sản phẩm');
-    if (!producerId) return res.status(400).send('Thiếu mã nhà sản xuất');
-    if (!quantity) return res.status(400).send('Thiếu số lượng');
-    if (!productionDate) return res.status(400).send('Thiếu ngày sản xuất');
-    if (!expireDate) return res.status(400).send('Thiếu ngày hết hạn');
-    if (!productionAddress) return res.status(400).send('Thiếu địa chỉ sản xuất');
-
-    // Làm sạch dữ liệu đầu vào
-    const cleanProductId = productId ? productId.trim() : '';
-    const cleanProducerId = producerId ? producerId.trim() : '';
-    const cleanQuantity = quantity ? parseInt(quantity, 10) : 0;
-    const cleanProductionDate = productionDate ? new Date(productionDate).getTime() / 1000 : 0; // Chuyển đổi ngày thành Unix timestamp
-    const cleanExpireDate = expireDate ? new Date(expireDate).getTime() / 1000 : 0; // Chuyển đổi ngày thành Unix timestamp
-    const cleanProductionAddress = productionAddress ? productionAddress.trim() : '';
-
-    // Ensure all required conditions are met
-    if (!batchName || !cleanProductId || !cleanProducerId || !cleanQuantity || !cleanProductionDate || !cleanExpireDate || !cleanProductionAddress) {
-      return res.status(400).send('Invalid input parameters');
+    if (!sscc || !quantity || !farmPlotNumber || !productId) {
+      return res.status(400).send('Thiếu thông tin bắt buộc');
     }
 
-    console.log('Input productId:', cleanProductId);
-    console.log('Input producerId:', cleanProducerId);
-
-    try {
-      // Kiểm tra sự tồn tại của sản phẩm
-      const productResults = await new Promise((resolve, reject) => {
-        db.query('SELECT * FROM products WHERE product_id = ?', [cleanProductId], (error, results) => {
-          if (error) return reject(error);
-          resolve(results);
-        });
-      });
-      console.log('Product query result:', productResults); // Log kết quả truy vấn sản phẩm
-
-      if (!Array.isArray(productResults) || productResults.length === 0) {
-        return res.status(400).send('Sản phẩm không tồn tại');
-      }
-
-      const productIdFromDb = productResults[0].product_id;
-      console.log('Database productId:', productIdFromDb);
-
-      // Kiểm tra sự tồn tại của người dùng
-      const userResults = await new Promise((resolve, reject) => {
-        db.query('SELECT uid FROM users WHERE uid = ?', [cleanProducerId], (error, results) => {
-          if (error) return reject(error);
-          resolve(results);
-        });
-      });
-      console.log('User query result:', userResults); // Log kết quả truy vấn người dùng
-
-      if (!Array.isArray(userResults) || userResults.length === 0) {
-        return res.status(400).send('Người dùng không tồn tại');
-      }
-
-      const userIdFromDb = userResults[0].uid;
-      console.log('Database userId:', userIdFromDb);
-
-      // Chuyển đổi các giá trị thành kiểu dữ liệu phù hợp
-      const productionDateTimestamp = BigInt(cleanProductionDate);
-      const expireDateTimestamp = BigInt(cleanExpireDate);
-      
-      // Lấy danh sách tài khoản từ web3
-      const accounts = await web3.eth.getAccounts();
-      console.log('Accounts:', accounts);
-
-      // Ước tính gas
-      const gasEstimate = await contract.methods.createBatch(
-        batchName,
-        cleanProductId,
-        cleanProducerId,
-        cleanQuantity,
-        productionDateTimestamp.toString(), // Chuyển đổi BigInt thành chuỗi
-        expireDateTimestamp.toString(), // Chuyển đổi BigInt thành chuỗi
-        accounts[0],
-        cleanProductionAddress
-      ).estimateGas({ from: accounts[0] });
-
-      // Chuyển đổi gasEstimate thành BigInt trước khi cộng
-      const gasEstimateBigInt = BigInt(gasEstimate);
-      const additionalGas = BigInt(100000);
-
-      // Gửi giao dịch
-      await contract.methods.createBatch(
-        batchName,
-        cleanProductId,
-        cleanProducerId,
-        cleanQuantity,
-        productionDateTimestamp.toString(), // Chuyển đổi BigInt thành chuỗi
-        expireDateTimestamp.toString(), // Chuyển đổi BigInt thành chuỗi
-        accounts[0],
-        cleanProductionAddress
-      ).send({
-        from: accounts[0],
-        gas: gasEstimateBigInt + additionalGas // Cộng hai giá trị BigInt
-      });
-
-      res.send('Lô hàng đã được tạo thành công, được lưu trữ trong blockchain');
-    } catch (error) {
-      console.error('Database query error:', error);
-      return res.status(500).send('Lỗi truy vấn cơ sở dữ liệu');
+    // Kiểm tra độ dài SSCC
+    if (sscc.length !== 18) {
+      return res.status(400).send('SSCC phải có 18 ký tự');
     }
 
+    // Kiểm tra và chuyển đổi productId
+    const cleanProductId = parseInt(productId, 10);
+    if (isNaN(cleanProductId) || cleanProductId <= 0) {
+      return res.status(400).send('Product ID không hợp lệ');
+    }
+
+    let productImageUrl = '';
+    let certificateImageUrl = '';
+
+    // Xử lý productImage
+    if (req.files['productImage']) {
+      const productImageFile = req.files['productImage'][0];
+      const productImageResult = await uploadFile(productImageFile.buffer, productImageFile.originalname);
+      productImageUrl = productImageResult.ipfsUrl;
+    } else {
+      return res.status(400).send('Thiếu ảnh sản phẩm');
+    }
+
+    // Xử lý certificateImage (nếu có)
+    if (req.files['certificateImage']) {
+      const certificateImageFile = req.files['certificateImage'][0];
+      const certificateImageResult = await uploadFile(certificateImageFile.buffer, certificateImageFile.originalname);
+      certificateImageUrl = certificateImageResult.ipfsUrl;
+    } else {
+      console.log('Không có ảnh chứng nhận được tải lên');
+      certificateImageUrl = ''; // Hoặc set một giá trị mặc định
+    }
+
+    console.log('Product Image URL:', productImageUrl);
+    console.log('Certificate Image URL:', certificateImageUrl);
+
+    // Tạo lô hàng trên blockchain
+    const web3 = new Web3('http://localhost:8545'); // Địa chỉ của node Ethereum
+    const contractABI = require('../build/contracts/TraceabilityContract.json').abi;
+    const contractAddress = '0x99e83fb3b2b0cA606A4587CcBE7590Da2e2E7228'; // Địa chỉ của smart contract
+    const contract = new web3.eth.Contract(contractABI, contractAddress);
+
+    const accounts = await web3.eth.getAccounts();
+    const producerId = accounts[0]; // Giả sử tài khoản đầu tiên là producer
+
+    const result = await contract.methods.createBatch(
+      sscc,
+      producerId,
+      quantity,
+      productImageUrl,
+      certificateImageUrl,
+      farmPlotNumber,
+      cleanProductId
+    ).send({ from: producerId, gas: 3000000 });
+
+    res.status(200).send({ 
+      message: 'Lô hàng đã được tạo thành công và đang chờ phê duyệt', 
+      transactionHash: result.transactionHash,
+      batchId: result.events.BatchCreated.returnValues.batchId,
+      productImageUrl, 
+      certificateImageUrl
+    });
   } catch (err) {
     console.error('Error:', err);
-    res.status(500).send('Lỗi tạo lô hàng');
+    res.status(500).send('Lỗi khi xử lý yêu cầu: ' + err.message);
   }
 });
-
-console.log('Access Key:', process.env.FILEBASE_ACCESS_KEY);
-console.log('Secret Key:', process.env.FILEBASE_SECRET_KEY);
-console.log('Bucket Name:', process.env.FILEBASE_BUCKET_NAME);
+async function updateProducerAddress(producerId, ethereumAddress) {
+  return new Promise((resolve, reject) => {
+    db.query('UPDATE users SET ethereum_address = ? WHERE uid = ?', [ethereumAddress, producerId], (error, results) => {
+      if (error) reject(error);
+      else resolve(results);
+    });
+  });
+}
 
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
+app.use((req, res, next) => {
+  if (!req.user) {
+    req.user = { uid: 1, role_id: 1 }; // Tạm thời gán giá trị mặc định
+  }
+  next();
+});
+
+app.use((req, res, next) => {
+  console.log('Request body:', req.body);
+  console.log('Request files:', req.files);
+  next();
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
