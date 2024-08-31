@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<<<<<<< Updated upstream
     <title>Quản lý lô hàng - Nhà kiểm duyệt</title>
+=======
+    <title>Thêm lô hàng mới - Nông dân</title>
+>>>>>>> Stashed changes
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/nhakiemduyet.css">
     <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
@@ -12,23 +16,37 @@
 <body>
     <!-- Thanh điều hướng -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light custom-navbar-height">
-        <a class="navbar-brand" href="#">Trang nông dân</a>
+<<<<<<< Updated upstream
+        <a class="navbar-brand" href="#">Trang nhà kiểm duyệt</a>
+=======
+        <a class="navbar-brand" href="#">Nông dân</a>
+>>>>>>> Stashed changes
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav"> <!-- Các mục điều hướng bên trái -->
                 <li class="nav-item">
+<<<<<<< Updated upstream
                     <a class="nav-link" href="#">Quản lý lô hàng</a>
+=======
+                    <a class="nav-link" href="#">Lô hàng</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Sản phẩm</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#">Yêu cầu kiểm định</a>
+>>>>>>> Stashed changes
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#">Thông báo</a>
                 </li>
             </ul>
+<<<<<<< Updated upstream
+=======
             </ul>
+>>>>>>> Stashed changes
             <ul class="navbar-nav ml-auto"> <!-- Menu dropdown bên phải -->
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -44,38 +62,74 @@
             </ul>
         </div>
     </nav>
-    
+<<<<<<< Updated upstream
+        
     <div class="row justify-content-center align-items-center">
         <div class="col-11 col-sm-8">
-            <div class="profile-container">
+            <div class="profile-container"> 
                 <div class="form-title">
-                    <h5><b>Thêm lô bưởi mới</b></h5>
+                    <h5><b>Thông tin cá nhân</b></h5>
                 </div>
                 <form action="update_profile.php" method="POST">
                     <div class="form-group">
-                        <label for="name">Sản phẩm</label>
-                        <input type="text" id="name" name="name" value="Chọn sản phẩm">
+                        <label for="name">Họ và tên:</label>
+                        <input type="text" id="name" name="name" value="Trần Văn A">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Địa chỉ email:</label>
+                        <input type="email" id="email" name="email" value="tranvana@gmail.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="bio">Tiểu sử:</label>
+                        <textarea id="bio" name="bio">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</textarea>
+=======
+    
+    <div class="row justify-content-center align-items-center">
+        <div class="col-11 col-sm-8">
+            <div class="add-container profile-container">
+                <div class="form-title">
+                    <h5><b>Thêm lô hàng mới</b></h5>
+                </div>
+                <form action="update_profile.php" method="POST">
+                    <div class="form-group">
+                        <label for="productname">Tên lô</label>
+                        <input type="text" id="productname" name="productname" value="Lô bưởi tháng 12">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="productid">Mã lô</label>
+                        <input type="text" id="productid" name="productid" value="AH-123">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="product">Sản phẩm</label>
+                        <br>
+                        <select id="product" name="product">
+                            <option value="namroi">Bưởi năm roi</option>
+                            <option value="daxanh" selected>Bưởi da xanh</option>
+                        </select>
                     </div>
     
                     <div class="form-group">
-                        <label for="name">Số lượng</label>
-                        <input type="text" id="name" name="name" value="300">
+                        <label for="quantity">Số lượng</label>
+                        <input type="text" id="quantity" name="quantity" value="300">
                     </div>
-    
+
                     <div class="form-group">
-                        <label for="name">Ngày sản xuất</label>
-                        <input type="date" id="name" name="name">
-                    </div>
-    
-                    <div class="form-group">
-                        <label for="name">Ngày hết hạn</label>
-                        <input type="date" id="name" name="name">
+                        <label for="batch-picture">Hình ảnh liên quan đến lô hàng</label>
+                        <input type="file" id="batch-picture" name="batch-picture" multiple>
+>>>>>>> Stashed changes
                     </div>
                     <div class="row">
                         <div class="col-12 col-sm-4 mr-auto">
                             <div class="bottom-button">
+<<<<<<< Updated upstream
                                 <div class="function-button accept-button-big">Thêm</div>
                                 <div class="function-button cancel-button-big">Hủy</div>
+=======
+                                <div class="function-button accept-button-big"><b>Thêm</b></div>
+                                <div class="function-button cancel-button-big"><b>Hủy</b></div>
+>>>>>>> Stashed changes
                             </div>
                         </div>
                     </div>

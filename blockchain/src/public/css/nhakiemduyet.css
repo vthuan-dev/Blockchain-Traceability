@@ -179,7 +179,7 @@ body {
 }
 
 .dashboard-table table, td, th {
-  border: 1px solid black;
+  border: 1px #dee2e6 solid;
   border-collapse: collapse;
   text-align: center;
   vertical-align: center;
@@ -188,21 +188,24 @@ body {
 
 /* Tùy chỉnh các nút */
 .check-button {
-  background-color: #4cd137;
+  background-color: white;
   border: none;
-  color: white;
+  color: #4cd137;
   padding: 3px 8px;
   text-align: center;
   text-decoration: none;
   display: inline-block;
   font-size: 16px;
   margin: 4px 0px;
+  height: 30px;
   cursor: pointer;
+  border: 1px #dee2e6 solid;
   border-radius: 5px;
 }
 
 .check-button:hover {
   background-color: #44bd32;
+  color: white;
 }
 
 .check-button-wide {
@@ -210,7 +213,8 @@ body {
 }
 
 .check-button-wide:hover {
-  background-color: #44bd32
+  background-color: #44bd32;
+  color: white;
 }
 
 .function-button {
@@ -218,7 +222,7 @@ body {
   border: none;
   color: white;
   text-align: center;
-  text-decoration: none;
+  text-decoration: red;
   display: block;
   font-size: 16px;
   cursor: pointer;
@@ -226,39 +230,53 @@ body {
 }
 
 .accept-button {
-  background-color: #00a8ff;
+  background-color: white;
+  border: 1px #dee2e6 solid;
+  color: #00a8ff;
   padding: 3px 8px;
+  margin: 5px 0px 5px 0px;
 }
 
 .accept-button:hover {
   background-color: #0097e6;
+  color: white;
 }
 
 .accept-button-big {
-  background-color: #00a8ff;
+  background-color: white;
+  border: 1px #dee2e6 solid;
+  color: #00a8ff;
   padding: 8px 8px;
 }
 
 .accept-button-big:hover {
   background-color: #0097e6;
+  color: white;
 }
 
 .cancel-button {
-  background-color: #e84118;
+  background-color: white;
+  border: 1px #dee2e6 solid;
+  color: #c23616;
   padding: 3px 8px;
+  margin: 5px 0px 5px 0px;
 }
 
 .cancel-button:hover {
   background-color: #c23616;
+  color: white;
 }
 
 .cancel-button-big {
-  background-color: #e84118;
+  background-color: white;
+  border: 1px #dee2e6 solid;
+  color: #c23616;
   padding: 8px 8px;
 }
 
 .cancel-button-big:hover {
   background-color: #c23616;
+  color: white;
 }
 
 .bottom-button {
@@ -311,15 +329,21 @@ body {
   background-image: url('searchicon.png');
   background-position: 14px 12px;
   background-repeat: no-repeat;
+  font-weight: bold;
   padding: 8px 8px;
   height: 30px;
-  width: 1200px;
+  width: 100%;
   margin: 0px 5px 0px 0px;
-  border: none;
+  border: 1px #dee2e6 solid;
   border-radius: 5px;
 }
 
 #myInput:focus {outline: 3px solid #ddd;}
+
+.searchbox-filter {
+  display: flex;
+  align-items: center;
+}
 
 .filter-dropdown {
   position: relative;
@@ -380,6 +404,7 @@ body {
 
 .settings-container form .form-group select,
 .settings-container form .form-group input[type="checkbox"] {
+  width: 100%;
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
@@ -453,4 +478,35 @@ body {
 
 .form-title {
   text-align: center;
+}
+
+.add-container form .form-group select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.functionGroup {
+  display: block;
+  margin: 5px;
+}
+
+.batchPicture {
+  height: 100px;
+  margin: 5px;
+  border-radius: 5px;
+}
+
+.notification-container h5 {
+  text-align: center;
+}
+
+.notificationGroup {
+  display: flex;
+  align-items: center;
+}
+
+.notificationGroup p {
+  margin: 0px;
 }
