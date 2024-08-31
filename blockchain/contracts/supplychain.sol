@@ -1,100 +1,333 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-contract SupplyChain {
+contract TraceabilityContract {
+    mapping(uint256 => bool) private _producers;
+    mapping(uint256 => bool) private _approvers;
+        // admin là địa chỉ của người dùng được cấp quyền quản lý hệ thống
+    uint256 private _admin;
+
+    bool private _paused;
+    // Biến đếm cho mỗi lô sản phẩm 
+    uint256 private _batchIdCounter;
+    
+    // Cấu trúc dữ liệu cho mỗi lô sản phẩm
+    struct Batch {
+        uint256 batchId;
+        string sscc;
+        uint256 producerId;
+        uint256 approverId;
+        string quantity; // Thay đổi từ uint256 sang string
+        uint256 productionDate;
+        uint256 expiryDate;
+        BatchStatus status;
+        string productImageUrl;
+        string certificateImageUrl;
+        string farmPlotNumber;
+        bytes32 dataHash;
+        uint256 productId;
+    }
+    // trạng thái 
     enum BatchStatus { Created, PendingApproval, Approved, Rejected }
 
-    event BatchCreated(
-        uint batchId,
-        string batchName,
-        uint productId,
-        uint producerId,
-        uint quantity,
-        uint productionDate,
-        uint expireDate,
-        uint timestamp,
-        address approver,
-        string productionAddress
-    );
+    mapping(uint256 => Batch) private _batches;
+    mapping(string => uint256) private _ssccToBatchId;
 
-    event BatchStatusUpdated(
-        uint batchId,
-        BatchStatus status,
-        uint timestamp
-    );
+    // Tách riêng các loại hoạt động
+    enum ActivityType { SystemGenerated, UserGenerated }
 
-    struct Batch {
-        uint batchId;
-        string batchName;
-        uint productId;
-        uint producerId;
-        uint quantity;
-        uint productionDate;
-        uint expireDate;
-        BatchStatus status;
-        uint timestamp;
-        string sscc;
-        address approver;
-        string productionAddress;
+    struct SystemActivity {
+        uint256 timestamp;
+        string action;
+        uint256 batchId;
+        uint256 userId;
     }
 
-    Batch[] public batches;
-    uint public nextBatchId;
+    struct UserActivity {
+        uint256 timestamp;
+        string action;
+        uint256 batchId;
+        string details;
+        string imageHash;
+        uint256 userId;
+    }
 
-    modifier onlyApprover(uint _batchId) {
-        require(msg.sender == batches[_batchId].approver, "Only the approver can perform this action");
+    // Tách riêng storage cho từng loại hoạt động
+    mapping(uint256 => SystemActivity[]) private _systemActivities;
+    mapping(uint256 => UserActivity[]) private _userActivities;
+
+    // Sử dụng các event riêng biệt
+    event NewSystemActivity(uint256 indexed userId, string action, uint256 batchId);
+    event NewUserActivity(uint256 indexed userId, string action, uint256 batchId, string details, string imageHash);
+    event BatchCreated(uint256 indexed batchId, string sscc, uint256 producerId, uint256 approverId);
+
+    constructor() {
+        _admin = uint256(uint160(msg.sender));
+    }
+
+    modifier onlyAdmin() {
+        require(uint256(uint160(msg.sender)) == _admin, "Only admin can perform this action");
+        _;
+    }
+
+    modifier onlyProducer() {
+        require(_producers[uint256(uint160(msg.sender))], "Only producer can perform this action");
+        _;
+    }
+
+    modifier onlyApprover() {
+        require(_approvers[uint256(uint160(msg.sender))], "Only approver can perform this action");
+        _;
+    }
+
+    modifier whenNotPaused() {
+        require(!_paused, "Contract is paused");
         _;
     }
 
     function createBatch(
-        string memory _batchName,
-        uint _productId,
-        uint _producerId,
-        uint _quantity,
-        uint _productionDate,
-        uint _expireDate,
-        address _approver,
-        string memory _productionAddress
-    ) public {
-        require(bytes(_batchName).length > 0, "Batch name is required");
-        require(_quantity > 0, "Quantity must be greater than zero");
-        require(_productionDate < _expireDate, "Production date must be before expire date");
-        require(bytes(_productionAddress).length > 0, "Production address is required");
+        string memory _sscc,
+        uint256 _producerId,
+        string memory _quantity,
+        string memory _productImageUrl,
+        string memory _certificateImageUrl,
+        string memory _farmPlotNumber,
+        uint256 _productId
+    ) public whenNotPaused returns (uint256) {
+        require(bytes(_sscc).length == 18, "SSCC must be 18 characters long");
+        require(_ssccToBatchId[_sscc] == 0, "SSCC already exists");
+        require(bytes(_quantity).length > 0, "Quantity must not be empty");
+        require(bytes(_productImageUrl).length > 0, "Product image URL is required");
+        require(bytes(_certificateImageUrl).length > 0, "Certificate image URL is required");
+        require(bytes(_farmPlotNumber).length > 0, "Farm plot number is required");
+        require(_productId > 0, "Product ID must be valid");
 
-        batches.push(Batch({
-            batchId: nextBatchId,
-            batchName: _batchName,
-            productId: _productId,
+        require(_producers[_producerId], "Only producer can perform this action");
+        require(_producerId == uint256(uint160(msg.sender)), "ProducerId must match the caller");
+
+        _batchIdCounter++;
+        uint256 newBatchId = _batchIdCounter;
+
+        uint256 productionDate = block.timestamp;
+        uint256 expiryDate = productionDate + 365 days;
+
+        Batch memory newBatch = Batch({
+            batchId: newBatchId,
+            sscc: _sscc,
             producerId: _producerId,
+            approverId: 0, // Để trống, sẽ được cập nhật khi được phê duyệt
             quantity: _quantity,
-            productionDate: _productionDate,
-            expireDate: _expireDate,
+            productionDate: productionDate,
+            expiryDate: expiryDate,
             status: BatchStatus.PendingApproval,
-            timestamp: block.timestamp,
-            sscc: "",
-            approver: _approver,
-            productionAddress: _productionAddress
-        }));
+            productImageUrl: _productImageUrl,
+            certificateImageUrl: _certificateImageUrl,
+            farmPlotNumber: _farmPlotNumber,
+            dataHash: calculateDataHash(_sscc, _producerId, 0, _quantity, productionDate, expiryDate, _farmPlotNumber, _productId),
+            productId: _productId
+        });
 
-        emit BatchCreated(
-            nextBatchId,
-            _batchName,
-            _productId,
-            _producerId,
-            _quantity,
-            _productionDate,
-            _expireDate,
-            block.timestamp,
-            _approver,
-            _productionAddress
-        );
+        _batches[newBatchId] = newBatch;
+        _ssccToBatchId[_sscc] = newBatchId;
 
-        nextBatchId++;
+        _logSystemActivity(_producerId, "Created Batch", newBatchId);
+
+        emit NewSystemActivity(_producerId, "Created Batch", newBatchId);
+        emit BatchCreated(newBatchId, _sscc, _producerId, 0);
+        return newBatchId;
     }
 
-    function updateBatchStatus(uint _batchId, BatchStatus _status) public onlyApprover(_batchId) {
-        require(_batchId < nextBatchId, "Invalid batch ID");
-        batches[_batchId].status = _status;
-        emit BatchStatusUpdated(_batchId, _status, block.timestamp);
+    function approveBatch(uint256 _batchId, bool _isApproved) public whenNotPaused onlyApprover {
+        require(_batches[_batchId].batchId != 0, "Batch does not exist");
+        require(_batches[_batchId].status == BatchStatus.PendingApproval, "Batch is not pending approval");
+
+        uint256 approverId = uint256(uint160(msg.sender));
+        uint256 producerId = _batches[_batchId].producerId;
+        
+        require(_userRegion[approverId] == _userRegion[producerId], "Approver must be in the same region as the producer");
+
+        _batches[_batchId].approverId = approverId;
+
+        if (_isApproved) {
+            _batches[_batchId].status = BatchStatus.Approved;
+        } else {
+            _batches[_batchId].status = BatchStatus.Rejected;
+        }
+
+        string memory action = _isApproved ? "Approved Batch" : "Rejected Batch";
+        _logSystemActivity(approverId, action, _batchId);
+
+        emit NewSystemActivity(approverId, action, _batchId);
+    }
+
+    function updateBatchStatus(uint256 _batchId, BatchStatus _newStatus) 
+        public 
+        whenNotPaused 
+        onlyApprover
+    {
+        require(_batchId <= _batchIdCounter, "Batch does not exist");
+        require(_batches[_batchId].status == BatchStatus.PendingApproval, "Can only update status of pending batches");
+
+        _batches[_batchId].status = _newStatus;
+        emit NewSystemActivity(uint256(uint160(msg.sender)), "Updated Batch Status", _batchId);
+    }
+
+    function updateBatchImages(
+        uint256 _batchId, 
+        string memory _newProductImageUrl, 
+        string memory _newCertificateImageUrl,
+        uint256 _producerId
+    ) 
+        public 
+        whenNotPaused 
+    {
+        require(_batchId <= _batchIdCounter, "Batch does not exist");
+        require(_batches[_batchId].status == BatchStatus.PendingApproval, "Can only update images of pending batches");
+        require(_batches[_batchId].producerId == _producerId, "Not authorized to update this batch");
+
+        _batches[_batchId].productImageUrl = _newProductImageUrl;
+        _batches[_batchId].certificateImageUrl = _newCertificateImageUrl;
+
+        _logSystemActivity(_producerId, "Updated Batch Images", _batchId);
+
+        emit NewSystemActivity(_producerId, "Updated Batch Images", _batchId);
+    }
+
+    function getBatchInfo(uint256 _batchId) public view returns (Batch memory) {
+        require(_batchId <= _batchIdCounter, "Batch does not exist");
+        return _batches[_batchId];
+    }
+
+    function getBatchIdBySSCC(string memory _sscc) public view returns (uint256) {
+        return _ssccToBatchId[_sscc];
+    }
+
+    function addProducer(uint256 producer) public onlyAdmin {
+        _producers[producer] = true;
+    }
+
+    function addApprover(uint256 approver) public onlyAdmin {
+        _approvers[approver] = true;
+    }
+
+    function pause() public onlyAdmin {
+        _paused = true;
+    }
+
+    function unpause() public onlyAdmin {
+        _paused = false;
+    }
+
+    function _generateDataHash(
+        uint256 _batchId,
+        string memory _sscc,
+        uint256 _producerId,
+        uint256 _approverId,
+        uint256 _quantity,
+        uint256 _productionDate,
+        uint256 _expiryDate,
+        string memory _productImageHash,
+        string memory _certificateImageHash
+    ) private pure returns (bytes32) {
+        return keccak256(abi.encodePacked(_batchId, _sscc, _producerId, _approverId, _quantity, _productionDate, _expiryDate, _productImageHash, _certificateImageHash));
+    }
+
+    function calculateDataHash(
+        string memory _sscc,
+        uint256 _producerId,
+        uint256 _approverId, // Giữ lại tham số này để tương thích với các lô hàng đã tồn tại
+        string memory _quantity,
+        uint256 _productionDate,
+        uint256 _expiryDate,
+        string memory _farmPlotNumber,
+        uint256 _productId
+    ) private pure returns (bytes32) {
+        return keccak256(abi.encodePacked(_sscc, _producerId, _approverId, _quantity, _productionDate, _expiryDate, _farmPlotNumber, _productId));
+    }
+
+    // Hàm log cho hoạt động hệ thống
+    function _logSystemActivity(uint256 userId, string memory action, uint256 batchId) private {
+        SystemActivity memory newActivity = SystemActivity({
+            timestamp: block.timestamp,
+            action: action,
+            batchId: batchId,
+            userId: userId
+        });
+        _systemActivities[userId].push(newActivity);
+        emit NewSystemActivity(userId, action, batchId);
+    }
+
+    // Hàm log cho hoạt động người dùng
+    function _logUserActivity(uint256 userId, string memory action, uint256 batchId, string memory details, string memory imageHash) private {
+        UserActivity memory newActivity = UserActivity({
+            timestamp: block.timestamp,
+            action: action,
+            batchId: batchId,
+            details: details,
+            imageHash: imageHash,
+            userId: userId
+        });
+        _userActivities[userId].push(newActivity);
+        emit NewUserActivity(userId, action, batchId, details, imageHash);
+    }
+
+    function getSystemActivities(uint256 userId) public view returns (SystemActivity[] memory) {
+        return _systemActivities[userId];
+    }
+
+    function getUserActivities(uint256 userId) public view returns (UserActivity[] memory) {
+        return _userActivities[userId];
+    }
+
+    // Thêm hàm mới để người sản xuất tự thêm nhật ký
+    function addProducerActivity(uint256 _batchId, string memory _action, string memory _details, string memory _imageHash) public whenNotPaused {
+        require(_batches[_batchId].batchId != 0, "Batch does not exist");
+        uint256 producerId = _batches[_batchId].producerId;
+        require(producerId == uint256(uint160(msg.sender)), "Not authorized to add activity for this batch");
+        
+        _logUserActivity(producerId, _action, _batchId, _details, _imageHash);
+    }
+
+    // Thêm hàm này vào contract TraceabilityContract
+    function getAdmin() public view returns (uint256) {
+        return _admin;
+    }
+
+    function getPendingBatches() public view onlyApprover returns (uint256[] memory) {
+        uint256[] memory pendingBatches = new uint256[](_batchIdCounter);
+        uint256 count = 0;
+        uint256 approverRegion = _userRegion[uint256(uint160(msg.sender))];
+        
+        for (uint256 i = 1; i <= _batchIdCounter; i++) {
+            if (_batches[i].status == BatchStatus.PendingApproval && 
+                _userRegion[_batches[i].producerId] == approverRegion) {
+                pendingBatches[count] = i;
+                count++;
+            }
+        }
+        
+        // Resize the array to remove unused slots
+        assembly {
+            mstore(pendingBatches, count)
+        }
+        
+        return pendingBatches;
+    }
+
+    mapping(uint256 => uint256) private _userRegion;
+    mapping(uint256 => uint256[]) private _regionApprovers;
+
+    function setUserRegion(uint256 userId, uint256 regionId) public onlyAdmin {
+        _userRegion[userId] = regionId;
+    }
+
+    function addApproverToRegion(uint256 approverId, uint256 regionId) public onlyAdmin {
+        require(_approvers[approverId], "User is not an approver");
+        _userRegion[approverId] = regionId;
+        _regionApprovers[regionId].push(approverId);
+    }
+
+    function getRegionApprovers(uint256 regionId) public view returns (uint256[] memory) {
+        return _regionApprovers[regionId];
     }
 }

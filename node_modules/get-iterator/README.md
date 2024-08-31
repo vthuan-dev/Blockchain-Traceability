@@ -1,8 +1,10 @@
 # get-iterator
 
-[![Build Status](https://travis-ci.org/alanshaw/get-iterator.svg?branch=master)](https://travis-ci.org/alanshaw/get-iterator) [![dependencies Status](https://david-dm.org/alanshaw/get-iterator/status.svg)](https://david-dm.org/alanshaw/get-iterator) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
+[![Build Status](https://github.com/alanshaw/get-iterator/actions/workflows/js-test-and-release.yml/badge.svg?branch=master)](https://github.com/alanshaw/get-iterator/actions/workflows/js-test-and-release.yml)
+[![Dependencies Status](https://status.david-dm.org/gh/alanshaw/get-iterator.svg)](https://david-dm.org/alanshaw/get-iterator)
+[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
-> Get the default iterator or async iterator for an Iterable.
+> Get the default iterator or async iterator for an iterable or async iterable
 
 Reduce the boilerplate of extracting the iterator from an object when you don't know if the object is an (async) iterable or already an (async) iterator.
 
@@ -15,7 +17,7 @@ npm install get-iterator
 ## Usage
 
 ```js
-const getIterator = require('get-iterator')
+import { getIterator } from 'get-iterator'
 const input = [1, 2, 3]
 const it = getIterator(input)
 console.log(it.next()) // { done: false, value: 1 }
@@ -29,7 +31,7 @@ console.log(it.next()) // { done: true, value: undefined }
 Regular iterator from iterable:
 
 ```js
-const getIterator = require('get-iterator')
+import { getIterator } from 'get-iterator'
 
 const input = [1, 2, 3]
 const iterable = {
@@ -54,7 +56,7 @@ console.log(it.next()) // { done: true, value: undefined }
 Async iterator from iterable:
 
 ```js
-const getIterator = require('get-iterator')
+import { getIterator } from 'get-iterator'
 
 const input = [1, 2, 3]
 const iterable = {
@@ -81,7 +83,7 @@ console.log(await it.next()) // { done: true, value: undefined }
 Already an iterator (probably):
 
 ```js
-const getIterator = require('get-iterator')
+import { getIterator } from 'get-iterator'
 
 const input = [1, 2, 3]
 let i = 0
@@ -102,7 +104,7 @@ console.log(it.next()) // { done: true, value: undefined }
 ## API
 
 ```js
-const getIterator = require('get-iterator')
+import { getIterator } from 'get-iterator'
 ```
 
 ### `getIterator(obj)`
