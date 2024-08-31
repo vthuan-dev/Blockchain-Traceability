@@ -52,8 +52,8 @@ $(document).ready(function(){
 
 
 //Dropbox lọc trạng thái xử lý lô hàng
-function myFunction() {
-document.getElementById("myDropdown").classList.toggle("show");
+function searchFilter() {
+    document.getElementById("filterDropdown").classList.toggle("show");
 }
   
 

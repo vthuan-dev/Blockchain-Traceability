@@ -12,14 +12,14 @@
 <body>
     <!-- Thanh điều hướng -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light custom-navbar-height">
-        <a class="navbar-brand" href="#">Nhà kiểm duyệt</a>
+        <a class="navbar-brand" href="#">Trang nhà kiểm duyệt</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav"> <!-- Các mục điều hướng bên trái -->
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Lô hàng</a>
+                    <a class="nav-link" href="#">Quản lý lô hàng</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#">Thông báo</a>
@@ -41,64 +41,37 @@
         </div>
     </nav>
         
-    <main>
-        <div class="container mt-4">
-            <div class="table-title">
-                <h5><b>Quản lý lô hàng</b></h5>
-            </div>
-            <br>
-            <div class="searchbox-filter">
-                <input class="searchbox" id="myInput" type="text" placeholder="Tìm kiếm">
-                <div class="dropdown">
-                    <button onclick="searchFilter()" class="check-button"><b>Lọc</b></button>
-                    <div id="filterDropdown" class="dropdown-content">
-                        <a href="#all">Tất cả</a>
-                        <a href="#checked">Đã kiểm định</a>
-                        <a href="#uncheck">Chưa kiểm định</a>
-                        <a href="#cancel">Đã từ chối</a>
+    <div class="row justify-content-center align-items-center">
+        <div class="col-11 col-sm-8">
+            <div class="profile-container"> 
+                <div class="form-title">
+                    <h5><b>Thông tin cá nhân</b></h5>
+                </div>
+                <form action="update_profile.php" method="POST">
+                    <div class="form-group">
+                        <label for="name">Họ và tên:</label>
+                        <input type="text" id="name" name="name" value="Trần Văn A">
                     </div>
-                </div>  
-            </div>
-              
-            <p></p>
-            <div class="dashboard-table">
-                <table>
-                    <thead>
-                        <tr>
-                            <th width="10%">Mã lô</th>
-                            <th width="10%">Tên lô</th>
-                            <th width="10%">Trạng thái xử lý</th>
-                            <th width="10%">Chức năng</th>
-                        </tr>
-                    </thead>
-
-                    <tbody id="d-table">
-                        <tr>
-                            <td>AX-123</td>
-                            <td>Lô bưởi năm roi tháng 5</td>
-                            <td>Chưa kiểm định</td>
-                            <td>
-                                <div class="functionGroup">
-                                    <div class="function-button accept-button"><b>Xem</b></div>
-                                </div>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td>AX-124</td>
-                            <td>Lô bưởi năm roi tháng 7</td>
-                            <td>Đã kiểm định</td>
-                            <td>
-                                <div class="functionGroup">
-                                    <div class="function-button accept-button"><b>Xem</b></div>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                    <div class="form-group">
+                        <label for="email">Địa chỉ email:</label>
+                        <input type="email" id="email" name="email" value="tranvana@gmail.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="bio">Tiểu sử:</label>
+                        <textarea id="bio" name="bio">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 col-sm-4 mr-auto">
+                            <div class="bottom-button">
+                                <div class="function-button accept-button-big">Thêm</div>
+                                <div class="function-button cancel-button-big">Hủy</div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
-    </main>
+    </div>
 
     <!-- jQuery và Bootstrap JavaScript -->
     <!-- AOS JavaScript -->

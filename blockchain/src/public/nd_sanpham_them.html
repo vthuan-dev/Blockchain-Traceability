@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý lô hàng - Nhà kiểm duyệt</title>
+    <title>Thêm sản phẩm mới - Nhà kiểm duyệt</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/nhakiemduyet.css">
     <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
@@ -12,7 +12,7 @@
 <body>
     <!-- Thanh điều hướng -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light custom-navbar-height">
-        <a class="navbar-brand" href="#">Nhà kiểm duyệt</a>
+        <a class="navbar-brand" href="#">Nông dân</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -22,8 +22,15 @@
                     <a class="nav-link" href="#">Lô hàng</a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link" href="#">Sản phẩm</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Yêu cầu kiểm định</a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" href="#">Thông báo</a>
                 </li>
+            </ul>
             </ul>
             <ul class="navbar-nav ml-auto"> <!-- Menu dropdown bên phải -->
                 <li class="nav-item dropdown">
@@ -40,65 +47,56 @@
             </ul>
         </div>
     </nav>
-        
-    <main>
-        <div class="container mt-4">
-            <div class="table-title">
-                <h5><b>Quản lý lô hàng</b></h5>
-            </div>
-            <br>
-            <div class="searchbox-filter">
-                <input class="searchbox" id="myInput" type="text" placeholder="Tìm kiếm">
-                <div class="dropdown">
-                    <button onclick="searchFilter()" class="check-button"><b>Lọc</b></button>
-                    <div id="filterDropdown" class="dropdown-content">
-                        <a href="#all">Tất cả</a>
-                        <a href="#checked">Đã kiểm định</a>
-                        <a href="#uncheck">Chưa kiểm định</a>
-                        <a href="#cancel">Đã từ chối</a>
+    
+    <div class="row justify-content-center align-items-center">
+        <div class="col-11 col-sm-8">
+            <div class="add-container profile-container">
+                <div class="form-title">
+                    <h5><b>Thêm sản phẩm mới</b></h5>
+                </div>
+                <form action="update_profile.php" method="POST">
+                    <div class="form-group">
+                        <label for="productname">Tên sản phẩm</label>
+                        <input type="text" id="productname" name="productname" value="Bưởi năm roi">
                     </div>
-                </div>  
-            </div>
-              
-            <p></p>
-            <div class="dashboard-table">
-                <table>
-                    <thead>
-                        <tr>
-                            <th width="10%">Mã lô</th>
-                            <th width="10%">Tên lô</th>
-                            <th width="10%">Trạng thái xử lý</th>
-                            <th width="10%">Chức năng</th>
-                        </tr>
-                    </thead>
 
-                    <tbody id="d-table">
-                        <tr>
-                            <td>AX-123</td>
-                            <td>Lô bưởi năm roi tháng 5</td>
-                            <td>Chưa kiểm định</td>
-                            <td>
-                                <div class="functionGroup">
-                                    <div class="function-button accept-button"><b>Xem</b></div>
-                                </div>
-                            </td>
-                        </tr>
+                    <div class="form-group">
+                        <label for="productid">Mã sản phẩm</label>
+                        <input type="text" id="productid" name="productid" value="AP-123">
+                    </div>
 
-                        <tr>
-                            <td>AX-124</td>
-                            <td>Lô bưởi năm roi tháng 7</td>
-                            <td>Đã kiểm định</td>
-                            <td>
-                                <div class="functionGroup">
-                                    <div class="function-button accept-button"><b>Xem</b></div>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                    <div class="form-group">
+                        <label for="location">Nơi trồng</label>
+                        <input type="text" id="location" name="location" value="Vĩnh Long">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Mô tả</label>
+                        <textarea type="text" id="description" name="description">ABC123</textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="use">Công dụng</label>
+                        <textarea type="text" id="use" name="use">ABC123</textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Vùng sản xuất</label>
+                        <input type="text" id="description" name="description" value="ABC123">
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12 col-sm-4 mr-auto">
+                            <div class="bottom-button">
+                                <div class="function-button accept-button-big"><b>Thêm</b></div>
+                                <div class="function-button cancel-button-big"><b>Hủy</b></div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
-    </main>
+    </div>
 
     <!-- jQuery và Bootstrap JavaScript -->
     <!-- AOS JavaScript -->

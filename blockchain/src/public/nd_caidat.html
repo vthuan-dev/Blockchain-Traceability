@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bảng thông tin - Nhà kiểm duyệt</title>
+    <title>Cài đặt - Nông dân</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/nhakiemduyet.css">
     <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
@@ -12,7 +12,7 @@
 <body>
     <!-- Thanh điều hướng -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light custom-navbar-height">
-        <a class="navbar-brand" href="#">Nhà kiểm duyệt</a>
+        <a class="navbar-brand" href="#">Nông dân</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -20,6 +20,12 @@
             <ul class="navbar-nav"> <!-- Các mục điều hướng bên trái -->
                 <li class="nav-item">
                     <a class="nav-link" href="#">Lô hàng</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Sản phẩm</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Yêu cầu kiểm định</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#">Thông báo</a>
@@ -40,70 +46,58 @@
             </ul>
         </div>
     </nav>
-        
-    <main>
-        <div class="container mt-4">
-            <div class="table-title">
-                <h5><b>Lô bưởi đang chờ xử lý</b></h5>
-            </div>
-            <br>
-            <div class="searchbox-filter">
-                <input class="searchbox" id="myInput" type="text" placeholder="Tìm kiếm">
-                <div class="dropdown">
-                    <button onclick="searchFilter()" class="check-button"><b>Lọc</b></button>
-                    <div id="filterDropdown" class="dropdown-content">
-                        <a href="#all">Tất cả</a>
-                        <a href="#checked">Đã kiểm định</a>
-                        <a href="#uncheck">Chưa kiểm định</a>
-                        <a href="#cancel">Đã từ chối</a>
+
+
+    <div class="row justify-content-center align-items-center">
+        <div class="col-11 col-sm-8">
+            <div class="settings-container">
+                <div class="form-title">
+                    <h5><b>Cài đặt</b></h5>
+                </div>
+                <br>
+                <form action="save_settings.php" method="POST">
+                    <div class="form-group">
+                        <label for="language">Ngôn ngữ:</label>
+                        <select id="language" name="language">
+                            <option value="en">Tiếng Anh</option>
+                            <option value="vi" selected>Tiếng Việt</option>
+                            <!-- Thêm các ngôn ngữ khác -->
+                        </select>
                     </div>
-                </div>  
-            </div>
-            <p></p>
-            <div class="dashboard-table">
-                <table>
-                    <thead>
-                        <tr>
-                            <th width="15%">Tên lô</th>
-                            <th width="15%">Nông dân</th>
-                            <th width="15%">Trạng thái xử lý</th>
-                            <th width="15%">Chức năng</th>
-                        </tr>
-                    </thead>
-
-                    <tbody id="d-table">
-                        <tr>
-                            <td>Lô bưởi năm roi tháng 5</td>
-                            <td>Nguyễn Văn X</td>
-                            <td>Chưa kiểm định</td>
-                            <td>
-                                <div class="functionGroup">
-                                    <div class="function-button accept-button"><b>Kiểm tra thông tin</b></div>
-                                </div>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td>Lô bưởi năm roi tháng 7</td>
-                            <td>Nguyễn Văn A</td>
-                            <td>Đã kiểm định</td>
-                            <td>
-                                <div class="functionGroup">
-                                    <div class="function-button accept-button"><b>Kiểm tra thông tin</b></div>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                    <div class="form-group">
+                        <label for="theme">Chủ đề:</label>
+                        <select id="theme" name="theme">
+                            <option value="light" selected>Sáng</option>
+                            <option value="dark">Tối</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="fontSize">Cỡ chữ:</label>
+                        <select id="fontSize" name="fontSize">
+                            <option value="small">Nhỏ</option>
+                            <option value="medium" selected>Trung bình</option>
+                            <option value="large">Lớn</option>
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 col-sm-4 mr-auto">
+                            <div class="bottom-button">
+                                <div class="function-button accept-button-big"><b>Thêm</b></div>
+                                <div class="function-button cancel-button-big"><b>Hủy</b></div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
-    </main>
+    </div>
 
     <!-- jQuery và Bootstrap JavaScript -->
     <!-- AOS JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
     <script>AOS.init();</script>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="js_giaodien/sanpham.js"></script>
