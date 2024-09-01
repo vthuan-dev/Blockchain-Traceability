@@ -4,22 +4,21 @@ pragma solidity ^0.8.0;
 contract TraceabilityContract {
     mapping(uint256 => bool) private _producers;
     mapping(uint256 => bool) private _approvers;
-        // admin là địa chỉ của người dùng được cấp quyền quản lý hệ thống
     uint256 private _admin;
 
     bool private _paused;
-    // Biến đếm cho mỗi lô sản phẩm 
     uint256 private _batchIdCounter;
-    
-    // Cấu trúc dữ liệu cho mỗi lô sản phẩm
+
     struct Batch {
         uint256 batchId;
         string sscc;
         uint256 producerId;
         uint256 approverId;
-        string quantity; // Thay đổi từ uint256 sang string
+        string quantity;
         uint256 productionDate;
         uint256 expiryDate;
+        uint256 startDate;
+        uint256 endDate;
         BatchStatus status;
         string productImageUrl;
         string certificateImageUrl;
@@ -27,13 +26,24 @@ contract TraceabilityContract {
         bytes32 dataHash;
         uint256 productId;
     }
-    // trạng thái 
+
+    struct BatchParams {
+        string sscc;
+        uint256 producerId;
+        string quantity;
+        string productImageUrl;
+        string certificateImageUrl;
+        string farmPlotNumber;
+        uint256 productId;
+        uint256 startDate;
+        uint256 endDate;
+    }
+
     enum BatchStatus { Created, PendingApproval, Approved, Rejected }
 
     mapping(uint256 => Batch) private _batches;
     mapping(string => uint256) private _ssccToBatchId;
 
-    // Tách riêng các loại hoạt động
     enum ActivityType { SystemGenerated, UserGenerated }
 
     struct SystemActivity {
@@ -52,11 +62,9 @@ contract TraceabilityContract {
         uint256 userId;
     }
 
-    // Tách riêng storage cho từng loại hoạt động
     mapping(uint256 => SystemActivity[]) private _systemActivities;
     mapping(uint256 => UserActivity[]) private _userActivities;
 
-    // Sử dụng các event riêng biệt
     event NewSystemActivity(uint256 indexed userId, string action, uint256 batchId);
     event NewUserActivity(uint256 indexed userId, string action, uint256 batchId, string details, string imageHash);
     event BatchCreated(uint256 indexed batchId, string sscc, uint256 producerId, uint256 approverId);
@@ -92,18 +100,39 @@ contract TraceabilityContract {
         string memory _productImageUrl,
         string memory _certificateImageUrl,
         string memory _farmPlotNumber,
-        uint256 _productId
+        uint256 _productId,
+        uint256 _startDate,
+        uint256 _endDate
     ) public whenNotPaused returns (uint256) {
-        require(bytes(_sscc).length == 18, "SSCC must be 18 characters long");
-        require(_ssccToBatchId[_sscc] == 0, "SSCC already exists");
-        require(bytes(_quantity).length > 0, "Quantity must not be empty");
-        require(bytes(_productImageUrl).length > 0, "Product image URL is required");
-        require(bytes(_certificateImageUrl).length > 0, "Certificate image URL is required");
-        require(bytes(_farmPlotNumber).length > 0, "Farm plot number is required");
-        require(_productId > 0, "Product ID must be valid");
+        BatchParams memory params = BatchParams({
+            sscc: _sscc,
+            producerId: _producerId,
+            quantity: _quantity,
+            productImageUrl: _productImageUrl,
+            certificateImageUrl: _certificateImageUrl,
+            farmPlotNumber: _farmPlotNumber,
+            productId: _productId,
+            startDate: _startDate,
+            endDate: _endDate
+        });
 
-        require(_producers[_producerId], "Only producer can perform this action");
-        require(_producerId == uint256(uint160(msg.sender)), "ProducerId must match the caller");
+        return _createBatch(params);
+    }
+
+    function _createBatch(BatchParams memory params) private returns (uint256) {
+        require(bytes(params.sscc).length == 18, "SSCC must be 18 characters long");
+        require(_ssccToBatchId[params.sscc] == 0, "SSCC already exists");
+        require(bytes(params.quantity).length > 0, "Quantity must not be empty");
+        require(bytes(params.productImageUrl).length > 0, "Product image URL is required");
+        require(bytes(params.certificateImageUrl).length > 0, "Certificate image URL is required");
+        require(bytes(params.farmPlotNumber).length > 0, "Farm plot number is required");
+        require(params.productId > 0, "Product ID must be valid");
+        require(params.startDate > 0, "Start date is required");
+        require(params.endDate > 0, "End date is required");
+        require(params.startDate < params.endDate, "Start date must be before end date");
+
+        require(_producers[params.producerId], "Only producer can perform this action");
+        require(params.producerId == uint256(uint160(msg.sender)), "ProducerId must match the caller");
 
         _batchIdCounter++;
         uint256 newBatchId = _batchIdCounter;
@@ -111,29 +140,42 @@ contract TraceabilityContract {
         uint256 productionDate = block.timestamp;
         uint256 expiryDate = productionDate + 365 days;
 
+        bytes32 dataHash = _calculateDataHash(
+            params.sscc,
+            params.producerId,
+            0,
+            params.quantity,
+            productionDate,
+            expiryDate,
+            params.farmPlotNumber,
+            params.productId
+        );
+
         Batch memory newBatch = Batch({
             batchId: newBatchId,
-            sscc: _sscc,
-            producerId: _producerId,
-            approverId: 0, // Để trống, sẽ được cập nhật khi được phê duyệt
-            quantity: _quantity,
+            sscc: params.sscc,
+            producerId: params.producerId,
+            approverId: 0,
+            quantity: params.quantity,
             productionDate: productionDate,
             expiryDate: expiryDate,
+            startDate: params.startDate,
+            endDate: params.endDate,
             status: BatchStatus.PendingApproval,
-            productImageUrl: _productImageUrl,
-            certificateImageUrl: _certificateImageUrl,
-            farmPlotNumber: _farmPlotNumber,
-            dataHash: calculateDataHash(_sscc, _producerId, 0, _quantity, productionDate, expiryDate, _farmPlotNumber, _productId),
-            productId: _productId
+            productImageUrl: params.productImageUrl,
+            certificateImageUrl: params.certificateImageUrl,
+            farmPlotNumber: params.farmPlotNumber,
+            dataHash: dataHash,
+            productId: params.productId
         });
 
         _batches[newBatchId] = newBatch;
-        _ssccToBatchId[_sscc] = newBatchId;
+        _ssccToBatchId[params.sscc] = newBatchId;
 
-        _logSystemActivity(_producerId, "Created Batch", newBatchId);
+        _logSystemActivity(params.producerId, "Created Batch", newBatchId);
 
-        emit NewSystemActivity(_producerId, "Created Batch", newBatchId);
-        emit BatchCreated(newBatchId, _sscc, _producerId, 0);
+        emit NewSystemActivity(params.producerId, "Created Batch", newBatchId);
+        emit BatchCreated(newBatchId, params.sscc, params.producerId, 0);
         return newBatchId;
     }
 
@@ -218,24 +260,10 @@ contract TraceabilityContract {
         _paused = false;
     }
 
-    function _generateDataHash(
-        uint256 _batchId,
+    function _calculateDataHash(
         string memory _sscc,
         uint256 _producerId,
         uint256 _approverId,
-        uint256 _quantity,
-        uint256 _productionDate,
-        uint256 _expiryDate,
-        string memory _productImageHash,
-        string memory _certificateImageHash
-    ) private pure returns (bytes32) {
-        return keccak256(abi.encodePacked(_batchId, _sscc, _producerId, _approverId, _quantity, _productionDate, _expiryDate, _productImageHash, _certificateImageHash));
-    }
-
-    function calculateDataHash(
-        string memory _sscc,
-        uint256 _producerId,
-        uint256 _approverId, // Giữ lại tham số này để tương thích với các lô hàng đã tồn tại
         string memory _quantity,
         uint256 _productionDate,
         uint256 _expiryDate,
@@ -245,7 +273,19 @@ contract TraceabilityContract {
         return keccak256(abi.encodePacked(_sscc, _producerId, _approverId, _quantity, _productionDate, _expiryDate, _farmPlotNumber, _productId));
     }
 
-    // Hàm log cho hoạt động hệ thống
+    function calculateDataHash(
+        string memory _sscc,
+        uint256 _producerId,
+        uint256 _approverId,
+        string memory _quantity,
+        uint256 _productionDate,
+        uint256 _expiryDate,
+        string memory _farmPlotNumber,
+        uint256 _productId
+    ) private pure returns (bytes32) {
+        return _calculateDataHash(_sscc, _producerId, _approverId, _quantity, _productionDate, _expiryDate, _farmPlotNumber, _productId);
+    }
+
     function _logSystemActivity(uint256 userId, string memory action, uint256 batchId) private {
         SystemActivity memory newActivity = SystemActivity({
             timestamp: block.timestamp,
@@ -257,7 +297,6 @@ contract TraceabilityContract {
         emit NewSystemActivity(userId, action, batchId);
     }
 
-    // Hàm log cho hoạt động người dùng
     function _logUserActivity(uint256 userId, string memory action, uint256 batchId, string memory details, string memory imageHash) private {
         UserActivity memory newActivity = UserActivity({
             timestamp: block.timestamp,
@@ -279,7 +318,6 @@ contract TraceabilityContract {
         return _userActivities[userId];
     }
 
-    // Thêm hàm mới để người sản xuất tự thêm nhật ký
     function addProducerActivity(uint256 _batchId, string memory _action, string memory _details, string memory _imageHash) public whenNotPaused {
         require(_batches[_batchId].batchId != 0, "Batch does not exist");
         uint256 producerId = _batches[_batchId].producerId;
@@ -288,7 +326,6 @@ contract TraceabilityContract {
         _logUserActivity(producerId, _action, _batchId, _details, _imageHash);
     }
 
-    // Thêm hàm này vào contract TraceabilityContract
     function getAdmin() public view returns (uint256) {
         return _admin;
     }
@@ -306,7 +343,6 @@ contract TraceabilityContract {
             }
         }
         
-        // Resize the array to remove unused slots
         assembly {
             mstore(pendingBatches, count)
         }
@@ -329,5 +365,26 @@ contract TraceabilityContract {
 
     function getRegionApprovers(uint256 regionId) public view returns (uint256[] memory) {
         return _regionApprovers[regionId];
+    }
+
+    function updateBatchDates(
+        uint256 _batchId, 
+        uint256 _newStartDate, 
+        uint256 _newEndDate,
+        uint256 _producerId
+    ) public whenNotPaused {
+        require(_batchId <= _batchIdCounter, "Batch does not exist");
+        require(_batches[_batchId].status == BatchStatus.PendingApproval, "Can only update dates of pending batches");
+        require(_batches[_batchId].producerId == _producerId, "Not authorized to update this batch");
+        require(_newStartDate > 0, "Start date is required");
+        require(_newEndDate > 0, "End date is required");
+        require(_newStartDate < _newEndDate, "Start date must be before end date");
+
+        _batches[_batchId].startDate = _newStartDate;
+        _batches[_batchId].endDate = _newEndDate;
+
+        _logSystemActivity(_producerId, "Updated Batch Dates", _batchId);
+
+        emit NewSystemActivity(_producerId, "Updated Batch Dates", _batchId);
     }
 }

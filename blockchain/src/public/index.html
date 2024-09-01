@@ -4,41 +4,88 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Upload and Display Image</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      text-align: center;
+    }
+    h1 {
+      color: #333;
+    }
+    form {
+      margin-bottom: 20px;
+    }
+    input[type="file"] {
+      display: block;
+      margin: 20px auto;
+    }
+    button {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .result {
+      margin-top: 20px;
+    }
+    .result img {
+      max-width: 100%;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+  </style>
 </head>
 <body>
-  <h1>Upload and Display Image</h1>
-  <form id="uploadForm" enctype="multipart/form-data">
-    <input type="file" id="fileInput" name="gf">
-    <button type="submit">Upload</button>
-  </form>
-  <div id="imageContainer"></div>
+  <div class="container">
+    <h1>Upload and Display Image</h1>
+    <form id="uploadForm" enctype="multipart/form-data">
+      <input type="file" id="imageFile" name="imageFile" accept="image/*" required>
+      <button type="submit">Upload</button>
+    </form>
+    <div class="result" id="result"></div>
+  </div>
 
   <script>
     document.getElementById('uploadForm').addEventListener('submit', async (event) => {
       event.preventDefault();
       const formData = new FormData();
-      const fileInput = document.getElementById('fileInput');
-      formData.append('gf', fileInput.files[0]);
+      const fileInput = document.getElementById('imageFile');
+      formData.append('imageFile', fileInput.files[0]);
 
       try {
         const response = await fetch('/upload', {
           method: 'POST',
           body: formData
         });
-
         const result = await response.json();
         if (response.ok) {
-          const imageContainer = document.getElementById('imageContainer');
-          const img = document.createElement('img');
-          img.src = result.url;
-          img.alt = 'Uploaded Image';
-          imageContainer.innerHTML = '';
-          imageContainer.appendChild(img);
+          document.getElementById('result').innerHTML = `
+            <p>Image URL: <a href="${result.url}" target="_blank">${result.url}</a></p>
+            <img src="${result.url}" alt="Uploaded Image" style="max-width: 100%;">
+          `;
         } else {
           console.error('Error uploading file:', result.message);
         }
       } catch (error) {
-        console.error('Error:', error);
+        console.error('Error uploading image:', error);
+        document.getElementById('result').innerHTML = '<p>Error uploading image</p>';
       }
     });
   </script>
