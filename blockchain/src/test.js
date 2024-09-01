@@ -212,16 +212,35 @@ async function checkUserExists(userId) {
   });
 }
 
+
+async function getProducerById(producerId) {
+  return new Promise((resolve, reject) => {
+    db.query('SELECT * FROM users WHERE uid = ?', [producerId], (error, results) => {
+      if (error) {
+        console.error('Lỗi truy vấn cơ sở dữ liệu:', error);
+        reject(error);
+      } else if (results.length > 0) {
+        console.log(`Thông tin nhà sản xuất cho UID ${producerId}:`, results[0]);
+        resolve(results[0]);
+      } else {
+        console.log(`Không tìm thấy nhà sản xuất cho UID ${producerId}`);
+        reject(new Error(`Không tìm thấy nhà sản xuất cho UID ${producerId}`));
+      }
+    });
+  });
+}
+
+
 // Route handler cho việc tạo lô hàng
 app.post('/createbatch', upload, async (req, res) => {
   console.log('Received body:', req.body);
   console.log('Received files:', req.files);
 
-  const { sscc, quantity, farmPlotNumber, productId } = req.body;
+  const { sscc, quantity, farmPlotNumber, productId, producerId } = req.body;
 
   try {
     // Kiểm tra các trường bắt buộc
-    if (!sscc || !quantity || !farmPlotNumber || !productId) {
+    if (!sscc || !quantity || !farmPlotNumber || !productId || !producerId) {
       return res.status(400).send('Thiếu thông tin bắt buộc');
     }
 
@@ -255,20 +274,21 @@ app.post('/createbatch', upload, async (req, res) => {
       certificateImageUrl = certificateImageResult.ipfsUrl;
     } else {
       console.log('Không có ảnh chứng nhận được tải lên');
-      certificateImageUrl = ''; // Hoặc set một giá trị mặc định
+      certificateImageUrl = 'default_certificate_image_url'; // Cung cấp giá trị mặc định
     }
 
     console.log('Product Image URL:', productImageUrl);
     console.log('Certificate Image URL:', certificateImageUrl);
 
-    // Tạo lô hàng trên blockchain
-    const web3 = new Web3('http://localhost:8545'); // Địa chỉ của node Ethereum
-    const contractABI = require('../build/contracts/TraceabilityContract.json').abi;
-    const contractAddress = '0x99e83fb3b2b0cA606A4587CcBE7590Da2e2E7228'; // Địa chỉ của smart contract
-    const contract = new web3.eth.Contract(contractABI, contractAddress);
+    // Lấy thông tin nhà sản xuất từ cơ sở dữ liệu
+    const producer = await getProducerById(producerId);
 
+    // Thêm nhà sản xuất vào smart contract
+    await addProducer(producerId);
+
+    // Tạo lô hàng trên blockchain
     const accounts = await web3.eth.getAccounts();
-    const producerId = accounts[0]; // Giả sử tài khoản đầu tiên là producer
+    const producerAddress = accounts[0]; // Sử dụng tài khoản đầu tiên làm địa chỉ nhà sản xuất
 
     const result = await contract.methods.createBatch(
       sscc,
@@ -278,7 +298,7 @@ app.post('/createbatch', upload, async (req, res) => {
       certificateImageUrl,
       farmPlotNumber,
       cleanProductId
-    ).send({ from: producerId, gas: 3000000 });
+    ).send({ from: producerAddress, gas: 3000000 }); // Đảm bảo gas limit đủ lớn
 
     res.status(200).send({ 
       message: 'Lô hàng đã được tạo thành công và đang chờ phê duyệt', 
@@ -292,6 +312,10 @@ app.post('/createbatch', upload, async (req, res) => {
     res.status(500).send('Lỗi khi xử lý yêu cầu: ' + err.message);
   }
 });
+
+
+
+
 async function updateProducerAddress(producerId, ethereumAddress) {
   return new Promise((resolve, reject) => {
     db.query('UPDATE users SET ethereum_address = ? WHERE uid = ?', [ethereumAddress, producerId], (error, results) => {
