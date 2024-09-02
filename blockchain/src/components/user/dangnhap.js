@@ -1,53 +1,48 @@
-const mysql = require('mysql2/promise');
 const express = require('express');
-const bcrypt = require('bcrypt'); // For password hashing
-const path = require('path'); // Import module path
-const db = require('../../config/db.js');
+const bcrypt = require('bcrypt');
+const path = require('path');
 
 const router = express.Router();
 
-router.get('/dangnhap', (req, res) => {
-    res.sendFile(path.join(__dirname, '../../public/dangnhap.html'));
-});
+module.exports = function(db) {
+    router.get('/dangnhap', (req, res) => {
+        res.sendFile(path.join(__dirname, '../../public/dangnhap.html'));
+    });
 
-// Route xử lý đăng nhập
-router.post('/dangnhap', async function(req, res) {
-    const { email, password } = req.body;
+    router.post('/dangnhap', async function(req, res) {
+        const { email, password } = req.body;
 
-    // Kiểm tra xem email và password có được cung cấp không
-    if (!email || !password) {
-        return res.status(400).json({ message: 'Vui lòng nhập email và mật khẩu' });
-    }
-
-    try {
-        // Lấy thông tin người dùng từ cơ sở dữ liệu dựa trên email
-        const [users] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
-        const user = users[0];
-
-        // Nếu không tìm thấy người dùng, trả về lỗi
-        if (!user) {
-            return res.status(401).json({ message: 'Email hoặc mật khẩu không đúng' });
-        }
-        if (!user.passwd) {
-            return res.status(500).json({ message: 'Internal server error', error: 'Password not found in database' });
+        if (!email || !password) {
+            return res.status(400).json({ message: 'Vui lòng nhập email và mật khẩu' });
         }
 
-        // So sánh mật khẩu người dùng nhập vào với mật khẩu đã băm
-        console.log('Password from:', password);
-        console.log('Hashed password from DB:', user.passwd);
-        const isPasswordValid = await bcrypt.compare(password, user.passwd);
+        try {
+            const [users] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
+            const user = users[0];
 
-        // Nếu mật khẩu không đúng, trả về lỗi
-        if (!isPasswordValid) {
-            return res.status(401).json({ message: 'Email hoặc mật khẩu không đúng' });
+            if (!user) {
+                return res.status(401).json({ message: 'Email hoặc mật khẩu không đúng' });
+            }
+            if (!user.passwd) {
+                return res.status(500).json({ message: 'Internal server error', error: 'Password not found in database' });
+            }
+
+            const isPasswordValid = await bcrypt.compare(password, user.passwd);
+
+            if (!isPasswordValid) {
+                return res.status(401).json({ message: 'Email hoặc mật khẩu không đúng' });
+            }
+
+            if (!user.is_approved) {
+                return res.status(403).json({ message: 'Tài khoản của bạn chưa xác thực, vui lòng xác thực Email trước khi đăng nhập.' });
+            }
+
+            res.status(200).json({ message: 'Đăng nhập thành công' });
+        } catch (error) {
+            console.error('Lỗi khi đăng nhập:', error);
+            res.status(500).json({ message: 'Internal server error', error: error.message });
         }
+    });
 
-        // Nếu đăng nhập thành công, trả về thông báo thành công
-        res.status(200).json({ message: 'Đăng nhập thành công' });
-    } catch (error) {
-        console.error('Lỗi khi đăng nhập:', error);
-        res.status(500).json({ message: 'Internal server error', error: error.message });
-    }
-});
-
-module.exports = router;
+    return router;
+};
