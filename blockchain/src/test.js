@@ -10,28 +10,16 @@ const axios = require('axios');
 const FormData = require('form-data');
 
 const app = express();
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: {
-    fileSize: 5 * 1024 * 1024, // giới hạn kích thước file 5MB
-  }
-}).fields([
-  { name: 'productImage', maxCount: 1 },
-  { name: 'certificateImage', maxCount: 1 }
-]);
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+const storage = multer.memoryStorage();
 
-// Cấu hình S3 client
 const s3Client = new S3Client({
   endpoint: 'https://s3.filebase.com',
-  region: "us-east-1", // Thay đổi region nếu cần
+  region: "us-east-1",
   credentials: {
     accessKeyId: "FB77055A97DE296E0668",
     secretAccessKey: "TQQGAV3TtNLEJqEafjz5pf1rpaSwA0tpzupn9yYu"
   }
 });
-
 
 const db = mysql.createConnection({
   host: 'database-1.cv20qo0q8bre.ap-southeast-2.rds.amazonaws.com',
@@ -39,7 +27,7 @@ const db = mysql.createConnection({
   port: '3306',
   password: '9W8RQuAdnZylXZAmb68P',
   database: 'blockchain',
-  connectTimeout: 10000 // Tăng thời gian chờ kết nối lên 10 giây =)
+  connectTimeout: 10000
 });
 
 db.connect((err) => {
@@ -49,11 +37,21 @@ db.connect((err) => {
   }
   console.log('Đã kết nối cơ sở dữ liệu');
 });
+
+const upload = multer({ storage: storage }).fields([
+  { name: 'productImage', maxCount: 1 },
+  { name: 'certificateImage', maxCount: 1 }
+]);
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 const { CID } = require('multiformats/cid');
 const { sha256 } = require('multiformats/hashes/sha2');
 const { base58btc } = require('multiformats/bases/base58');
 
 const BUCKET_NAME = 'nckh';
+
 async function uploadFile(fileBuffer, fileName) {
   try {
     console.log(`Bắt đầu tải lên Filebase: ${fileName}`);
@@ -75,7 +73,6 @@ async function uploadFile(fileBuffer, fileName) {
   }
 }
 
-// Hàm kiểm tra trạng thái file và lấy CID
 async function checkFileStatusWithRetry(fileName, maxRetries = 5, retryDelay = 1000) {
   for (let i = 0; i < maxRetries; i++) {
     try {
@@ -111,22 +108,10 @@ async function checkFileStatusWithRetry(fileName, maxRetries = 5, retryDelay = 1
     }
   }
 }
-function validateAndFormatAddress(address) {
-  if (!address) {
-    throw new Error('Địa chỉ không được để trống');
-  }
-  
-  if (!web3.utils.isAddress(address)) {
-    throw new Error('Địa chỉ không hợp lệ');
-  }
-  
-  return web3.utils.toChecksumAddress(address);
-}
 
 async function processFiles(files) {
   const processedFiles = {};
 
-  // Kiểm tra sự tồn tại của tệp ảnh lô hàng
   if (!files.images || !Array.isArray(files.images) || files.images.length === 0) {
     throw new Error('Thiếu ảnh lô hàng');
   }
@@ -147,8 +132,8 @@ async function processFiles(files) {
 
   return processedFiles;
 }
-// Cấu hình Web3 với node Ethereum cục bộ
-const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545')); // Địa chỉ node Ethereum cục bộ
+
+const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
 
 const account = web3.eth.accounts.privateKeyToAccount('0xe9437cabf0c3b29aac95c0338c1177a53f6a2487e15480d959f37cb1597b5795');
 web3.eth.accounts.wallet.add(account);
@@ -159,11 +144,34 @@ web3.eth.net.isListening()
   .catch(e => console.log('Lỗi rồi', e));
 
 const contractABI = require('../build/contracts/TraceabilityContract.json').abi;
-
-const contractAddress = '0x99e83fb3b2b0cA606A4587CcBE7590Da2e2E7228';
+const contractAddress = '0x430e0b42E6B56F2CfA2C1e32A56eAa5e79968974';
 const contract = new web3.eth.Contract(contractABI, contractAddress);
 
-// Cấu hình middleware để phân tích dữ liệu JSON và URL-encoded
+function replacer(key, value) {
+  if (typeof value === 'bigint') {
+    return value.toString();
+  }
+  return value;
+}
+
+
+
+// const fromAccount = '0x84c7cFF56f736B372b64888c6Ad9D90c4F13d184'; // Thay thế bằng địa chỉ tài khoản có đủ ETH trong Ganache
+// const toAccount = '0xB5b37722018951f460Bf2435C472E95BaFD89906'; // Thay thế bằng địa chỉ tài khoản của bạn
+
+// // Chuyển ETH ảo
+// web3.eth.sendTransaction({
+//   from: fromAccount,
+//   to: toAccount,
+//   value: web3.utils.toWei('100', 'ether') // Số lượng ETH bạn muốn nạp
+// })
+// .then(receipt => {
+//   console.log('Giao dịch thành công:', receipt);
+// })
+// .catch(error => {
+//   console.error('Lỗi khi chuyển ETH:', error);
+// });
+
 
 
 function cleanKeys(obj) {
@@ -175,33 +183,7 @@ function cleanKeys(obj) {
   return cleanedObj;
 }
 
-app.use(express.urlencoded({ extended: true })); // Sử dụng để phân tích dữ liệu URL-encoded
-
-// Thêm hàm này vào đầu file, sau phần import và cấu hình
-async function getEthereumAddressFromId(id) {
-  return new Promise((resolve, reject) => {
-    db.query('SELECT ethereum_address FROM users WHERE id = ?', [id], (error, results) => {
-      if (error) {
-        console.error('Database query error:', error);
-        reject(error);
-      } else if (results.length > 0 && results[0].ethereum_address) {
-        console.log(`Địa chỉ Ethereum cho ID ${id}:`, results[0].ethereum_address);
-        resolve(results[0].ethereum_address);
-      } else {
-        console.log(`Không tìm thấy địa chỉ Ethereum cho ID ${id}`);
-        reject(new Error(`Không tìm thấy địa chỉ Ethereum cho ID ${id}`));
-      }
-    });
-  });
-}
-async function checkProductExists(productId) {
-  return new Promise((resolve, reject) => {
-    db.query('SELECT * FROM products WHERE product_id = ?', [productId], (error, results) => {
-      if (error) return reject(error);
-      resolve(results.length > 0);
-    });
-  });
-}
+app.use(express.urlencoded({ extended: true }));
 
 async function checkUserExists(userId) {
   return new Promise((resolve, reject) => {
@@ -212,6 +194,14 @@ async function checkUserExists(userId) {
   });
 }
 
+async function checkProductExists(productId) {
+  return new Promise((resolve, reject) => {
+    db.query('SELECT * FROM products WHERE product_id = ?', [productId], (error, results) => {
+      if (error) return reject(error);
+      resolve(results.length > 0);
+    });
+  });
+}
 
 async function getProducerById(producerId) {
   return new Promise((resolve, reject) => {
@@ -230,17 +220,34 @@ async function getProducerById(producerId) {
   });
 }
 
-
-// Route handler cho việc tạo lô hàng
-app.post('/createbatch', upload, async (req, res) => {
-  console.log('Received body:', req.body);
-  console.log('Received files:', req.files);
-
-  const { sscc, quantity, farmPlotNumber, productId, producerId } = req.body;
-
+app.get('/batches/:producerId', async (req, res) => {
   try {
+    const producerId = parseInt(req.params.producerId, 10);
+
+    if (isNaN(producerId) || producerId <= 0) {
+      return res.status(400).send('Producer ID không hợp lệ');
+    }
+
+    const batches = await contract.methods.getBatchesByProducer(producerId).call();
+    res.status(200).send(batches);
+  } catch (err) {
+    console.error('Error fetching batches:', err);
+    res.status(500).send('Lỗi khi lấy danh sách lô hàng: ' + err.message);
+  }
+});
+
+app.post('/checkdata', upload, (req, res) => {
+  res.status(200).send({
+    body: req.body,
+    files: req.files
+  });
+});
+app.post('/createbatch', upload, async (req, res) => {
+  try {
+    const { sscc, quantity, farmPlotNumber, productId, producerId, startDate, endDate } = req.body;
+
     // Kiểm tra các trường bắt buộc
-    if (!sscc || !quantity || !farmPlotNumber || !productId || !producerId) {
+    if (!sscc || !quantity || !farmPlotNumber || !productId || !producerId || !startDate || !endDate) {
       return res.status(400).send('Thiếu thông tin bắt buộc');
     }
 
@@ -249,17 +256,47 @@ app.post('/createbatch', upload, async (req, res) => {
       return res.status(400).send('SSCC phải có 18 ký tự');
     }
 
-    // Kiểm tra và chuyển đổi productId
+    // Kiểm tra và chuyển đổi các giá trị số
     const cleanProductId = parseInt(productId, 10);
+    const cleanProducerId = parseInt(producerId, 10);
+    const cleanStartDate = parseInt(startDate, 10);
+    const cleanEndDate = parseInt(endDate, 10);
+
     if (isNaN(cleanProductId) || cleanProductId <= 0) {
       return res.status(400).send('Product ID không hợp lệ');
+    }
+    if (isNaN(cleanProducerId) || cleanProducerId <= 0) {
+      return res.status(400).send('Producer ID không hợp lệ');
+    }
+    if (isNaN(cleanStartDate) || cleanStartDate <= 0) {
+      return res.status(400).send('Start date không hợp lệ');
+    }
+    if (isNaN(cleanEndDate) || cleanEndDate <= 0) {
+      return res.status(400).send('End date không hợp lệ');
+    }
+    if (cleanStartDate >= cleanEndDate) {
+      return res.status(400).send('Start date phải trước End date');
+    }
+
+    // Kiểm tra sự tồn tại của userId và productId trong MySQL
+    const userExists = await checkUserExists(cleanProducerId);
+    const productExists = await checkProductExists(cleanProductId);
+
+    if (!userExists) {
+      return res.status(400).send('Producer ID không tồn tại');
+    }
+    if (!productExists) {
+      return res.status(400).send('Product ID không tồn tại');
     }
 
     let productImageUrl = '';
     let certificateImageUrl = '';
 
+    // Debugging: Log các tệp nhận được
+    console.log('Received files:', req.files);
+
     // Xử lý productImage
-    if (req.files['productImage']) {
+    if (req.files && req.files['productImage'] && req.files['productImage'][0]) {
       const productImageFile = req.files['productImage'][0];
       const productImageResult = await uploadFile(productImageFile.buffer, productImageFile.originalname);
       productImageUrl = productImageResult.ipfsUrl;
@@ -268,7 +305,7 @@ app.post('/createbatch', upload, async (req, res) => {
     }
 
     // Xử lý certificateImage (nếu có)
-    if (req.files['certificateImage']) {
+    if (req.files && req.files['certificateImage'] && req.files['certificateImage'][0]) {
       const certificateImageFile = req.files['certificateImage'][0];
       const certificateImageResult = await uploadFile(certificateImageFile.buffer, certificateImageFile.originalname);
       certificateImageUrl = certificateImageResult.ipfsUrl;
@@ -277,44 +314,33 @@ app.post('/createbatch', upload, async (req, res) => {
       certificateImageUrl = 'default_certificate_image_url'; // Cung cấp giá trị mặc định
     }
 
-    console.log('Product Image URL:', productImageUrl);
-    console.log('Certificate Image URL:', certificateImageUrl);
-
-    // Lấy thông tin nhà sản xuất từ cơ sở dữ liệu
-    const producer = await getProducerById(producerId);
-
-    // Thêm nhà sản xuất vào smart contract
-    await addProducer(producerId);
-
-    // Tạo lô hàng trên blockchain
-    const accounts = await web3.eth.getAccounts();
-    const producerAddress = accounts[0]; // Sử dụng tài khoản đầu tiên làm địa chỉ nhà sản xuất
-
+    // Gọi hàm createBatch của smart contract
     const result = await contract.methods.createBatch(
       sscc,
-      producerId,
+      cleanProducerId,
       quantity,
       productImageUrl,
       certificateImageUrl,
       farmPlotNumber,
-      cleanProductId
-    ).send({ from: producerAddress, gas: 3000000 }); // Đảm bảo gas limit đủ lớn
+      cleanProductId,
+      cleanStartDate,
+      cleanEndDate
+    ).send({ from: account.address, gas: 3000000 });
+
+    // Chuyển đổi kết quả thành chuỗi JSON
+    const safeResult = JSON.parse(JSON.stringify(result, replacer));
 
     res.status(200).send({ 
       message: 'Lô hàng đã được tạo thành công và đang chờ phê duyệt', 
-      transactionHash: result.transactionHash,
-      batchId: result.events.BatchCreated.returnValues.batchId,
-      productImageUrl, 
-      certificateImageUrl
+      transactionHash: safeResult.transactionHash,
+      batchId: safeResult.events.BatchCreated.returnValues.batchId,
+      productImageUrl
     });
   } catch (err) {
-    console.error('Error:', err);
-    res.status(500).send('Lỗi khi xử lý yêu cầu: ' + err.message);
+    console.error('Error creating batch:', err);
+    res.status(500).send('Lỗi khi tạo lô hàng: ' + err.message);
   }
 });
-
-
-
 
 async function updateProducerAddress(producerId, ethereumAddress) {
   return new Promise((resolve, reject) => {
@@ -342,44 +368,3 @@ app.use((req, res, next) => {
   console.log('Request files:', req.files);
   next();
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
