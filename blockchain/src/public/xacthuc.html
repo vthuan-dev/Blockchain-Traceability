@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border: 1px solid #dddddd;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #dddddd;
+        }
+        .header img {
+            max-width: 100px;
+        }
+        .header h1 {
+            font-size: 24px;
+            color: #d9534f;
+        }
+        .content {
+            padding: 20px;
+        }
+        .content p {
+            font-size: 16px;
+            line-height: 1.5;
+            color: #333333;
+        }
+        .content p span {
+            font-weight: bold;
+            color: #d9534f;
+        }
+        .button-container {
+            text-align: center;
+            margin-top: 20px;
+            align-items: center;
+            justify-content: center;
+        }
+        .button-container a {
+            background-color: #d9534f;
+            color: #ffffff;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px 0;
+            border-top: 1px solid #dddddd;
+            font-size: 12px;
+            color: #777777;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <img src="https://via.placeholder.com/100" alt="Logo">
+            <h1>MyBlockchain</h1>
+        </div>
+        <div class="content">
+            <p>Xin chào <span>{{user_id}}</span>,</p>
+            <p>Xin chân thành cảm ơn bạn vì đã sử dụng dịch vụ của chúng tôi!</p>
+            <p><span>MyBlockchain</span> xin thông báo tài khoản của bạn đã được đăng ký, vui lòng nhấn vào nút bên dưới để xác thực email của bạn để hoàn tất quá trình.</p>
+        </div>
+        <div class="button-container">
+            <a href="{{verification_link}}">Xác thực email</a>
+        </div>
+        <div class="footer">
+            <p>© 2023 MyBlockchain. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
