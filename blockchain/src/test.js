@@ -5,10 +5,11 @@ const express = require('express');
 const { Web3 } = require('web3');
 const dotenv = require('dotenv');
 const mysql = require('mysql');
-dotenv.config();
+require('dotenv').config();
 const axios = require('axios');
 const FormData = require('form-data');
-
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 const app = express();
 const storage = multer.memoryStorage();
 
@@ -16,20 +17,19 @@ const s3Client = new S3Client({
   endpoint: 'https://s3.filebase.com',
   region: "us-east-1",
   credentials: {
-    accessKeyId: "FB77055A97DE296E0668",
-    secretAccessKey: "TQQGAV3TtNLEJqEafjz5pf1rpaSwA0tpzupn9yYu"
+    accessKeyId: process.env.S3_ACCESS_KEY,
+    secretAccessKey: process.env.S3_SECRET_KEY
   }
 });
 
 const db = mysql.createConnection({
-  host: 'database-1.cv20qo0q8bre.ap-southeast-2.rds.amazonaws.com',
-  user: 'admin',
-  port: '3306',
-  password: '9W8RQuAdnZylXZAmb68P',
-  database: 'blockchain',
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  port: process.env.DB_PORT,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_DATABASE,
   connectTimeout: 10000
 });
-
 db.connect((err) => {
   if (err) {
     console.error('Lỗi kết nối cơ sở dữ liệu:', err.message);
@@ -50,7 +50,7 @@ const { CID } = require('multiformats/cid');
 const { sha256 } = require('multiformats/hashes/sha2');
 const { base58btc } = require('multiformats/bases/base58');
 
-const BUCKET_NAME = 'nckh';
+const BUCKET_NAME = 'truyxuat';
 
 async function uploadFile(fileBuffer, fileName) {
   try {
@@ -144,7 +144,7 @@ web3.eth.net.isListening()
   .catch(e => console.log('Lỗi rồi', e));
 
 const contractABI = require('../build/contracts/TraceabilityContract.json').abi;
-const contractAddress = '0x430e0b42E6B56F2CfA2C1e32A56eAa5e79968974';
+const contractAddress = '0xc2A82A6180e4C8c5C2e351ef7a31eF7Ad7E72B2E';
 const contract = new web3.eth.Contract(contractABI, contractAddress);
 
 function replacer(key, value) {
@@ -289,6 +289,11 @@ app.post('/createbatch', upload, async (req, res) => {
       return res.status(400).send('Product ID không tồn tại');
     }
 
+    const ssccExists = await contract.methods.ssccExists(sscc).call();
+    if (ssccExists) {
+      return res.status(400).send('SSCC đã tồn tại, vui lòng nhập lại SSCC khác');
+    }
+
     let productImageUrl = '';
     let certificateImageUrl = '';
 
@@ -342,29 +347,12 @@ app.post('/createbatch', upload, async (req, res) => {
   }
 });
 
-async function updateProducerAddress(producerId, ethereumAddress) {
-  return new Promise((resolve, reject) => {
-    db.query('UPDATE users SET ethereum_address = ? WHERE uid = ?', [ethereumAddress, producerId], (error, results) => {
-      if (error) reject(error);
-      else resolve(results);
-    });
-  });
-}
+
 
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 
-app.use((req, res, next) => {
-  if (!req.user) {
-    req.user = { uid: 1, role_id: 1 }; // Tạm thời gán giá trị mặc định
-  }
-  next();
-});
 
-app.use((req, res, next) => {
-  console.log('Request body:', req.body);
-  console.log('Request files:', req.files);
-  next();
-});
+

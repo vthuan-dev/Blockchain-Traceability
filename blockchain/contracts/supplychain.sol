@@ -131,6 +131,10 @@ contract TraceabilityContract {
     ) private pure returns (bytes32) {
         return keccak256(abi.encodePacked(_sscc, _producerId, _quantity, _productionDate, _expiryDate, _farmPlotNumber, _productId));
     }
+    // hàm kiểm tra sscc đã tồn tại hay chưa 
+    function ssccExists(string memory sscc) public view returns (bool) {
+        return _ssccToBatchId[sscc] != 0;
+    }
 
     // Hàm mới để lấy danh sách các lô hàng dựa trên producerId
     function getBatchesByProducer(uint256 producerId) public view returns (Batch[] memory) {
