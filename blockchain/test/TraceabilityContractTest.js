@@ -1,20 +1,24 @@
 const TraceabilityContract = artifacts.require("TraceabilityContract");
 
-contract("TraceabilityContract", accounts => {
-    it("should create a batch with start date and end date", async () => {
-        const instance = await TraceabilityContract.deployed();
+contract("TraceabilityContract", (accounts) => {
+    let contract;
+
+    before(async () => {
+        contract = await TraceabilityContract.deployed();
+    });
+
+    it("should create a new batch", async () => {
         const sscc = "123456789012345678";
-        const producerId = accounts[1];
-        const quantity = "100";
+        const producerId = 1;
+        const quantity = "1000";
         const productImageUrl = "img2.jpg";
         const certificateImageUrl = "img1.jpg";
-        const farmPlotNumber = "Plot123";
+        const farmPlotNumber = "FP123";
         const productId = 1;
-        const startDate = Math.floor(Date.now() / 1000); // current timestamp
-        const endDate = startDate + (30 * 24 * 60 * 60); // 30 days later
+        const startDate = 1672531200;
+        const endDate = 1675119600;
 
-        await instance.addProducer(producerId, { from: accounts[0] });
-        const tx = await instance.createBatch(
+        const result = await contract.createBatch(
             sscc,
             producerId,
             quantity,
@@ -24,17 +28,14 @@ contract("TraceabilityContract", accounts => {
             productId,
             startDate,
             endDate,
-            { from: producerId }
+            { from: accounts[0] }
         );
 
-        // Truy cập batchId từ sự kiện
-        const receipt = await tx;
-        const batchCreatedEvent = receipt.logs.find(log => log.event === 'BatchCreated');
-        console.log(batchCreatedEvent.args); // Thêm câu lệnh console.log để kiểm tra giá trị
-        const batchId = batchCreatedEvent.args.batchId.toNumber();
+        const batchId = result.logs[0].args.batchId.toNumber();
+        const batch = await contract.getBatchesByProducer(producerId);
 
-        const batch = await instance.getBatchInfo(batchId);
-        assert.equal(batch.startDate, startDate, "Start date should be set correctly");
-        assert.equal(batch.endDate, endDate, "End date should be set correctly");
+        assert.strictEqual(batch.length, 1);
+        assert.strictEqual(batch[0].sscc, sscc);
+        assert.strictEqual(Number(batch[0].producerId), producerId); // Chuyển đổi producerId thành số
     });
 });
