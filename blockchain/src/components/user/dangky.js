@@ -5,7 +5,7 @@
     const bcrypt = require('bcrypt');
     const multer = require('multer');
     const crypto = require('crypto');
-    const { sendVerificationEmail } = require('./sendmail');
+    const { sendEmail } = require('./sendmail');
 
     const router = express.Router();
 
@@ -80,7 +80,7 @@
 
                 // Gửi email xác thực
                 const verificationLink = `http://localhost:3000/api/verify/${verificationToken}`;
-                await sendVerificationEmail(email, name, verificationLink);
+                await sendEmail(email, name, verificationLink);
 
                 res.status(201).json({ 
                     message: 'Đã đăng ký tài khoản người dùng thành công. Vui lòng kiểm tra email của bạn để xác thực tài khoản.',
