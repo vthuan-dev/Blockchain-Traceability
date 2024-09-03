@@ -2,31 +2,30 @@ const fs = require('fs');
 const path = require('path');
 const nodemailer = require('nodemailer');
 
-// Đọc nội dung file HTML
-const emailTemplatePath = path.join(__dirname, '../../public/xacthuc.html');
-const emailTemplate = fs.readFileSync(emailTemplatePath, 'utf8');
-
 // Hàm gửi email
-async function sendVerificationEmail(userEmail, userId, verificationLink) {
+async function sendEmail(userEmail, userName, link, subject, templatePath) {
+    // Đọc nội dung file HTML
+    const emailTemplate = fs.readFileSync(templatePath, 'utf8');
+
     // Tạo transporter
     let transporter = nodemailer.createTransport({
-        service: 'gmail', // Hoặc dịch vụ email khác
+        service: 'gmail',
         auth: {
-            user: 'locb2111807@student.ctu.edu.vn', // Thay bằng email của bạn
-            pass: 'wsib uqog gcbz bprl'   // Thay bằng mật khẩu email của bạn
+            user: 'locb2111807@student.ctu.edu.vn',
+            pass: 'wsib uqog gcbz bprl'
         }
     });
 
     // Thay thế các placeholder trong template
     const emailContent = emailTemplate
-        .replace('{{user_id}}', userId)
-        .replace('{{verification_link}}', verificationLink);
+        .replace('{{user_name}}', userName)
+        .replace('{{link}}', link);
 
     // Cấu hình email
     let mailOptions = {
         from: 'locb2111807@student.ctu.edu.vn',
         to: userEmail,
-        subject: 'Xác thực tài khoản của bạn',
+        subject: subject,
         html: emailContent
     };
 
@@ -36,7 +35,8 @@ async function sendVerificationEmail(userEmail, userId, verificationLink) {
         console.log('Email sent successfully');
     } catch (error) {
         console.error('Error sending email:', error);
+        throw error;
     }
 }
 
-module.exports = { sendVerificationEmail };
+module.exports = { sendEmail };

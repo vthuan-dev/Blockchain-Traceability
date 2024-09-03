@@ -6,6 +6,8 @@ const path = require('path');
 const multer = require('multer');
 const dangkyRoutes = require('./components/user/dangky.js');
 const dangnhapRoutes = require('./components/user/dangnhap.js');
+const bcrypt = require('bcrypt'); // Thêm dòng này để import bcrypt
+const nodemailer = require('nodemailer'); // Thêm dòng này để import nodemailer
 
 dotenv.config();
 const app = express();
@@ -18,7 +20,6 @@ app.use(bodyParser.json());
 //   password: process.env.DB_PASSWORD,
 //   database: process.env.DB_DATABASE
 // });
-
 const db = mysql.createPool({
   host: "database-1.cv20qo0q8bre.ap-southeast-2.rds.amazonaws.com",
   user: "admin",
