@@ -26,8 +26,17 @@
 
     module.exports = function(db) {
         async function recordExists(query, param) {
-            const [result] = await db.query(query, param);
-            return result.length > 0;
+            try {
+                const [rows] = await db.query(query, param);
+                return rows.length > 0;
+            } catch (error) {
+                if (error.code === 'ECONNRESET') {
+                    console.error('Connection was reset. Retrying...');
+                    // Retry logic or handle the error appropriately
+                } else {
+                    throw error;
+                }
+            }
         }
 
         router.get('/regions', async (req, res) => {
@@ -80,7 +89,9 @@
 
                 // Gửi email xác thực
                 const verificationLink = `http://localhost:3000/api/verify/${verificationToken}`;
-                await sendEmail(email, name, verificationLink);
+                const templatePath = path.join(__dirname, '../../public/xacthuc.html');
+                await sendEmail(email, name, verificationLink, 'Xác thực tài khoản của bạn', templatePath);
+
 
                 res.status(201).json({ 
                     message: 'Đã đăng ký tài khoản người dùng thành công. Vui lòng kiểm tra email của bạn để xác thực tài khoản.',
@@ -92,22 +103,7 @@
             }
         });
 
-        router.get('/api/verify/:token', async function(req, res) {
-            const { token } = req.params;
-            try {
-                const [result] = await db.query('UPDATE users SET is_approved = true WHERE verificationToken = ?', [token]);
-                if (result.affectedRows > 0) {
-                    res.redirect('/dangnhap.html'); // Chuyển hướng đến trang đăng nhập
-                } else {
-                    res.status(400).send('Token xác thực không hợp lệ hoặc đã hết hạn.');
-                }
-            } catch (error) {
-                console.error('Lỗi khi xác thực:', error);
-                res.status(500).send('Đã xảy ra lỗi khi xác thực tài khoản.');
-            }
-        });
-
-        router.get('/verify/:token', async function(req, res) {
+        router.get(['/api/verify/:token', '/verify/:token'], async function(req, res) {
             const { token } = req.params;
             try {
                 const [result] = await db.query('UPDATE users SET is_approved = true WHERE verificationToken = ?', [token]);
@@ -124,4 +120,3 @@
 
         return router;
     };
-    
