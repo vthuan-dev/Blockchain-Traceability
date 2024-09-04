@@ -1,6 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const path = require('path');
+//const mysql = require('mysql2/promise');
 const { sendEmail } = require('./sendmail');
 
 const router = express.Router();
