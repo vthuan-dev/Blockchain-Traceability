@@ -1,41 +1,35 @@
 const dotenv = require('dotenv');
 const express = require('express');
 const bodyParser = require('body-parser');
-const mysql = require('mysql2/promise');
+const mysql = require('mysql');
 const path = require('path');
 const multer = require('multer');
 const dangkyRoutes = require('./components/user/dangky.js');
 const dangnhapRoutes = require('./components/user/dangnhap.js');
 const bcrypt = require('bcrypt'); // Thêm dòng này để import bcrypt
 const nodemailer = require('nodemailer'); // Thêm dòng này để import nodemailer
+require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
+
 
 dotenv.config();
 const app = express();
 app.use(bodyParser.json());
 
-// const db = mysql.createConnection({
-//   host: process.env.DB_HOST,
-//   user: process.env.DB_USER,
-//   port: process.env.DB_PORT,
-//   password: process.env.DB_PASSWORD,
-//   database: process.env.DB_DATABASE
-// });
-const db = mysql.createPool({
-  host: "database-1.cv20qo0q8bre.ap-southeast-2.rds.amazonaws.com",
-  user: "admin",
-  port: "3306",
-  password: "9W8RQuAdnZylXZAmb68P",
-  database: "blockchain"
+const db = mysql.createConnection({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  port: process.env.DB_PORT,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_DATABASE,
+  connectTimeout: 10000
 });
-
-// db.getConnection((err, connection) => {
-//   if (err) {
-//     console.error('Lỗi kết nối cơ sở dữ liệu:', err.message);
-//   } else {
-//     console.log('Đã kết nối cơ sở dữ liệu thành công');
-//     connection.release();
-//   }
-// });
+db.connect((err) => {
+  if (err) {
+    console.error('Lỗi kết nối cơ sở dữ liệu:', err.message);
+    return;
+  }
+  console.log('Đã kết nối cơ sở dữ liệu');
+});
 
 app.use('/api', dangkyRoutes(db));
 app.use('/api', dangnhapRoutes(db));
