@@ -59,25 +59,20 @@ module.exports = function(db) {
     let globalNewPassword = '';
 
     // Thêm route để xử lý yêu cầu đặt lại mật khẩu
-    router.post('/quenmatkhau', async function(req, res) {
+    router.post('/reset-passwd', async function(req, res) {
         const { email, newPassword, captcha } = req.body;
 
-        console.log('Email nhận được:', email); // Thêm dòng này để kiểm tra email nhận được
-
+    try {
         const [users] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
         const user = users[0];
 
-        console.log('Kết quả truy vấn:', users); // Thêm dòng này để kiểm tra kết quả truy vấn
-
-        try {
-            if (!user) {
-                return res.status(400).json({ message: 'Email không tồn tại' });
-            }
-            console.log('User:', user); // Thêm dòng này để kiểm tra thông tin user
+        if(!user) {
+            return res.status(400).json({ message: 'Email không tồn tại' });
+        }
     
-            if (!user.is_approved) {
-                return res.status(400).json({ message: 'Tài khoản chưa được phê duyệt' });
-            }
+        if(!user.is_approved) {
+            return res.status(400).json({ message: 'Tài khoản chưa được phê duyệt' });
+        }
 
             globalNewPassword = newPassword; 
             // Lấy token từ cơ sở dữ liệu dựa trên email

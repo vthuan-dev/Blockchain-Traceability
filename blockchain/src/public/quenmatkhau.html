@@ -142,7 +142,7 @@
             const data = Object.fromEntries(formData.entries());
 
             try {
-                const response = await fetch('/api/quenmatkhau', {
+                const response = await fetch('/api/reset-passwd', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -169,7 +169,8 @@
                     // Ẩn phần card
                     document.querySelector('.container').classList.add('hidden');
                 } else {
-                    console.log('Response not OK');
+                    const errorData = await response.json();
+                    alert('Lỗi: ' + errorData.message);
                 }
             } catch (error) {
                 console.error('Lỗi:', error);

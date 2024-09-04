@@ -25,6 +25,10 @@
     }
 
     module.exports = function(db) {
+        router.get('/dangky', function(req, res) {
+            res.sendFile(path.join(__dirname, '../../public/dangky.html'));
+        });
+        
         async function recordExists(query, param) {
             try {
                 const [rows] = await db.query(query, param);
@@ -49,9 +53,6 @@
             }
         });
 
-        router.get('/dangky', function(req, res) {
-            res.sendFile(path.join(__dirname, '../../public/dangky.html'));
-        });
 
         router.post('/register', upload.single('avatar'), async function(req, res) {
             const { name, email, password, phone, address, dob, gender, role_id, region_id } = req.body;
