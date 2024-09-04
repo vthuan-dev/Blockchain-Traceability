@@ -72,6 +72,7 @@ module.exports = function(db) {
             if (!user) {
                 return res.status(400).json({ message: 'Email không tồn tại' });
             }
+            console.log('User:', user); // Thêm dòng này để kiểm tra thông tin user
     
             if (!user.is_approved) {
                 return res.status(400).json({ message: 'Tài khoản chưa được phê duyệt' });
