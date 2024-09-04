@@ -38,6 +38,7 @@ db.connect((err) => {
   console.log('Đã kết nối cơ sở dữ liệu');
 });
 
+// tạo biến lưu trữ file, giới hạn số lượng file và tên file, maxCount: số lượng file, name: tên file
 const upload = multer({ storage: storage }).fields([
   { name: 'productImage', maxCount: 1 },
   { name: 'certificateImage', maxCount: 1 }
