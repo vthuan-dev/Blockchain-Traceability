@@ -1,7 +1,7 @@
 
 /* Background color for the entire webpage */
 body {
-  background-color: #ecf0f1; /* Màu xanh lá cây nhạt */
+  background-color: white; /* Màu xanh lá cây nhạt */
   color: #333; /* Màu chữ */
   font-family: Arial, sans-serif; /* Font chữ */
   margin: 0;
@@ -385,7 +385,7 @@ body {
   padding: 20px;
   background-color: white;
   border-radius: 5px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border: 1px #dee2e6 solid;
   max-width: 600px;
   margin: 20px auto;
 }
@@ -434,7 +434,7 @@ body {
   padding: 20px;
   background-color: white;
   border-radius: 5px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border: 1px #dee2e6 solid;
   max-width: 600px;
   margin: 20px auto;
 }
@@ -622,4 +622,10 @@ body {
 /* CSS cho navbar */
 .navbar {
   z-index: 1050; /* Đảm bảo navbar nằm trên lớp phủ */
+}
+
+.unread, .read {
+  border: 1px #dee2e6 solid;
+  border-radius: 5px;
+  padding: 10px;
 }
