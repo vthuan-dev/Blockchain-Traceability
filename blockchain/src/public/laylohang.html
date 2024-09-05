@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Truy xuất lô hàng</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .batch img {
+            max-width: 100%;
+            height: auto;
+        }
+        .card {
+            margin-bottom: 20px;
+        }
+        .card-title {
+            font-size: 1.5rem;
+            color: #007bff;
+        }
+        .card-text {
+            font-size: 1rem;
+            color: #343a40;
+        }
+        .card img {
+            border-radius: 5px;
+        }
+        .image-container {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        .image-container img {
+            max-width: 48%;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="my-4 text-center">Truy xuất thông tin lô hàng</h1>
+        <div class="form-group">
+            <input type="number" id="producerIdInput" class="form-control" placeholder="Nhập Producer ID">
+        </div>
+        <button class="btn btn-primary mb-4" onclick="getBatchesByProducer()">Truy xuất</button>
+        <div id="batchInfo"></div>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        async function getBatchesByProducer() {
+            const producerId = document.getElementById('producerIdInput').value;
+            console.log(`Fetching batches for producer ID: ${producerId}`);
+            try {
+                const response = await fetch(`/batches/producer/${producerId}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                console.log('Fetched data:', data);
+                displayBatchInfo(data);
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('batchInfo').innerHTML = 'Có lỗi xảy ra khi truy xuất thông tin.';
+            }
+        }
+
+        function displayBatchInfo(batches) {
+            const batchInfoDiv = document.getElementById('batchInfo');
+            if (batches.length === 0) {
+                batchInfoDiv.innerHTML = '<p>Không có lô hàng nào được tìm thấy.</p>';
+                return;
+            }
+            batchInfoDiv.innerHTML = batches.map(batch => `
+                <div class="batch card">
+                    <div class="card-body">
+                        <h2 class="card-title">Thông tin lô hàng: ${batch.batchId}</h2>
+                        <p class="card-text"><strong>SSCC:</strong> ${batch.sscc}</p>
+                        <p class="card-text"><strong>Nhà sản xuất ID:</strong> ${batch.producerId}</p>
+                        <p class="card-text"><strong>Số lượng:</strong> ${batch.quantity}</p>
+                        <p class="card-text"><strong>Ngày sản xuất:</strong> ${new Date(batch.productionDate).toLocaleString()}</p>
+                        <p class="card-text"><strong>Hạn sử dụng:</strong> ${new Date(batch.expiryDate).toLocaleString()}</p>
+                        <p class="card-text"><strong>Ngày bắt đầu:</strong> ${new Date(batch.startDate).toLocaleString()}</p>
+                        <p class="card-text"><strong>Ngày kết thúc:</strong> ${new Date(batch.endDate).toLocaleString()}</p>
+                        <p class="card-text"><strong>Trạng thái:</strong> ${batch.status}</p>
+                        <p class="card-text"><strong>Số lô đất canh tác:</strong> ${batch.farmPlotNumber}</p>
+                        <p class="card-text"><strong>Mã sản phẩm:</strong> ${batch.productId}</p>
+                        <div class="image-container">
+                            <div>
+                                <h5>Hình ảnh sản phẩm</h5>
+                                <img src="${batch.productImageUrl}" class="img-fluid" alt="Hình ảnh sản phẩm">
+                            </div>
+                            <div>
+                                <h5>Hình ảnh giấy chứng nhận</h5>
+                                <img src="${batch.certificateImageUrl}" class="img-fluid" alt="Chứng nhận">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>

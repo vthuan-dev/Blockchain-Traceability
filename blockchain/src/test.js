@@ -147,7 +147,7 @@ web3.eth.net.isListening()
   .catch(e => console.log('Lỗi rồi', e));
 
 const contractABI = require('../build/contracts/TraceabilityContract.json').abi;
-const contractAddress = '0x6b3937D6d2DEBb441f5272323293743f1e4C46Df';
+const contractAddress = '0xBE979b1780C3564843F338ECA1ab2a5B382711C4';
 const contract = new web3.eth.Contract(contractABI, contractAddress);
 
 function replacer(key, value) {
@@ -364,6 +364,35 @@ app.post('/createbatch', upload, async (req, res) => {
   }
 });
 
+app.use(express.static(path.join(__dirname, 'public')));
+app.get('/batches/producer/:producerId', async (req, res) => {
+  try {
+      const producerId = req.params.producerId;
+      console.log(`Fetching batches for producer ID: ${producerId}`);
+      const batches = await contract.methods.getBatchesByProducer(producerId).call();
+      console.log('Fetched batches:', batches);
+      const batchDetails = batches.map(batch => ({
+          batchId: batch.batchId.toString(),
+          sscc: batch.sscc,
+          producerId: batch.producerId.toString(),
+          quantity: batch.quantity,
+          productionDate: new Date(Number(batch.productionDate) * 1000).toISOString(),
+          expiryDate: new Date(Number(batch.expiryDate) * 1000).toISOString(),
+          startDate: new Date(Number(batch.startDate) * 1000).toISOString(),
+          endDate: new Date(Number(batch.endDate) * 1000).toISOString(),
+          status: ['Created', 'PendingApproval', 'Approved', 'Rejected'][Number(batch.status)],
+          productImageUrl: batch.productImageUrl,
+          certificateImageUrl: batch.certificateImageUrl,
+          farmPlotNumber: batch.farmPlotNumber,
+          dataHash: batch.dataHash,
+          productId: batch.productId.toString()
+      }));
+      res.json(batchDetails);
+  } catch (error) {
+      console.error('Error fetching batches:', error);
+      res.status(500).json({ error: error.message });
+  }
+});
 
 
 const PORT = 3000;

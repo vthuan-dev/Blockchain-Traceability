@@ -157,3 +157,4 @@ contract TraceabilityContract {
 
         return batches;
     }
+}
