@@ -31,6 +31,26 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             border: 1px solid #ccc;
         }
+
+        .alert-box {
+            cursor: pointer;
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #28a745;
+            color: #fff;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .alert-box.show {
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
@@ -106,7 +126,7 @@
         </form>
         <br>
         <div class="dangnhap">
-            <p>Hoặc <a href="http://localhost:3000/api/dangnhap">Đăng nhập</a> nếu như bạn chưa có tài khoản</p>
+            <p>Hoặc <a href="http://localhost:3000/api/dangnhap">Đăng nhập</a> nếu như bạn đã có tài khoản</p>
         </div>
     </div>
 
@@ -134,35 +154,50 @@
 
         document.getElementById('registrationForm').addEventListener('submit', async function(event) {
             event.preventDefault();
-        
+
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
-        
+
             if (password !== confirmPassword) {
                 alert('Mật khẩu không khớp. Vui lòng thử lại.');
                 return;
             }
-        
+
             const formData = new FormData(this);
-        
+
             try {
-                const response = await fetch('http://localhost:3000/api/register', {
+                const response = await fetch('/api/register', {
                     method: 'POST',
                     body: formData
                 });
-        
-                if (response.ok) {
-                    alert('Đăng ký thành công');
-                } else {
+
+                if (!response.ok) {
                     const contentType = response.headers.get('content-type');
                     if (contentType && contentType.indexOf('application/json') !== -1) {
                         const errorData = await response.json();
-                        alert('Lỗi: ' + errorData.message + '\nChi tiết: ' + JSON.stringify(errorData.errors));
+                        alert('Lỗi: ' + errorData.message);
                     } else {
                         const errorText = await response.text();
                         alert('Lỗi không xác định: ' + errorText);
                     }
+                    return;
                 }
+
+                const data = await response.json();
+                document.getElementById('registrationForm').style.display = 'none';
+                const verificationLink = `https://mail.google.com/mail/u/0/#search/from:locb2111807@student.ctu.edu.vn`;
+                const alertBox = document.createElement('div');
+                alertBox.textContent = 'Đăng ký thành công! Vui lòng kiểm tra email của bạn để xác thực tài khoản.';
+                alertBox.className = 'alert-box';
+                alertBox.onclick = function() {
+                    window.open(verificationLink, '_blank', 'noopener,noreferrer');
+                };
+                document.body.appendChild(alertBox);
+
+                // Thêm hiệu ứng xuất hiện
+                setTimeout(() => {
+                    alertBox.classList.add('show');
+                }, 5);
             } catch (error) {
                 console.error('Lỗi:', error);
                 alert('Lỗi khi đăng ký: ' + error.message);

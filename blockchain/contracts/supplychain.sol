@@ -1,164 +1,158 @@
+
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-contract SupplyChain {
-    enum BatchStatus { Created, PendingApproval, Approved, Rejected }
-
-    event BatchCreated(
-        uint batchId,
-        string batchName,
-        uint productId,
-        uint producerId,
-        uint quantity,
-        uint productionDate,
-        uint expireDate,
-        uint timestamp,
-        string[] imageHashes,
-        string certificateImageHash,
-        uint approverId
-    );
-
-    event BatchApproved(uint batchId, string sscc);
-    event BatchRejected(uint batchId);
+contract TraceabilityContract {
+    uint256 private _batchIdCounter;
 
     struct Batch {
-        uint batchId;
-        string batchName;
-        uint productId;
-        uint producerId;
-        uint quantity;
-        uint productionDate;
-        uint expireDate;
-        BatchStatus status;
-        uint timestamp;
+        uint256 batchId;
         string sscc;
-        string[] imageHashes;
-        string certificateImageHash;
-        uint approverId; // ID của nhà kiểm duyệt được chọn
+        uint256 producerId;
+        string quantity;
+        uint256 productionDate;
+      //  uint256 expiryDate;
+        uint256 startDate;
+        uint256 endDate;
+        BatchStatus status;
+        string[] productImageUrls; // Change to array
+        string certificateImageUrl;
+        string farmPlotNumber;
+        bytes32 dataHash;
+        uint256 productId;
     }
 
-    struct ActivityLog {
-        uint logId;
-        uint batchId;
-        uint userId; // ID của người dùng từ bảng users
-        string activity;
-    }
+    enum BatchStatus { Created, PendingApproval, Approved, Rejected }
 
-    Batch[] public batches;
-    uint public nextBatchId;
+    mapping(uint256 => Batch) private _batches;
+    mapping(string => uint256) private _ssccToBatchId;
 
-    mapping(string => bool) private usedSSCCs;
+    event BatchCreated(uint256 indexed batchId, string sscc, uint256 producerId);
 
-    address public admin;
-
-    constructor(address _admin) {
-        admin = _admin;
-    }
-
-    modifier onlyAdmin() {
-        require(msg.sender == admin, "Only admin can call this function");
-        _;
-    }
-
-    modifier onlyApprover(uint _batchId) {
-        require(msg.sender == getApproverAddress(batches[_batchId].approverId), "Only the assigned approver can call this function");
-        _;
-    }
-
-    function getApproverAddress(uint _approverId) internal view returns (address) {
-        // Implement logic to get the approver's address by their ID
-        // This could be a mapping from approverId to address
-        // For example: return approvers[_approverId];
+    struct BatchParams {
+        string sscc;
+        uint256 producerId;
+        string quantity;
+        string[] productImageUrls; // Change to array
+        string certificateImageUrl;
+        string farmPlotNumber;
+        uint256 productId;
+        uint256 startDate;
+        uint256 endDate;
     }
 
     function createBatch(
-        string memory _batchName,
-        uint _productId,
-        uint _producerId,
-        uint _quantity,
-        uint _productionDate,
-        uint _expireDate,
-        string[] memory _imageHashes,
-        string memory _certificateImageHash,
-        uint _approverId
-    ) public {
-        require(bytes(_batchName).length > 0, "Batch name is required");
-        require(_quantity > 0, "Quantity must be greater than zero");
-        require(_productionDate < _expireDate, "Production date must be before expire date");
-        require(_imageHashes.length > 0, "At least one image hash is required");
-        require(bytes(_certificateImageHash).length > 0, "Certificate image hash is required");
-
-        batches.push(Batch({
-            batchId: nextBatchId,
-            batchName: _batchName,
-            productId: _productId,
+        string memory _sscc,
+        uint256 _producerId,
+        string memory _quantity,
+        string[] memory _productImageUrls, // Đã thay đổi thành mảng
+        string memory _certificateImageUrl,
+        string memory _farmPlotNumber,
+        uint256 _productId,
+        uint256 _startDate,
+        uint256 _endDate
+    ) public returns (uint256) {
+        BatchParams memory params = BatchParams({
+            sscc: _sscc,
             producerId: _producerId,
             quantity: _quantity,
-            productionDate: _productionDate,
-            expireDate: _expireDate,
-            status: BatchStatus.PendingApproval,
-            timestamp: block.timestamp,
-            sscc: "",
-            imageHashes: _imageHashes,
-            certificateImageHash: _certificateImageHash,
-            approverId: _approverId
-        }));
+            productImageUrls: _productImageUrls, // Đã sửa
+            certificateImageUrl: _certificateImageUrl,
+            farmPlotNumber: _farmPlotNumber,
+            productId: _productId,
+            startDate: _startDate,
+            endDate: _endDate
+        });
 
-        emit BatchCreated(
-            nextBatchId,
-            _batchName,
-            _productId,
-            _producerId,
-            _quantity,
-            _productionDate,
-            _expireDate,
-            block.timestamp,
-            _imageHashes,
-            _certificateImageHash,
-            _approverId
+        return _createBatch(params);
+    }
+
+    
+    function _createBatch(BatchParams memory params) private returns (uint256) {
+        require(bytes(params.sscc).length == 18, "SSCC must be 18 characters long");
+        require(_ssccToBatchId[params.sscc] == 0, "SSCC already exists");
+        require(bytes(params.quantity).length > 0, "Quantity must not be empty");
+        require(params.productImageUrls.length > 0, "At least one product image URL is required");
+        require(bytes(params.certificateImageUrl).length > 0, "Certificate image URL is required");
+        require(bytes(params.farmPlotNumber).length > 0, "Farm plot number is required");
+        require(params.productId > 0, "Product ID must be valid");
+        require(params.startDate > 0, "Start date is required");
+        require(params.endDate > 0, "End date is required");
+        require(params.startDate < params.endDate, "Start date must be before end date");
+
+        _batchIdCounter++;
+        uint256 newBatchId = _batchIdCounter;
+
+        uint256 productionDate = block.timestamp;
+        // uint256 expiryDate = productionDate + 5 days;
+
+        bytes32 dataHash = _calculateDataHash(
+            params.sscc,
+            params.producerId,
+            params.quantity,
+            productionDate,
+         //   expiryDate,
+            params.farmPlotNumber,
+            params.productId
         );
 
-        nextBatchId++;
+        Batch memory newBatch = Batch({
+            batchId: newBatchId,
+            sscc: params.sscc,
+            producerId: params.producerId,
+            quantity: params.quantity,
+            productionDate: productionDate,
+        //    expiryDate: expiryDate,
+            startDate: params.startDate,
+            endDate: params.endDate,
+            status: BatchStatus.PendingApproval,
+            productImageUrls: params.productImageUrls, // Đã sửa
+            certificateImageUrl: params.certificateImageUrl,
+            farmPlotNumber: params.farmPlotNumber,
+            dataHash: dataHash,
+            productId: params.productId
+        });
+
+        _batches[newBatchId] = newBatch;
+        _ssccToBatchId[params.sscc] = newBatchId;
+
+        emit BatchCreated(newBatchId, params.sscc, params.producerId);
+        return newBatchId;
+    }
+    function _calculateDataHash(
+        string memory _sscc,
+        uint256 _producerId,
+        string memory _quantity,
+        uint256 _productionDate,
+        // Xóa _expiryDate khỏi đây
+        string memory _farmPlotNumber,
+        uint256 _productId
+    ) private pure returns (bytes32) {
+        return keccak256(abi.encodePacked(_sscc, _producerId, _quantity, _productionDate, _farmPlotNumber, _productId));
+    }
+    // hàm kiểm tra sscc đã tồn tại hay chưa 
+    function ssccExists(string memory sscc) public view returns (bool) {
+        return _ssccToBatchId[sscc] != 0;
     }
 
-    function approveBatch(uint _batchId, string memory _sscc) public onlyApprover(_batchId) {
-        Batch storage batch = batches[_batchId];
-        require(batch.status == BatchStatus.PendingApproval, "Batch is not pending approval");
-
-        require(!usedSSCCs[_sscc], "SSCC has already been used");
-
-        usedSSCCs[_sscc] = true;
-
-        batch.status = BatchStatus.Approved;
-        batch.sscc = _sscc;
-        emit BatchApproved(_batchId, _sscc);
-    }
-
-    function rejectBatch(uint _batchId) public onlyApprover(_batchId) {
-        Batch storage batch = batches[_batchId];
-        require(batch.status == BatchStatus.PendingApproval, "Batch is not pending approval");
-
-        batch.status = BatchStatus.Rejected;
-        emit BatchRejected(_batchId);
-    }
-
-    function getPendingBatches() public view returns (Batch[] memory) {
-        uint pendingCount = 0;
-        for (uint i = 0; i < batches.length; i++) {
-            if (batches[i].status == BatchStatus.PendingApproval) {
-                pendingCount++;
+    // Hàm mới để lấy danh sách các lô hàng dựa trên producerId
+    function getBatchesByProducer(uint256 producerId) public view returns (Batch[] memory) {
+        uint256 count = 0;
+        for (uint256 i = 1; i <= _batchIdCounter; i++) {
+            if (_batches[i].producerId == producerId) {
+                count++;
             }
         }
 
-        Batch[] memory pendingBatches = new Batch[](pendingCount);
-        uint index = 0;
-        for (uint i = 0; i < batches.length; i++) {
-            if (batches[i].status == BatchStatus.PendingApproval) {
-                pendingBatches[index] = batches[i];
+        Batch[] memory batches = new Batch[](count);
+        uint256 index = 0;
+        for (uint256 i = 1; i <= _batchIdCounter; i++) {
+            if (_batches[i].producerId == producerId) {
+                batches[index] = _batches[i];
                 index++;
             }
         }
 
-        return pendingBatches;
+        return batches;
     }
 }

@@ -3,72 +3,91 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Batch Information</title>
+  <title>Upload and Display Image</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #f4f4f9;
+      background-color: #f4f4f4;
       margin: 0;
-      padding: 20px;
+      padding: 0;
     }
-    h1 {
-      text-align: center;
-      color: #333;
-    }
-    #batch-info {
+    .container {
       max-width: 600px;
-      margin: 20px auto;
+      margin: 50px auto;
       padding: 20px;
       background-color: #fff;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
       border-radius: 8px;
+      text-align: center;
     }
-    #batch-info p {
-      margin: 10px 0;
-      font-size: 16px;
-      color: #555;
-    }
-    #batch-info p span {
-      font-weight: bold;
+    h1 {
       color: #333;
+    }
+    form {
+      margin-bottom: 20px;
+    }
+    input[type="file"] {
+      display: block;
+      margin: 20px auto;
+    }
+    button {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .result {
+      margin-top: 20px;
+    }
+    .result img {
+      max-width: 100%;
+      border-radius: 8px;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
-  <h1>Batch Information</h1>
-  <div id="batch-info">
-    <!-- Thông tin lô hàng sẽ được hiển thị ở đây -->
+  <div class="container">
+    <h1>Upload and Display Image</h1>
+    <form id="uploadForm" enctype="multipart/form-data">
+      <input type="file" id="imageFile" name="imageFile" accept="image/*" required>
+      <button type="submit">Upload</button>
+    </form>
+    <div class="result" id="result"></div>
   </div>
 
   <script>
-    async function displayBatchData(batchId) {
-      try {
-        console.log(`Fetching data for batch ID: ${batchId}`);
-        const response = await fetch(`/api/batch/${batchId}`);
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        const batch = await response.json();
-        console.log('Batch data:', batch);
-        const batchInfoDiv = document.getElementById('batch-info');
-        batchInfoDiv.innerHTML = `
-          <p><span>Batch ID:</span> ${batch.batchId}</p>
-          <p><span>Batch Name:</span> ${batch.batchName}</p>
-          <p><span>Product ID:</span> ${batch.productId}</p>
-          <p><span>Producer ID:</span> ${batch.producerId}</p>
-          <p><span>Quantity:</span> ${batch.quantity}</p>
-          <p><span>Production Date:</span> ${new Date(batch.productionDate * 1000).toLocaleDateString()}</p>
-          <p><span>Expire Date:</span> ${new Date(batch.expireDate * 1000).toLocaleDateString()}</p>
-          <p><span>Status:</span> ${batch.status}</p>
-          <p><span>Timestamp:</span> ${new Date(batch.timestamp * 1000).toLocaleString()}</p>
-        `;
-      } catch (error) {
-        console.error('Error fetching batch data:', error);
-      }
-    }
+    document.getElementById('uploadForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const formData = new FormData();
+      const fileInput = document.getElementById('imageFile');
+      formData.append('imageFile', fileInput.files[0]);
 
-    // Gọi hàm displayBatchData với batchId là 0
-    displayBatchData(0);
+      try {
+        const response = await fetch('/upload', {
+          method: 'POST',
+          body: formData
+        });
+        const result = await response.json();
+        if (response.ok) {
+          document.getElementById('result').innerHTML = `
+            <p>Image URL: <a href="${result.url}" target="_blank">${result.url}</a></p>
+            <img src="${result.url}" alt="Uploaded Image" style="max-width: 100%;">
+          `;
+        } else {
+          console.error('Error uploading file:', result.message);
+        }
+      } catch (error) {
+        console.error('Error uploading image:', error);
+        document.getElementById('result').innerHTML = '<p>Error uploading image</p>';
+      }
+    });
   </script>
 </body>
 </html>

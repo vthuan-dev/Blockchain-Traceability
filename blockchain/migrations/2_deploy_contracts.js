@@ -1,7 +1,7 @@
 // 2_deploy_contracts.js
-const SupplyChain = artifacts.require("SupplyChain");
+const TraceabilityContract = artifacts.require("TraceabilityContract");
 
 module.exports = function(deployer, network, accounts) {
-    const admin = accounts[0]; // Hoặc bất kỳ địa chỉ nào bạn muốn sử dụng làm admin
-    deployer.deploy(SupplyChain, admin);
+    const adminAddress = accounts[0]; // Sử dụng địa chỉ đầu tiên từ danh sách tài khoản
+    deployer.deploy(TraceabilityContract, { from: adminAddress });
 };
