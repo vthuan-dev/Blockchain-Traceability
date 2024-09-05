@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý thông tin cá nhân - Nhà kiểm duyệt</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/nhakiemduyet.css">
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Thanh điều hướng -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light custom-navbar-height">
+        <a class="navbar-brand" href="#">Trang nhà kiểm duyệt</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav"> <!-- Các mục điều hướng bên trái -->
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Quản lý lô hàng</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Thông báo</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ml-auto"> <!-- Menu dropdown bên phải -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Nguyễn Văn A
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="#">Trang cá nhân</a>
+                        <a class="dropdown-item" href="#">Cài đặt</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="#">Đăng xuất</a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
+        
+    <main>
+        <div class="container mt-4">
+            <div class="row justify-content-center align-items-center">
+                <div class="col-11 col-sm-8 p-0">
+                    <div class="form-title">
+                        <h5><b>Thông tin cá nhân</b></h5>
+                    </div>
+                    <div class="profile-container"> 
+                        <form id="profile-form" action="update_profile.php" method="POST">
+                            <div class="form-group">
+                                <label for="name">Họ và tên:</label>
+                                <input type="text" id="name" name="name" value="Trần Văn A" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Địa chỉ email:</label>
+                                <input type="email" id="email" name="email" value="tranvana@gmail.com" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="bio">Tiểu sử:</label>
+                                <textarea id="bio" name="bio" class="form-control">Lorem Ipsum is simply dummy text of the printing and typesetting industry...</textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="password">Mật khẩu mới:</label>
+                                <input type="password" id="password" name="password" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="confirm-password">Xác nhận mật khẩu:</label>
+                                <input type="password" id="confirm-password" name="confirm-password" class="form-control">
+                            </div>
+                            <div class="row">
+                                <div class="col-12 col-sm-4 mr-auto">
+                                    <div class="bottom-button">
+                                        <div class="function-button accept-button-big" data-toggle="modal" data-target="#confirmModal"><b>Lưu</b></div>
+                                        <div class="function-button cancel-button-big"><b>Hủy</b></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal -->
+    <div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel" aria-hidden="true" data-aos="zoom-in">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmModalLabel"><b>Xác nhận</b></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Bạn có chắc chắn muốn lưu thông tin này?
+                </div>
+                <div class="row">
+                    <div class="col-12 col-sm-6 ml-auto">
+                        <div class="popupButton">
+                            <div class="function-button cancel-button" data-dismiss="modal"><b>Hủy</b></div>
+                            <div class="function-button accept-button" id="save-button"><b>Xác nhận</b></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery và Bootstrap JavaScript -->
+    <!-- AOS JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <script>AOS.init();</script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="js_giaodien/sanpham.js"></script>
+</body>
+</html>
