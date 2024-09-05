@@ -545,6 +545,12 @@ body {
   transform: scale(1.05);
 }
 
+.function-button.disabled {
+  opacity: 0.5; /* Làm mờ nút khi không thể bấm */
+  cursor: not-allowed; /* Thay đổi con trỏ */
+  pointer-events: none; /* Ngăn chặn các sự kiện chuột */
+}
+
 .check-button {
   transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out;
 }

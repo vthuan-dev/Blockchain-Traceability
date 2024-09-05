@@ -77,7 +77,7 @@
                             <div>
                                 <hr>
                                 <p><b>Quản lí tài khoản</b></p>
-                                <div class="function-button cancel-button-big"><b>Xóa tài khoản</b></div>
+                                <div class="function-button cancel-button-big" data-toggle="modal" data-target="#confirmModal"><b>Xóa tài khoản</b></div>
                             </div>
                             <br>
                             <div class="row">
@@ -94,6 +94,31 @@
             </div>
         </div>
     </main>
+
+        <!-- Modal -->
+        <div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel" aria-hidden="true" data-aos="zoom-in">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="confirmModalLabel"><b>Xác nhận</b></h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        Bạn có chắc chắn muốn lưu thông tin này?
+                    </div>
+                    <div class="row">
+                        <div class="col-12 col-sm-6 ml-auto">
+                            <div class="popupButton">
+                                <div class="function-button accept-button" data-dismiss="modal"><b>Hủy</b></div>
+                                <div class="function-button cancel-button" id="save-button"><b>Xác nhận</b></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
     <!-- jQuery và Bootstrap JavaScript -->
     <!-- AOS JavaScript -->

@@ -93,7 +93,7 @@
                 <div class="row">
                     <div class="col-12 col-sm-3 mr-auto">
                         <div class="bottom-button">
-                            <div class="function-button accept-button-big"><b>Chấp nhận</b></div>
+                            <div class="function-button accept-button-big" data-toggle="modal" data-target="#confirmModal"><b>Chấp nhận</b></div>
                             <div class="function-button cancel-button-big"><b>Từ chối</b></div>
                         </div>
                     </div>
@@ -105,6 +105,31 @@
 
     <div class="overlay" id="overlay" onclick="hideImage()">
         <img id="overlay-img" src="" alt="">
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel" aria-hidden="true" data-aos="zoom-in">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmModalLabel"><b>Xác nhận</b></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Bạn có chắc chắn duyệt lô hàng này?
+                </div>
+                <div class="row">
+                    <div class="col-12 col-sm-6 ml-auto">
+                        <div class="popupButton">
+                            <div class="function-button cancel-button" data-dismiss="modal"><b>Hủy</b></div>
+                            <div class="function-button accept-button" id="save-button"><b>Xác nhận</b></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- jQuery và Bootstrap JavaScript -->
