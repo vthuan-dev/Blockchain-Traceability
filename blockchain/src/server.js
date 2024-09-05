@@ -53,6 +53,10 @@ const upload = multer();
 //   });
 // });
 
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'trangchu.html'));
+});
+
 // API endpoint để xử lý đăng ký
 app.post('/api/register', upload.single('avatar'), (req, res) => {
   // Xử lý logic đăng ký ở đây
