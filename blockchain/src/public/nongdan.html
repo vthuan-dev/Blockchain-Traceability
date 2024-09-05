@@ -87,7 +87,7 @@
                             <td>
                                 <div class="functionGroup">
                                     <div class="function-button accept-button"><b>Xem</b></div>
-                                    <div class="function-button cancel-button"><b>Xóa</b></div>
+                                    <div class="function-button cancel-button" data-toggle="modal" data-target="#confirmModal"><b>Xóa</b></div>
                                 </div>
                             </td>
                         </tr>
@@ -99,7 +99,7 @@
                             <td>
                                 <div class="functionGroup">
                                     <div class="function-button accept-button"><b>Xem</b></div>
-                                    <div class="function-button cancel-button"><b>Xóa</b></div>
+                                    <div class="function-button cancel-button" data-toggle="modal" data-target="#confirmModal"><b>Xóa</b></div>
                                 </div>
                             </td>
                         </tr>
@@ -111,7 +111,7 @@
                             <td>
                                 <div class="functionGroup">
                                     <div class="function-button accept-button"><b>Xem</b></div>
-                                    <div class="function-button cancel-button"><b>Xóa</b></div>
+                                    <div class="function-button cancel-button" data-toggle="modal" data-target="#confirmModal"><b>Xóa</b></div>
                                 </div>
                             </td>
                         </tr>
@@ -120,6 +120,31 @@
             </div>
         </div>
     </main>
+
+    <!-- Modal -->
+    <div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel" aria-hidden="true" data-aos="zoom-in">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmModalLabel"><b>Xác nhận</b></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Bạn có chắc chắn muốn xóa thông tin này?
+                </div>
+                <div class="row">
+                    <div class="col-12 col-sm-6 ml-auto">
+                        <div class="popupButton">
+                            <div class="function-button cancel-button" data-dismiss="modal"><b>Hủy</b></div>
+                            <div class="function-button accept-button" id="save-button"><b>Xác nhận</b></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- jQuery và Bootstrap JavaScript -->
     <!-- AOS JavaScript -->

@@ -1,7 +1,7 @@
 
 /* Background color for the entire webpage */
 body {
-  background-color: #ecf0f1; /* Màu xanh lá cây nhạt */
+  background-color: white; /* Màu xanh lá cây nhạt */
   color: #333; /* Màu chữ */
   font-family: Arial, sans-serif; /* Font chữ */
   margin: 0;
@@ -13,8 +13,9 @@ body {
   padding: 0 20px;
 }
 .custom-navbar-height {
-          height: 120px; /* Bạn có thể thay đổi giá trị này theo nhu cầu */
+  height: 120px; /* Bạn có thể thay đổi giá trị này theo nhu cầu */
 }
+
 .card {
   border: 1px solid #ddd;
   
@@ -338,12 +339,15 @@ body {
   border-radius: 5px;
 }
 
-#myInput:focus {outline: 3px solid #ddd;}
+#myInput:focus {
+  outline: 3px solid #ddd;
+}
 
 .searchbox-filter {
   display: flex;
   align-items: center;
 }
+
 
 .filter-dropdown {
   position: relative;
@@ -351,6 +355,7 @@ body {
 }
 
 .dropdown-content {
+  width: 100%;
   display: none;
   position: absolute;
   background-color: white;
@@ -359,11 +364,12 @@ body {
   border: 1px solid #ddd;
   border-radius: 5px;
   z-index: 1;
-  right: 0;
+  right: auto;
   left: auto;
 }
 
 .dropdown-content a {
+  width: 100%;
   color: black;
   padding: 12px 16px;
   text-decoration: none;
@@ -379,7 +385,7 @@ body {
   padding: 20px;
   background-color: white;
   border-radius: 5px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border: 1px #dee2e6 solid;
   max-width: 600px;
   margin: 20px auto;
 }
@@ -428,7 +434,7 @@ body {
   padding: 20px;
   background-color: white;
   border-radius: 5px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border: 1px #dee2e6 solid;
   max-width: 600px;
   margin: 20px auto;
 }
@@ -509,4 +515,117 @@ body {
 
 .notificationGroup p {
   margin: 0px;
+}
+
+.notification-bell {
+  position: relative;
+  display: inline-block;
+}
+.notification-dot {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 10px;
+  height: 10px;
+  background-color: red;
+  border-radius: 50%;
+}
+
+.seeAll hr {
+  margin: 0px;
+}
+
+.seeAll a {
+  text-align: center;
+}
+
+/* CSS Animation cho nút */
+.function-button {
+  transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out;
+}
+
+.function-button:hover {
+  transform: scale(1.05);
+}
+
+.function-button.disabled {
+  opacity: 0.5; /* Làm mờ nút khi không thể bấm */
+  cursor: not-allowed; /* Thay đổi con trỏ */
+  pointer-events: none; /* Ngăn chặn các sự kiện chuột */
+}
+
+.check-button {
+  transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out;
+}
+
+.check-button:hover {
+  transform: scale(1.05);
+}
+
+
+/* Animation cho Modal */
+.modal.fade .modal-dialog {
+  transform: translateY(-100px);
+  transition: transform 0.3s ease-out;
+}
+
+.modal.show .modal-dialog {
+  transform: translateY(0);
+}
+
+.popupButton {
+  display: flex;
+  gap: 5px;
+  margin: 0px 5px 0px 5px;
+}
+
+.notification-badge {
+  position: relative;
+  background-color: red; /* Red background for the badge */
+  color: white;
+  border-radius: 5px; /* Rounded corners */
+  padding: 2px 6px 2px 6px; /* Padding to create a rectangle shape */
+  font-size: 12px;
+}
+
+.navbar-nav .nav-item {
+  position: relative;
+}
+
+#notificationPopup {
+  cursor: pointer;
+  position: relative;
+  display: inline-block;
+}
+
+#notificationButtonGroup {
+  position: relative;
+  display: inline-block;
+}
+
+/* CSS cho lớp phủ */
+.overlay {
+  display: none; /* Ẩn mặc định */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 168px;
+  background-color: #f8f9fa; /* Đen mờ */
+  z-index: 1000; /* Đảm bảo lớp phủ nằm trên cùng */
+}
+
+.overlay.active {
+  display: block; /* Hiển thị khi active */
+}
+
+/* CSS cho navbar */
+.navbar {
+  z-index: 1050; /* Đảm bảo navbar nằm trên lớp phủ */
+}
+
+.unread, .read {
+  border: 1px #dee2e6 solid;
+  border-radius: 5px;
+  padding: 10px;
 }
