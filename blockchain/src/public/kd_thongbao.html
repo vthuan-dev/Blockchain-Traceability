@@ -14,21 +14,6 @@
     <!-- Thanh điều hướng -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light custom-navbar-height">
         <a class="navbar-brand" href="#">Nhà kiểm duyệt</a>
-        <div class="notification-bell">
-            <div class="dropdown">
-                <i class="fas fa-bell fa-1.5x" onclick="searchFilter()"></i>
-                <div class="notification-dot"></div>
-                <div id="filterDropdown" class="dropdown-content">
-                    <a href="#1">Lô bưởi AH-001 từ nông dân Nguyễn Văn X yêu cầu kiểm định</a>
-                    <a href="#2">Lô bưởi AH-002 từ nông dân Nguyễn Văn Y yêu cầu kiểm định</a>
-                    <div class="seeAll">
-                        <hr>
-                        <a href="#all">Xem tất cả</a>
-                    </div>
-                </div>
-            </div>  
-        </div>
-    </div>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -37,8 +22,20 @@
                 <li class="nav-item">
                     <a class="nav-link" href="#">Lô hàng</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Thông báo</a>
+                <li class="nav-item" id="notificationButtonGroup">
+                    <div class="nav-link" onclick="notificationPopup()" id="notificationPopup">Thông báo
+                        <span class="notification-badge" id="notificationCount">99+</span> <!-- Notification count -->
+                    </div>
+                    <div class="dropdown">
+                        <div id="filterDropdown" class="dropdown-content">
+                            <a href="#1">Lô bưởi AH-001 từ nông dân Nguyễn Văn X yêu cầu kiểm định</a>
+                            <a href="#2">Lô bưởi AH-002 từ nông dân Nguyễn Văn Y yêu cầu kiểm định</a>
+                            <div class="seeAll">
+                                <hr>
+                                <a href="#all">Xem tất cả</a>
+                            </div>
+                        </div>
+                    </div>  
                 </li>
             </ul>
             <ul class="navbar-nav ml-auto"> <!-- Menu dropdown bên phải -->

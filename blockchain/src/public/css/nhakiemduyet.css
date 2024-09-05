@@ -362,7 +362,7 @@ body {
   border: 1px solid #ddd;
   border-radius: 5px;
   z-index: 1;
-  right: 0;
+  right: auto;
   left: auto;
 }
 
@@ -574,4 +574,28 @@ body {
   display: flex;
   gap: 5px;
   margin: 0px 5px 0px 5px;
+}
+
+.notification-badge {
+  position: relative;
+  background-color: red; /* Red background for the badge */
+  color: white;
+  border-radius: 5px; /* Rounded corners */
+  padding: 2px 6px 2px 6px; /* Padding to create a rectangle shape */
+  font-size: 12px;
+}
+
+.navbar-nav .nav-item {
+  position: relative;
+}
+
+#notificationPopup {
+  cursor: pointer;
+  position: relative;
+  display: inline-block;
+}
+
+#notificationButtonGroup {
+  position: relative;
+  display: inline-block;
 }

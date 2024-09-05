@@ -55,6 +55,11 @@ $(document).ready(function(){
 function searchFilter() {
     document.getElementById("filterDropdown").classList.toggle("show");
 }
+
+//Popup thông báo
+function notificationPopup() {
+    document.getElementById("filterDropdown").classList.toggle("show");
+}
   
 
 // Hàm để xử lý sự kiện click cho các tab
