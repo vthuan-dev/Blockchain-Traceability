@@ -11,7 +11,7 @@ contract TraceabilityContract {
         uint256 producerId;
         string quantity;
         uint256 productionDate;
-        uint256 expiryDate;
+      //  uint256 expiryDate;
         uint256 startDate;
         uint256 endDate;
         BatchStatus status;
@@ -84,14 +84,14 @@ contract TraceabilityContract {
         uint256 newBatchId = _batchIdCounter;
 
         uint256 productionDate = block.timestamp;
-        uint256 expiryDate = productionDate + 365 days;
+        // uint256 expiryDate = productionDate + 5 days;
 
         bytes32 dataHash = _calculateDataHash(
             params.sscc,
             params.producerId,
             params.quantity,
             productionDate,
-            expiryDate,
+         //   expiryDate,
             params.farmPlotNumber,
             params.productId
         );
@@ -102,7 +102,7 @@ contract TraceabilityContract {
             producerId: params.producerId,
             quantity: params.quantity,
             productionDate: productionDate,
-            expiryDate: expiryDate,
+        //    expiryDate: expiryDate,
             startDate: params.startDate,
             endDate: params.endDate,
             status: BatchStatus.PendingApproval,
@@ -122,14 +122,13 @@ contract TraceabilityContract {
     function _calculateDataHash(
         string memory _sscc,
         uint256 _producerId,
-        // Remove the approverId parameter
         string memory _quantity,
         uint256 _productionDate,
-        uint256 _expiryDate,
+        // Xóa _expiryDate khỏi đây
         string memory _farmPlotNumber,
         uint256 _productId
     ) private pure returns (bytes32) {
-        return keccak256(abi.encodePacked(_sscc, _producerId, _quantity, _productionDate, _expiryDate, _farmPlotNumber, _productId));
+        return keccak256(abi.encodePacked(_sscc, _producerId, _quantity, _productionDate, _farmPlotNumber, _productId));
     }
     // hàm kiểm tra sscc đã tồn tại hay chưa 
     function ssccExists(string memory sscc) public view returns (bool) {

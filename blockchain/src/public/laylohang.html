@@ -5,19 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Truy xuất lô hàng</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
+            font-family: 'Roboto', Arial, sans-serif;
             background-color: #f8f9fa;
+            color: #333;
         }
         .container {
-            max-width: 1200px;
+            max-width: 1000px;
             margin: auto;
+            padding: 20px;
         }
         h1 {
-            color: #007bff;
+            color: #2c3e50;
+            text-align: center;
             margin-bottom: 30px;
+            font-weight: 700;
         }
         .form-group input {
             border-radius: 0;
@@ -32,49 +36,87 @@
             border-color: #0056b3;
         }
         .card {
-            margin-bottom: 20px;
-            border: none;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
         }
         .card:hover {
             transform: translateY(-5px);
         }
+        .card-body {
+            padding: 25px;
+        }
         .card-title {
-            font-size: 1.5rem;
-            color: #007bff;
+            color: #3498db;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
         }
         .card-text {
-            font-size: 1rem;
-            color: #343a40;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        .card img {
-            border-radius: 5px;
+        .card-text strong {
+            font-weight: 600;
+            color: #2c3e50;
+            min-width: 150px;
         }
         .image-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
+            margin-top: 25px;
         }
-        .image-container > div {
-            flex: 1;
-            min-width: 200px;
+        .image-container h5 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-weight: 600;
         }
-        .image-container img {
-            max-width: 100%;
-            height: auto;
-            margin-bottom: 10px;
+        .product-images {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
         }
-        .image-preview-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .image-preview-container img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 5px;
+        .product-images img {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 6px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
+        }
+        .product-images img:hover {
+            transform: scale(1.05);
+        }
+        .certificate-image {
+            text-align: center;
+        }
+        .certificate-image img {
+            max-height: 200px;
+            max-width: 100%;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
+            display: inline-block; /* Thêm dòng này */
+        }
+        .certificate-image img:hover {
+            transform: scale(1.05);
+        }
+        @media (max-width: 768px) {
+            .card-text {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .card-text strong {
+                margin-bottom: 5px;
+            }
+        }
+        .certificate-image-container {
+            text-align: left;
         }
     </style>
 </head>
@@ -133,7 +175,6 @@
                         <p class="card-text"><strong>SSCC:</strong> ${batch.sscc}</p>
                         <p class="card-text"><strong>Nhà sản xuất ID:</strong> ${batch.producerId}</p>
                         <p class="card-text"><strong>Số lượng:</strong> ${batch.quantity}</p>
-                        <p class="card-text"><strong>Ngày sản xuất:</strong> ${new Date(batch.productionDate).toLocaleString()}</p>
                         <p class="card-text"><strong>Hạn sử dụng:</strong> ${new Date(batch.expiryDate).toLocaleString()}</p>
                         <p class="card-text"><strong>Ngày bắt đầu:</strong> ${new Date(batch.startDate).toLocaleString()}</p>
                         <p class="card-text"><strong>Ngày kết thúc:</strong> ${new Date(batch.endDate).toLocaleString()}</p>
@@ -143,14 +184,18 @@
                         <div class="image-container">
                             <div>
                                 <h5>Hình ảnh sản phẩm</h5>
-                                ${batch.productImageUrls ? batch.productImageUrls.map(url => `
-                                    <img src="${url}" class="img-fluid mb-2" alt="Hình ảnh sản phẩm">
-                                `).join('') : '<p>Không có hình ảnh sản phẩm</p>'}
+                                <div class="product-images">
+                                    ${batch.productImageUrls ? batch.productImageUrls.map(url => `
+                                        <img src="${url}" alt="Hình ảnh sản phẩm">
+                                    `).join('') : '<p>Không có hình ảnh sản phẩm</p>'}
+                                </div>
                             </div>
                             
-                            <div>
+                            <div class="certificate-image-container">
                                 <h5>Hình ảnh giấy chứng nhận</h5>
-                                ${batch.certificateImageUrl ? `<img src="${batch.certificateImageUrl}" class="img-fluid" alt="Chứng nhận">` : '<p>Không có hình ảnh chứng nhận</p>'}
+                                <div class="certificate-image">
+                                    ${batch.certificateImageUrl ? `<img src="${batch.certificateImageUrl}" alt="Chứng nhận">` : '<p>Không có hình ảnh chứng nhận</p>'}
+                                </div>
                             </div>
                         </div>
                     </div>
