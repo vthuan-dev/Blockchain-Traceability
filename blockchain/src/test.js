@@ -149,7 +149,7 @@ web3.eth.net.isListening()
   .catch(e => console.log('Lỗi rồi', e));
 
 const contractABI = require('../build/contracts/TraceabilityContract.json').abi;
-const contractAddress = '0x232041fB6AB1D4B1e8bd25a3eeaF12c634612610';
+const contractAddress = '0xe44998a7283863C9D56C1aE3527E3c4015Cca762';
 const contract = new web3.eth.Contract(contractABI, contractAddress);
 
 function replacer(key, value) {
@@ -381,7 +381,7 @@ app.get('/batches/producer/:producerId', async (req, res) => {
       producerId: batch.producerId.toString(),
       quantity: batch.quantity,
       productionDate: new Date(Number(batch.productionDate) * 1000).toISOString(),
-      expiryDate: new Date(Number(batch.expiryDate) * 1000).toISOString(),
+    //  expiryDate: new Date(Number(batch.expiryDate) * 1000).toISOString(),
       startDate: new Date(Number(batch.startDate) * 1000).toISOString(),
       endDate: new Date(Number(batch.endDate) * 1000).toISOString(),
       status: ['Created', 'PendingApproval', 'Approved', 'Rejected'][Number(batch.status)],
