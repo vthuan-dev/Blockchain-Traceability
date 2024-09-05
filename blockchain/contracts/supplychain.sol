@@ -157,4 +157,8 @@ contract TraceabilityContract {
 
         return batches;
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> Branchcualoc

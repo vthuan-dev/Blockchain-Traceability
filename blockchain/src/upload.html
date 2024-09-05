@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload 2 Images to Filebase</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        #uploadForm {
+            margin-bottom: 20px;
+        }
+        #results {
+            margin-top: 20px;
+        }
+        .result-item {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Upload 2 Images to Filebase</h1>
+    <form id="uploadForm">
+        <div>
+            <label for="image1">Image 1:</label>
+            <input type="file" id="image1" name="image1" accept="image/*" required>
+        </div>
+        <div>
+            <label for="image2">Image 2:</label>
+            <input type="file" id="image2" name="image2" accept="image/*" required>
+        </div>
+        <button type="submit">Upload and Get URLs</button>
+    </form>
+    <div id="results"></div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData();
+            const image1 = document.getElementById('image1').files[0];
+            const image2 = document.getElementById('image2').files[0];
+            
+            if (!image1 || !image2) {
+                alert('Please select both images');
+                return;
+            }
+
+            formData.append('image1', image1);
+            formData.append('image2', image2);
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const results = await response.json();
+                displayResults(results);
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while uploading the images.');
+            }
+        });
+
+        function displayResults(results) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<h2>Upload Results:</h2>';
+            results.forEach((result, index) => {
+                const resultItem = document.createElement('div');
+                resultItem.className = 'result-item';
+                resultItem.innerHTML = `
+                    <p>Image ${index + 1}:</p>
+                    <p>Filename: ${result.filename}</p>
+                    <p>URL: <a href="${result.url}" target="_blank">${result.url}</a></p>
+                `;
+                resultsDiv.appendChild(resultItem);
+            });
+        }
+    </script>
+</body>
+</html>

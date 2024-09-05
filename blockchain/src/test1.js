@@ -1,11 +1,16 @@
 const express = require('express');
 const multer = require('multer');
-const fs = require('fs');
 const path = require('path');
 const { S3Client, PutObjectCommand, HeadObjectCommand } = require("@aws-sdk/client-s3");
-
 const app = express();
-const upload = multer({ storage: multer.memoryStorage() });
+const cors = require('cors');
+app.use(cors());
+
+
+const upload = multer({ storage: multer.memoryStorage() }).fields([
+  { name: 'image1', maxCount: 1 },
+  { name: 'image2', maxCount: 1 }
+]);
 
 const s3Client = new S3Client({
   endpoint: 'https://s3.filebase.com',
@@ -75,20 +80,52 @@ async function checkFileStatusWithRetry(fileName, maxRetries = 5, retryDelay = 1
   }
 }
 
-app.post('/upload', upload.single('imageFile'), async (req, res) => {
+// Serve trang HTML
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'upload.html'));
+});
+
+
+app.post('/upload', upload, async (req, res) => {
+  console.log('Received files:', req.files);
+
   try {
-    const fileBuffer = req.file.buffer;
-    const fileName = req.file.originalname;
-    const { ipfsUrl } = await uploadFile(fileBuffer, fileName);
-    res.json({ url: ipfsUrl });
+    if (!req.files || !req.files.image1 || !req.files.image2) {
+      return res.status(400).send('Cần tải lên cả hai ảnh');
+    }
+
+    const results = [];
+
+    for (const fieldName of ['image1', 'image2']) {
+      const file = req.files[fieldName][0];
+      console.log(`Bắt đầu xử lý file:`, file.originalname);
+      try {
+        const result = await uploadFile(file.buffer, file.originalname);
+        console.log(`Xử lý file thành công:`, result.ipfsUrl);
+        results.push({
+          filename: file.originalname,
+          url: result.ipfsUrl
+        });
+      } catch (error) {
+        console.error(`Lỗi khi xử lý file ${file.originalname}:`, error);
+      }
+    }
+
+    console.log('Kết quả cuối cùng:', JSON.stringify(results, null, 2));
+    res.json(results);
   } catch (error) {
-    console.error('Error uploading file:', error);
-    res.status(500).send('Error uploading file');
+    console.error('Lỗi khi tải lên file:', error);
+    res.status(500).send('Lỗi khi tải lên file');
   }
 });
 
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-app.listen(3000, () => {
-  console.log('Server is running on port 3000');
+const PORT = 3000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+
 });
