@@ -39,11 +39,13 @@ db.connect((err) => {
 });
 
 // tạo biến lưu trữ file, giới hạn số lượng file và tên file, maxCount: số lượng file, name: tên file
-const upload = multer({ storage: storage }).fields([
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
+}).fields([
   { name: 'productImage', maxCount: 1 },
   { name: 'certificateImage', maxCount: 1 }
 ]);
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -237,46 +239,59 @@ app.get('/batches/:producerId', async (req, res) => {
   }
 });
 
+
+app.get('/create-batch', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'themlohang.html'));
+});
+
 app.post('/checkdata', upload, (req, res) => {
   res.status(200).send({
     body: req.body,
     files: req.files
   });
 });
+
+
 app.post('/createbatch', upload, async (req, res) => {
+  console.log('Received body:', req.body);
+  console.log('Received files:', req.files);
+
   try {
     const { sscc, quantity, farmPlotNumber, productId, producerId, startDate, endDate } = req.body;
 
     // Kiểm tra các trường bắt buộc
     if (!sscc || !quantity || !farmPlotNumber || !productId || !producerId || !startDate || !endDate) {
-      return res.status(400).send('Thiếu thông tin bắt buộc');
+      return res.status(400).json({ error: 'Thiếu thông tin bắt buộc' });
     }
+    
 
     // Kiểm tra độ dài SSCC
     if (sscc.length !== 18) {
-      return res.status(400).send('SSCC phải có 18 ký tự');
-    }
+      return res.status(400).json({ error: 'SSCC phải có 18 ký tự' });    }
 
     // Kiểm tra và chuyển đổi các giá trị số
     const cleanProductId = parseInt(productId, 10);
     const cleanProducerId = parseInt(producerId, 10);
-    const cleanStartDate = parseInt(startDate, 10);
-    const cleanEndDate = parseInt(endDate, 10);
+    const cleanStartDate = new Date(startDate).getTime() / 1000;
+    const cleanEndDate = new Date(endDate).getTime() / 1000;
+    
 
     if (isNaN(cleanProductId) || cleanProductId <= 0) {
-      return res.status(400).send('Product ID không hợp lệ');
+      return res.status(400).json({ error: 'Product ID không hợp lệ' });
     }
     if (isNaN(cleanProducerId) || cleanProducerId <= 0) {
-      return res.status(400).send('Producer ID không hợp lệ');
+      return res.status(400).json({ error: 'Producer ID không hợp lệ' });
     }
+
+    
     if (isNaN(cleanStartDate) || cleanStartDate <= 0) {
-      return res.status(400).send('Start date không hợp lệ');
+      return res.status(400).json({ error: 'Start date không hợp lệ' });
     }
     if (isNaN(cleanEndDate) || cleanEndDate <= 0) {
-      return res.status(400).send('End date không hợp lệ');
+      return res.status(400).json({ error: 'End date không hợp lệ' });
     }
     if (cleanStartDate >= cleanEndDate) {
-      return res.status(400).send('Start date phải trước End date');
+      return res.status(400).json({ error: 'End date không hợp lệ' });
     }
 
     // Kiểm tra sự tồn tại của userId và productId trong MySQL
@@ -284,22 +299,20 @@ app.post('/createbatch', upload, async (req, res) => {
     const productExists = await checkProductExists(cleanProductId);
 
     if (!userExists) {
-      return res.status(400).send('Producer ID không tồn tại');
+      return res.status(400).json({ error: 'Producer ID không tồn tại' });
     }
     if (!productExists) {
-      return res.status(400).send('Product ID không tồn tại');
+      return res.status(400).json({ error: 'Product ID không tồn tại' });
     }
 
     const ssccExists = await contract.methods.ssccExists(sscc).call();
     if (ssccExists) {
-      return res.status(400).send('SSCC đã tồn tại, vui lòng nhập lại SSCC khác');
+      return res.status(400).json({ error: 'SSCC đã tồn tại, vui lòng nhập lại SSCC khác' });
     }
 
     let productImageUrl = '';
-    let certificateImageUrl = '';
 
     // Debugging: Log các tệp nhận được
-    console.log('Received files:', req.files);
 
     // Xử lý productImage
     if (req.files && req.files['productImage'] && req.files['productImage'][0]) {
@@ -307,19 +320,20 @@ app.post('/createbatch', upload, async (req, res) => {
       const productImageResult = await uploadFile(productImageFile.buffer, productImageFile.originalname);
       productImageUrl = productImageResult.ipfsUrl;
     } else {
-      return res.status(400).send('Thiếu ảnh sản phẩm');
+      return res.status(400).json({ error: 'Thiếu ảnh sản phẩm' });
     }
+    let certificateImageUrl = '';
 
     // Xử lý certificateImage (nếu có)
-    if (req.files && req.files['certificateImage'] && req.files['certificateImage'][0]) {
+    if (req.files['certificateImage'] && req.files['certificateImage'][0]) {
       const certificateImageFile = req.files['certificateImage'][0];
       const certificateImageResult = await uploadFile(certificateImageFile.buffer, certificateImageFile.originalname);
       certificateImageUrl = certificateImageResult.ipfsUrl;
+      console.log('Certificate image uploaded:', certificateImageUrl);
     } else {
       console.log('Không có ảnh chứng nhận được tải lên');
-      certificateImageUrl = 'default_certificate_image_url'; // Cung cấp giá trị mặc định
+      certificateImageUrl = 'default_certificate_image_url';
     }
-
     // Gọi hàm createBatch của smart contract
     const result = await contract.methods.createBatch(
       sscc,
@@ -340,11 +354,13 @@ app.post('/createbatch', upload, async (req, res) => {
       message: 'Lô hàng đã được tạo thành công và đang chờ phê duyệt', 
       transactionHash: safeResult.transactionHash,
       batchId: safeResult.events.BatchCreated.returnValues.batchId,
-      productImageUrl
+      productImageUrl,
+      certificateImageUrl
+
     });
   } catch (err) {
     console.error('Error creating batch:', err);
-    res.status(500).send('Lỗi khi tạo lô hàng: ' + err.message);
+    res.status(500).json({ error: 'Lỗi khi tạo lô hàng: ' + err.message });
   }
 });
 
