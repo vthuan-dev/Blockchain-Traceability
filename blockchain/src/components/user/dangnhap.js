@@ -39,7 +39,9 @@ module.exports = function(db) {
                 return res.status(403).json({ message: 'Tài khoản của bạn chưa xác thực, vui lòng xác thực Email trước khi đăng nhập.' });
             }
 
-            res.status(200).json({ message: 'Đăng nhập thành công' });
+            // Trả về thông tin người dùng
+            res.status(200).json({ message: 'Đăng nhập thành công', user });
+
         } catch (error) {
             if (error.code === 'ECONNRESET') {
                 console.error('Lỗi kết nối cơ sở dữ liệu:', error);
@@ -47,6 +49,7 @@ module.exports = function(db) {
             }
             console.error('Lỗi khi đăng nhập:', error);
             res.status(500).json({ message: 'Internal server error', error: error.message });
+            return; // Thêm return để dừng việc thực thi tiếp
         }
     });
 
