@@ -7,13 +7,16 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/nhakiemduyet.css">
     <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 
 <body>
+    <div class="overlay" id="overlay"></div>
+
     <!-- Thanh điều hướng -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light custom-navbar-height">
         <a class="navbar-brand" href="#">Nhà kiểm duyệt</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation" onclick="toggleOverlay()">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
@@ -21,8 +24,20 @@
                 <li class="nav-item">
                     <a class="nav-link" href="#">Lô hàng</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Thông báo</a>
+                <li class="nav-item" id="notificationButtonGroup">
+                    <div class="nav-link" onclick="notificationPopup()" id="notificationPopup">Thông báo
+                        <span class="notification-badge" id="notificationCount">99+</span> <!-- Notification count -->
+                    </div>
+                    <div class="dropdown">
+                        <div id="filterDropdown" class="dropdown-content">
+                            <a href="#1">Lô bưởi AH-001 từ nông dân Nguyễn Văn X yêu cầu kiểm định</a>
+                            <a href="#2">Lô bưởi AH-002 từ nông dân Nguyễn Văn Y yêu cầu kiểm định</a>
+                            <div class="seeAll">
+                                <hr>
+                                <a href="#all">Xem tất cả</a>
+                            </div>
+                        </div>
+                    </div>  
                 </li>
             </ul>
             <ul class="navbar-nav ml-auto"> <!-- Menu dropdown bên phải -->
@@ -47,37 +62,39 @@
                 <h5><b>Thông báo</b></h5>
                 <br>
                 <div class="notification">
-                    <p><b>Chưa đọc</b></p><hr>
-                    <div class="notificationGroup">
-                        <p>Lô bưởi AH-001 từ nông dân Nguyễn Văn X yêu cầu kiểm định</p><hr>
-                        <div class="col-4 col-sm-2 p-0">
-                            <div class="function-button accept-button"><b>Xem</b></div>
+                    <p><b>Chưa đọc</b></p>
+                    <div class="unread">
+                        <div class="notificationGroup">
+                            <p>Lô bưởi AH-001 từ nông dân Nguyễn Văn X yêu cầu kiểm định</p><hr>
+                            <div class="col-4 col-sm-2 p-0">
+                                <div class="function-button accept-button"><b>Xem</b></div>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="notificationGroup">
+                            <p>Lô bưởi AH-002 từ nông dân Nguyễn Văn Y yêu cầu kiểm định</p><hr>
+                            <div class="col-4 col-sm-2 p-0">
+                                <div class="function-button accept-button"><b>Xem</b></div>
+                            </div>
                         </div>
                     </div>
-                    <hr>
-                    <div class="notificationGroup">
-                        <p>Lô bưởi AH-002 từ nông dân Nguyễn Văn Y yêu cầu kiểm định</p><hr>
-                        <div class="col-4 col-sm-2 p-0">
-                            <div class="function-button accept-button"><b>Xem</b></div>
-                        </div>
-                    </div>
-                    <hr>
                     <br>
-                    <p><b>Đã đọc</b></p><hr>
-                    <div class="notificationGroup">
-                        <p>Lô bưởi AC-006 từ nông dân Nguyễn Văn X yêu cầu kiểm định</p><hr>
-                        <div class="col-4 col-sm-2 p-0">
-                            <div class="function-button accept-button"><b>Xem</b></div>
+                    <p><b>Đã đọc</b></p>
+                    <div class="read">
+                        <div class="notificationGroup">
+                            <p>Lô bưởi AC-006 từ nông dân Nguyễn Văn X yêu cầu kiểm định</p><hr>
+                            <div class="col-4 col-sm-2 p-0">
+                                <div class="function-button accept-button"><b>Xem</b></div>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="notificationGroup">
+                            <p>Lô bưởi AS-003 từ nông dân Nguyễn Văn X yêu cầu kiểm định</p><hr>
+                            <div class="col-4 col-sm-2 p-0">
+                                <div class="function-button accept-button"><b>Xem</b></div>
+                            </div>
                         </div>
                     </div>
-                    <hr>
-                    <div class="notificationGroup">
-                        <p>Lô bưởi AS-003 từ nông dân Nguyễn Văn X yêu cầu kiểm định</p><hr>
-                        <div class="col-4 col-sm-2 p-0">
-                            <div class="function-button accept-button"><b>Xem</b></div>
-                        </div>
-                    </div>
-                    <hr>
                 </div>
             </div> 
         </div>
