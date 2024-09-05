@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Truy xuất lô hàng</title>
-    <!-- Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -12,12 +11,34 @@
             padding: 20px;
             background-color: #f8f9fa;
         }
-        .batch img {
-            max-width: 100%;
-            height: auto;
+        .container {
+            max-width: 1200px;
+            margin: auto;
+        }
+        h1 {
+            color: #007bff;
+            margin-bottom: 30px;
+        }
+        .form-group input {
+            border-radius: 0;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
         }
         .card {
             margin-bottom: 20px;
+            border: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
         }
         .card-title {
             font-size: 1.5rem;
@@ -32,44 +53,70 @@
         }
         .image-container {
             display: flex;
-            justify-content: space-between;
             flex-wrap: wrap;
+            gap: 10px;
+        }
+        .image-container > div {
+            flex: 1;
+            min-width: 200px;
         }
         .image-container img {
-            max-width: 48%;
+            max-width: 100%;
+            height: auto;
             margin-bottom: 10px;
+        }
+        .image-preview-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .image-preview-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1 class="my-4 text-center">Truy xuất thông tin lô hàng</h1>
-        <div class="form-group">
-            <input type="number" id="producerIdInput" class="form-control" placeholder="Nhập Producer ID">
-        </div>
-        <button class="btn btn-primary mb-4" onclick="getBatchesByProducer()">Truy xuất</button>
+        <form id="batchForm" onsubmit="return validateForm()">
+            <div class="form-group">
+                <input type="number" id="producerIdInput" class="form-control" placeholder="Nhập Producer ID" required min="1">
+            </div>
+            <button type="submit" class="btn btn-primary mb-4">Truy xuất</button>
+        </form>
         <div id="batchInfo"></div>
     </div>
 
-    <!-- Bootstrap JS and dependencies -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
+        function validateForm() {
+            const producerId = document.getElementById('producerIdInput').value;
+            if (!producerId || producerId <= 0) {
+                alert('Vui lòng nhập Producer ID hợp lệ');
+                return false;
+            }
+            getBatchesByProducer();
+            return false;
+        }
+
         async function getBatchesByProducer() {
             const producerId = document.getElementById('producerIdInput').value;
-            console.log(`Fetching batches for producer ID: ${producerId}`);
+            const batchInfoDiv = document.getElementById('batchInfo');
+            batchInfoDiv.innerHTML = '<p>Đang tải dữ liệu...</p>';
             try {
                 const response = await fetch(`/batches/producer/${producerId}`);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const data = await response.json();
-                console.log('Fetched data:', data);
                 displayBatchInfo(data);
             } catch (error) {
-                console.error('Error:', error);
-                document.getElementById('batchInfo').innerHTML = 'Có lỗi xảy ra khi truy xuất thông tin.';
+                batchInfoDiv.innerHTML = `<p class="text-danger">Có lỗi xảy ra khi truy xuất thông tin: ${error.message}</p>`;
             }
         }
 
@@ -96,11 +143,14 @@
                         <div class="image-container">
                             <div>
                                 <h5>Hình ảnh sản phẩm</h5>
-                                <img src="${batch.productImageUrl}" class="img-fluid" alt="Hình ảnh sản phẩm">
+                                ${batch.productImageUrls ? batch.productImageUrls.map(url => `
+                                    <img src="${url}" class="img-fluid mb-2" alt="Hình ảnh sản phẩm">
+                                `).join('') : '<p>Không có hình ảnh sản phẩm</p>'}
                             </div>
+                            
                             <div>
                                 <h5>Hình ảnh giấy chứng nhận</h5>
-                                <img src="${batch.certificateImageUrl}" class="img-fluid" alt="Chứng nhận">
+                                ${batch.certificateImageUrl ? `<img src="${batch.certificateImageUrl}" class="img-fluid" alt="Chứng nhận">` : '<p>Không có hình ảnh chứng nhận</p>'}
                             </div>
                         </div>
                     </div>

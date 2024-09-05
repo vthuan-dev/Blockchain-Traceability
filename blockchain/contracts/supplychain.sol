@@ -15,7 +15,7 @@ contract TraceabilityContract {
         uint256 startDate;
         uint256 endDate;
         BatchStatus status;
-        string productImageUrl;
+        string[] productImageUrls; // Change to array
         string certificateImageUrl;
         string farmPlotNumber;
         bytes32 dataHash;
@@ -33,7 +33,7 @@ contract TraceabilityContract {
         string sscc;
         uint256 producerId;
         string quantity;
-        string productImageUrl;
+        string[] productImageUrls; // Change to array
         string certificateImageUrl;
         string farmPlotNumber;
         uint256 productId;
@@ -45,7 +45,7 @@ contract TraceabilityContract {
         string memory _sscc,
         uint256 _producerId,
         string memory _quantity,
-        string memory _productImageUrl,
+        string[] memory _productImageUrls, // Đã thay đổi thành mảng
         string memory _certificateImageUrl,
         string memory _farmPlotNumber,
         uint256 _productId,
@@ -56,7 +56,7 @@ contract TraceabilityContract {
             sscc: _sscc,
             producerId: _producerId,
             quantity: _quantity,
-            productImageUrl: _productImageUrl,
+            productImageUrls: _productImageUrls, // Đã sửa
             certificateImageUrl: _certificateImageUrl,
             farmPlotNumber: _farmPlotNumber,
             productId: _productId,
@@ -67,11 +67,12 @@ contract TraceabilityContract {
         return _createBatch(params);
     }
 
+    
     function _createBatch(BatchParams memory params) private returns (uint256) {
         require(bytes(params.sscc).length == 18, "SSCC must be 18 characters long");
         require(_ssccToBatchId[params.sscc] == 0, "SSCC already exists");
         require(bytes(params.quantity).length > 0, "Quantity must not be empty");
-        require(bytes(params.productImageUrl).length > 0, "Product image URL is required");
+        require(params.productImageUrls.length > 0, "At least one product image URL is required");
         require(bytes(params.certificateImageUrl).length > 0, "Certificate image URL is required");
         require(bytes(params.farmPlotNumber).length > 0, "Farm plot number is required");
         require(params.productId > 0, "Product ID must be valid");
@@ -99,14 +100,13 @@ contract TraceabilityContract {
             batchId: newBatchId,
             sscc: params.sscc,
             producerId: params.producerId,
-            // Remove the approverId field
             quantity: params.quantity,
             productionDate: productionDate,
             expiryDate: expiryDate,
             startDate: params.startDate,
             endDate: params.endDate,
             status: BatchStatus.PendingApproval,
-            productImageUrl: params.productImageUrl,
+            productImageUrls: params.productImageUrls, // Đã sửa
             certificateImageUrl: params.certificateImageUrl,
             farmPlotNumber: params.farmPlotNumber,
             dataHash: dataHash,
@@ -119,7 +119,6 @@ contract TraceabilityContract {
         emit BatchCreated(newBatchId, params.sscc, params.producerId);
         return newBatchId;
     }
-
     function _calculateDataHash(
         string memory _sscc,
         uint256 _producerId,
