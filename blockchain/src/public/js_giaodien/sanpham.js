@@ -84,3 +84,13 @@ function handleTabClick(event) {
 document.querySelectorAll('.col').forEach(col => {
     col.addEventListener('click', handleTabClick);
 });
+
+AOS.init({
+    duration: 1000, // Thời gian animation
+    once: true // Chạy animation một lần khi scroll
+});
+
+document.getElementById("save-button").addEventListener("click", function() {
+    // Submit form
+    document.getElementById("profile-form").submit();
+});

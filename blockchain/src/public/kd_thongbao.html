@@ -7,12 +7,28 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/nhakiemduyet.css">
     <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 
 <body>
     <!-- Thanh điều hướng -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light custom-navbar-height">
         <a class="navbar-brand" href="#">Nhà kiểm duyệt</a>
+        <div class="notification-bell">
+            <div class="dropdown">
+                <i class="fas fa-bell fa-1.5x" onclick="searchFilter()"></i>
+                <div class="notification-dot"></div>
+                <div id="filterDropdown" class="dropdown-content">
+                    <a href="#1">Lô bưởi AH-001 từ nông dân Nguyễn Văn X yêu cầu kiểm định</a>
+                    <a href="#2">Lô bưởi AH-002 từ nông dân Nguyễn Văn Y yêu cầu kiểm định</a>
+                    <div class="seeAll">
+                        <hr>
+                        <a href="#all">Xem tất cả</a>
+                    </div>
+                </div>
+            </div>  
+        </div>
+    </div>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>

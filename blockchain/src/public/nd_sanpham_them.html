@@ -48,60 +48,64 @@
         </div>
     </nav>
     
-    <div class="row justify-content-center align-items-center">
-        <div class="col-11 col-sm-8">
-            <div class="add-container profile-container">
-                <div class="form-title">
-                    <h5><b>Thêm sản phẩm mới</b></h5>
-                </div>
-                <form action="update_profile.php" method="POST">
-                    <div class="form-group">
-                        <label for="productname">Tên sản phẩm</label>
-                        <input type="text" id="productname" name="productname" value="Bưởi năm roi">
+    <main>
+        <div class="container mt-4">
+            <div class="row justify-content-center align-items-center">
+                <div class="col-11 col-sm-8 p-0">
+                    <div class="form-title">
+                        <h5><b>Thêm sản phẩm mới</b></h5>
                     </div>
-
-                    <div class="form-group">
-                        <label for="productid">Mã sản phẩm</label>
-                        <input type="text" id="productid" name="productid" value="AP-123">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="location">Nơi trồng</label>
-                        <input type="text" id="location" name="location" value="Vĩnh Long">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="price">Giá</label>
-                        <textarea type="text" id="price" name="price">30.000</textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="description">Mô tả</label>
-                        <textarea type="text" id="description" name="description">ABC123</textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="use">Công dụng</label>
-                        <textarea type="text" id="use" name="use">ABC123</textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="description">Vùng sản xuất</label>
-                        <input type="text" id="description" name="description" value="ABC123">
-                    </div>
-
-                    <div class="row">
-                        <div class="col-12 col-sm-4 mr-auto">
-                            <div class="bottom-button">
-                                <div class="function-button accept-button-big"><b>Thêm</b></div>
-                                <div class="function-button cancel-button-big"><b>Hủy</b></div>
+                    <div class="add-container profile-container">
+                        <form action="update_profile.php" method="POST">
+                            <div class="form-group">
+                                <label for="productname">Tên sản phẩm</label>
+                                <input type="text" id="productname" name="productname" value="Bưởi năm roi">
                             </div>
-                        </div>
+        
+                            <div class="form-group">
+                                <label for="productid">Mã sản phẩm</label>
+                                <input type="text" id="productid" name="productid" value="AP-123">
+                            </div>
+        
+                            <div class="form-group">
+                                <label for="location">Nơi trồng</label>
+                                <input type="text" id="location" name="location" value="Vĩnh Long">
+                            </div>
+        
+                            <div class="form-group">
+                                <label for="price">Giá</label>
+                                <textarea type="text" id="price" name="price">30.000</textarea>
+                            </div>
+        
+                            <div class="form-group">
+                                <label for="description">Mô tả</label>
+                                <textarea type="text" id="description" name="description">ABC123</textarea>
+                            </div>
+        
+                            <div class="form-group">
+                                <label for="use">Công dụng</label>
+                                <textarea type="text" id="use" name="use">ABC123</textarea>
+                            </div>
+        
+                            <div class="form-group">
+                                <label for="description">Vùng sản xuất</label>
+                                <input type="text" id="description" name="description" value="ABC123">
+                            </div>
+        
+                            <div class="row">
+                                <div class="col-12 col-sm-4 mr-auto">
+                                    <div class="bottom-button">
+                                        <div class="function-button accept-button-big"><b>Thêm</b></div>
+                                        <div class="function-button cancel-button-big"><b>Hủy</b></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
-    </div>
+    </main>
 
     <!-- jQuery và Bootstrap JavaScript -->
     <!-- AOS JavaScript -->
