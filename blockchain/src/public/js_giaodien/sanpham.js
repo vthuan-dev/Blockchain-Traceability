@@ -99,3 +99,45 @@ document.getElementById("save-button").addEventListener("click", function() {
     // Submit form
     document.getElementById("profile-form").submit();
 });
+
+function toggleOverlay() {
+    const overlay = document.getElementById('overlay');
+    overlay.classList.toggle('active');
+}
+
+function notificationPopup() {
+    const dropdown = document.getElementById('filterDropdown');
+    dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const overlay = document.getElementById('overlay');
+    const navbarNav = document.getElementById('navbarNav');
+    const toggler = document.querySelector('.navbar-toggler');
+
+    function closeNavbar() {
+        if (navbarNav.classList.contains('show')) {
+            navbarNav.classList.remove('show');
+            toggler.classList.add('collapsed');
+        }
+    }
+
+    // Khi nhấp vào nút toggler, chuyển đổi overlay
+    toggler.addEventListener('click', function() {
+        toggleOverlay();
+    });
+
+    // Khi nhấp vào lớp phủ, đóng navbar và ẩn lớp phủ
+    overlay.addEventListener('click', function() {
+        closeNavbar();
+        overlay.classList.remove('active');
+    });
+
+    // Khi nhấp vào liên kết trong navbar, đóng lớp phủ
+    navbarNav.addEventListener('click', function(event) {
+        if (event.target.matches('a')) {
+            closeNavbar();
+            overlay.classList.remove('active');
+        }
+    });
+});
