@@ -48,53 +48,67 @@
         </div>
     </nav>
     
-    <div class="row justify-content-center align-items-center">
-        <div class="col-11 col-sm-8">
-            <div class="add-container profile-container">
-                <div class="form-title">
-                    <h5><b>Thêm lô hàng mới</b></h5>
-                </div>
-                <form action="update_profile.php" method="POST">
-                    <div class="form-group">
-                        <label for="productname">Tên lô</label>
-                        <input type="text" id="productname" name="productname" value="Lô bưởi tháng 12">
+    <main>
+        <div class="container mt-4">
+            <div class="row justify-content-center align-items-center">
+                <div class="col-11 col-sm-8 p-0">
+                    <div class="form-title">
+                        <h5><b>Thêm lô hàng mới</b></h5>
                     </div>
-
-                    <div class="form-group">
-                        <label for="productid">Mã lô</label>
-                        <input type="text" id="productid" name="productid" value="AH-123">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="product">Sản phẩm</label>
-                        <br>
-                        <select id="product" name="product">
-                            <option value="namroi">Bưởi năm roi</option>
-                            <option value="daxanh" selected>Bưởi da xanh</option>
-                        </select>
-                    </div>
-    
-                    <div class="form-group">
-                        <label for="quantity">Số lượng</label>
-                        <input type="text" id="quantity" name="quantity" value="300">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="batch-picture">Hình ảnh liên quan đến lô hàng</label>
-                        <input type="file" id="batch-picture" name="batch-picture" multiple>
-                    </div>
-                    <div class="row">
-                        <div class="col-12 col-sm-4 mr-auto">
-                            <div class="bottom-button">
-                                <div class="function-button accept-button-big"><b>Thêm</b></div>
-                                <div class="function-button cancel-button-big"><b>Hủy</b></div>
+                    <div class="add-container profile-container">
+                        <form action="update_profile.php" method="POST">
+                            <div class="form-group">
+                                <label for="productname">Tên lô</label>
+                                <input type="text" id="productname" name="productname" value="Lô bưởi tháng 12">
                             </div>
-                        </div>
+        
+                            <div class="form-group">
+                                <label for="productid">Mã lô</label>
+                                <input type="text" id="productid" name="productid" value="AH-123">
+                            </div>
+        
+                            <div class="form-group">
+                                <label for="product">Sản phẩm</label>
+                                <br>
+                                <select id="product" name="product">
+                                    <option value="namroi">Bưởi năm roi</option>
+                                    <option value="daxanh" selected>Bưởi da xanh</option>
+                                </select>
+                            </div>
+            
+                            <div class="form-group">
+                                <label for="quantity">Số lượng</label>
+                                <input type="text" id="quantity" name="quantity" value="300">
+                            </div>
+        
+                            <div class="form-group">
+                                <label for="batch-picture">Giấy chứng nhận</label>
+                                <input type="file" id="certification" name="certification" multiple>
+                            </div>
+        
+                            <div class="form-group">
+                                <label for="quantity">Mã SCCC</label>
+                                <input type="sccc" id="sccc" name="quantity" value="30024435JSKD">
+                            </div>
+        
+                            <div class="form-group">
+                                <label for="batch-picture">Hình ảnh liên quan đến lô hàng</label>
+                                <input type="file" id="batch-picture" name="batch-picture" multiple>
+                            </div>
+                            <div class="row">
+                                <div class="col-12 col-sm-4 mr-auto">
+                                    <div class="bottom-button">
+                                        <div class="function-button accept-button-big"><b>Thêm</b></div>
+                                        <div class="function-button cancel-button-big"><b>Hủy</b></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
-    </div>
+    </main>
 
     <!-- jQuery và Bootstrap JavaScript -->
     <!-- AOS JavaScript -->
