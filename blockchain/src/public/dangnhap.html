@@ -78,9 +78,15 @@
                 });
     
                 if (response.ok) {
-                    alert('Đăng nhập thành công');
-                    // Chuyển hướng đến trang chính sau khi đăng nhập thành công
-                    window.location.href = '/';
+                    const responseData = await response.json();
+                    const user = responseData.user;
+                    if (user.role_id == 1) {
+                        window.location.href = '/nhakiemduyet.html';
+                    } else if (user.role_id == 2) {
+                        window.location.href = '/nongdan.html';
+                    } else {
+                        alert('Role không hợp lệ');
+                    }
                 } else {
                     const errorData = await response.json();
                     alert('Lỗi: ' + errorData.message);
