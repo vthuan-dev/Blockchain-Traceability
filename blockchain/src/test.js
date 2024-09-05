@@ -43,9 +43,10 @@ const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
 }).fields([
-  { name: 'productImage', maxCount: 1 },
+  { name: 'productImages', maxCount: 10 },
   { name: 'certificateImage', maxCount: 1 }
 ]);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -111,26 +112,27 @@ async function checkFileStatusWithRetry(fileName, maxRetries = 5, retryDelay = 1
     }
   }
 }
-
 async function processFiles(files) {
   const processedFiles = {};
 
-  if (!files.images || !Array.isArray(files.images) || files.images.length === 0) {
+  if (!files.productImages || !Array.isArray(files.productImages) || files.productImages.length === 0) {
     throw new Error('Thiếu ảnh lô hàng');
   }
 
-  for (const fieldName in files) {
-    if (Array.isArray(files[fieldName])) {
-      processedFiles[fieldName] = [];
-      for (const file of files[fieldName]) {
-        const url = await uploadFile(file.buffer, file.originalname);
-        processedFiles[fieldName].push(url);
-      }
-    } else {
-      const file = files[fieldName];
-      const url = await uploadFile(file.buffer, file.originalname);
-      processedFiles[fieldName] = url;
-    }
+  processedFiles.productImages = [];
+  for (const file of files.productImages) {
+    const result = await uploadFile(file.buffer, file.originalname);
+    processedFiles.productImages.push(result.ipfsUrl);
+    console.log(`Đã xử lý ảnh sản phẩm: ${result.ipfsUrl}`);
+  }
+
+  if (files.certificateImage && files.certificateImage[0]) {
+    const certificateFile = files.certificateImage[0];
+    const result = await uploadFile(certificateFile.buffer, certificateFile.originalname);
+    processedFiles.certificateImage = result.ipfsUrl;
+    console.log(`Đã xử lý ảnh chứng nhận: ${result.ipfsUrl}`);
+  } else {
+    processedFiles.certificateImage = 'default_certificate_image_url';
   }
 
   return processedFiles;
@@ -147,7 +149,7 @@ web3.eth.net.isListening()
   .catch(e => console.log('Lỗi rồi', e));
 
 const contractABI = require('../build/contracts/TraceabilityContract.json').abi;
-const contractAddress = '0xBE979b1780C3564843F338ECA1ab2a5B382711C4';
+const contractAddress = '0x232041fB6AB1D4B1e8bd25a3eeaF12c634612610';
 const contract = new web3.eth.Contract(contractABI, contractAddress);
 
 function replacer(key, value) {
@@ -156,26 +158,6 @@ function replacer(key, value) {
   }
   return value;
 }
-
-
-
-// const fromAccount = '0x84c7cFF56f736B372b64888c6Ad9D90c4F13d184'; // Thay thế bằng địa chỉ tài khoản có đủ ETH trong Ganache
-// const toAccount = '0xB5b37722018951f460Bf2435C472E95BaFD89906'; // Thay thế bằng địa chỉ tài khoản của bạn
-
-// // Chuyển ETH ảo
-// web3.eth.sendTransaction({
-//   from: fromAccount,
-//   to: toAccount,
-//   value: web3.utils.toWei('100', 'ether') // Số lượng ETH bạn muốn nạp
-// })
-// .then(receipt => {
-//   console.log('Giao dịch thành công:', receipt);
-// })
-// .catch(error => {
-//   console.error('Lỗi khi chuyển ETH:', error);
-// });
-
-
 
 function cleanKeys(obj) {
   const cleanedObj = {};
@@ -239,7 +221,6 @@ app.get('/batches/:producerId', async (req, res) => {
   }
 });
 
-
 app.get('/create-batch', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'themlohang.html'));
 });
@@ -251,8 +232,19 @@ app.post('/checkdata', upload, (req, res) => {
   });
 });
 
-
-app.post('/createbatch', upload, async (req, res) => {
+app.post('/createbatch', (req, res, next) => {
+  upload(req, res, function (err) {
+    if (err instanceof multer.MulterError) {
+      // Lỗi Multer
+      return res.status(400).json({ error: 'Lỗi upload file: ' + err.message });
+    } else if (err) {
+      // Lỗi không xác định
+      return res.status(500).json({ error: 'Lỗi server: ' + err.message });
+    }
+    // Nếu không có lỗi, tiếp tục xử lý
+    next();
+  });
+}, async (req, res) => {
   console.log('Received body:', req.body);
   console.log('Received files:', req.files);
 
@@ -263,18 +255,17 @@ app.post('/createbatch', upload, async (req, res) => {
     if (!sscc || !quantity || !farmPlotNumber || !productId || !producerId || !startDate || !endDate) {
       return res.status(400).json({ error: 'Thiếu thông tin bắt buộc' });
     }
-    
 
     // Kiểm tra độ dài SSCC
     if (sscc.length !== 18) {
-      return res.status(400).json({ error: 'SSCC phải có 18 ký tự' });    }
+      return res.status(400).json({ error: 'SSCC phải có 18 ký tự' });
+    }
 
     // Kiểm tra và chuyển đổi các giá trị số
     const cleanProductId = parseInt(productId, 10);
     const cleanProducerId = parseInt(producerId, 10);
     const cleanStartDate = new Date(startDate).getTime() / 1000;
     const cleanEndDate = new Date(endDate).getTime() / 1000;
-    
 
     if (isNaN(cleanProductId) || cleanProductId <= 0) {
       return res.status(400).json({ error: 'Product ID không hợp lệ' });
@@ -283,7 +274,6 @@ app.post('/createbatch', upload, async (req, res) => {
       return res.status(400).json({ error: 'Producer ID không hợp lệ' });
     }
 
-    
     if (isNaN(cleanStartDate) || cleanStartDate <= 0) {
       return res.status(400).json({ error: 'Start date không hợp lệ' });
     }
@@ -310,18 +300,28 @@ app.post('/createbatch', upload, async (req, res) => {
       return res.status(400).json({ error: 'SSCC đã tồn tại, vui lòng nhập lại SSCC khác' });
     }
 
-    let productImageUrl = '';
+    let productImageUrls = [];
 
-    // Debugging: Log các tệp nhận được
-
-    // Xử lý productImage
-    if (req.files && req.files['productImage'] && req.files['productImage'][0]) {
-      const productImageFile = req.files['productImage'][0];
-      const productImageResult = await uploadFile(productImageFile.buffer, productImageFile.originalname);
-      productImageUrl = productImageResult.ipfsUrl;
+    // Xử lý productImages
+    if (req.files && req.files['productImages'] && req.files['productImages'].length > 0) {
+      console.log(`Số lượng ảnh sản phẩm nhận được: ${req.files['productImages'].length}`);
+      
+      for (const file of req.files['productImages']) {
+        try {
+          const result = await uploadFile(file.buffer, file.originalname);
+          productImageUrls.push(result.ipfsUrl);
+          console.log(`Đã thêm URL ảnh sản phẩm: ${result.ipfsUrl}`);
+        } catch (uploadError) {
+          console.error(`Lỗi khi tải lên ảnh ${file.originalname}:`, uploadError);
+        }
+      }
+      
+      console.log(`Tổng số URL ảnh sản phẩm sau khi xử lý: ${productImageUrls.length}`);
     } else {
+      console.log('Không có ảnh sản phẩm được gửi lên');
       return res.status(400).json({ error: 'Thiếu ảnh sản phẩm' });
     }
+
     let certificateImageUrl = '';
 
     // Xử lý certificateImage (nếu có)
@@ -334,12 +334,16 @@ app.post('/createbatch', upload, async (req, res) => {
       console.log('Không có ảnh chứng nhận được tải lên');
       certificateImageUrl = 'default_certificate_image_url';
     }
+
+    // Trước khi gọi createBatch
+    console.log('productImageUrls trước khi gọi createBatch:', productImageUrls);
+
     // Gọi hàm createBatch của smart contract
     const result = await contract.methods.createBatch(
       sscc,
       cleanProducerId,
       quantity,
-      productImageUrl,
+      productImageUrls,
       certificateImageUrl,
       farmPlotNumber,
       cleanProductId,
@@ -349,14 +353,14 @@ app.post('/createbatch', upload, async (req, res) => {
 
     // Chuyển đổi kết quả thành chuỗi JSON
     const safeResult = JSON.parse(JSON.stringify(result, replacer));
+    console.log('Number of product images:', req.files['productImages'] ? req.files['productImages'].length : 0);
 
     res.status(200).send({ 
       message: 'Lô hàng đã được tạo thành công và đang chờ phê duyệt', 
       transactionHash: safeResult.transactionHash,
       batchId: safeResult.events.BatchCreated.returnValues.batchId,
-      productImageUrl,
+      productImageUrls,
       certificateImageUrl
-
     });
   } catch (err) {
     console.error('Error creating batch:', err);
@@ -367,37 +371,34 @@ app.post('/createbatch', upload, async (req, res) => {
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('/batches/producer/:producerId', async (req, res) => {
   try {
-      const producerId = req.params.producerId;
-      console.log(`Fetching batches for producer ID: ${producerId}`);
-      const batches = await contract.methods.getBatchesByProducer(producerId).call();
-      console.log('Fetched batches:', batches);
-      const batchDetails = batches.map(batch => ({
-          batchId: batch.batchId.toString(),
-          sscc: batch.sscc,
-          producerId: batch.producerId.toString(),
-          quantity: batch.quantity,
-          productionDate: new Date(Number(batch.productionDate) * 1000).toISOString(),
-          expiryDate: new Date(Number(batch.expiryDate) * 1000).toISOString(),
-          startDate: new Date(Number(batch.startDate) * 1000).toISOString(),
-          endDate: new Date(Number(batch.endDate) * 1000).toISOString(),
-          status: ['Created', 'PendingApproval', 'Approved', 'Rejected'][Number(batch.status)],
-          productImageUrl: batch.productImageUrl,
-          certificateImageUrl: batch.certificateImageUrl,
-          farmPlotNumber: batch.farmPlotNumber,
-          dataHash: batch.dataHash,
-          productId: batch.productId.toString()
-      }));
-      res.json(batchDetails);
+    const producerId = req.params.producerId;
+    console.log(`Fetching batches for producer ID: ${producerId}`);
+    const batches = await contract.methods.getBatchesByProducer(producerId).call();
+    console.log('Fetched batches:', batches);
+    const batchDetails = batches.map(batch => ({
+      batchId: batch.batchId.toString(),
+      sscc: batch.sscc,
+      producerId: batch.producerId.toString(),
+      quantity: batch.quantity,
+      productionDate: new Date(Number(batch.productionDate) * 1000).toISOString(),
+      expiryDate: new Date(Number(batch.expiryDate) * 1000).toISOString(),
+      startDate: new Date(Number(batch.startDate) * 1000).toISOString(),
+      endDate: new Date(Number(batch.endDate) * 1000).toISOString(),
+      status: ['Created', 'PendingApproval', 'Approved', 'Rejected'][Number(batch.status)],
+      productImageUrls: batch.productImageUrls, // Thay đổi này
+      certificateImageUrl: batch.certificateImageUrl,
+      farmPlotNumber: batch.farmPlotNumber,
+      dataHash: batch.dataHash,
+      productId: batch.productId.toString()
+    }));
+    res.json(batchDetails);
   } catch (error) {
-      console.error('Error fetching batches:', error);
-      res.status(500).json({ error: error.message });
+    console.error('Error fetching batches:', error);
+    res.status(500).json({ error: error.message });
   }
 });
-
 
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
-
-

@@ -50,12 +50,80 @@
         #result p {
             margin: 10px 0;
         }
+        #imagePreview, #certificatePreview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .image-container {
+            position: relative;
+            width: 100px;
+            height: 100px;
+        }
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+        .delete-btn {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background-color: red;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+        #certificatePreview .image-container {
+            width: 200px;
+            height: 200px;
+        }
+        #imagePreview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .delete-btn {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: red;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Tạo Lô Hàng Mới</h1>
-        <form id="createBatchForm" enctype="multipart/form-data" method="POST" action="/createbatch">
+        <form id="createBatchForm" enctype="multipart/form-data">
             <div class="form-group">
                 <label for="sscc">SSCC:</label>
                 <input type="text" class="form-control" id="sscc" name="sscc" required>
@@ -92,17 +160,27 @@
             </div>
 
             <div class="form-group">
-                <label for="productImage">Ảnh sản phẩm:</label>
-                <input type="file" class="form-control-file" id="productImage" name="productImage" accept="image/*" required>
+                <label for="productImages">Ảnh sản phẩm:</label>
+                <input type="file" class="form-control-file" id="productImages" name="productImages" accept="image/*" multiple required>
+                <small class="form-text text-muted">Bạn có thể chọn tối đa 10 ảnh.</small>
+                <div id="imagePreview"></div>
             </div>
 
             <div class="form-group">
                 <label for="certificateImage">Ảnh chứng nhận:</label>
                 <input type="file" class="form-control-file" id="certificateImage" name="certificateImage" accept="image/*">
+                <div id="certificatePreview"></div>
             </div>
 
             <button type="submit" class="btn btn-primary btn-block">Tạo Lô Hàng</button>
         </form>
+
+        <div class="loading">
+            <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Đang xử lý...</span>
+            </div>
+            <p>Đang tạo lô hàng, vui lòng đợi...</p>
+        </div>
 
         <div id="result"></div>
     </div>
@@ -110,36 +188,172 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
-        document.getElementById('createBatchForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const form = e.target;
-            const formData = new FormData(form);
-    
-            try {
-                const response = await fetch('/createbatch', {
-                    method: 'POST',
-                    body: formData
+        let productImageFiles = []; // Mảng lưu trữ các file ảnh sản phẩm
+        let certificateImageFile = null; // Biến lưu trữ file ảnh giấy chứng nhận
+
+        function previewProductImages(input) {
+            const preview = $('#imagePreview');
+            preview.empty();
+
+            if (input.files && input.files.length > 0) {
+                const files = Array.from(input.files);
+                const maxImages = 10;
+                const newFiles = files.slice(0, maxImages - productImageFiles.length);
+                productImageFiles = [...productImageFiles, ...newFiles].slice(0, maxImages);
+
+                productImageFiles.forEach((file, index) => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const container = $('<div class="image-container"></div>');
+                        const img = $('<img>').attr({
+                            src: e.target.result,
+                            class: 'img-preview',
+                            alt: 'preview',
+                            id: `productImage-${index + 1}`
+                        });
+                        const deleteBtn = $('<button class="delete-btn">x</button>').click(function() {
+                            container.remove();
+                            productImageFiles.splice(index, 1);
+                            updateProductFileInput();
+                        });
+                        container.append(img, deleteBtn);
+                        preview.append(container);
+                    };
+                    reader.readAsDataURL(file);
                 });
-    
-                const result = await response.json();
-    
-                if (!response.ok) {
-                    throw new Error(result.error || `HTTP error! status: ${response.status}`);
+
+                if (productImageFiles.length >= maxImages) {
+                    alert(`Đã đạt số lượng tối đa ${maxImages} ảnh sản phẩm.`);
                 }
-    
-                document.getElementById('result').innerHTML = `
-                    <h2>Kết quả:</h2>
-                    <p>${result.message}</p>
-                    <p>Transaction Hash: ${result.transactionHash}</p>
-                    <p>Batch ID: ${result.batchId}</p>
-                    <p>Product Image URL: ${result.productImageUrl}</p>
-                    <p>Certificate Image URL: ${result.certificateImageUrl}</p>
-                `;
-            } catch (error) {
-                console.error('Lỗi:', error);
-                document.getElementById('result').innerHTML = `<p>Lỗi: ${error.message}</p>`;
             }
+            updateProductFileInput();
+        }
+
+        function previewCertificateImage(input) {
+            const preview = $('#certificatePreview');
+            preview.empty();
+
+            if (input.files && input.files.length > 0) {
+                certificateImageFile = input.files[0];
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const container = $('<div class="image-container"></div>');
+                    const img = $('<img>').attr({
+                        src: e.target.result,
+                        class: 'img-preview',
+                        alt: 'preview',
+                        id: 'certificateImage'
+                    });
+                    const deleteBtn = $('<button class="delete-btn">x</button>').click(function() {
+                        container.remove();
+                        certificateImageFile = null;
+                        updateCertificateFileInput();
+                    });
+                    container.append(img, deleteBtn);
+                    preview.append(container);
+                };
+                reader.readAsDataURL(certificateImageFile);
+            }
+            updateCertificateFileInput();
+        }
+
+        function updateProductFileInput() {
+            const dt = new DataTransfer();
+            productImageFiles.forEach(file => dt.items.add(file));
+            document.getElementById('productImages').files = dt.files;
+        }
+
+        function updateCertificateFileInput() {
+            const dt = new DataTransfer();
+            if (certificateImageFile) {
+                dt.items.add(certificateImageFile);
+            }
+            document.getElementById('certificateImage').files = dt.files;
+        }
+
+        $('#productImages').change(function() {
+            previewProductImages(this);
+        });
+
+        $('#certificateImage').change(function() {
+            previewCertificateImage(this);
+        });
+
+        $('#createBatchForm').submit(function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            
+            // Xóa tất cả các file ảnh sản phẩm hiện có trong formData
+            formData.delete('productImages');
+            formData.delete('certificateImage');
+            
+            // Thêm lại tất cả các file ảnh sản phẩm
+            productImageFiles.forEach((file, index) => {
+                formData.append('productImages', file, file.name);
+            });
+
+            // Thêm ảnh giấy chứng nhận nếu có
+            if (certificateImageFile) {
+                formData.append('certificateImage', certificateImageFile, certificateImageFile.name);
+            }
+
+            console.log('Số lượng ảnh sản phẩm được gửi:', productImageFiles.length);
+            console.log('Ảnh giấy chứng nhận được gửi:', certificateImageFile ? 'Có' : 'Không');
+
+            // Hiển thị modal loading
+            $('#loadingModal').modal('show');
+
+            $.ajax({
+                url: '/createbatch',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(result) {
+                    // Ẩn spinner và hiển thị thông báo thành công
+                    $('#loadingSpinner').hide();
+                    $('#resultMessage').show();
+                    $('#resultText').text('Lô hàng đã được tạo thành công!');
+                    $('#resultText').addClass('text-success');
+
+                    // Tự động đóng modal và refresh trang sau 3 giây
+                    setTimeout(function() {
+                        $('#loadingModal').modal('hide');
+                        location.reload();
+                    }, 3000);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Lỗi:', error);
+                    // Ẩn spinner và hiển thị thông báo lỗi
+                    $('#loadingSpinner').hide();
+                    $('#resultMessage').show();
+                    $('#resultText').text('Lỗi: ' + (xhr.responseJSON ? xhr.responseJSON.error : error));
+                    $('#resultText').addClass('text-danger');
+
+                    // Thêm nút đóng cho trường hợp lỗi
+                    $('#resultMessage').append('<button type="button" class="btn btn-secondary mt-3" data-dismiss="modal">Đóng</button>');
+                }
+            });
         });
     </script>
+    <!-- Modal -->
+    <div class="modal fade" id="loadingModal" tabindex="-1" role="dialog" aria-labelledby="loadingModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-body text-center">
+            <div id="loadingSpinner">
+              <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Đang xử lý...</span>
+              </div>
+              <p class="mt-2">Đang tạo lô hàng, vui lòng đợi...</p>
+            </div>
+            <div id="resultMessage" style="display: none;">
+              <h4 id="resultText"></h4>
+              <!-- Nút đóng sẽ được thêm động trong trường hợp lỗi -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 </body>
 </html>
