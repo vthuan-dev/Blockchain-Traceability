@@ -1,4 +1,3 @@
-
 /* Background color for the entire webpage */
 body {
     background-color: #ecf0f1; /* Màu xanh lá cây nhạt */
@@ -31,6 +30,9 @@ body {
 
 /* CSS for the card image */
 .card-img-top {
+    width: 100%;
+    height: 200px; /* Đặt chiều cao cố định */
+    object-fit: cover; /* Đảm bảo ảnh được cắt để vừa với khung */
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
 }
