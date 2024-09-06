@@ -67,52 +67,9 @@
             <h2 class="highlighted-heading" data-aos="fade-up">
                 Thông tin nhà sản xuất
             </h2>
-            <div class="row">
-                <div class="col-md-3 col-6 mb-4" data-aos="fade-up">
-                    <div class="card">
-                        <img src="./hinhanh/5-hinh-anh-cay-buoi-nam-roi-inkythuatso-21-15-48-49.jpg" class="card-img-top" alt="...">
-                        <div class="card-body">
-                            <h5 class="card-title">Bưởi năm roi</h5>
-                            <div class="sanpham-id">
-                                NS123456
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3 col-6 mb-4" data-aos="fade-up">
-                    <div class="card justify-content-center" >
-                        <img src="./hinhanh/5-hinh-anh-cay-buoi-nam-roi-inkythuatso-21-15-48-49.jpg" class="card-img-top" alt="...">
-                        <div class="card-body">
-                            <h5 class="card-title">Bưởi năm roi</h5>
-                            <div class="sanpham-id">
-                                NS123456
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3 col-6 mb-4" data-aos="fade-up">
-                    <div class="card">
-                        <img src="./hinhanh/5-hinh-anh-cay-buoi-nam-roi-inkythuatso-21-15-48-49.jpg" class="card-img-top" alt="...">
-                        <div class="card-body">
-                            <h5 class="card-title">Bưởi năm roi</h5>
-                            <div class="sanpham-id">
-                                NS123456
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3 col-6 mb-4" data-aos="fade-up">
-                    <div class="card">
-                        <img src="./hinhanh/5-hinh-anh-cay-buoi-nam-roi-inkythuatso-21-15-48-49.jpg" class="card-img-top" alt="...">
-                        <div class="card-body">
-                            <h5 class="card-title">Bưởi năm roi</h5>
-                            <div class="sanpham-id">
-                                NS123456
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div> 
+            <div class="row" id="nhasanxuat-container">
+                <!-- Nội dung sẽ được thêm vào đây bằng JavaScript -->
+            </div>
         </div>
     
         <div class="text-center my-2">
@@ -158,5 +115,44 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('/api/nhasanxuat');
+                const data = await response.json();
+                const container = document.getElementById('nhasanxuat-container');
+
+                data.forEach((user, index) => {
+                    if (index % 4 === 0 && index !== 0) {
+                        container.appendChild(document.createElement('div')).classList.add('w-100');
+                    }
+
+                    const col = document.createElement('div');
+                    col.classList.add('col-md-3', 'col-6', 'mb-4');
+                    col.setAttribute('data-aos', 'fade-up');
+
+                    // Lấy đường dẫn hình ảnh từ cơ sở dữ liệu
+                    const avatarPath = user.avatar.split('avatars').pop();
+
+
+                    col.innerHTML = `
+                        <a href="trangcanhan.html">
+                            <div class="card">
+                                <img src="uploads/avatars${avatarPath}" class="card-img-top" alt="...">
+                                <div class="card-body">
+                                    <h5 class="card-title">${user.name}</h5>
+                                    <div class="sanpham-id"><span>ID nhà sản xuất: </span> ${user.uid}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                    container.appendChild(col);
+                });
+            } catch (error) {
+                console.error('Lỗi khi lấy danh sách nhà sản xuất:', error);
+            }
+        });
+    </script>
 </body>
 </html>

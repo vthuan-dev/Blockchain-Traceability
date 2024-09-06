@@ -8,7 +8,6 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/trangchu.css">
     <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
-    
 </head>
 <body>
     <!-- Thanh điều hướng -->
@@ -42,10 +41,6 @@
     </nav>
 
     <div class="container mt-4">
-        <!-- <div class="banner d-flex justify-content-center">
-            <img src=".\hinhanh\banner.jpg" class="img-fluid custom-img" alt="Responsive image">
-        </div> -->
-
         <div class="search-bar mt-4 mb-4" data-aos="fade-up">
             <div class="container">
                 <div class="row justify-content-center">
@@ -67,52 +62,9 @@
             <h2 class="highlighted-heading" data-aos="fade-up">
                 Thông tin nhà kiểm duyệt
             </h2>
-            <div class="row">
-                <div class="col-md-3 col-6 mb-4" data-aos="fade-up">
-                    <div class="card">
-                        <img src="./hinhanh/5-hinh-anh-cay-buoi-nam-roi-inkythuatso-21-15-48-49.jpg" class="card-img-top" alt="...">
-                        <div class="card-body">
-                            <h5 class="card-title">Bưởi năm roi</h5>
-                            <div class="sanpham-id">
-                                NS123456
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3 col-6 mb-4" data-aos="fade-up">
-                    <div class="card justify-content-center" >
-                        <img src="./hinhanh/5-hinh-anh-cay-buoi-nam-roi-inkythuatso-21-15-48-49.jpg" class="card-img-top" alt="...">
-                        <div class="card-body">
-                            <h5 class="card-title">Bưởi năm roi</h5>
-                            <div class="sanpham-id">
-                                NS123456
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3 col-6 mb-4" data-aos="fade-up">
-                    <div class="card">
-                        <img src="./hinhanh/5-hinh-anh-cay-buoi-nam-roi-inkythuatso-21-15-48-49.jpg" class="card-img-top" alt="...">
-                        <div class="card-body">
-                            <h5 class="card-title">Bưởi năm roi</h5>
-                            <div class="sanpham-id">
-                                NS123456
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3 col-6 mb-4" data-aos="fade-up">
-                    <div class="card">
-                        <img src="./hinhanh/5-hinh-anh-cay-buoi-nam-roi-inkythuatso-21-15-48-49.jpg" class="card-img-top" alt="...">
-                        <div class="card-body">
-                            <h5 class="card-title">Bưởi năm roi</h5>
-                            <div class="sanpham-id">
-                                NS123456
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div> 
+            <div class="row" id="nhakiemduyet-container">
+                <!-- Nội dung sẽ được thêm vào đây bằng JavaScript -->
+            </div>
         </div>
     
         <div class="text-center my-2">
@@ -146,11 +98,8 @@
 
     </div>
 
-
-
-
     <!-- jQuery và Bootstrap JavaScript -->
-     <!-- AOS JavaScript -->
+    <!-- AOS JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
     <script>
     AOS.init();
@@ -158,5 +107,42 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('/api/nhakiemduyet');
+                const data = await response.json();
+                const container = document.getElementById('nhakiemduyet-container');
+
+                data.forEach((user, index) => {
+                    if (index % 4 === 0 && index !== 0) {
+                        container.appendChild(document.createElement('div')).classList.add('w-100');
+                    }
+
+                    const col = document.createElement('div');
+                    col.classList.add('col-md-3', 'col-6', 'mb-4');
+                    col.setAttribute('data-aos', 'fade-up');
+
+                    const avatarPath = user.avatar.split('avatars').pop();
+
+                    col.innerHTML = `
+                        <a href="trangcanhan.html">
+                            <div class="card">
+                                <img src="uploads/avatars${avatarPath}" class="card-img-top" alt="...">
+                                <div class="card-body">
+                                    <h5 class="card-title">${user.name}</h5>
+                                    <div class="sanpham-id"><span>ID nhà kiểm duyệt: </span> ${user.uid}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                    container.appendChild(col);
+                });
+            } catch (error) {
+                console.error('Lỗi khi lấy danh sách nhà kiểm duyệt:', error);
+            }
+        });
+    </script>
 </body>
 </html>

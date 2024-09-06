@@ -6,70 +6,58 @@ const path = require('path');
 const multer = require('multer');
 const dangkyRoutes = require('./components/user/dangky.js');
 const dangnhapRoutes = require('./components/user/dangnhap.js');
-const bcrypt = require('bcrypt'); // Thêm dòng này để import bcrypt
-const nodemailer = require('nodemailer'); // Thêm dòng này để import nodemailer
+const bcrypt = require('bcrypt');
+const nodemailer = require('nodemailer');
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
-
 
 dotenv.config();
 const app = express();
 app.use(bodyParser.json());
 
-
 const db = mysql.createPool({
-    // host: process.env.DB_HOST,
-    // user: process.env.DB_USER,
-    // port: process.env.DB_PORT,
-    // password: process.env.DB_PASSWORD,
-    // database: process.env.DB_DATABASE,
     host: 'database-1.cv20qo0q8bre.ap-southeast-2.rds.amazonaws.com',
     user: 'admin',
     password: '9W8RQuAdnZylXZAmb68P',
     database: 'blockchain',
     connectTimeout: 10000
 });
-// db.connect((err) => {
-//   if (err) {
-//     console.error('Lỗi kết nối cơ sở dữ liệu:', err.message);
-//     return;
-//   }
-//   console.log('Đã kết nối cơ sở dữ liệu');
-// });
 
 app.use('/api', dangkyRoutes(db));
 app.use('/api', dangnhapRoutes(db));
 
 const upload = multer();
 
-// API endpoint để lấy danh sách vùng sản xuất
-// app.get('/api/regions', (req, res) => {
-//   const query = 'SELECT * FROM regions';
-//   db.query(query, (err, results) => {
-//     if (err) {
-//       res.status(500).json({ error: 'Lỗi khi lấy danh sách vùng sản xuất' });
-//     } else {
-//       res.json(results);
-//     }
-//   });
-// });
-
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'trangchu.html'));
 });
 
-// API endpoint để xử lý đăng ký
 app.post('/api/register', upload.single('avatar'), (req, res) => {
   // Xử lý logic đăng ký ở đây
-  // Lưu thông tin người dùng vào cơ sở dữ liệu
-  // Trả về kết quả cho client
 });
 
-// API endpoint để xử lý đăng nhập
 app.post('/api/dangnhap', (req, res) => {
   const { email, password } = req.body;
   // Xử lý logic đăng nhập ở đây
-  // Kiểm tra thông tin đăng nhập với cơ sở dữ liệu
-  // Trả về kết quả cho client
+});
+
+app.get('/api/nhasanxuat', async (req, res) => {
+  try {
+    const [rows] = await db.query('SELECT * FROM users WHERE role_id = 2');
+    res.json(rows);
+  } catch (err) {
+    console.error('Lỗi khi lấy danh sách nhà sản xuất:', err.message);
+    res.status(500).json({ error: 'Lỗi khi lấy danh sách nhà sản xuất' });
+  }
+});
+
+app.get('/api/nhakiemduyet', async (req, res) => {
+  try {
+    const [rows] = await db.query('SELECT * FROM users WHERE role_id = 1');
+    res.json(rows);
+  } catch (err) {
+    console.error('Lỗi khi lấy danh sách nhà kiểm duyệt:', err.message);
+    res.status(500).json({ error: 'Lỗi khi lấy danh sách nhà kiểm duyệt' });
+  }
 });
 
 app.use(express.static(path.join(__dirname, 'public')));
