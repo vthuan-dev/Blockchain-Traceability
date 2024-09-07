@@ -410,6 +410,9 @@ app.post('/createbatch', (req, res, next) => {
   }
 });
 
+app.get('/create-activity', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'themnkhd.html'));
+});
 
 app.post('/createactivity', (req, res, next) => {
   activityUpload(req, res, function (err) {

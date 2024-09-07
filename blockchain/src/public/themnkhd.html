@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thêm Nhật Ký Hoạt Động</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            margin-top: 50px;
+            max-width: 600px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .form-group label {
+            font-weight: bold;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 class="text-center">Thêm Nhật Ký Hoạt Động</h2>
+        <form id="activityLogForm" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="uid">UID:</label>
+                <input type="number" class="form-control" id="uid" name="uid" required>
+            </div>
+            <div class="form-group">
+                <label for="activityName">Tên Hoạt Động:</label>
+                <input type="text" class="form-control" id="activityName" name="activityName" required>
+            </div>
+            <div class="form-group">
+                <label for="description">Mô Tả:</label>
+                <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="relatedProductIds">ID Sản Phẩm Liên Quan (cách nhau bằng dấu phẩy):</label>
+                <input type="text" class="form-control" id="relatedProductIds" name="relatedProductIds">
+            </div>
+            <div class="form-group">
+                <label for="imageUrls">Ảnh Hoạt Động:</label>
+                <input type="file" class="form-control-file" id="imageUrls" name="imageUrls" multiple>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Thêm Nhật Ký</button>
+        </form>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        document.getElementById('activityLogForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+
+            const response = await fetch('/createactivity', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                alert('Nhật ký hoạt động đã được thêm thành công');
+            } else {
+                const errorData = await response.json();
+                alert('Lỗi khi thêm nhật ký hoạt động: ' + errorData.error);
+            }
+        });
+    </script>
+</body>
+</html>
