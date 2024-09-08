@@ -151,55 +151,75 @@
             const batchInfoDiv = document.getElementById('batchInfo');
             batchInfoDiv.innerHTML = '<p>Đang tải dữ liệu...</p>';
             try {
-                const response = await fetch(`/batches/producer/${producerId}`);
+                const response = await fetch(`/batches/${producerId}`);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const data = await response.json();
+                console.log('Raw data received:', data); // Thêm dòng này
                 displayBatchInfo(data);
             } catch (error) {
+                console.error('Error:', error);
                 batchInfoDiv.innerHTML = `<p class="text-danger">Có lỗi xảy ra khi truy xuất thông tin: ${error.message}</p>`;
             }
         }
 
         function displayBatchInfo(batches) {
+            console.log('Received batches:', batches);
             const batchInfoDiv = document.getElementById('batchInfo');
-            if (batches.length === 0) {
+            if (!Array.isArray(batches) || batches.length === 0) {
                 batchInfoDiv.innerHTML = '<p>Không có lô hàng nào được tìm thấy.</p>';
                 return;
             }
-            batchInfoDiv.innerHTML = batches.map(batch => `
-                <div class="batch card">
-                    <div class="card-body">
-                        <h2 class="card-title">Thông tin lô hàng: ${batch.batchId}</h2>
-                        <p class="card-text"><strong>SSCC:</strong> ${batch.sscc}</p>
-                        <p class="card-text"><strong>Nhà sản xuất ID:</strong> ${batch.producerId}</p>
-                        <p class="card-text"><strong>Số lượng:</strong> ${batch.quantity}</p>
-                        <p class="card-text"><strong>Ngày bắt đầu:</strong> ${new Date(batch.startDate).toLocaleString()}</p>
-                        <p class="card-text"><strong>Ngày kết thúc:</strong> ${new Date(batch.endDate).toLocaleString()}</p>
-                        <p class="card-text"><strong>Trạng thái:</strong> ${batch.status}</p>
-                        <p class="card-text"><strong>Số lô đất canh tác:</strong> ${batch.farmPlotNumber}</p>
-                        <p class="card-text"><strong>Mã sản phẩm:</strong> ${batch.productId}</p>
-                        <div class="image-container">
-                            <div>
-                                <h5>Hình ảnh sản phẩm</h5>
-                                <div class="product-images">
-                                    ${batch.productImageUrls ? batch.productImageUrls.map(url => `
-                                        <img src="${url}" alt="Hình ảnh sản phẩm">
-                                    `).join('') : '<p>Không có hình ảnh sản phẩm</p>'}
+            batchInfoDiv.innerHTML = batches.map(batch => {
+                // Chuyển đổi timestamp thành đối tượng Date
+                const startDate = new Date(parseInt(batch.startDate) * 1000);
+                const endDate = new Date(parseInt(batch.endDate) * 1000);
+
+                // Định dạng ngày tháng
+                const formatDate = (date) => {
+                    return date.toLocaleString('vi-VN', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                };
+
+                return `
+                    <div class="batch card">
+                        <div class="card-body">
+                            <h2 class="card-title">Thông tin lô hàng: ${batch.batchId}</h2>
+                            <p class="card-text"><strong>SSCC:</strong> ${batch.sscc}</p>
+                            <p class="card-text"><strong>Nhà sản xuất ID:</strong> ${batch.producerId}</p>
+                            <p class="card-text"><strong>Số lượng:</strong> ${batch.quantity}</p>
+                            <p class="card-text"><strong>Ngày bắt đầu:</strong> ${formatDate(startDate)}</p>
+                            <p class="card-text"><strong>Ngày kết thúc:</strong> ${formatDate(endDate)}</p>
+                            <p class="card-text"><strong>Trạng thái:</strong> ${batch.status}</p>
+                            <p class="card-text"><strong>Số lô đất canh tác:</strong> ${batch.farmPlotNumber}</p>
+                            <p class="card-text"><strong>Mã sản phẩm:</strong> ${batch.productId}</p>
+                            <div class="image-container">
+                                <div>
+                                    <h5>Hình ảnh sản phẩm</h5>
+                                    <div class="product-images">
+                                        ${batch.productImageUrls ? batch.productImageUrls.map(url => `
+                                            <img src="${url}" alt="Hình ảnh sản phẩm">
+                                        `).join('') : '<p>Không có hình ảnh sản phẩm</p>'}
+                                    </div>
                                 </div>
-                            </div>
-                            
-                            <div class="certificate-image-container">
-                                <h5>Hình ảnh giấy chứng nhận</h5>
-                                <div class="certificate-image">
-                                    ${batch.certificateImageUrl ? `<img src="${batch.certificateImageUrl}" alt="Chứng nhận">` : '<p>Không có hình ảnh chứng nhận</p>'}
+                                
+                                <div class="certificate-image-container">
+                                    <h5>Hình ảnh giấy chứng nhận</h5>
+                                    <div class="certificate-image">
+                                        ${batch.certificateImageUrl ? `<img src="${batch.certificateImageUrl}" alt="Chứng nhận">` : '<p>Không có hình ảnh chứng nhận</p>'}
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
     </script>
 </body>

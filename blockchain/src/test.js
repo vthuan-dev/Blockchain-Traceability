@@ -38,6 +38,22 @@ db.connect((err) => {
   console.log('Đã kết nối cơ sở dữ liệu');
 });
 
+
+
+const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
+
+const account = web3.eth.accounts.privateKeyToAccount('0xe9437cabf0c3b29aac95c0338c1177a53f6a2487e15480d959f37cb1597b5795');
+web3.eth.accounts.wallet.add(account);
+web3.eth.defaultAccount = account.address
+
+web3.eth.net.isListening()
+  .then(() => console.log('Đã kết nối với ETH node'))
+  .catch(e => console.log('Lỗi rồi', e));
+
+const contractABI = require('../build/contracts/TraceabilityContract.json').abi;
+const contractAddress = '0x3f59eDb2b07F55A5DBFB81F8E4914107d3390a40';
+const contract = new web3.eth.Contract(contractABI, contractAddress);
+
 // tạo biến lưu trữ file, giới hạn số lượng file và tên file, maxCount: số lượng file, name: tên file
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -82,6 +98,20 @@ async function uploadFile(fileBuffer, fileName) {
     console.error('Lỗi khi tải lên Filebase:', error);
     throw error;
   }
+}
+function convertBigIntToString(item) {
+  if (typeof item === 'bigint') {
+    return item.toString();
+  }
+  if (Array.isArray(item)) {
+    return item.map(convertBigIntToString);
+  }
+  if (typeof item === 'object' && item !== null) {
+    return Object.fromEntries(
+      Object.entries(item).map(([key, value]) => [key, convertBigIntToString(value)])
+    );
+  }
+  return item;
 }
 
 async function checkFileStatusWithRetry(fileName, maxRetries = 5, retryDelay = 1000) {
@@ -145,20 +175,6 @@ async function processFiles(files) {
   return processedFiles;
 }
 
-const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
-
-const account = web3.eth.accounts.privateKeyToAccount('0xe9437cabf0c3b29aac95c0338c1177a53f6a2487e15480d959f37cb1597b5795');
-web3.eth.accounts.wallet.add(account);
-web3.eth.defaultAccount = account.address
-
-web3.eth.net.isListening()
-  .then(() => console.log('Đã kết nối với ETH node'))
-  .catch(e => console.log('Lỗi rồi', e));
-
-const contractABI = require('../build/contracts/TraceabilityContract.json').abi;
-const contractAddress = '0x3f59eDb2b07F55A5DBFB81F8E4914107d3390a40';
-const contract = new web3.eth.Contract(contractABI, contractAddress);
-
 function replacer(key, value) {
   if (typeof value === 'bigint') {
     return value.toString();
@@ -212,361 +228,377 @@ async function getProducerById(producerId) {
   });
 }
 
-app.get('/batches/:producerId', async (req, res) => {
-  try {
-    const producerId = parseInt(req.params.producerId, 10);
-
-    if (isNaN(producerId) || producerId <= 0) {
-      return res.status(400).send('Producer ID không hợp lệ');
-    }
-
-    const batches = await contract.methods.getBatchesByProducer(producerId).call();
-    res.status(200).send(batches);
-  } catch (err) {
-    console.error('Error fetching batches:', err);
-    res.status(500).send('Lỗi khi lấy danh sách lô hàng: ' + err.message);
-  }
-});
-const { convertBigIntToString } = require('./util.js');
-
-app.get('/getActivityLogs/:uid', async (req, res) => {
-  try {
-    const uid = req.params.uid;
-    
-    console.log('Đang truy xuất nhật ký hoạt động cho UID:', uid);
-
-    const activityLogs = await contract.methods.getActivityLogs(uid).call();
-    
-    console.log('Số lượng nhật ký hoạt động:', activityLogs.length);
-
-    // Chuyển đổi tất cả giá trị BigInt thành chuỗi
-    const convertedLogs = convertBigIntToString(activityLogs);
-
-    // Chuyển đổi dữ liệu để dễ đọc hơn
-    const formattedLogs = convertedLogs.map(log => ({
-      timestamp: new Date(Number(log.timestamp) * 1000).toISOString(),
-      uid: log.uid,
-      activityName: log.activityName,
-      description: log.description,
-      isSystemGenerated: log.isSystemGenerated,
-      imageUrls: log.imageUrls,
-      relatedProductIds: log.relatedProductIds
-    }));
-
-    res.status(200).json({
-      message: 'Truy xuất nhật ký hoạt động thành công',
-      activityLogs: formattedLogs
-    });
-  } catch (error) {
-    console.error('Lỗi khi truy xuất nhật ký hoạt động:', error);
-    res.status(500).json({ error: 'Lỗi khi truy xuất nhật ký hoạt động: ' + error.message });
-  }
-});
-
-app.get('/create-batch', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'themlohang.html'));
-});
-
-app.post('/checkdata', upload, (req, res) => {
-  res.status(200).send({
-    body: req.body,
-    files: req.files
-  });
-});
-
-app.post('/createbatch', (req, res, next) => {
-  upload(req, res, function (err) {
-    if (err instanceof multer.MulterError) {
-      // Lỗi Multer
-      return res.status(400).json({ error: 'Lỗi upload file: ' + err.message });
-    } else if (err) {
-      // Lỗi không xác định
-      return res.status(500).json({ error: 'Lỗi server: ' + err.message });
-    }
-    // Nếu không có lỗi, tiếp tục xử lý
-    next();
-  });
-}, async (req, res) => {
-  console.log('Received body:', req.body);
-  console.log('Received files:', req.files);
-
-  try {
-    const { sscc, quantity, farmPlotNumber, productId, producerId, startDate, endDate } = req.body;
-
-    // Kiểm tra các trường bắt buộc
-    if (!sscc || !quantity || !farmPlotNumber || !productId || !producerId || !startDate || !endDate) {
-      return res.status(400).json({ error: 'Thiếu thông tin bắt buộc' });
-    }
-
-    // Kiểm tra độ dài SSCC
-    if (sscc.length !== 18) {
-      return res.status(400).json({ error: 'SSCC phải có 18 ký tự' });
-    }
-
-    // Kiểm tra và chuyển đổi các giá trị số
-    const cleanProductId = parseInt(productId, 10);
-    const cleanProducerId = parseInt(producerId, 10);
-    const cleanStartDate = new Date(startDate).getTime() / 1000;
-    const cleanEndDate = new Date(endDate).getTime() / 1000;
-
-    if (isNaN(cleanProductId) || cleanProductId <= 0) {
-      return res.status(400).json({ error: 'Product ID không hợp lệ' });
-    }
-    if (isNaN(cleanProducerId) || cleanProducerId <= 0) {
-      return res.status(400).json({ error: 'Producer ID không hợp lệ' });
-    }
-
-    if (isNaN(cleanStartDate) || cleanStartDate <= 0) {
-      return res.status(400).json({ error: 'Start date không hợp lệ' });
-    }
-    if (isNaN(cleanEndDate) || cleanEndDate <= 0) {
-      return res.status(400).json({ error: 'End date không hợp lệ' });
-    }
-    if (cleanStartDate >= cleanEndDate) {
-      return res.status(400).json({ error: 'End date không hợp lệ' });
-    }
-
-    // Kiểm tra sự tồn tại của userId và productId trong MySQL
-    const userExists = await checkUserExists(cleanProducerId);
-    const productExists = await checkProductExists(cleanProductId);
-
-    if (!userExists) {
-      return res.status(400).json({ error: 'Producer ID không tồn tại' });
-    }
-    if (!productExists) {
-      return res.status(400).json({ error: 'Product ID không tồn tại' });
-    }
-
-    const ssccExists = await contract.methods.ssccExists(sscc).call();
-    if (ssccExists) {
-      return res.status(400).json({ error: 'SSCC đã tồn tại, vui lòng nhập lại SSCC khác' });
-    }
-
-    let productImageUrls = [];
-
-    // Xử lý productImages
-    if (req.files && req.files['productImages'] && req.files['productImages'].length > 0) {
-      console.log(`Số lượng ảnh sản phẩm nhận được: ${req.files['productImages'].length}`);
-      
-      for (const file of req.files['productImages']) {
-        try {
-          const result = await uploadFile(file.buffer, file.originalname);
-          productImageUrls.push(result.ipfsUrl);
-          console.log(`Đã thêm URL ảnh sản phẩm: ${result.ipfsUrl}`);
-        } catch (uploadError) {
-          console.error(`Lỗi khi tải lên ảnh ${file.originalname}:`, uploadError);
-        }
+function setupRoutes(app, db){
+  app.get('/batches/:producerId', async (req, res) => {
+    try {
+      const producerId = parseInt(req.params.producerId, 10);
+  
+      if (isNaN(producerId) || producerId <= 0) {
+        return res.status(400).send('Producer ID không hợp lệ');
       }
-      
-      console.log(`Tổng số URL ảnh sản phẩm sau khi xử lý: ${productImageUrls.length}`);
-    } else {
-      console.log('Không có ảnh sản phẩm được gửi lên');
-      return res.status(400).json({ error: 'Thiếu ảnh sản phẩm' });
+  
+      const batches = await contract.methods.getBatchesByProducer(producerId).call();
+      const serializedBatches = convertBigIntToString(batches);
+      res.status(200).json(serializedBatches);
+    } catch (err) {
+      console.error('Error fetching batches:', err);
+      res.status(500).send('Lỗi khi lấy danh sách lô hàng: ' + err.message);
     }
-
-    let certificateImageUrl = '';
-
-    // Xử lý certificateImage (nếu có)
-    if (req.files['certificateImage'] && req.files['certificateImage'][0]) {
-      const certificateImageFile = req.files['certificateImage'][0];
-      const certificateImageResult = await uploadFile(certificateImageFile.buffer, certificateImageFile.originalname);
-      certificateImageUrl = certificateImageResult.ipfsUrl;
-      console.log('Certificate image uploaded:', certificateImageUrl);
-    } else {
-      console.log('Không có ảnh chứng nhận được tải lên');
-      certificateImageUrl = 'default_certificate_image_url';
-    }
-
-    // Trước khi gọi createBatch
-    console.log('productImageUrls trước khi gọi createBatch:', productImageUrls);
-
-    // Gọi hàm createBatch của smart contract
-    const result = await contract.methods.createBatch(
-      sscc,
-      cleanProducerId,
-      quantity,
-      productImageUrls,
-      certificateImageUrl,
-      farmPlotNumber,
-      cleanProductId,
-      cleanStartDate,
-      cleanEndDate
-    ).send({ from: account.address, gas: 3000000 });
-
-    // Chuyển đổi kết quả thành chuỗi JSON
-    const safeResult = JSON.parse(JSON.stringify(result, replacer));
-    console.log('Number of product images:', req.files['productImages'] ? req.files['productImages'].length : 0);
-
-    res.status(200).send({ 
-      message: 'Lô hàng đã được tạo thành công và đang chờ phê duyệt', 
-      transactionHash: safeResult.transactionHash,
-      batchId: safeResult.events.BatchCreated.returnValues.batchId,
-      productImageUrls,
-      certificateImageUrl
-    });
-  } catch (err) {
-    console.error('Error creating batch:', err);
-    res.status(500).json({ error: 'Lỗi khi tạo lô hàng: ' + err.message });
-  }
-});
-
-app.get('/create-activity', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'themnkhd.html'));
-});
-
-app.post('/createactivity', (req, res, next) => {
-  activityUpload(req, res, function (err) {
-    if (err instanceof multer.MulterError) {
-      // Lỗi Multer
-      return res.status(400).json({ error: 'Lỗi upload file: ' + err.message });
-    } else if (err) {
-      // Lỗi không xác định
-      return res.status(500).json({ error: 'Lỗi server: ' + err.message });
-    }
-    // Nếu không có lỗi, tiếp tục xử lý
-    next();
   });
-}, async (req, res) => {
-  try {
+  
+  app.get('/activity-logs/:uid', async (req, res) => {
+    try {
+      const uid = req.params.uid;
+      
+      console.log('Đang truy xuất nhật ký hoạt động cho UID:', uid);
+  
+      const activityLogs = await contract.methods.getActivityLogs(uid).call();
+      
+      console.log('Số lượng nhật ký hoạt động:', activityLogs.length);
+  
+      // Chuyển đổi tất cả giá trị BigInt thành chuỗi
+      const convertedLogs = convertBigIntToString(activityLogs);
+  
+      // Chuyển đổi dữ liệu để dễ đọc hơn
+      const formattedLogs = convertedLogs.map(log => ({
+        timestamp: new Date(Number(log.timestamp) * 1000).toISOString(),
+        uid: log.uid,
+        activityName: log.activityName,
+        description: log.description,
+        isSystemGenerated: log.isSystemGenerated,
+        imageUrls: log.imageUrls,
+        relatedProductIds: log.relatedProductIds
+      }));
+  
+      res.status(200).json({
+        message: 'Truy xuất nhật ký hoạt động thành công',
+        activityLogs: formattedLogs
+      });
+    } catch (error) {
+      console.error('Lỗi khi truy xuất nhật ký hoạt động:', error);
+      res.status(500).json({ error: 'Lỗi khi truy xuất nhật ký hoạt động: ' + error.message });
+    }
+  });
+  
+  app.get('/create-batch', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'themlohang.html'));
+  });
+  
+  app.post('/checkdata', upload, (req, res) => {
+    res.status(200).send({
+      body: req.body,
+      files: req.files
+    });
+  });
+  
+  app.post('/createbatch', (req, res, next) => {
+    upload(req, res, function (err) {
+      if (err instanceof multer.MulterError) {
+        // Lỗi Multer
+        return res.status(400).json({ error: 'Lỗi upload file: ' + err.message });
+      } else if (err) {
+        // Lỗi không xác định
+        return res.status(500).json({ error: 'Lỗi server: ' + err.message });
+      }
+      // Nếu không có lỗi, tiếp tục xử lý
+      next();
+    });
+  }, async (req, res) => {
     console.log('Received body:', req.body);
     console.log('Received files:', req.files);
-
-    // Làm sạch các key trong req.body
-    const cleanBody = Object.keys(req.body).reduce((acc, key) => {
-      acc[key.trim()] = req.body[key];
-      return acc;
-    }, {});
-
-    const { uid, activityName, description, relatedProductIds } = cleanBody;
-
-    // Validate input
-    if (!uid || !activityName || !description) {
-      return res.status(400).json({ error: 'Thiếu thông tin bắt buộc' });
-    }
-
-    // Kiểm tra xem người dùng có tồn tại trong cơ sở dữ liệu không
-    const userExists = await checkUserExists(uid);
-    if (!userExists) {
-      return res.status(400).json({ error: 'Người dùng không tồn tại' });
-    }
-
-    // Chuyển đổi relatedProductIds thành mảng số nguyên
-    const productIds = Array.isArray(relatedProductIds) 
-      ? relatedProductIds.map(id => parseInt(id, 10))
-      : relatedProductIds ? [parseInt(relatedProductIds, 10)] : [];
-
-    // Kiểm tra xem tất cả các sản phẩm liên quan có tồn tại trong cơ sở dữ liệu không
-    if (productIds.length > 0) {
-      for (const productId of productIds) {
-        const productExists = await checkProductExists(productId);
-        if (!productExists) {
-          return res.status(400).json({ error: `Sản phẩm với ID ${productId} không tồn tại` });
-        }
-      }
-    }
-
-    let imageUrls = [];
-
-    // Process activity images
-    if (req.files && req.files.length > 0) {
-      console.log(`Số ảnh nhận được: ${req.files.length}`);
-      
-      for (const file of req.files) {
-        try {
-          const result = await uploadFile(file.buffer, file.originalname);
-          imageUrls.push(result.ipfsUrl);
-          console.log(`Đã thêm URL ảnh hoạt động: ${result.ipfsUrl}`);
-        } catch (uploadError) {
-          console.error(`Lỗi khi tải lên ảnh ${file.originalname}:`, uploadError);
-        }
-      }
-      
-      console.log(`Tổng số URL ảnh hoạt động sau khi xử lý: ${imageUrls.length}`);
-    } else {
-      console.log('Không có ảnh hoạt động được tải lên');
-    }
-
-    // Kiểm tra phiên bản của smart contract
-    const networkId = await web3.eth.net.getId();
-    console.log('Network ID:', networkId);
-
-    // Kiểm tra số dư của tài khoản
-    const balance = await web3.eth.getBalance(account.address);
-    console.log('Account balance:', web3.utils.fromWei(balance, 'ether'), 'ETH');
-
-    // Kiểm tra số lượng nhật ký hoạt động hiện tại
-    const currentLogCount = await contract.methods.getActivityLogCount(parseInt(uid, 10)).call();
-    console.log('Current activity log count:', currentLogCount);
-
-    // Thử gọi một hàm đơn giản
+  
     try {
-      const totalBatches = await contract.methods.getTotalBatches().call();
-      console.log('Total batches:', totalBatches);
-    } catch (error) {
-      console.error('Error calling getTotalBatches:', error);
-    }
-
-    // Sau đó mới gọi addActivityLog
-    try {
-      console.log('Bắt đầu gọi hàm addActivityLog');
-      const gasEstimate = await contract.methods.addActivityLog(
-        parseInt(uid, 10),
-        activityName,
-        description,
-        imageUrls,
-        productIds
-      ).estimateGas({ from: account.address });
-      
-      console.log('Ước tính gas:', gasEstimate);
-
-      const result = await contract.methods.addActivityLog(
-        parseInt(uid, 10),
-        activityName,
-        description,
-        imageUrls,
-        productIds
-      ).send({ 
-        from: account.address, 
-        gas: Math.floor(Number(gasEstimate) * 1.5).toString()
-      });
-      console.log('Kết quả giao dịch:', result);
-      if (result.events && result.events.ActivityLogAdded) {
-        console.log('Event ActivityLogAdded:', result.events.ActivityLogAdded.returnValues);
+      const { sscc, quantity, farmPlotNumber, productId, producerId, startDate, endDate } = req.body;
+  
+      // Kiểm tra các trường bắt buộc
+      if (!sscc || !quantity || !farmPlotNumber || !productId || !producerId || !startDate || !endDate) {
+        return res.status(400).json({ error: 'Thiếu thông tin bắt buộc' });
+      }
+  
+      // Kiểm tra độ dài SSCC
+      if (sscc.length !== 18) {
+        return res.status(400).json({ error: 'SSCC phải có 18 ký tự' });
+      }
+  
+      // Kiểm tra và chuyển đổi các giá trị số
+      const cleanProductId = parseInt(productId, 10);
+      const cleanProducerId = parseInt(producerId, 10);
+      const cleanStartDate = new Date(startDate).getTime() / 1000;
+      const cleanEndDate = new Date(endDate).getTime() / 1000;
+  
+      if (isNaN(cleanProductId) || cleanProductId <= 0) {
+        return res.status(400).json({ error: 'Product ID không hợp lệ' });
+      }
+      if (isNaN(cleanProducerId) || cleanProducerId <= 0) {
+        return res.status(400).json({ error: 'Producer ID không hợp lệ' });
+      }
+  
+      if (isNaN(cleanStartDate) || cleanStartDate <= 0) {
+        return res.status(400).json({ error: 'Start date không hợp lệ' });
+      }
+      if (isNaN(cleanEndDate) || cleanEndDate <= 0) {
+        return res.status(400).json({ error: 'End date không hợp lệ' });
+      }
+      if (cleanStartDate >= cleanEndDate) {
+        return res.status(400).json({ error: 'End date không hợp lệ' });
+      }
+  
+      // Kiểm tra sự tồn tại của userId và productId trong MySQL
+      const userExists = await checkUserExists(cleanProducerId);
+      const productExists = await checkProductExists(cleanProductId);
+  
+      if (!userExists) {
+        return res.status(400).json({ error: 'Producer ID không tồn tại' });
+      }
+      if (!productExists) {
+        return res.status(400).json({ error: 'Product ID không tồn tại' });
+      }
+  
+      const ssccExists = await contract.methods.ssccExists(sscc).call();
+      if (ssccExists) {
+        return res.status(400).json({ error: 'SSCC đã tồn tại, vui lòng nhập lại SSCC khác' });
+      }
+  
+      let productImageUrls = [];
+  
+      // Xử lý productImages
+      if (req.files && req.files['productImages'] && req.files['productImages'].length > 0) {
+        console.log(`Số lượng ảnh sản phẩm nhận được: ${req.files['productImages'].length}`);
+        
+        for (const file of req.files['productImages']) {
+          try {
+            const result = await uploadFile(file.buffer, file.originalname);
+            productImageUrls.push(result.ipfsUrl);
+            console.log(`Đã thêm URL ảnh sản phẩm: ${result.ipfsUrl}`);
+          } catch (uploadError) {
+            console.error(`Lỗi khi tải lên ảnh ${file.originalname}:`, uploadError);
+          }
+        }
+        
+        console.log(`Tổng số URL ảnh sản phẩm sau khi xử lý: ${productImageUrls.length}`);
       } else {
-        console.log('Không tìm thấy event ActivityLogAdded');
+        console.log('Không có ảnh sản phẩm được gửi lên');
+        return res.status(400).json({ error: 'Thiếu ảnh sản phẩm' });
       }
-      
-      // Kiểm tra lại số lượng nhật ký sau khi thêm
-      const newLogCount = await contract.methods.getActivityLogCount(parseInt(uid, 10)).call();
-      console.log('New activity log count:', newLogCount);
-      
-      res.status(200).json({
-        message: 'Nhật ký hoạt động đã được thêm thành công',
-        transactionHash: result.transactionHash,
-        imageUrls: imageUrls
+  
+      let certificateImageUrl = '';
+  
+      // Xử lý certificateImage (nếu có)
+      if (req.files['certificateImage'] && req.files['certificateImage'][0]) {
+        const certificateImageFile = req.files['certificateImage'][0];
+        const certificateImageResult = await uploadFile(certificateImageFile.buffer, certificateImageFile.originalname);
+        certificateImageUrl = certificateImageResult.ipfsUrl;
+        console.log('Certificate image uploaded:', certificateImageUrl);
+      } else {
+        console.log('Không có ảnh chứng nhận được tải lên');
+        certificateImageUrl = 'default_certificate_image_url';
+      }
+  
+      // Trước khi gọi createBatch
+      console.log('productImageUrls trước khi gọi createBatch:', productImageUrls);
+  
+      // Gọi hàm createBatch của smart contract
+      const result = await contract.methods.createBatch(
+        sscc,
+        cleanProducerId,
+        quantity,
+        productImageUrls,
+        certificateImageUrl,
+        farmPlotNumber,
+        cleanProductId,
+        cleanStartDate,
+        cleanEndDate
+      ).send({ from: account.address, gas: 3000000 });
+  
+      // Chuyển đổi kết quả thành chuỗi JSON
+      const safeResult = JSON.parse(JSON.stringify(result, replacer));
+      console.log('Number of product images:', req.files['productImages'] ? req.files['productImages'].length : 0);
+  
+      res.status(200).send({ 
+        message: 'Lô hàng đã được tạo thành công và đang chờ phê duyệt', 
+        transactionHash: safeResult.transactionHash,
+        batchId: safeResult.events.BatchCreated.returnValues.batchId,
+        productImageUrls,
+        certificateImageUrl
       });
-    } catch (error) {
-      console.error('Chi tiết lỗi:', error);
-      if (error.message.includes('revert')) {
-        console.error('Lỗi revert:', error.message);
-        // Thử lấy thông tin lỗi chi tiết từ smart contract
-        try {
-          const revertReason = await web3.eth.call(error.receipt);
-          console.error('Lý do revert:', revertReason);
-        } catch (callError) {
-          console.error('Không thể lấy lý do revert:', callError);
+    } catch (err) {
+      console.error('Error creating batch:', err);
+      res.status(500).json({ error: 'Lỗi khi tạo lô hàng: ' + err.message });
+    }
+  });
+  
+  app.get('/create-activity', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'themnkhd.html'));
+  });
+  
+  app.post('/createactivity', (req, res, next) => {
+    activityUpload(req, res, function (err) {
+      if (err instanceof multer.MulterError) {
+        // Lỗi Multer
+        return res.status(400).json({ error: 'Lỗi upload file: ' + err.message });
+      } else if (err) {
+        // Lỗi không xác định
+        return res.status(500).json({ error: 'Lỗi server: ' + err.message });
+      }
+      // Nếu không có lỗi, tiếp tục xử lý
+      next();
+    });
+  }, async (req, res) => {
+    try {
+      console.log('Received body:', req.body);
+      console.log('Received files:', req.files);
+  
+      // Làm sạch các key trong req.body
+      const cleanBody = Object.keys(req.body).reduce((acc, key) => {
+        acc[key.trim()] = req.body[key];
+        return acc;
+      }, {});
+  
+      const { uid, activityName, description, relatedProductIds } = cleanBody;
+  
+      // Validate input
+      if (!uid || !activityName || !description) {
+        return res.status(400).json({ error: 'Thiếu thông tin bắt buộc' });
+      }
+  
+      // Kiểm tra xem người dùng có tồn tại trong cơ sở dữ liệu không
+      const userExists = await checkUserExists(uid);
+      if (!userExists) {
+        return res.status(400).json({ error: 'Người dùng không tồn tại' });
+      }
+  
+      // Chuyển đổi relatedProductIds thành mảng số nguyên
+      const productIds = Array.isArray(relatedProductIds) 
+        ? relatedProductIds.map(id => parseInt(id, 10))
+        : relatedProductIds ? [parseInt(relatedProductIds, 10)] : [];
+  
+      // Kiểm tra xem tất cả các sản phẩm liên quan có tồn tại trong cơ sở dữ liệu không
+      if (productIds.length > 0) {
+        for (const productId of productIds) {
+          const productExists = await checkProductExists(productId);
+          if (!productExists) {
+            return res.status(400).json({ error: `Sản phẩm với ID ${productId} không tồn tại` });
+          }
         }
       }
+  
+      let imageUrls = [];
+  
+      // Process activity images
+      if (req.files && req.files.length > 0) {
+        console.log(`Số ảnh nhận được: ${req.files.length}`);
+        
+        for (const file of req.files) {
+          try {
+            const result = await uploadFile(file.buffer, file.originalname);
+            imageUrls.push(result.ipfsUrl);
+            console.log(`Đã thêm URL ảnh hoạt động: ${result.ipfsUrl}`);
+          } catch (uploadError) {
+            console.error(`Lỗi khi tải lên ảnh ${file.originalname}:`, uploadError);
+          }
+        }
+        
+        console.log(`Tổng số URL ảnh hoạt động sau khi xử lý: ${imageUrls.length}`);
+      } else {
+        console.log('Không có ảnh hoạt động được tải lên');
+      }
+  
+      // Kiểm tra phiên bản của smart contract
+      const networkId = await web3.eth.net.getId();
+      console.log('Network ID:', networkId);
+  
+      // Kiểm tra số dư của tài khoản
+      const balance = await web3.eth.getBalance(account.address);
+      console.log('Account balance:', web3.utils.fromWei(balance, 'ether'), 'ETH');
+  
+      // Kiểm tra số lượng nhật ký hoạt động hiện tại
+      const currentLogCount = await contract.methods.getActivityLogCount(parseInt(uid, 10)).call();
+      console.log('Current activity log count:', currentLogCount);
+  
+      // Thử gọi một hàm đơn giản
+      try {
+        const totalBatches = await contract.methods.getTotalBatches().call();
+        console.log('Total batches:', totalBatches);
+      } catch (error) {
+        console.error('Error calling getTotalBatches:', error);
+      }
+  
+      // Sau đó mới gọi addActivityLog
+      try {
+        console.log('Bắt đầu gọi hàm addActivityLog');
+        const gasEstimate = await contract.methods.addActivityLog(
+          parseInt(uid, 10),
+          activityName,
+          description,
+          imageUrls,
+          productIds
+        ).estimateGas({ from: account.address });
+        
+        console.log('Ước tính gas:', gasEstimate);
+  
+        const result = await contract.methods.addActivityLog(
+          parseInt(uid, 10),
+          activityName,
+          description,
+          imageUrls,
+          productIds
+        ).send({ 
+          from: account.address, 
+          gas: Math.floor(Number(gasEstimate) * 1.5).toString()
+        });
+        console.log('Kết quả giao dịch:', result);
+        if (result.events && result.events.ActivityLogAdded) {
+          console.log('Event ActivityLogAdded:', result.events.ActivityLogAdded.returnValues);
+        } else {
+          console.log('Không tìm thấy event ActivityLogAdded');
+        }
+        
+        // Kiểm tra lại số lượng nhật ký sau khi thêm
+        const newLogCount = await contract.methods.getActivityLogCount(parseInt(uid, 10)).call();
+        console.log('New activity log count:', newLogCount);
+        
+        res.status(200).json({
+          message: 'Nhật ký hoạt động đã được thêm thành công',
+          transactionHash: result.transactionHash,
+          imageUrls: imageUrls
+        });
+      } catch (error) {
+        console.error('Chi tiết lỗi:', error);
+        if (error.message.includes('revert')) {
+          console.error('Lỗi revert:', error.message);
+          // Thử lấy thông tin lỗi chi tiết từ smart contract
+          try {
+            const revertReason = await web3.eth.call(error.receipt);
+            console.error('Lý do revert:', revertReason);
+          } catch (callError) {
+            console.error('Không thể lấy lý do revert:', callError);
+          }
+        }
+        res.status(500).json({ error: 'Lỗi thêm nhật ký hoạt động: ' + error.message });
+      }
+  
+    } catch (error) {
+      console.error('Lỗi thêm nhật ký hoạt động:', error);
       res.status(500).json({ error: 'Lỗi thêm nhật ký hoạt động: ' + error.message });
     }
+  });
+}
+module.exports = {
+  s3Client,
+  web3,
+  contract,
+  uploadFile,
+  checkFileStatusWithRetry,
+  setupRoutes,
+  upload,
+  activityUpload,
+  processFiles,
+  checkUserExists,
+  checkProductExists,
+  getProducerById,
+  replacer,
+  cleanKeys,
+  convertBigIntToString,  // Thêm dòng này để export hàm
 
-  } catch (error) {
-    console.error('Lỗi thêm nhật ký hoạt động:', error);
-    res.status(500).json({ error: 'Lỗi thêm nhật ký hoạt động: ' + error.message });
-  }
-});
-
-const PORT = 3000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+  BUCKET_NAME
+};
