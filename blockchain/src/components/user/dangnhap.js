@@ -39,17 +39,24 @@ module.exports = function(db) {
                 return res.status(403).json({ message: 'Tài khoản của bạn chưa xác thực, vui lòng xác thực Email trước khi đăng nhập.' });
             }
 
-            // Trả về thông tin người dùng
-            res.status(200).json({ message: 'Đăng nhập thành công', user });
+            // Tạo session cho người dùng
+            req.session.userId = user.uid;
+            req.session.roleId = user.role_id;
+
+            // Trả về thông tin người dùng và role_id
+            res.status(200).json({ 
+                message: 'Đăng nhập thành công', 
+                user: {
+                    uid: user.uid,
+                    name: user.name,
+                    email: user.email,
+                    roleId: user.role_id
+                }
+            });
 
         } catch (error) {
-            if (error.code === 'ECONNRESET') {
-                console.error('Lỗi kết nối cơ sở dữ liệu:', error);
-                return res.status(500).json({ message: 'Lỗi kết nối cơ sở dữ liệu. Vui lòng thử lại sau.' });
-            }
             console.error('Lỗi khi đăng nhập:', error);
             res.status(500).json({ message: 'Internal server error', error: error.message });
-            return; // Thêm return để dừng việc thực thi tiếp
         }
     });
 
