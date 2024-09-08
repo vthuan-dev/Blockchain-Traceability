@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Truy xuất nhật ký hoạt động</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .activity-log {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .activity-images img {
+            max-width: 100px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">Truy xuất nhật ký hoạt động</h1>
+        <form onsubmit="getActivityLogs(); return false;">
+            <div class="form-group">
+                <label for="uidInput">UID:</label>
+                <input type="text" id="uidInput" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Truy xuất</button>
+        </form>
+        <div id="activityLogs" class="mt-4"></div>
+    </div>
+
+    <script>
+        async function getActivityLogs() {
+            const uid = document.getElementById('uidInput').value;
+            const logsDiv = document.getElementById('activityLogs');
+            logsDiv.innerHTML = '<p>Đang tải dữ liệu...</p>';
+            try {
+                const url = `/activity-logs/${uid}`;
+                console.log('Calling URL:', url);
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                console.log('Received data:', data);
+                displayActivityLogs(data.activityLogs);
+            } catch (error) {
+                console.error('Error:', error);
+                logsDiv.innerHTML = `<p class="text-danger">Có lỗi xảy ra khi truy xuất thông tin: ${error.message}</p>`;
+            }
+        }
+
+        function displayActivityLogs(logs) {
+            const logsDiv = document.getElementById('activityLogs');
+            if (logs.length === 0) {
+                logsDiv.innerHTML = '<p>Không có nhật ký hoạt động nào được tìm thấy.</p>';
+                return;
+            }
+            logsDiv.innerHTML = logs.map(log => `
+                <div class="activity-log">
+                    <h3>${log.activityName}</h3>
+                    <p><strong>Thời gian:</strong> ${new Date(log.timestamp).toLocaleString()}</p>
+                    <p><strong>UID:</strong> ${log.uid}</p>
+                    <p><strong>Mô tả:</strong> ${log.description}</p>
+                    <p><strong>Loại:</strong> ${log.isSystemGenerated ? 'Hệ thống tạo' : 'Người dùng tạo'}</p>
+                    <p><strong>Sản phẩm liên quan:</strong> ${log.relatedProductIds.join(', ')}</p>
+                    <div class="activity-images">
+                        ${log.imageUrls.map(url => `<img src="${url}" alt="Hình ảnh hoạt động">`).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>

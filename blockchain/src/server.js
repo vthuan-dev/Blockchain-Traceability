@@ -14,26 +14,58 @@ dotenv.config();
 const app = express();
 app.use(bodyParser.json());
 
+
 const db = mysql.createPool({
-    host: 'database-1.cv20qo0q8bre.ap-southeast-2.rds.amazonaws.com',
-    user: 'admin',
-    password: '9W8RQuAdnZylXZAmb68P',
-    database: 'blockchain',
-    connectTimeout: 10000
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  port: process.env.DB_PORT,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_DATABASE,
+  connectTimeout: 10000
 });
 
 app.use('/api', dangkyRoutes(db));
 app.use('/api', dangnhapRoutes(db));
 
-const upload = multer();
+
+const { 
+  s3Client, 
+  web3, 
+  contract, 
+  uploadFile, 
+  checkFileStatusWithRetry, 
+  setupRoutes,
+  upload,
+  activityUpload,
+  processFiles,
+  checkUserExists,
+  checkProductExists,
+  getProducerById,
+  replacer,
+  cleanKeys,
+  BUCKET_NAME
+} = require('./test.js');
+
+// ... (phần code khác giữ nguyên)
+
+setupRoutes(app, db);
+
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+  next();
+});
+
+
+
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'trangchu.html'));
 });
 
-app.post('/api/register', upload.single('avatar'), (req, res) => {
+//app.post('/api/register', upload.single('avatar'), (req, res) => {
   // Xử lý logic đăng ký ở đây
-});
+//});
 
 app.post('/api/dangnhap', (req, res) => {
   const { email, password } = req.body;
