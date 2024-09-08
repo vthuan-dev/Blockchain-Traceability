@@ -9,10 +9,19 @@ const dangnhapRoutes = require('./components/user/dangnhap.js');
 const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer');
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
+const session = require('express-session');
 
-dotenv.config();
+
 const app = express();
 app.use(bodyParser.json());
+
+
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false } // Đặt true nếu bạn sử dụng HTTPS
+}));
 
 
 const db = mysql.createPool({
@@ -44,7 +53,7 @@ const {
   replacer,
   cleanKeys,
   BUCKET_NAME
-} = require('./test.js');
+} = require('./backend.js');
 
 // ... (phần code khác giữ nguyên)
 
@@ -74,7 +83,7 @@ app.post('/api/dangnhap', (req, res) => {
 
 app.get('/api/nhasanxuat', async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT * FROM users WHERE role_id = 2');
+    const [rows] = await db.query('SELECT * FROM users WHERE role_id = 1');
     res.json(rows);
   } catch (err) {
     console.error('Lỗi khi lấy danh sách nhà sản xuất:', err.message);
@@ -84,7 +93,7 @@ app.get('/api/nhasanxuat', async (req, res) => {
 
 app.get('/api/nhakiemduyet', async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT * FROM users WHERE role_id = 1');
+    const [rows] = await db.query('SELECT * FROM users WHERE role_id = 2');
     res.json(rows);
   } catch (err) {
     console.error('Lỗi khi lấy danh sách nhà kiểm duyệt:', err.message);
@@ -94,6 +103,71 @@ app.get('/api/nhakiemduyet', async (req, res) => {
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+
+function requireAuth(req, res, next) {
+  if (req.session.userId) {
+    next();
+  } else {
+    res.status(401).json({ message: 'Unauthorized' });
+  }
+}
+
+// Sử dụng middleware cho các route cần xác thực
+app.get('/nongdan.html', requireAuth, (req, res) => {
+  if (req.session.roleId === 1) {
+    res.sendFile(path.join(__dirname, 'public', 'nongdan.html'));
+  } else {
+    res.status(403).send('Forbidden');
+  }
+});
+
+app.get('/nhakiemduyet.html', requireAuth, (req, res) => {
+  if (req.session.roleId === 2) {
+    res.sendFile(path.join(__dirname, 'public', 'nhakiemduyet.html'));
+  } else {
+    res.status(403).send('Forbidden');
+  }
+});
+
 app.listen(3000, () => {
   console.log('Server đang chạy trên cổng 3000');
+});
+app.get('/api/user-info', async (req, res) => {
+  if (req.session.userId) {
+      try {
+          const [users] = await db.query(`
+              SELECT u.name, u.email, r.role_name, reg.region_name 
+              FROM users u 
+              JOIN roles r ON u.role_id = r.role_id 
+              JOIN regions reg ON u.region_id = reg.region_id 
+              WHERE u.uid = ?
+          `, [req.session.userId]);
+          
+          const user = users[0];
+          if (user) {
+              res.json({
+                  name: user.name,
+                  email: user.email,
+                  role: user.role_name,
+                  region: user.region_name
+              });
+          } else {
+              res.status(404).json({ message: 'Không tìm thấy thông tin người dùng' });
+          }
+      } catch (error) {
+          console.error('Lỗi khi lấy thông tin người dùng:', error);
+          res.status(500).json({ message: 'Lỗi server' });
+      }
+  } else {
+      res.status(401).json({ message: 'Chưa đăng nhập' });
+  }
+});
+
+app.post('/api/dangxuat', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            return res.status(500).json({ message: 'Không thể đăng xuất' });
+        }
+        res.json({ message: 'Đăng xuất thành công' });
+    });
 });

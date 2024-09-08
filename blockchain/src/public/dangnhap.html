@@ -62,38 +62,39 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
     <script>
-        document.getElementById('loginForm').addEventListener('submit', async function(event) {
-            event.preventDefault();
-    
-            const formData = new FormData(this);
-            const data = Object.fromEntries(formData.entries());
-    
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
             try {
-                const response = await fetch('http://localhost:3000/api/dangnhap', {
+                const response = await fetch('/api/dangnhap', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(data)
+                    body: JSON.stringify({ email, password }),
                 });
-    
+
+                const data = await response.json();
+
                 if (response.ok) {
-                    const responseData = await response.json();
-                    const user = responseData.user;
-                    if (user.role_id == 1) {
-                        window.location.href = '/nhakiemduyet.html';
-                    } else if (user.role_id == 2) {
+                    alert(data.message);
+                    // Chuyển hướng dựa trên role_id
+                    if (data.user.roleId === 1) {
                         window.location.href = '/nongdan.html';
+                    } else if (data.user.roleId === 2) {
+                        window.location.href = '/nhakiemduyet.html';
                     } else {
-                        alert('Role không hợp lệ');
+                        // Xử lý cho các role khác nếu cần
+                        alert('Không có trang phù hợp cho vai trò của bạn');
                     }
                 } else {
-                    const errorData = await response.json();
-                    alert('Lỗi: ' + errorData.message);
+                    alert(data.message);
                 }
             } catch (error) {
                 console.error('Lỗi:', error);
-                alert('Lỗi khi đăng nhập');
+                alert('Đã xảy ra lỗi khi đăng nhập');
             }
         });
     </script>

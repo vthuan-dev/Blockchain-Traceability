@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bảng thông tin - Nông dân</title>
+    <title>Trang chủ- Người sản xuất</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/nhakiemduyet.css">
     <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
@@ -12,7 +12,7 @@
 <body>
     <!-- Thanh điều hướng -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light custom-navbar-height">
-        <a class="navbar-brand" href="#">Nông dân</a>
+        <a class="navbar-brand" href="#">Người sản xuất</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -31,22 +31,25 @@
                     <a class="nav-link" href="#">Thông báo</a>
                 </li>
             </ul>
-            <ul class="navbar-nav ml-auto"> <!-- Menu dropdown bên phải -->
+            <ul class="navbar-nav ml-auto">
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Nguyễn Văn A
+                        <span id="userName">Tên người dùng</span>
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="#">Trang cá nhân</a>
-                        <a class="dropdown-item" href="#">Cài đặt</a>
+                        <a class="dropdown-item" href="#" id="userRole">Vai trò</a>
+                        <a class="dropdown-item" href="#" id="userRegion">Khu vực</a>
                         <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#">Đăng xuất</a>
+                        <a class="dropdown-item" href="#" id="logoutButton">Đăng xuất</a>
                     </div>
                 </li>
             </ul>
         </div>
     </nav>
-        
+    
+    <!-- Thêm div overlay ngay sau nav -->
+    <div class="menu-overlay"></div>
+
     <main>
         <div class="container mt-4">
             <div class="table-title">
@@ -155,5 +158,104 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="js_giaodien/sanpham.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', async function() {
+        try {
+            const response = await fetch('/api/user-info');
+            if (response.ok) {
+                const data = await response.json();
+                document.getElementById('userName').textContent = data.name;
+                document.getElementById('userRole').textContent = `Vai trò: ${data.role}`;
+                document.getElementById('userRegion').textContent = `Khu vực: ${data.region}`;
+            } else {
+                console.error('Không thể lấy thông tin người dùng');
+            }
+        } catch (error) {
+            console.error('Lỗi:', error);
+        }
+    });
+
+    // Xử lý đăng xuất
+    document.getElementById('logoutButton').addEventListener('click', async function(e) {
+        e.preventDefault();
+        try {
+            const response = await fetch('/api/dangxuat', { method: 'POST' });
+            if (response.ok) {
+                window.location.href = '/dangnhap.html'; // Chuyển hướng về trang đăng nhập
+            } else {
+                console.error('Không thể đăng xuất');
+            }
+        } catch (error) {
+            console.error('Lỗi khi đăng xuất:', error);
+        }
+    });
+    </script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var navbarToggler = document.querySelector('.navbar-toggler');
+    var navbarCollapse = document.querySelector('.navbar-collapse');
+    var menuOverlay = document.querySelector('.menu-overlay');
+
+    function toggleMenu() {
+        navbarCollapse.classList.toggle('show');
+        document.body.classList.toggle('menu-open');
+        if (menuOverlay) {
+            menuOverlay.classList.toggle('show');
+        }
+    }
+
+    function closeMenu() {
+        navbarCollapse.classList.remove('show');
+        document.body.classList.remove('menu-open');
+        if (menuOverlay) {
+            menuOverlay.classList.remove('show');
+        }
+    }
+
+    navbarToggler.addEventListener('click', function(e) {
+        e.stopPropagation();
+        toggleMenu();
+    });
+
+    if (menuOverlay) {
+        menuOverlay.addEventListener('click', closeMenu);
+    }
+
+    document.addEventListener('click', function(e) {
+        if (!navbarCollapse.contains(e.target) && !navbarToggler.contains(e.target)) {
+            closeMenu();
+        }
+    });
+
+    // Ngăn sự kiện click trên menu lan ra ngoài
+    navbarCollapse.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+
+    // Xử lý cho dropdown trong menu
+    var dropdowns = document.querySelectorAll('.navbar-nav .dropdown');
+    dropdowns.forEach(function(dropdown) {
+        dropdown.addEventListener('click', function(e) {
+            e.stopPropagation();
+            this.classList.toggle('show');
+        });
+    });
+
+    var userDropdown = document.querySelector('.navbar-nav .dropdown');
+    var userDropdownMenu = userDropdown.querySelector('.dropdown-menu');
+
+    userDropdown.addEventListener('click', function(e) {
+        e.stopPropagation();
+        userDropdownMenu.classList.toggle('show');
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!userDropdown.contains(e.target)) {
+            userDropdownMenu.classList.remove('show');
+        }
+    });
+});
+</script>
 </body>
 </html>
