@@ -4,32 +4,95 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thêm Nhật Ký Hoạt Động</title>
-    <!-- Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
         }
         .container {
-            margin-top: 50px;
-            max-width: 600px;
-            background: #fff;
+            max-width: 800px;
+            margin: 40px auto;
             padding: 20px;
+            background-color: white;
             border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
         }
         .form-group label {
-            font-weight: bold;
+            font-weight: 600;
+            color: #34495e;
         }
-        .btn-primary {
-            background-color: #007bff;
-            border-color: #007bff;
+        button {
+            background-color: #3498db;
+            color: white;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #result {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        #result h2 {
+            color: #2c3e50;
+            margin-top: 0;
+        }
+        #result p {
+            margin: 10px 0;
+        }
+        #imagePreview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .image-container {
+            position: relative;
+            width: 100px;
+            height: 100px;
+        }
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+        .delete-btn {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background-color: red;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2 class="text-center">Thêm Nhật Ký Hoạt Động</h2>
+        <h1>Thêm Nhật Ký Hoạt Động</h1>
         <form id="activityLogForm" enctype="multipart/form-data">
             <div class="form-group">
                 <label for="uid">UID:</label>
@@ -50,32 +113,117 @@
             <div class="form-group">
                 <label for="imageUrls">Ảnh Hoạt Động:</label>
                 <input type="file" class="form-control-file" id="imageUrls" name="imageUrls" multiple>
+                <small class="form-text text-muted">Bạn có thể chọn tối đa 10 ảnh.</small>
+                <div id="imagePreview"></div>
             </div>
             <button type="submit" class="btn btn-primary btn-block">Thêm Nhật Ký</button>
         </form>
-    </div>
 
-    <!-- Bootstrap JS and dependencies -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+        <div class="loading">
+            <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Đang xử lý...</span>
+            </div>
+            <p>Đang thêm nhật ký hoạt động, vui lòng đợi...</p>
+        </div>
+
+        <div id="result"></div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
     <script>
-        document.getElementById('activityLogForm').addEventListener('submit', async function(event) {
-            event.preventDefault();
-            const formData = new FormData(this);
+        let activityImageFiles = []; // Mảng lưu trữ các file ảnh hoạt động
 
-            const response = await fetch('/createactivity', {
-                method: 'POST',
-                body: formData
+        function previewActivityImages(input) {
+            const preview = $('#imagePreview');
+            preview.empty();
+
+            if (input.files && input.files.length > 0) {
+                const files = Array.from(input.files);
+                const maxImages = 10;
+                const newFiles = files.slice(0, maxImages - activityImageFiles.length);
+                activityImageFiles = [...activityImageFiles, ...newFiles].slice(0, maxImages);
+
+                activityImageFiles.forEach((file, index) => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const container = $('<div class="image-container"></div>');
+                        const img = $('<img>').attr({
+                            src: e.target.result,
+                            class: 'img-preview',
+                            alt: 'preview',
+                            id: `activityImage-${index + 1}`
+                        });
+                        const deleteBtn = $('<button class="delete-btn">x</button>').click(function() {
+                            container.remove();
+                            activityImageFiles.splice(index, 1);
+                            updateActivityFileInput();
+                        });
+                        container.append(img, deleteBtn);
+                        preview.append(container);
+                    };
+                    reader.readAsDataURL(file);
+                });
+
+                if (activityImageFiles.length >= maxImages) {
+                    alert(`Đã đạt số lượng tối đa ${maxImages} ảnh hoạt động.`);
+                }
+            }
+            updateActivityFileInput();
+        }
+
+        function updateActivityFileInput() {
+            const dt = new DataTransfer();
+            activityImageFiles.forEach(file => dt.items.add(file));
+            document.getElementById('imageUrls').files = dt.files;
+        }
+
+        $('#imageUrls').change(function() {
+            previewActivityImages(this);
+        });
+
+        $('#activityLogForm').submit(function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            
+            // Xóa tất cả các file ảnh hoạt động hiện có trong formData
+            formData.delete('imageUrls');
+            
+            // Thêm lại tất cả các file ảnh hoạt động
+            activityImageFiles.forEach((file, index) => {
+                formData.append('imageUrls', file, file.name);
             });
 
-            if (response.ok) {
-                alert('Nhật ký hoạt động đã được thêm thành công');
-            } else {
-                const errorData = await response.json();
-                alert('Lỗi khi thêm nhật ký hoạt động: ' + errorData.error);
-            }
+            console.log('Số lượng ảnh hoạt động được gửi:', activityImageFiles.length);
+
+            // Hiển thị modal loading
+            $('.loading').show();
+
+            $.ajax({
+                url: '/createactivity',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(result) {
+                    // Ẩn spinner và hiển thị thông báo thành công
+                    $('.loading').hide();
+                    $('#result').html('<h2>Nhật ký hoạt động đã được thêm thành công!</h2>');
+                    $('#result').addClass('text-success');
+
+                    // Tự động refresh trang sau 3 giây
+                    setTimeout(function() {
+                        location.reload();
+                    }, 3000);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Lỗi:', error);
+                    // Ẩn spinner và hiển thị thông báo lỗi
+                    $('.loading').hide();
+                    $('#result').html('<h2>Lỗi: ' + (xhr.responseJSON ? xhr.responseJSON.error : error) + '</h2>');
+                    $('#result').addClass('text-danger');
+                }
+            });
         });
     </script>
 </body>
