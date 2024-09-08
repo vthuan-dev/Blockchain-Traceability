@@ -598,7 +598,7 @@ module.exports = {
   getProducerById,
   replacer,
   cleanKeys,
-  convertBigIntToString,  // Thêm dòng này để export hàm
+  convertBigIntToString,  // dùng để chuyển đổi bigInt sang string, do lỗi in ra số lớn
 
   BUCKET_NAME
 };

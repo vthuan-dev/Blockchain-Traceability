@@ -670,3 +670,111 @@ body {
       overflow: hidden;
   }
 }
+
+/* Styles for the Add Batch page */
+.add-batch-container {
+  max-width: 800px;
+  margin: 30px auto;
+  background-color: #ffffff;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+.add-batch-container h1 {
+  color: #007bff;
+  text-align: center;
+  margin-bottom: 30px;
+  font-weight: 300;
+  font-size: 2.5rem;
+}
+
+.add-batch-container .form-group {
+  margin-bottom: 20px;
+}
+
+.add-batch-container .form-group label {
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 5px;
+  display: block;
+}
+
+.add-batch-container .form-control {
+  border-radius: 4px;
+  border: 1px solid #ced4da;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.add-batch-container .form-control:focus {
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.add-batch-container button[type="submit"] {
+  background-color: #007bff;
+  border-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  font-size: 1rem;
+  border-radius: 5px;
+  transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.add-batch-container button[type="submit"]:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
+}
+
+#imagePreview, #certificatePreview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.image-container {
+  position: relative;
+  display: inline-block;
+}
+
+.img-preview {
+  max-width: 100px;
+  max-height: 100px;
+  border-radius: 4px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
+
+.delete-btn {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.15s ease-in-out;
+}
+
+.delete-btn:hover {
+  opacity: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .add-batch-container {
+      padding: 20px;
+  }
+
+  .add-batch-container h1 {
+      font-size: 2rem;
+  }
+}

@@ -19,10 +19,12 @@ app.use(bodyParser.json());
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
-  saveUninitialized: true,
-  cookie: { secure: false } // Đặt true nếu bạn sử dụng HTTPS
+  saveUninitialized: false,
+  cookie: { 
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 24 * 60 * 60 * 1000 // 24 giờ
+  }
 }));
-
 
 const db = mysql.createPool({
   host: process.env.DB_HOST,
@@ -76,9 +78,23 @@ app.get('/', (req, res) => {
   // Xử lý logic đăng ký ở đây
 //});
 
-app.post('/api/dangnhap', (req, res) => {
+app.post('/api/dangnhap', async (req, res) => {
   const { email, password } = req.body;
-  // Xử lý logic đăng nhập ở đây
+  // ... xác thực người dùng ...
+  if (user && await bcrypt.compare(password, user.password)) {
+    req.session.userId = user.uid;
+    // ... các xử lý khác ...
+  }
+  // ...
+});
+app.get('/api/products', async (req, res) => {
+  try {
+      const [products] = await db.query('SELECT product_id, product_name FROM products');
+      res.json(products);
+  } catch (error) {
+      console.error('Lỗi khi lấy danh sách sản phẩm:', error);
+      res.status(500).json({ error: 'Lỗi server khi lấy danh sách sản phẩm' });
+  }
 });
 
 app.get('/api/nhasanxuat', async (req, res) => {
@@ -134,32 +150,33 @@ app.listen(3000, () => {
 });
 app.get('/api/user-info', async (req, res) => {
   if (req.session.userId) {
-      try {
-          const [users] = await db.query(`
-              SELECT u.name, u.email, r.role_name, reg.region_name 
-              FROM users u 
-              JOIN roles r ON u.role_id = r.role_id 
-              JOIN regions reg ON u.region_id = reg.region_id 
-              WHERE u.uid = ?
-          `, [req.session.userId]);
-          
-          const user = users[0];
-          if (user) {
-              res.json({
-                  name: user.name,
-                  email: user.email,
-                  role: user.role_name,
-                  region: user.region_name
-              });
-          } else {
-              res.status(404).json({ message: 'Không tìm thấy thông tin người dùng' });
-          }
-      } catch (error) {
-          console.error('Lỗi khi lấy thông tin người dùng:', error);
-          res.status(500).json({ message: 'Lỗi server' });
+    try {
+      const [users] = await db.query(`
+        SELECT u.uid, u.name, u.email, r.role_name, reg.region_name 
+        FROM users u 
+        JOIN roles r ON u.role_id = r.role_id 
+        JOIN regions reg ON u.region_id = reg.region_id 
+        WHERE u.uid = ?
+      `, [req.session.userId]);
+      
+      const user = users[0];
+      if (user) {
+        res.json({
+          id: user.uid,  // Đảm bảo trả về ID người dùng
+          name: user.name,
+          email: user.email,
+          role: user.role_name,
+          region: user.region_name
+        });
+      } else {
+        res.status(404).json({ message: 'Không tìm thấy thông tin người dùng' });
       }
+    } catch (error) {
+      console.error('Lỗi khi lấy thông tin người dùng:', error);
+      res.status(500).json({ message: 'Lỗi server' });
+    }
   } else {
-      res.status(401).json({ message: 'Chưa đăng nhập' });
+    res.status(401).json({ message: 'Chưa đăng nhập' });
   }
 });
 
