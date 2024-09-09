@@ -51,7 +51,7 @@ web3.eth.net.isListening()
   .catch(e => console.log('Lỗi rồi', e));
 
 const contractABI = require('../build/contracts/TraceabilityContract.json').abi;
-const contractAddress = '0x3f59eDb2b07F55A5DBFB81F8E4914107d3390a40';
+const contractAddress = '0xfDBB2490e6fabC5d889FbE0Dcc556157648b118a';
 const contract = new web3.eth.Contract(contractABI, contractAddress);
 
 // tạo biến lưu trữ file, giới hạn số lượng file và tên file, maxCount: số lượng file, name: tên file
@@ -112,6 +112,14 @@ function convertBigIntToString(item) {
     );
   }
   return item;
+}
+function translateStatus(status) {
+  const statusTranslations = {
+    'PendingApproval': 'Chờ phê duyệt',
+    'Approved': 'Đã phê duyệt',
+    'Rejected': 'Đã từ chối'
+  };
+  return statusTranslations[status] || status;
 }
 
 async function checkFileStatusWithRetry(fileName, maxRetries = 5, retryDelay = 1000) {
@@ -308,16 +316,11 @@ function setupRoutes(app, db){
     console.log('Received files:', req.files);
   
     try {
-      const { sscc, quantity, farmPlotNumber, productId, producerId, startDate, endDate } = req.body;
+      const { name, quantity, farmPlotNumber, productId, producerId, startDate, endDate } = req.body;
   
       // Kiểm tra các trường bắt buộc
-      if (!sscc || !quantity || !farmPlotNumber || !productId || !producerId || !startDate || !endDate) {
+      if (!name || !quantity || !farmPlotNumber || !productId || !producerId || !startDate || !endDate) {
         return res.status(400).json({ error: 'Thiếu thông tin bắt buộc' });
-      }
-  
-      // Kiểm tra độ dài SSCC
-      if (sscc.length !== 18) {
-        return res.status(400).json({ error: 'SSCC phải có 18 ký tự' });
       }
   
       // Kiểm tra và chuyển đổi các giá trị số
@@ -334,13 +337,13 @@ function setupRoutes(app, db){
       }
   
       if (isNaN(cleanStartDate) || cleanStartDate <= 0) {
-        return res.status(400).json({ error: 'Start date không hợp lệ' });
+        return res.status(400).json({ error: 'Ngày bắt đầu không hợp lệ' });
       }
       if (isNaN(cleanEndDate) || cleanEndDate <= 0) {
-        return res.status(400).json({ error: 'End date không hợp lệ' });
+        return res.status(400).json({ error: 'Ngày kết thúc không hợp lệ' });
       }
       if (cleanStartDate >= cleanEndDate) {
-        return res.status(400).json({ error: 'End date không hợp lệ' });
+        return res.status(400).json({ error: 'Ngày kết thúc phải sau ngày bắt đầu' });
       }
   
       // Kiểm tra sự tồn tại của userId và productId trong MySQL
@@ -352,11 +355,6 @@ function setupRoutes(app, db){
       }
       if (!productExists) {
         return res.status(400).json({ error: 'Product ID không tồn tại' });
-      }
-  
-      const ssccExists = await contract.methods.ssccExists(sscc).call();
-      if (ssccExists) {
-        return res.status(400).json({ error: 'SSCC đã tồn tại, vui lòng nhập lại SSCC khác' });
       }
   
       let productImageUrls = [];
@@ -399,7 +397,7 @@ function setupRoutes(app, db){
   
       // Gọi hàm createBatch của smart contract
       const result = await contract.methods.createBatch(
-        sscc,
+        name,  // Thêm tên lô hàng
         cleanProducerId,
         quantity,
         productImageUrls,
@@ -414,12 +412,10 @@ function setupRoutes(app, db){
       const safeResult = JSON.parse(JSON.stringify(result, replacer));
       console.log('Number of product images:', req.files['productImages'] ? req.files['productImages'].length : 0);
   
-      res.status(200).send({ 
-        message: 'Lô hàng đã được tạo thành công và đang chờ phê duyệt', 
-        transactionHash: safeResult.transactionHash,
+      res.status(200).json({
+        message: 'Lô hàng đã được tạo thành công và đang chờ phê duyệt',
         batchId: safeResult.events.BatchCreated.returnValues.batchId,
-        productImageUrls,
-        certificateImageUrl
+        status: 'PendingApproval'
       });
     } catch (err) {
       console.error('Error creating batch:', err);
@@ -582,6 +578,35 @@ function setupRoutes(app, db){
       res.status(500).json({ error: 'Lỗi thêm nhật ký hoạt động: ' + error.message });
     }
   });
+
+
+  app.get('/pending-batches', async (req, res) => {
+    try {
+      if (!req.session.userId) {
+        return res.status(401).json({ error: 'Người dùng chưa đăng nhập' });
+      }
+  
+      const producerId = req.session.userId;
+      const pendingBatches = await contract.methods.getPendingBatchesByProducer(producerId).call();
+      
+      // Chuyển đổi trạng thái từ số sang chuỗi và dịch sang tiếng Việt
+      const statusMap = ['PendingApproval', 'Approved', 'Rejected'];
+      
+      const serializedBatches = pendingBatches.map(batch => ({
+        ...convertBigIntToString(batch),
+        status: translateStatus(statusMap[batch.status] || 'Unknown'),
+        productImageUrls: batch.productImageUrls,
+        certificateImageUrl: batch.certificateImageUrl
+      }));
+  
+      res.status(200).json(serializedBatches);
+    } catch (err) {
+      console.error('Error fetching pending batches for producer:', err);
+      res.status(500).json({ error: 'Lỗi khi lấy danh sách lô hàng đang chờ kiểm duyệt: ' + err.message });
+    }
+  });
+
+
 }
 module.exports = {
   s3Client,
