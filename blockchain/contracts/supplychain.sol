@@ -1,21 +1,22 @@
-
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
 contract TraceabilityContract {
     uint256 private _batchIdCounter;
 
+enum BatchStatus { PendingApproval, Approved, Rejected }
+
     struct Batch {
         uint256 batchId;
+        string name;  // Thêm trường tên lô hàng
         string sscc;
         uint256 producerId;
         string quantity;
         uint256 productionDate;
-      //  uint256 expiryDate;
         uint256 startDate;
         uint256 endDate;
         BatchStatus status;
-        string[] productImageUrls; // Change to array
+        string[] productImageUrls;
         string certificateImageUrl;
         string farmPlotNumber;
         bytes32 dataHash;
@@ -23,7 +24,7 @@ contract TraceabilityContract {
     }
       struct ActivityLog {
         uint256 timestamp;
-        uint256 uid; // Sử dụng uid thay vì address
+        uint256 uid;
         string activityName;
         string description;
         bool isSystemGenerated;
@@ -31,12 +32,14 @@ contract TraceabilityContract {
         uint256[] relatedProductIds;
     }
 
-    enum BatchStatus { Created, PendingApproval, Approved, Rejected }
 
     mapping(uint256 => Batch) private _batches;
     mapping(string => uint256) private _ssccToBatchId;
         mapping(uint256 => ActivityLog[]) private _producerActivityLogs;
-
+    mapping(uint256 => bool) private _approvedBatches;
+    
+    event BatchApproved(uint256 indexed batchId, uint256 indexed producerId, string sscc);
+    event BatchApprovedForQR(uint256 indexed batchId, uint256 indexed producerId, string sscc);
 
     event BatchCreated(uint256 indexed batchId, string sscc, uint256 producerId);
     event ActivityLogAdded(
@@ -49,10 +52,11 @@ contract TraceabilityContract {
     );
 
     struct BatchParams {
+        string name;  // Thêm trường tên lô hàng
         string sscc;
         uint256 producerId;
         string quantity;
-        string[] productImageUrls; // Change to array
+        string[] productImageUrls;
         string certificateImageUrl;
         string farmPlotNumber;
         uint256 productId;
@@ -61,21 +65,23 @@ contract TraceabilityContract {
     }
 
     function createBatch(
-        string memory _sscc,
+        string memory _name,  // Thêm tham số tên lô hàng
         uint256 _producerId,
         string memory _quantity,
-        string[] memory _productImageUrls, // Đã thay đổi thành mảng
+        string[] memory _productImageUrls,
         string memory _certificateImageUrl,
         string memory _farmPlotNumber,
         uint256 _productId,
         uint256 _startDate,
         uint256 _endDate
     ) public returns (uint256) {
+        string memory sscc = generateSSCC(_producerId);
         BatchParams memory params = BatchParams({
-            sscc: _sscc,
+            name: _name,  // Thêm tên lô hàng
+            sscc: sscc,
             producerId: _producerId,
             quantity: _quantity,
-            productImageUrls: _productImageUrls, // Đã sửa
+            productImageUrls: _productImageUrls,
             certificateImageUrl: _certificateImageUrl,
             farmPlotNumber: _farmPlotNumber,
             productId: _productId,
@@ -86,9 +92,54 @@ contract TraceabilityContract {
         return _createBatch(params);
     }
 
-    
+    function generateSSCC(uint256 _producerId) private view returns (string memory) {
+        string memory prefix = "00";
+        string memory companyPrefix = uint2str(_producerId);
+        uint256 serialNumber = uint256(keccak256(abi.encodePacked(block.timestamp, _producerId)));
+        string memory serialReference = uint2str(serialNumber);
+        
+        string memory ssccWithoutCheck = string(abi.encodePacked(prefix, companyPrefix, serialReference));
+        uint8 checkDigit = calculateCheckDigit(ssccWithoutCheck);
+        
+        string memory sscc = string(abi.encodePacked(ssccWithoutCheck, uint2str(uint256(checkDigit))));
+        
+        return sscc;
+    }
+
+    function calculateCheckDigit(string memory _code) private pure returns (uint8) {
+        bytes memory codeBytes = bytes(_code);
+        uint256 sum = 0;
+        for (uint256 i = 0; i < codeBytes.length; i++) {
+            uint8 digit = uint8(codeBytes[i]) - 48;
+            sum += (i % 2 == 0) ? digit * 3 : digit;
+        }
+        uint8 checkDigit = uint8((10 - (sum % 10)) % 10);
+        return checkDigit;
+    }
+
+    function uint2str(uint256 _i) private pure returns (string memory) {
+        if (_i == 0) {
+            return "0";
+        }
+        uint256 j = _i;
+        uint256 length;
+        while (j != 0) {
+            length++;
+            j /= 10;
+        }
+        bytes memory bstr = new bytes(length);
+        uint256 k = length;
+        while (_i != 0) {
+            k = k-1;
+            uint8 temp = (48 + uint8(_i - _i / 10 * 10));
+            bytes1 b1 = bytes1(temp);
+            bstr[k] = b1;
+            _i /= 10;
+        }
+        return string(bstr);
+    }
+
     function _createBatch(BatchParams memory params) private returns (uint256) {
-        require(bytes(params.sscc).length == 18, "SSCC must be 18 characters long");
         require(_ssccToBatchId[params.sscc] == 0, "SSCC already exists");
         require(bytes(params.quantity).length > 0, "Quantity must not be empty");
         require(params.productImageUrls.length > 0, "At least one product image URL is required");
@@ -98,34 +149,34 @@ contract TraceabilityContract {
         require(params.startDate > 0, "Start date is required");
         require(params.endDate > 0, "End date is required");
         require(params.startDate < params.endDate, "Start date must be before end date");
+        require(bytes(params.name).length > 0, "Batch name must not be empty");
 
         _batchIdCounter++;
         uint256 newBatchId = _batchIdCounter;
 
         uint256 productionDate = block.timestamp;
-        // uint256 expiryDate = productionDate + 5 days;
 
         bytes32 dataHash = _calculateDataHash(
             params.sscc,
             params.producerId,
             params.quantity,
             productionDate,
-         //   expiryDate,
             params.farmPlotNumber,
-            params.productId
+            params.productId,
+            params.name  // Thêm tên lô hàng vào hàm băm
         );
 
         Batch memory newBatch = Batch({
             batchId: newBatchId,
+            name: params.name,  // Thêm tên lô hàng
             sscc: params.sscc,
             producerId: params.producerId,
             quantity: params.quantity,
             productionDate: productionDate,
-        //    expiryDate: expiryDate,
             startDate: params.startDate,
             endDate: params.endDate,
             status: BatchStatus.PendingApproval,
-            productImageUrls: params.productImageUrls, // Đã sửa
+            productImageUrls: params.productImageUrls,
             certificateImageUrl: params.certificateImageUrl,
             farmPlotNumber: params.farmPlotNumber,
             dataHash: dataHash,
@@ -138,6 +189,7 @@ contract TraceabilityContract {
         emit BatchCreated(newBatchId, params.sscc, params.producerId);
         return newBatchId;
     }
+    
 
     function addActivityLog(
         uint256 _uid,
@@ -192,11 +244,11 @@ contract TraceabilityContract {
         uint256 _producerId,
         string memory _quantity,
         uint256 _productionDate,
-        // Xóa _expiryDate khỏi đây
         string memory _farmPlotNumber,
-        uint256 _productId
+        uint256 _productId,
+        string memory _name  // Thêm tên lô hàng
     ) private pure returns (bytes32) {
-        return keccak256(abi.encodePacked(_sscc, _producerId, _quantity, _productionDate, _farmPlotNumber, _productId));
+        return keccak256(abi.encodePacked(_sscc, _producerId, _quantity, _productionDate, _farmPlotNumber, _productId, _name));
     }
     // hàm kiểm tra sscc đã tồn tại hay chưa 
     function ssccExists(string memory sscc) public view returns (bool) {
@@ -231,6 +283,25 @@ function updateBatchStatus(uint256 _batchId, BatchStatus _newStatus) public {
     _batches[_batchId].status = _newStatus;
     emit BatchStatusUpdated(_batchId, _newStatus);
 }
+function getPendingBatchesByProducer(uint256 _producerId) public view returns (Batch[] memory) {
+    uint256 pendingCount = 0;
+    for (uint256 i = 1; i <= _batchIdCounter; i++) {
+        if (_batches[i].producerId == _producerId && _batches[i].status == BatchStatus.PendingApproval) {
+            pendingCount++;
+        }
+    }
+
+    Batch[] memory pendingBatches = new Batch[](pendingCount);
+    uint256 index = 0;
+    for (uint256 i = 1; i <= _batchIdCounter; i++) {
+        if (_batches[i].producerId == _producerId && _batches[i].status == BatchStatus.PendingApproval) {
+            pendingBatches[index] = _batches[i];
+            index++;
+        }
+    }
+
+    return pendingBatches;
+}
 
 event BatchStatusUpdated(uint256 indexed batchId, BatchStatus newStatus);
 
@@ -259,6 +330,31 @@ function getActivityLogs(uint256 _uid) public view returns (ActivityLog[] memory
 }
 function getActivityLogCount(uint256 _uid) public view returns (uint256) {
     return _producerActivityLogs[_uid].length;
+}
+
+modifier onlyApprover() {
+    // Implement logic to check if msg.sender is an approver
+    _;
+}
+
+function approveBatch(uint256 _batchId) public onlyApprover {
+    require(_batches[_batchId].batchId != 0, "Batch does not exist");
+    require(_batches[_batchId].status == BatchStatus.PendingApproval, "Batch is not pending approval");
+
+    _batches[_batchId].status = BatchStatus.Approved;
+    _approvedBatches[_batchId] = true;
+
+    emit BatchApproved(_batchId, _batches[_batchId].producerId, _batches[_batchId].sscc);
+    emit BatchApprovedForQR(_batchId, _batches[_batchId].producerId, _batches[_batchId].sscc);
+    
+    // Add system activity log
+    uint256[] memory relatedProductIds = new uint256[](1);
+    relatedProductIds[0] = _batches[_batchId].productId;
+    _addSystemActivityLog(_batches[_batchId].producerId, "Batch Approved", "Batch has been approved by the approver", relatedProductIds);
+}
+
+function isBatchApproved(uint256 _batchId) public view returns (bool) {
+    return _approvedBatches[_batchId];
 }
 
 }

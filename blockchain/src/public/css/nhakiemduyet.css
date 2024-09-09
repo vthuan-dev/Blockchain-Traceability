@@ -778,3 +778,157 @@ body {
       font-size: 2rem;
   }
 }
+
+/* Modal styles */
+.modal-content {
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  overflow: hidden;
+}
+
+.modal-header {
+  background-color: #007bff;
+  color: white;
+  border-bottom: none;
+  padding: 20px 30px;
+}
+
+.modal-title {
+  font-weight: 600;
+  font-size: 1.5rem;
+}
+
+.modal-body {
+  padding: 30px;
+}
+
+.modal-footer {
+  border-top: none;
+  padding: 20px 30px;
+}
+
+/* Spinner styles */
+#loadingSpinner .spinner-border {
+  width: 3rem;
+  height: 3rem;
+}
+
+/* Result message styles */
+#resultMessage {
+  text-align: center;
+}
+
+#resultText {
+  font-size: 1.2rem;
+  font-weight: 500;
+  margin-bottom: 20px;
+}
+
+/* Button styles */
+.modal-footer .btn {
+  padding: 10px 20px;
+  border-radius: 50px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  border-color: #6c757d;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268;
+  border-color: #545b62;
+}
+
+/* Animation for modal */
+.modal.fade .modal-dialog {
+  transition: transform 0.3s ease-out;
+  transform: scale(0.8);
+}
+
+.modal.show .modal-dialog {
+  transform: scale(1);
+}
+
+/* Custom animation for spinner */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+#loadingSpinner .spinner-border {
+  animation: spin 1s linear infinite;
+}
+
+/* Success and error styles */
+.text-success {
+  color: #28a745 !important;
+}
+
+.text-danger {
+  color: #dc3545 !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+  .modal-dialog {
+    margin: 1rem;
+  }
+  
+  .modal-content {
+    border-radius: 10px;
+  }
+  
+  .modal-header, .modal-body, .modal-footer {
+    padding: 15px;
+  }
+  
+  .modal-title {
+    font-size: 1.2rem;
+  }
+}
+#countdownText {
+  font-size: 1rem;
+  color: #6c757d;
+  font-weight: 500;
+  margin-top: 15px;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% {
+      opacity: 1;
+  }
+  50% {
+      opacity: 0.5;
+  }
+  100% {
+      opacity: 1;
+  }
+}
+.table-responsive {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.table {
+  min-width: 1000px; /* Điều chỉnh giá trị này tùy theo nội dung của bảng */
+}
+
+.product-image, .certificate-image {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  margin: 2px;
+}
+
+/* Tùy chọn: Cố định header của bảng */
+.table thead th {
+  position: sticky;
+  top: 0;
+  background-color: #f8f9fa;
+  z-index: 1;
+}

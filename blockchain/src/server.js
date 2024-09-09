@@ -119,7 +119,7 @@ app.get('/api/nhakiemduyet', async (req, res) => {
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-
+// xac thuc dang nhap
 function requireAuth(req, res, next) {
   if (req.session.userId) {
     next();

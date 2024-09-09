@@ -54,8 +54,8 @@
         <h1>Tạo Lô Hàng Mới</h1>
         <form id="createBatchForm" enctype="multipart/form-data">
             <div class="form-group">
-                <label for="sscc">SSCC:</label>
-                <input type="text" class="form-control" id="sscc" name="sscc" required>
+                <label for="name">Tên lô hàng:</label>
+                <input type="text" class="form-control" id="name" name="name" required>
             </div>
 
             <div class="form-group">
@@ -76,7 +76,6 @@
                 </select>
             </div>
 
-         
             <div class="form-group">
                 <label for="startDate">Ngày bắt đầu:</label>
                 <input type="date" class="form-control" id="startDate" name="startDate" required>
@@ -100,17 +99,15 @@
                 <div id="certificatePreview"></div>
             </div>
 
-            <button type="submit" class="btn btn-primary btn-block">Tạo Lô Hàng</button>
+            <button type="submit" class="btn btn-primary btn-block" id="submitButton" disabled>Tạo Lô Hàng</button>
         </form>
-
-       
 
         <div id="result"></div>
     </div>
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-   
+  
   
 
    <script>
@@ -249,8 +246,29 @@
             loadProducts();
         });
 
+        function validateDates() {
+            const startDate = new Date($('#startDate').val());
+            const endDate = new Date($('#endDate').val());
+            
+            if (startDate && endDate && startDate < endDate) {
+                $('#submitButton').prop('disabled', false);
+            } else {
+                $('#submitButton').prop('disabled', true);
+            }
+        }
+
+        $('#startDate, #endDate').on('change', validateDates);
+
         $('#createBatchForm').submit(function(e) {
             e.preventDefault();
+            const startDate = new Date($('#startDate').val());
+            const endDate = new Date($('#endDate').val());
+            
+            if (startDate >= endDate) {
+                alert('Ngày kết thúc phải sau ngày bắt đầu');
+                return;
+            }
+
             const formData = new FormData(this);
             
             // Xóa tất cả các file ảnh sản phẩm hiện có trong formData
@@ -289,17 +307,25 @@
                 processData: false,
                 contentType: false,
                 success: function(result) {
-                    // Ẩn spinner và hiển thị thông báo thành công
+                    // Ẩn spinner
                     $('#loadingSpinner').hide();
+                    
+                    // Hiển thị thông báo thành công
                     $('#resultMessage').show();
-                    $('#resultText').text('Lô hàng đã được tạo thành công!');
+                    $('#resultText').text('Lô hàng đã được tạo thành công và đang chờ phê duyệt');
                     $('#resultText').addClass('text-success');
 
-                    // Tự động đóng modal và refresh trang sau 3 giây
-                    setTimeout(function() {
-                        $('#loadingModal').modal('hide');
-                        location.reload();
-                    }, 3000);
+                    // Bắt đầu đếm ngược
+                    let countdown = 3;
+                    const countdownInterval = setInterval(function() {
+                        $('#countdownText').text(`Trang sẽ chuyển hướng về trang chủ sau ${countdown} giây`);
+                        countdown--;
+                        
+                        if (countdown < 0) {
+                            clearInterval(countdownInterval);
+                            window.location.href = '/nongdan.html';
+                        }
+                    }, 1000);
                 },
                 error: function(xhr, status, error) {
                     console.error('Lỗi:', error);
@@ -333,22 +359,22 @@
  
     <!-- Modal -->
     <div class="modal fade" id="loadingModal" tabindex="-1" role="dialog" aria-labelledby="loadingModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
-      <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-          <div class="modal-body text-center">
-            <div id="loadingSpinner">
-              <div class="spinner-border text-primary" role="status">
-                <span class="sr-only">Đang xử lý...</span>
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-body text-center">
+              <div id="loadingSpinner">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="sr-only">Đang xử lý...</span>
+                </div>
+                <p class="mt-2">Đang tạo lô hàng, vui lòng đợi...</p>
               </div>
-              <p class="mt-2">Đang tạo lô hàng, vui lòng đợi...</p>
-            </div>
-            <div id="resultMessage" style="display: none;">
-              <h4 id="resultText"></h4>
-              <!-- Nút đóng sẽ được thêm động trong trường hợp lỗi -->
+              <div id="resultMessage" style="display: none;">
+                <h4 id="resultText"></h4>
+                <p id="countdownText" class="mt-2"></p>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
 </body>
 </html>
