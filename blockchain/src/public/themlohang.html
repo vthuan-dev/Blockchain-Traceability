@@ -14,6 +14,9 @@
 <body>
     <!-- Thanh điều hướng -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light custom-navbar-height">
+        <div class="logo">
+            <img src="\hinhanh\Bitcoin-Blockchain-Network-icon-on-transparent-background-PNG.png" alt="Logo" class="logo-image">
+        </div>
         <a class="navbar-brand" href="sanxuat.html">Sản xuất</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -54,22 +57,22 @@
         <h1>Tạo Lô Hàng Mới</h1>
         <form id="createBatchForm" enctype="multipart/form-data">
             <div class="form-group">
-                <label for="name">Tên lô hàng:</label>
-                <input type="text" class="form-control" id="name" name="name" required>
+                <label for="name">Tên lô hàng :</label>
+                <input type="text" class="form-control" id="name" name="name" placeholder="Nhập tên lô hàng" required>
             </div>
 
             <div class="form-group">
-                <label for="quantity">Số lượng (kg):</label>
-                <input type="number" class="form-control" id="quantity" name="quantity" required>
+                <label for="quantity">Số lượng (tấn):</label>
+                <input type="number" class="form-control" id="quantity" name="quantity" placeholder="Nhập số lượng" required>
             </div>
 
             <div class="form-group">
-                <label for="farmPlotNumber">Số lô đất:</label>
-                <input type="text" class="form-control" id="farmPlotNumber" name="farmPlotNumber" required>
+                <label for="farmPlotNumber">Diện tích đất trồng:</label>
+                <input type="text" class="form-control" id="farmPlotNumber" name="farmPlotNumber" placeholder="Có thể nhập m2" required>
             </div>
 
             <div class="form-group">
-                <label for="productId">Sản phẩm:</label>
+                <label for="productId">Giống bưởi:</label>
                 <select class="form-control short-dropdown" id="productId" name="productId" required>
                     <option value="">Chọn sản phẩm</option>
                     <!-- Các option sẽ được thêm vào đây bằng JavaScript -->
@@ -77,12 +80,12 @@
             </div>
 
             <div class="form-group">
-                <label for="startDate">Ngày bắt đầu:</label>
+                <label for="startDate">Ngày bắt đầu sản xuất (có thể ước tính):</label>
                 <input type="date" class="form-control" id="startDate" name="startDate" required>
             </div>
 
             <div class="form-group">
-                <label for="endDate">Ngày kết thúc:</label>
+                <label for="endDate">Ngày thu hoạch:</label>
                 <input type="date" class="form-control" id="endDate" name="endDate" required>
             </div>
 
@@ -94,7 +97,7 @@
             </div>
 
             <div class="form-group">
-                <label for="certificateImage">Ảnh chứng nhận:</label>
+                <label for="certificateImage">Ảnh giấy chứng nhận:</label>
                 <input type="file" class="form-control-file" id="certificateImage" name="certificateImage" accept="image/*">
                 <div id="certificatePreview"></div>
             </div>
@@ -323,7 +326,7 @@
                         
                         if (countdown < 0) {
                             clearInterval(countdownInterval);
-                            window.location.href = '/nongdan.html';
+                            window.location.href = '/sanxuat.html';
                         }
                     }, 1000);
                 },
