@@ -84,11 +84,4 @@ Dự án này là một hệ thống truy xuất bưởi  sử dụng công ngh�
 - **Người tiêu dùng**: Quét mã QR để truy xuất thông tin sản phẩm.
 - **Nhà kiểm duyệt**: Đăng nhập, kiểm định thông tin và cấp chứng nhận.
 
-## Đóng Góp
-
-Nếu bạn muốn đóng góp vào dự án, vui lòng mở một yêu cầu kéo (pull request) hoặc tạo một vấn đề mới (issue).
-
-## Giấy Phép
-
-## Liên Hệ
 
