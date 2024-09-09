@@ -267,7 +267,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     console.error('Lỗi:', error);
   }
 });
-
 function displayPendingBatches(batches) {
   const pendingBatchesList = document.getElementById('pendingBatchesList');
   if (batches.length === 0) {
@@ -292,6 +291,7 @@ function displayPendingBatches(batches) {
   `;
   
   batches.forEach(batch => {
+    const statusClass = getStatusClass(batch.status);
     html += `
       <tr>
         <td>${batch.name}</td>
@@ -300,13 +300,26 @@ function displayPendingBatches(batches) {
         <td>${new Date(Number(batch.productionDate) * 1000).toLocaleDateString()}</td>
         <td>${batch.productImageUrls.map(url => `<img src="${url}" alt="Product Image" class="product-image">`).join('')}</td>
         <td><img src="${batch.certificateImageUrl}" alt="Certificate" class="certificate-image"></td>
-        <td>${translateStatus(batch.status)}</td>
+        <td class="${statusClass}">${batch.status}</td>
       </tr>
     `;
   });
   
   html += '</tbody></table>';
   pendingBatchesList.innerHTML = html;
+}
+
+function getStatusClass(status) {
+  switch (status) {
+    case 'Chờ phê duyệt':
+      return 'status-pending';
+    case 'Đã phê duyệt':
+      return 'status-approved';
+    case 'Đã từ chối':
+      return 'status-rejected';
+    default:
+      return '';
+  }
 }
 </script>
 </body>
