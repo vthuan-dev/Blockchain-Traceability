@@ -62,7 +62,7 @@ Dự án này là một hệ thống truy xuất bưởi  sử dụng công ngh�
 
 1. **Clone dự án**:
     ```sh
-    git clone https://github.com/LocNguyen807/NCKH.git
+   https://github.com/vthuan-dev/nckh-be.git
     ```
 
 2. **Cài đặt các phụ thuộc**:
