@@ -8,7 +8,9 @@
     <link rel="stylesheet" href="css/nhakiemduyet.css">
     <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <style>
 .table-responsive {
   overflow-x: auto;
@@ -33,13 +35,21 @@
   background-color: #f8f9fa;
   z-index: 1;
 }
+
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
 </style>
 </head>
 
 <body>
     <!-- Thanh điều hướng -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light custom-navbar-height">
-        <a class="navbar-brand" href="#">Người sản xuất</a>
+        <div class="logo">
+            <img src="\hinhanh\Bitcoin-Blockchain-Network-icon-on-transparent-background-PNG.png" alt="Logo" class="logo-image">
+        </div>
+        <a class="navbar-brand" href="sanxuat.html">Sản xuất</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -81,51 +91,43 @@
                 <h5><b>Lô hàng đang chờ kiểm định</b></h5>
             </div>
             <br>
-            <div class="searchbox-filter">
-                <input class="searchbox" id="myInput" type="text" placeholder="Tìm kiếm">
-                <div class="dropdown">
-                    <button onclick="searchFilter()" class="check-button"><b>Lọc</b></button>
-                    <div id="filterDropdown" class="dropdown-content">
-                        <a href="#all">Tất cả</a>
-                        <a href="#checked">Đã kiểm định</a>
-                        <a href="#uncheck">Chưa kiểm định</a>
-                        <a href="#cancel">Đã từ chối</a>
+            <div class="container-fluid mt-3">
+                <div class="row justify-content-center">
+                    <div class="col-12">
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" placeholder="Tìm kiếm lô hàng..." aria-label="Tìm kiếm lô hàng">
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" type="button">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                </div>  
+                </div>
             </div>
-              
+            
             <p></p>
             <div class="dashboard-table">
-                <a href="themlohang.html" class="check-button"><b>Thêm lô mới</b></a>
+                <a href="themlohang.html" class="check-button"><b>Tạo lô hàng</b></a>
               
+            </div>
+            <!-- Thêm spinner loading -->
+            <div id="loadingSpinner" class="text-center mt-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="sr-only">Đang tải...</span>
+                </div>
+                <p class="mt-2">Đang tải lô hàng...</p>
+            </div>
+            
+            <!-- Container của bảng lô hàng -->
+            <div class="table-responsive">
+                <div id="pendingBatchesList"></div>
             </div>
         </div>
     </main>
 
     <!-- Modal -->
-    <div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel" aria-hidden="true" data-aos="zoom-in">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="confirmModalLabel"><b>Xác nhận</b></h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    Bạn có chắc chắn muốn xóa thông tin này?
-                </div>
-                <div class="row">
-                    <div class="col-12 col-sm-6 ml-auto">
-                        <div class="popupButton">
-                            <div class="function-button cancel-button" data-dismiss="modal"><b>Hủy</b></div>
-                            <div class="function-button accept-button" id="save-button"><b>Xác nhận</b></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    
 
     <!-- jQuery và Bootstrap JavaScript -->
     <!-- AOS JavaScript -->
@@ -236,90 +238,90 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<div class="container mt-4">
-  <h2>Lô hàng đang chờ kiểm duyệt</h2>
-  <div class="table-responsive">
-    <div id="pendingBatchesList"></div>
-  </div>
-</div>
-
 <script>
-function translateStatus(status) {
-  const statusTranslations = {
-    'PendingApproval': 'Chờ phê duyệt',
-    'Approved': 'Đã phê duyệt',
-    'Rejected': 'Đã từ chối'
-  };
-  return statusTranslations[status] || status;
-}
-
 document.addEventListener('DOMContentLoaded', async function() {
-  try {
-    const response = await fetch('/pending-batches');
-    if (response.ok) {
-      const pendingBatches = await response.json();
-      displayPendingBatches(pendingBatches);
-    } else {
-      const errorData = await response.json();
-      console.error('Không thể lấy danh sách lô hàng chờ duyệt:', errorData.error);
-    }
-  } catch (error) {
-    console.error('Lỗi:', error);
-  }
-});
-function displayPendingBatches(batches) {
-  const pendingBatchesList = document.getElementById('pendingBatchesList');
-  if (batches.length === 0) {
-    pendingBatchesList.innerHTML = '<p>Không có lô hàng nào đang chờ kiểm duyệt.</p>';
-    return;
-  }
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const pendingBatchesList = document.getElementById('pendingBatchesList');
 
-  let html = `
-    <table class="table table-striped table-bordered">
-      <thead>
-        <tr>
-          <th>Tên lô</th>
-          <th>Mã lô</th>
-          <th>Số lượng</th>
-          <th>Ngày tạo</th>
-          <th>Hình ảnh</th>
-          <th>Giấy chứng nhận</th>
-          <th>Trạng thái</th>
-        </tr>
-      </thead>
-      <tbody>
-  `;
-  
-  batches.forEach(batch => {
-    const statusClass = getStatusClass(batch.status);
-    html += `
-      <tr>
-        <td>${batch.name}</td>
-        <td>${batch.batchId}</td>
-        <td>${batch.quantity}</td>
-        <td>${new Date(Number(batch.productionDate) * 1000).toLocaleDateString()}</td>
-        <td>${batch.productImageUrls.map(url => `<img src="${url}" alt="Product Image" class="product-image">`).join('')}</td>
-        <td><img src="${batch.certificateImageUrl}" alt="Certificate" class="certificate-image"></td>
-        <td class="${statusClass}">${batch.status}</td>
-      </tr>
+    try {
+        // Hiển thị spinner
+        loadingSpinner.style.display = 'block';
+        pendingBatchesList.style.display = 'none';
+
+        // Gọi API để lấy dữ liệu lô hàng
+        const response = await fetch('/pending-batches');
+        if (response.ok) {
+            const pendingBatches = await response.json();
+            
+            // Xử lý và hiển thị dữ liệu
+            displayPendingBatches(pendingBatches);
+
+            // Ẩn spinner và hiển thị bảng lô hàng
+            loadingSpinner.style.display = 'none';
+            pendingBatchesList.style.display = 'block';
+        } else {
+            throw new Error('Không thể lấy danh sách lô hàng');
+        }
+    } catch (error) {
+        console.error('Lỗi:', error);
+        // Hiển thị thông báo lỗi
+        loadingSpinner.innerHTML = '<p class="text-danger">Đã xảy ra lỗi khi tải dữ liệu. Vui lòng thử lại sau.</p>';
+    }
+});
+
+function displayPendingBatches(batches) {
+    const pendingBatchesList = document.getElementById('pendingBatchesList');
+    if (batches.length === 0) {
+        pendingBatchesList.innerHTML = '<p>Không có lô hàng nào đang chờ kiểm duyệt.</p>';
+        return;
+    }
+
+    let html = `
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>Tên lô</th>
+                    <th>Mã lô</th>
+                    <th>Số lượng</th>
+                    <th>Ngày tạo</th>
+                    <th>Hình ảnh</th>
+                    <th>Giấy chứng nhận</th>
+                    <th>Trạng thái</th>
+                </tr>
+            </thead>
+            <tbody>
     `;
-  });
-  
-  html += '</tbody></table>';
-  pendingBatchesList.innerHTML = html;
+    
+    batches.forEach(batch => {
+        const statusClass = getStatusClass(batch.status);
+        html += `
+            <tr>
+                <td>${batch.name}</td>
+                <td>${batch.batchId}</td>
+                <td>${batch.quantity}</td>
+                <td>${new Date(Number(batch.productionDate) * 1000).toLocaleDateString()}</td>
+                <td>${batch.productImageUrls.map(url => `<img src="${url}" alt="Product Image" class="product-image">`).join('')}</td>
+                <td><img src="${batch.certificateImageUrl}" alt="Certificate" class="certificate-image"></td>
+                <td class="${statusClass}">${batch.status}</td>
+            </tr>
+        `;
+    });
+    
+    html += '</tbody></table>';
+    pendingBatchesList.innerHTML = html;
 }
 
 function getStatusClass(status) {
-  switch (status) {
-    case 'Chờ phê duyệt':
-      return 'status-pending';
-    case 'Đã phê duyệt':
-      return 'status-approved';
-    case 'Đã từ chối':
-      return 'status-rejected';
-    default:
-      return '';
-  }
+    switch (status) {
+        case 'Chờ phê duyệt':
+            return 'status-pending';
+        case 'Đã phê duyệt':
+            return 'status-approved';
+        case 'Đã từ chối':
+            return 'status-rejected';
+        default:
+            return '';
+    }
 }
 </script>
 </body>

@@ -590,6 +590,7 @@ body {
 
 .navbar-nav .nav-item {
   position: relative;
+  
 }
 
 #notificationPopup {
@@ -622,6 +623,7 @@ body {
 /* CSS cho navbar */
 .navbar {
   z-index: 1050; /* Đảm bảo navbar nằm trên lớp phủ */
+  color: black;
 }
 
 .unread, .read {
@@ -945,3 +947,61 @@ body {
     color: #ff0000; /* Màu đỏ */
     font-weight: bold;
   }
+
+  .navbar {
+    background-color: #4cd137 !important; /* Màu xanh dương */
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    
+  }
+  .navbar-brand {
+    display: flex;
+    align-items: center;
+  }
+  
+  .logo-image {
+    width: 67px;  /* Điều chỉnh kích thước logo */
+    height: 67px;
+    margin-right: 10px;  /* Khoảng cách giữa logo và tên */
+    object-fit: contain;  /* Đảm bảo logo không bị méo */
+  }
+  
+  .navbar-brand span {
+    font-size: 1.2rem;  /* Kích thước chữ cho tên */
+    font-weight: bold;
+  }
+
+  ::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+    font-style: italic;
+    opacity: 0.7; /* Firefox */
+  }
+  
+  :-ms-input-placeholder { /* Internet Explorer 10-11 */
+    font-style: italic;
+    opacity: 0.7;
+  }
+  
+  ::-ms-input-placeholder { /* Microsoft Edge */
+    font-style: italic;
+    opacity: 0.7;
+  }
+  .searchbox-filter {
+    margin-bottom: 20px;
+}
+
+.searchbox {
+    border-radius: 20px 0 0 20px;
+    border-right: none;
+}
+
+.input-group-append button {
+    border-radius: 0 20px 20px 0;
+    border-left: none;
+}
+
+.input-group-append button:hover {
+    background-color: #f8f9fa;
+    border-color: #ced4da;
+}
