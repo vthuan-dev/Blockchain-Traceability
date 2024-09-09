@@ -932,3 +932,16 @@ body {
   background-color: #f8f9fa;
   z-index: 1;
 }
+
+  .status-pending {
+    color: #ffa500; /* Màu vàng */
+    font-weight: bold;
+  }
+  .status-approved {
+    color: #008000; /* Màu xanh lá */
+    font-weight: bold;
+  }
+  .status-rejected {
+    color: #ff0000; /* Màu đỏ */
+    font-weight: bold;
+  }
