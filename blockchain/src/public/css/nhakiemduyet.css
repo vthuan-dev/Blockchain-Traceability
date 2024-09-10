@@ -1005,3 +1005,20 @@ body {
     background-color: #f8f9fa;
     border-color: #ced4da;
 }
+
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+}
+
+.status-pending {
+  color: orange;
+}
+
+.status-approved {
+  color: green;
+}
+
+.status-rejected {
+  color: red;
+} 

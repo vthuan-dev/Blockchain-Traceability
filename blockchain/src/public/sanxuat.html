@@ -47,7 +47,7 @@
     <!-- Thanh điều hướng -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light custom-navbar-height">
         <div class="logo">
-            <img src="\hinhanh\Bitcoin-Blockchain-Network-icon-on-transparent-background-PNG.png" alt="Logo" class="logo-image">
+            <img src=".\hinhanh\Bitcoin-Blockchain-Network-icon-on-transparent-background-PNG.png" alt="Logo" class="logo-image">
         </div>
         <a class="navbar-brand" href="sanxuat.html">Sản xuất</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -56,7 +56,7 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav"> <!-- Các mục điều hướng bên trái -->
                 <li class="nav-item">
-                    <a class="nav-link" href="#"> Quản lí lô hàng</a>
+                    <a class="nav-link" href="quanli-lohang.html"> Quản lí lô hàng</a>
                 </li>
               
                 <li class="nav-item">
@@ -118,11 +118,22 @@
                 </div>
                 <p class="mt-2">Đang tải lô hàng...</p>
             </div>
-            
+            <div class="mt-4">
+                <label for="statusFilter">Lọc theo trạng thái:</label>
+                <select id="statusFilter" class="form-control">
+                    <option value="Chờ phê duyệt">Chờ phê duyệt</option>
+                    <option value="Đã phê duyệt">Đã phê duyệt</option>
+                    <option value="Đã từ chối">Đã từ chối</option>
+                </select>
+            </div>
             <!-- Container của bảng lô hàng -->
+            <h5><i>Danh sách lô hàng :</i></h5>
+
             <div class="table-responsive">
                 <div id="pendingBatchesList"></div>
             </div>
+
+            
         </div>
     </main>
 

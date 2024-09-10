@@ -1,0 +1,156 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lí lô hàng</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/nhakiemduyet.css">
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light custom-navbar-height">
+        <div class="logo">
+            <img src="\hinhanh\Bitcoin-Blockchain-Network-icon-on-transparent-background-PNG.png" alt="Logo" class="logo-image">
+        </div>
+        <a class="navbar-brand" href="sanxuat.html">Quản lí lô hàng</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav"> <!-- Các mục điều hướng bên trái -->
+                <li class="nav-item">
+                    <a class="nav-link" href="#"> Quản lí lô hàng</a>
+                </li>
+              
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Quản lí hoạt động</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Thông báo</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <span id="userName">Tên người dùng</span>
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="#" id="userRole">Vai trò</a>
+                        <a class="dropdown-item" href="#" id="userRegion">Khu vực</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="#" id="logoutButton">Đăng xuất</a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
+</body>
+
+<script>
+    document.addEventListener('DOMContentLoaded', async function() {
+        try {
+            const response = await fetch('/api/user-info');
+            if (response.ok) {
+                const data = await response.json();
+                document.getElementById('userName').textContent = data.name;
+                document.getElementById('userRole').textContent = `Vai trò: ${data.role}`;
+                document.getElementById('userRegion').textContent = `Khu vực: ${data.region}`;
+            } else {
+                console.error('Không thể lấy thông tin người dùng');
+            }
+        } catch (error) {
+            console.error('Lỗi:', error);
+        }
+    });
+
+    // Xử lý đăng xuất
+    document.getElementById('logoutButton').addEventListener('click', async function(e) {
+        e.preventDefault();
+        try {
+            const response = await fetch('/api/dangxuat', { method: 'POST' });
+            if (response.ok) {
+                window.location.href = '/dangnhap.html'; // Chuyển hướng về trang đăng nhập
+            } else {
+                console.error('Không thể đăng xuất');
+            }
+        } catch (error) {
+            console.error('Lỗi khi đăng xuất:', error);
+        }
+    });
+    </script>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var navbarToggler = document.querySelector('.navbar-toggler');
+        var navbarCollapse = document.querySelector('.navbar-collapse');
+        var menuOverlay = document.querySelector('.menu-overlay');
+    
+        function toggleMenu() {
+            navbarCollapse.classList.toggle('show');
+            document.body.classList.toggle('menu-open');
+            if (menuOverlay) {
+                menuOverlay.classList.toggle('show');
+            }
+        }
+    
+        function closeMenu() {
+            navbarCollapse.classList.remove('show');
+            document.body.classList.remove('menu-open');
+            if (menuOverlay) {
+                menuOverlay.classList.remove('show');
+            }
+        }
+    
+        navbarToggler.addEventListener('click', function(e) {
+            e.stopPropagation();
+            toggleMenu();
+        });
+    
+        if (menuOverlay) {
+            menuOverlay.addEventListener('click', closeMenu);
+        }
+    
+        document.addEventListener('click', function(e) {
+            if (!navbarCollapse.contains(e.target) && !navbarToggler.contains(e.target)) {
+                closeMenu();
+            }
+        });
+    
+        // Ngăn sự kiện click trên menu lan ra ngoài
+        navbarCollapse.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    
+        // Xử lý cho dropdown trong menu
+        var dropdowns = document.querySelectorAll('.navbar-nav .dropdown');
+        dropdowns.forEach(function(dropdown) {
+            dropdown.addEventListener('click', function(e) {
+                e.stopPropagation();
+                this.classList.toggle('show');
+            });
+        });
+    
+        var userDropdown = document.querySelector('.navbar-nav .dropdown');
+        var userDropdownMenu = userDropdown.querySelector('.dropdown-menu');
+    
+        userDropdown.addEventListener('click', function(e) {
+            e.stopPropagation();
+            userDropdownMenu.classList.toggle('show');
+        });
+    
+        document.addEventListener('click', function(e) {
+            if (!userDropdown.contains(e.target)) {
+                userDropdownMenu.classList.remove('show');
+            }
+        });
+    });
+    </script>
+    
+<footer>
+
+</footer>
