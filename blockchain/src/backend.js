@@ -51,7 +51,7 @@ web3.eth.net.isListening()
   .catch(e => console.log('Lỗi rồi', e));
 
 const contractABI = require('../build/contracts/TraceabilityContract.json').abi;
-const contractAddress = '0xfDBB2490e6fabC5d889FbE0Dcc556157648b118a';
+const contractAddress = '0x724225d9BbC856286ee2d4a7553A19ba1bBD467b';
 const contract = new web3.eth.Contract(contractABI, contractAddress);
 
 // tạo biến lưu trữ file, giới hạn số lượng file và tên file, maxCount: số lượng file, name: tên file
@@ -606,7 +606,75 @@ function setupRoutes(app, db){
     }
   });
 
+app.get('/pending-batches-by-region', async (req, res) => {
+  try {
+    if (!req.session.userId) {
+      return res.status(401).json({ error: 'Người dùng chưa đăng nhập' });
+    }
 
+    const userId = req.session.userId;
+
+    // Truy xuất vùng sản xuất của người kiểm duyệt từ SQL
+    db.query('SELECT region_id FROM users WHERE uid = ?', [userId], async (err, results) => {
+      if (err) {
+        console.error('Lỗi truy vấn cơ sở dữ liệu:', err);
+        return res.status(500).json({ error: 'Lỗi truy vấn cơ sở dữ liệu' });
+      }
+
+      if (results.length === 0) {
+        return res.status(404).json({ error: 'Không tìm thấy người dùng' });
+      }
+
+      const regionId = results[0].region_id;
+
+      // Truy xuất tất cả các lô hàng chưa duyệt từ smart contract
+      const allPendingBatches = await contract.methods.getAllPendingBatches().call();
+
+      // Lọc các lô hàng dựa trên vùng sản xuất của người sản xuất
+      const filteredBatches = [];
+      for (const batch of allPendingBatches) {
+        const producerId = batch.producerId;
+        const producerRegion = await getProducerRegion(producerId);
+        if (producerRegion === regionId) {
+          filteredBatches.push(batch);
+        }
+      }
+
+      // Chuyển đổi trạng thái từ số sang chuỗi và dịch sang tiếng Việt
+      const statusMap = ['PendingApproval', 'Approved', 'Rejected'];
+
+      const serializedBatches = filteredBatches.map(batch => ({
+        ...convertBigIntToString(batch),
+        status: translateStatus(statusMap[batch.status] || 'Unknown'),
+        productImageUrls: batch.productImageUrls,
+        certificateImageUrl: batch.certificateImageUrl
+      }));
+
+      res.status(200).json(serializedBatches);
+    });
+  } catch (err) {
+    console.error('Error fetching pending batches by region:', err);
+    res.status(500).json({ error: 'Lỗi khi lấy danh sách lô hàng đang chờ kiểm duyệt: ' + err.message });
+  }
+});
+
+// Hàm để lấy vùng sản xuất của người sản xuất từ SQL
+async function getProducerRegion(producerId) {
+  return new Promise((resolve, reject) => {
+    db.query('SELECT region_id FROM users WHERE uid = ?', [producerId], (err, results) => {
+      if (err) {
+        console.error('Lỗi truy vấn cơ sở dữ liệu:', err);
+        return reject(err);
+      }
+
+      if (results.length === 0) {
+        return reject(new Error('Không tìm thấy người sản xuất'));
+      }
+
+      resolve(results[0].region_id);
+    });
+  });
+}
 }
 module.exports = {
   s3Client,

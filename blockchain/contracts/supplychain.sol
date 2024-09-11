@@ -303,6 +303,26 @@ function getPendingBatchesByProducer(uint256 _producerId) public view returns (B
     return pendingBatches;
 }
 
+function getAllPendingBatches() public view returns (Batch[] memory) {
+        uint256 pendingCount = 0;
+        for (uint256 i = 1; i <= _batchIdCounter; i++) {
+            if (_batches[i].status == BatchStatus.PendingApproval) {
+                pendingCount++;
+            }
+        }
+
+        Batch[] memory pendingBatches = new Batch[](pendingCount);
+        uint256 index = 0;
+        for (uint256 i = 1; i <= _batchIdCounter; i++) {
+            if (_batches[i].status == BatchStatus.PendingApproval) {
+                pendingBatches[index] = _batches[i];
+                index++;
+            }
+        }
+
+        return pendingBatches;
+    }
+
 event BatchStatusUpdated(uint256 indexed batchId, BatchStatus newStatus);
 
 // hàm lấy thông tin lô hàng

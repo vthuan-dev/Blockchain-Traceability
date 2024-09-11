@@ -7,7 +7,7 @@ async function sendEmail(userEmail, userName, link, subject, templatePath) {
     // Đọc nội dung file HTML
     const emailTemplate = fs.readFileSync(templatePath, 'utf8');
 
-    // Tạo transporter
+    // Tạo transporter dùng 
     let transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
