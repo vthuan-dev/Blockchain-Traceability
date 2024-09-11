@@ -582,6 +582,7 @@ function setupRoutes(app, db){
 
   app.get('/pending-batches', async (req, res) => {
     try {
+      
       if (!req.session.userId) {
         return res.status(401).json({ error: 'Người dùng chưa đăng nhập' });
       }
@@ -606,57 +607,83 @@ function setupRoutes(app, db){
     }
   });
 
-app.get('/pending-batches-by-region', async (req, res) => {
-  try {
-    if (!req.session.userId) {
-      return res.status(401).json({ error: 'Người dùng chưa đăng nhập' });
-    }
-
-    const userId = req.session.userId;
-
-    // Truy xuất vùng sản xuất của người kiểm duyệt từ SQL
-    db.query('SELECT region_id FROM users WHERE uid = ?', [userId], async (err, results) => {
-      if (err) {
-        console.error('Lỗi truy vấn cơ sở dữ liệu:', err);
-        return res.status(500).json({ error: 'Lỗi truy vấn cơ sở dữ liệu' });
+  app.get('/pending-batches-by-region', async (req, res) => {
+    try {
+      console.log('Bắt đầu xử lý yêu cầu lấy lô hàng chưa duyệt theo vùng');
+      if (!req.session.userId) {
+        console.log('Người dùng chưa đăng nhập');
+        return res.status(401).json({ error: 'Người dùng chưa đăng nhập' });
       }
-
-      if (results.length === 0) {
-        return res.status(404).json({ error: 'Không tìm thấy người dùng' });
+  
+      const userId = req.session.userId;
+      console.log('Người dùng đã đăng nhập với ID:', userId);
+  
+      // 1. Lấy thông tin người kiểm định
+      const [approvers] = await db.query('SELECT * FROM users WHERE uid = ? AND role_id = 2', [userId]);
+      if (approvers.length === 0) {
+        return res.status(404).json({ error: 'Không tìm thấy thông tin người kiểm định hoặc người dùng không có quyền kiểm định' });
       }
-
-      const regionId = results[0].region_id;
-
-      // Truy xuất tất cả các lô hàng chưa duyệt từ smart contract
+      const approver = approvers[0];
+      const approverRegionId = approver.region_id;
+  
+      console.log('Vùng của người kiểm định:', approverRegionId);
+  
+      // 2. Tìm tất cả người sản xuất cùng vùng
+      const [producers] = await db.query('SELECT uid FROM users WHERE region_id = ? AND role_id = 1', [approverRegionId]);
+      
+      console.log('Số lượng người sản xuất cùng vùng:', producers.length);
+  
+      // 3. Lấy danh sách lô hàng chưa duyệt từ blockchain
       const allPendingBatches = await contract.methods.getAllPendingBatches().call();
-
-      // Lọc các lô hàng dựa trên vùng sản xuất của người sản xuất
-      const filteredBatches = [];
-      for (const batch of allPendingBatches) {
-        const producerId = batch.producerId;
-        const producerRegion = await getProducerRegion(producerId);
-        if (producerRegion === regionId) {
-          filteredBatches.push(batch);
-        }
-      }
-
+      console.log('Tổng số lô hàng chưa duyệt:', allPendingBatches.length);
+  
+      // 4. Lọc lô hàng của người sản xuất cùng vùng
+      const filteredBatches = allPendingBatches.filter(batch => 
+        producers.some(producer => producer.uid === parseInt(batch.producerId))
+      );
+  
+      console.log('Số lô hàng chưa duyệt theo vùng:', filteredBatches.length);
+  
       // Chuyển đổi trạng thái từ số sang chuỗi và dịch sang tiếng Việt
       const statusMap = ['PendingApproval', 'Approved', 'Rejected'];
-
-      const serializedBatches = filteredBatches.map(batch => ({
-        ...convertBigIntToString(batch),
-        status: translateStatus(statusMap[batch.status] || 'Unknown'),
-        productImageUrls: batch.productImageUrls,
-        certificateImageUrl: batch.certificateImageUrl
+  
+      const serializedBatches = await Promise.all(filteredBatches.map(async batch => {
+        const [producers] = await db.query('SELECT name FROM users WHERE uid = ?', [batch.producerId]);
+        const producerName = producers.length > 0 ? producers[0].name : 'Unknown';
+        
+        return {
+          batchId: batch.batchId.toString(),
+          name: batch.name,
+         // sscc: batch.sscc,
+          producerName: producerName,
+          quantity: batch.quantity.toString(),
+          productionDate: batch.productionDate.toString(),
+          status: translateStatus(statusMap[batch.status] || 'Unknown'),
+          productImageUrls: batch.productImageUrls,
+          certificateImageUrl: batch.certificateImageUrl
+        };
       }));
-
+  
       res.status(200).json(serializedBatches);
-    });
-  } catch (err) {
-    console.error('Error fetching pending batches by region:', err);
-    res.status(500).json({ error: 'Lỗi khi lấy danh sách lô hàng đang chờ kiểm duyệt: ' + err.message });
+    } catch (err) {
+      console.error('Error fetching pending batches by region:', err);
+      res.status(500).json({ error: 'Lỗi khi lấy danh sách lô hàng đang chờ kiểm duyệt: ' + err.message });
+    }
+  });
+  
+  function translateStatus(status) {
+    switch (status) {
+      case 'PendingApproval':
+        return 'Chờ phê duyệt';
+      case 'Approved':
+        return 'Đã phê duyệt';
+      case 'Rejected':
+        return 'Đã từ chối';
+      default:
+        return 'Không xác định';
+    }
   }
-});
+
 
 // Hàm để lấy vùng sản xuất của người sản xuất từ SQL
 async function getProducerRegion(producerId) {
@@ -675,7 +702,130 @@ async function getProducerRegion(producerId) {
     });
   });
 }
+app.post('/approve-batch/:batchId', async (req, res) => {
+  try {
+    if (!req.session.userId) {
+      return res.status(401).json({ error: 'Người dùng chưa đăng nhập' });
+    }
+
+    const batchId = req.params.batchId;
+    const userId = req.session.userId;
+
+    // Kiểm tra xem người dùng có phải là nhà kiểm duyệt không
+    const [approvers] = await db.query('SELECT * FROM users WHERE uid = ? AND role_id = 2', [userId]);
+    if (approvers.length === 0) {
+      return res.status(403).json({ error: 'Người dùng không có quyền kiểm duyệt' });
+    }
+
+    // Gọi hàm updateBatchStatus từ smart contract để phê duyệt (status 1 = Approved)
+    const result = await contract.methods.updateBatchStatus(batchId, 1).send({ from: account.address, gas: 3000000 });
+
+    res.status(200).json({
+      message: 'Lô hàng đã được phê duyệt thành công',
+      transactionHash: result.transactionHash
+    });
+  } catch (error) {
+    console.error('Lỗi khi phê duyệt lô hàng:', error);
+    res.status(500).json({ error: 'Không thể phê duyệt lô hàng: ' + error.message });
+  }
+});
+
+app.post('/reject-batch/:batchId', async (req, res) => {
+  try {
+    if (!req.session.userId) {
+      return res.status(401).json({ error: 'Người dùng chưa đăng nhập' });
+    }
+
+    const batchId = req.params.batchId;
+    const userId = req.session.userId;
+
+    // Kiểm tra xem người dùng có phải là nhà kiểm duyệt không
+    const [approvers] = await db.query('SELECT * FROM users WHERE uid = ? AND role_id = 2', [userId]);
+    if (approvers.length === 0) {
+      return res.status(403).json({ error: 'Người dùng không có quyền kiểm duyệt' });
+    }
+
+    // Gọi hàm updateBatchStatus từ smart contract để từ chối (status 2 = Rejected)
+    const result = await contract.methods.updateBatchStatus(batchId, 2).send({ from: account.address, gas: 3000000 });
+
+    res.status(200).json({
+      message: 'Lô hàng đã bị từ chối',
+      transactionHash: result.transactionHash
+    });
+  } catch (error) {
+    console.error('Lỗi khi từ chối lô hàng:', error);
+    res.status(500).json({ error: 'Không thể từ chối lô hàng: ' + error.message });
+  }
+});
+
+app.get('/batch-details/:batchId', async (req, res) => {
+  try {
+      const batchId = req.params.batchId;
+      console.log('Đang lấy chi tiết cho lô hàng:', batchId);
+
+      // Gọi hàm getBatchDetails từ smart contract
+      const batchDetails = await contract.methods.getBatchDetails(batchId).call();
+      console.log('Chi tiết lô hàng từ blockchain:', batchDetails);
+
+      // Xử lý và định dạng dữ liệu
+      const formattedBatchDetails = {
+          batchId: batchDetails.batchId,
+          name: batchDetails.name,
+          producerName: await getProducerNameById(batchDetails.producerId),
+          quantity: batchDetails.quantity,
+          productionDate: batchDetails.productionDate,
+          startDate: batchDetails.startDate,
+          endDate: batchDetails.endDate,
+          status: translateStatus(batchDetails.status),
+          farmPlotNumber: batchDetails.farmPlotNumber,
+          productImageUrls: batchDetails.productImageUrls,
+          certificateImageUrl: batchDetails.certificateImageUrl
+      };
+
+      res.json(formattedBatchDetails);
+  } catch (error) {
+      console.error('Lỗi khi lấy chi tiết lô hàng:', error);
+      res.status(500).json({ error: 'Không thể lấy chi tiết lô hàng: ' + error.message });
+  }
+});
+
+// Hàm hỗ trợ để lấy tên người sản xuất từ ID
+async function getProducerNameById(producerId) {
+  return new Promise((resolve, reject) => {
+      db.query('SELECT name FROM users WHERE uid = ?', [producerId], (err, results) => {
+          if (err) {
+              console.error('Lỗi truy vấn cơ sở dữ liệu:', err);
+              return reject(err);
+          }
+          if (results.length === 0) {
+              return resolve('Không xác định');
+          }
+          resolve(results[0].name);
+      });
+  });
 }
+
+// Hàm chuyển đổi trạng thái
+
+function translateStatus(status) {
+  switch (status) {
+      case 'PendingApproval':
+      case 0:
+          return 'Chờ phê duyệt';
+      case 'Approved':
+      case 1:
+          return 'Đã phê duyệt';
+      case 'Rejected':
+      case 2:
+          return 'Đã từ chối';
+      default:
+          return 'Không xác định';
+  }
+}
+}
+
+
+
 module.exports = {
   s3Client,
   web3,

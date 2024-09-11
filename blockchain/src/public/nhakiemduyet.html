@@ -7,6 +7,142 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/nhakiemduyet.css">
     <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+    <style>
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .product-image, .certificate-image {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            margin: 2px;
+            cursor: pointer;
+        }
+
+        #imageModal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.9);
+        }
+
+        #modalImage {
+            margin: auto;
+            display: block;
+            width: 80%;
+            max-width: 700px;
+        }
+
+        .status-pending { color: orange; }
+        .status-approved { color: green; }
+        .status-rejected { color: red; }
+
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            margin-bottom: 1em;
+        }
+
+        .dashboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px; /* Đảm bảo bảng có chiều rộng tối thiểu */
+        }
+
+        .dashboard-table th, .dashboard-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        .dashboard-table th {
+            background-color: #5bd657;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .dashboard-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .dashboard-table tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .product-image, .certificate-image {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            margin: 2px;
+            cursor: pointer;
+        }
+
+        .function-button {
+            padding: 6px 12px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .function-button:hover {
+            background-color: #45a049;
+        }
+
+        .status-pending { color: orange; }
+        .status-approved { color: green; }
+        .status-rejected { color: red; }
+
+        /* Responsive design */
+        @media screen and (max-width: 600px) {
+            .dashboard-table {
+                font-size: 14px;
+            }
+
+            .dashboard-table th, .dashboard-table td {
+                padding: 8px;
+            }
+        }
+        
+    </style>
 </head>
 <body>
     <!-- Thanh điều hướng -->
@@ -62,14 +198,18 @@
                 </div>  
             </div>
             <p></p>
-            <div class="dashboard-table">
-                <table>
+            <div class="table-container">
+                <table class="dashboard-table">
                     <thead>
                         <tr>
-                            <th width="15%">Tên lô</th>
-                            <th width="15%">Nông dân</th>
-                            <th width="15%">Trạng thái xử lý</th>
-                            <th width="15%">Chức năng</th>
+                            <th>Tên lô</th>
+                            <th>Người sản xuất</th>
+                            <th>Số lượng (tấn)</th>
+                            <th>Ngày tạo</th>
+                            <th>Hình ảnh</th>
+                            <th>Giấy chứng nhận</th>
+                            <th>Trạng thái</th>
+                            <th>Chức năng</th>
                         </tr>
                     </thead>
 
@@ -81,8 +221,7 @@
         </div>
     </main>
 
-    <!-- jQuery và Bootstrap JavaScript -->
-    <!-- AOS JavaScript -->
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
     <script>AOS.init();</script>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
@@ -90,34 +229,164 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="js_giaodien/sanpham.js"></script>
     <script>
+        
+        let currentBatchId;
         document.addEventListener('DOMContentLoaded', async function() {
-            const response = await fetch('/pending-batches-by-region');
-            const batches = await response.json();
-            displayPendingBatches(batches);
+            try {
+                const response = await fetch('/pending-batches-by-region');
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const batches = await response.json();
+                displayPendingBatches(batches);
+            } catch (error) {
+                console.error('Lỗi khi lấy danh sách lô hàng chờ duyệt:', error);
+                alert('Không thể lấy danh sách lô hàng. Vui lòng thử lại sau.');
+            }
         });
 
+        
+        function addEventListeners() {
+            const detailButtons = document.querySelectorAll('.detail-button');
+            detailButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const batchId = this.getAttribute('data-batch-id');
+                    viewBatchDetails(batchId);
+                });
+            });
+
+            const approveButtons = document.querySelectorAll('.approve-button');
+            approveButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const batchId = this.getAttribute('data-batch-id');
+                    approveBatch(batchId);
+                });
+            });
+
+            const rejectButtons = document.querySelectorAll('.reject-button');
+            rejectButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const batchId = this.getAttribute('data-batch-id');
+                    rejectBatch(batchId);
+                });
+            });
+        }
         function displayPendingBatches(batches) {
             const tableBody = document.getElementById('d-table');
             tableBody.innerHTML = '';
 
             batches.forEach(batch => {
                 const row = document.createElement('tr');
+                const statusClass = getStatusClass(batch.status);
                 row.innerHTML = `
                     <td>${batch.name}</td>
-                    <td>${batch.producerId}</td>
-                    <td>${batch.status}</td>
+                    <td>${batch.producerName}</td>
+                    <td>${batch.quantity}</td>
+                    <td>${new Date(Number(batch.productionDate) * 1000).toLocaleDateString()}</td>
+                    <td>${batch.productImageUrls.map(url => `<img src="${url}" alt="Product Image" class="product-image" onclick="showImage('${url}')">`).join('')}</td>
+                    <td><img src="${batch.certificateImageUrl}" alt="Certificate" class="certificate-image" onclick="showImage('${batch.certificateImageUrl}')"></td>
+                    <td class="${statusClass}">${batch.status}</td>
                     <td>
-                        <div class="functionGroup">
-                            <div class="function-button accept-button"><b>Kiểm tra thông tin</b></div>
-                        </div>
+                        <button class="function-button detail-button" data-batch-id="${batch.batchId}">Chi tiết</button>
+                        <button class="function-button approve-button" data-batch-id="${batch.batchId}" style="display: none;">Phê duyệt</button>
+                        <button class="function-button reject-button" data-batch-id="${batch.batchId}" style="display: none;">Từ chối</button>
                     </td>
                 `;
                 tableBody.appendChild(row);
             });
-        }
-    </script>
 
-    <script>
+            addEventListeners();
+}
+
+        function getStatusClass(status) {
+            switch (status) {
+                case 'Chờ phê duyệt':
+                    return 'status-pending';
+                case 'Đã phê duyệt':
+                    return 'status-approved';
+                case 'Đã từ chối':
+                    return 'status-rejected';
+                default:
+                    return '';
+            }
+        }
+
+        async function viewBatchDetails(batchId) {
+            try {
+                const response = await fetch(`/batch-details/${batchId}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const batchDetails = await response.json();
+                console.log('Batch details:', batchDetails); // Để debug
+
+                // Hiển thị các nút "Phê duyệt" và "Từ chối"
+                const approveButton = document.querySelector(`.approve-button[data-batch-id="${batchId}"]`);
+                const rejectButton = document.querySelector(`.reject-button[data-batch-id="${batchId}"]`);
+                approveButton.style.display = 'inline-block';
+                rejectButton.style.display = 'inline-block';
+            } catch (error) {
+                console.error('Lỗi khi lấy chi tiết lô hàng:', error);
+                alert('Không thể lấy chi tiết lô hàng. Vui lòng thử lại sau. Lỗi: ' + error.message);
+            }
+        }
+        async function approveBatch(batchId) {
+            try {
+                const response = await fetch(`/approve-batch/${batchId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const result = await response.json();
+                alert('Lô hàng đã được phê duyệt thành công');
+                await loadPendingBatches();
+            } catch (error) {
+                console.error('Lỗi khi phê duyệt lô hàng:', error);
+                alert('Không thể phê duyệt lô hàng. Vui lòng thử lại sau.');
+            }
+}
+
+async function rejectBatch(batchId) {
+    try {
+        const response = await fetch(`/reject-batch/${batchId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const result = await response.json();
+        alert('Lô hàng đã bị từ chối');
+        await loadPendingBatches();
+    } catch (error) {
+        console.error('Lỗi khi từ chối lô hàng:', error);
+        alert('Không thể từ chối lô hàng. Vui lòng thử lại sau.');
+    }
+}
+
+        function showImage(src) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            modal.style.display = "block";
+            modalImg.src = src;
+        }
+
+        // Đóng modal khi click vào nút đóng hoặc bên ngoài modal
+        window.onclick = function(event) {
+            const batchModal = document.getElementById('batchDetailsModal');
+            const imageModal = document.getElementById('imageModal');
+            if (event.target == batchModal || event.target == imageModal || event.target.className == 'close') {
+                batchModal.style.display = 'none';
+                imageModal.style.display = 'none';
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', async function() {
             try {
                 const response = await fetch('/api/user-info');
@@ -148,14 +417,12 @@
                 console.error('Lỗi khi đăng xuất:', error);
             }
         });
-    </script>
 
-    <script>
         document.addEventListener('DOMContentLoaded', function() {
             var navbarToggler = document.querySelector('.navbar-toggler');
             var navbarCollapse = document.querySelector('.navbar-collapse');
             var menuOverlay = document.querySelector('.menu-overlay');
-        
+            
             function toggleMenu() {
                 navbarCollapse.classList.toggle('show');
                 document.body.classList.toggle('menu-open');
@@ -163,7 +430,7 @@
                     menuOverlay.classList.toggle('show');
                 }
             }
-        
+            
             function closeMenu() {
                 navbarCollapse.classList.remove('show');
                 document.body.classList.remove('menu-open');
@@ -171,27 +438,27 @@
                     menuOverlay.classList.remove('show');
                 }
             }
-        
+            
             navbarToggler.addEventListener('click', function(e) {
                 e.stopPropagation();
                 toggleMenu();
             });
-        
+            
             if (menuOverlay) {
                 menuOverlay.addEventListener('click', closeMenu);
             }
-        
+            
             document.addEventListener('click', function(e) {
                 if (!navbarCollapse.contains(e.target) && !navbarToggler.contains(e.target)) {
                     closeMenu();
                 }
             });
-        
+            
             // Ngăn sự kiện click trên menu lan ra ngoài
             navbarCollapse.addEventListener('click', function(e) {
                 e.stopPropagation();
             });
-        
+            
             // Xử lý cho dropdown trong menu
             var dropdowns = document.querySelectorAll('.navbar-nav .dropdown');
             dropdowns.forEach(function(dropdown) {
@@ -200,22 +467,36 @@
                     this.classList.toggle('show');
                 });
             });
-        
+            
             var userDropdown = document.querySelector('.navbar-nav .dropdown');
             var userDropdownMenu = userDropdown.querySelector('.dropdown-menu');
-        
+            
             userDropdown.addEventListener('click', function(e) {
                 e.stopPropagation();
                 userDropdownMenu.classList.toggle('show');
             });
-        
+            
             document.addEventListener('click', function(e) {
                 if (!userDropdown.contains(e.target)) {
                     userDropdownMenu.classList.remove('show');
                 }
             });
         });
+
+
+        async function loadPendingBatches() {
+            try {
+                const response = await fetch('/pending-batches-by-region');
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const batches = await response.json();
+                displayPendingBatches(batches);
+            } catch (error) {
+                console.error('Lỗi khi lấy danh sách lô hàng chờ duyệt:', error);
+                alert('Không thể lấy danh sách lô hàng. Vui lòng thử lại sau.');
+            }
+        }
     </script>
 </body>
 </html>
-+   
