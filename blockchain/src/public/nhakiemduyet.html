@@ -7,68 +7,102 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/nhakiemduyet.css">
     <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+
     <style>
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.4);
-        }
+      /* Đảm bảo modal được căn giữa màn hình */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1050; /* Đảm bảo modal nằm trên các thành phần khác */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4); /* Màu nền mờ */
+    justify-content: center;
+    align-items: center;
+    display: flex;
+}
 
-        .modal-content {
-            background-color: #fefefe;
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-        }
+/* Đảm bảo nội dung modal được căn giữa và có khoảng cách hợp lý */
+.modal-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 90%; /* Giới hạn chiều rộng tối đa */
+    max-width: 500px; /* Giới hạn chiều rộng tối đa */
+    border-radius: 10px; /* Bo tròn góc */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3); /* Đổ bóng */
+    text-align: center; /* Căn giữa nội dung */
+    position: relative; /* Để căn chỉnh nút đóng */
+}
 
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
+/* Nút đóng modal */
+.close {
+    color: #aaa;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 28px;
+    font-weight: bold;
+}
 
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
 
-        .product-image, .certificate-image {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
-            margin: 2px;
-            cursor: pointer;
-        }
+/* Nút chức năng */
+.function-button {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    margin: 10px;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
 
-        #imageModal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.9);
-        }
+.function-button:hover {
+    background-color: #45a049;
+}
 
-        #modalImage {
-            margin: auto;
-            display: block;
-            width: 80%;
-            max-width: 700px;
-        }
+/* Căn chỉnh các nút */
+.button-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px; /* Khoảng cách giữa các nút */
+    margin-top: 20px;
+}
 
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .modal-content {
+        width: 95%; /* Giới hạn chiều rộng tối đa cho màn hình nhỏ */
+        padding: 15px;
+    }
+
+    .function-button {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+
+    .button-container {
+        flex-direction: column;
+        gap: 10px; /* Khoảng cách giữa các nút */
+    }
+}
+
+/* Đảm bảo modal backdrop có giá trị z-index thấp hơn modal */
+.modal-backdrop {
+    z-index: 1040; /* Đảm bảo backdrop nằm dưới modal */
+}
         .status-pending { color: orange; }
         .status-approved { color: green; }
         .status-rejected { color: red; }
@@ -95,7 +129,7 @@
             background-color: #5bd657;
             position: sticky;
             top: 0;
-            z-index: 10;
+            z-index: 0;
         }
 
         .dashboard-table tr:nth-child(even) {
@@ -141,6 +175,7 @@
                 padding: 8px;
             }
         }
+        
         
     </style>
 </head>
@@ -231,7 +266,11 @@
     <script>
         
         let currentBatchId;
-        document.addEventListener('DOMContentLoaded', async function() {
+
+      document.addEventListener('DOMContentLoaded', function() {
+        loadPendingBatches();
+    });
+    async function loadPendingBatches() {
             try {
                 const response = await fetch('/pending-batches-by-region');
                 if (!response.ok) {
@@ -243,11 +282,31 @@
                 console.error('Lỗi khi lấy danh sách lô hàng chờ duyệt:', error);
                 alert('Không thể lấy danh sách lô hàng. Vui lòng thử lại sau.');
             }
-        });
+        }
 
-        
+        async function viewBatchDetails(batchId) {
+            console.log('Đang lấy chi tiết cho lô hàng với ID:', batchId); // Thêm log để kiểm tra
+
+            // Hiển thị modal với hai nút "Phê duyệt" và "Từ chối"
+            const content = document.getElementById('batchDetailsContent');
+            content.innerHTML = `
+                <p>Bạn có muốn phê duyệt hoặc từ chối lô hàng này?</p>
+                <div class="d-flex justify-content-center">
+                    <button class="btn btn-success mx-2" onclick="approveBatch('${batchId}')">Phê duyệt</button>
+                    <button class="btn btn-danger mx-2" onclick="rejectBatch('${batchId}')">Từ chối</button>
+                </div>
+            `;
+            $('#batchDetailsModal').modal('show'); // Sử dụng Bootstrap để hiển thị modal
+        }
+
+        function closeModal() {
+            $('#batchDetailsModal').modal('hide'); // Sử dụng Bootstrap để ẩn modal
+}
+
         function addEventListeners() {
             const detailButtons = document.querySelectorAll('.detail-button');
+            console.log('Detail buttons:', detailButtons); // Thêm log để kiểm tra
+
             detailButtons.forEach(button => {
                 button.addEventListener('click', function() {
                     const batchId = this.getAttribute('data-batch-id');
@@ -256,6 +315,8 @@
             });
 
             const approveButtons = document.querySelectorAll('.approve-button');
+            console.log('Approve buttons:', approveButtons); // Thêm log để kiểm tra
+
             approveButtons.forEach(button => {
                 button.addEventListener('click', function() {
                     const batchId = this.getAttribute('data-batch-id');
@@ -264,39 +325,16 @@
             });
 
             const rejectButtons = document.querySelectorAll('.reject-button');
+            console.log('Reject buttons:', rejectButtons); // Thêm log để kiểm tra
+
             rejectButtons.forEach(button => {
                 button.addEventListener('click', function() {
                     const batchId = this.getAttribute('data-batch-id');
                     rejectBatch(batchId);
                 });
             });
-        }
-        function displayPendingBatches(batches) {
-            const tableBody = document.getElementById('d-table');
-            tableBody.innerHTML = '';
-
-            batches.forEach(batch => {
-                const row = document.createElement('tr');
-                const statusClass = getStatusClass(batch.status);
-                row.innerHTML = `
-                    <td>${batch.name}</td>
-                    <td>${batch.producerName}</td>
-                    <td>${batch.quantity}</td>
-                    <td>${new Date(Number(batch.productionDate) * 1000).toLocaleDateString()}</td>
-                    <td>${batch.productImageUrls.map(url => `<img src="${url}" alt="Product Image" class="product-image" onclick="showImage('${url}')">`).join('')}</td>
-                    <td><img src="${batch.certificateImageUrl}" alt="Certificate" class="certificate-image" onclick="showImage('${batch.certificateImageUrl}')"></td>
-                    <td class="${statusClass}">${batch.status}</td>
-                    <td>
-                        <button class="function-button detail-button" data-batch-id="${batch.batchId}">Chi tiết</button>
-                        <button class="function-button approve-button" data-batch-id="${batch.batchId}" style="display: none;">Phê duyệt</button>
-                        <button class="function-button reject-button" data-batch-id="${batch.batchId}" style="display: none;">Từ chối</button>
-                    </td>
-                `;
-                tableBody.appendChild(row);
-            });
-
-            addEventListeners();
 }
+
 
         function getStatusClass(status) {
             switch (status) {
@@ -310,26 +348,7 @@
                     return '';
             }
         }
-
-        async function viewBatchDetails(batchId) {
-            try {
-                const response = await fetch(`/batch-details/${batchId}`);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const batchDetails = await response.json();
-                console.log('Batch details:', batchDetails); // Để debug
-
-                // Hiển thị các nút "Phê duyệt" và "Từ chối"
-                const approveButton = document.querySelector(`.approve-button[data-batch-id="${batchId}"]`);
-                const rejectButton = document.querySelector(`.reject-button[data-batch-id="${batchId}"]`);
-                approveButton.style.display = 'inline-block';
-                rejectButton.style.display = 'inline-block';
-            } catch (error) {
-                console.error('Lỗi khi lấy chi tiết lô hàng:', error);
-                alert('Không thể lấy chi tiết lô hàng. Vui lòng thử lại sau. Lỗi: ' + error.message);
-            }
-        }
+       
         async function approveBatch(batchId) {
             try {
                 const response = await fetch(`/approve-batch/${batchId}`, {
@@ -368,6 +387,32 @@ async function rejectBatch(batchId) {
         console.error('Lỗi khi từ chối lô hàng:', error);
         alert('Không thể từ chối lô hàng. Vui lòng thử lại sau.');
     }
+}
+    function displayPendingBatches(batches) {
+        const tableBody = document.getElementById('d-table');
+        tableBody.innerHTML = '';
+
+        batches.forEach(batch => {
+            const row = document.createElement('tr');
+            const statusClass = getStatusClass(batch.status);
+            row.innerHTML = `
+                <td>${batch.name}</td>
+                <td>${batch.producerName}</td>
+                <td>${batch.quantity}</td>
+                <td>${new Date(Number(batch.productionDate) * 1000).toLocaleDateString()}</td>
+                <td>${batch.productImageUrls.map(url => `<img src="${url}" alt="Product Image" class="product-image" onclick="showImage('${url}')">`).join('')}</td>
+                <td><img src="${batch.certificateImageUrl}" alt="Certificate" class="certificate-image" onclick="showImage('${batch.certificateImageUrl}')"></td>
+                <td class="${statusClass}">${batch.status}</td>
+                <td>
+                    <button class="function-button detail-button" data-batch-id="${batch.batchId}">Chi tiết</button>
+                    <button class="function-button approve-button" data-batch-id="${batch.batchId}" style="display: none;">Phê duyệt</button>
+                    <button class="function-button reject-button" data-batch-id="${batch.batchId}" style="display: none;">Từ chối</button>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+
+        addEventListeners();
 }
 
         function showImage(src) {
@@ -484,19 +529,29 @@ async function rejectBatch(batchId) {
         });
 
 
-        async function loadPendingBatches() {
-            try {
-                const response = await fetch('/pending-batches-by-region');
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                const batches = await response.json();
-                displayPendingBatches(batches);
-            } catch (error) {
-                console.error('Lỗi khi lấy danh sách lô hàng chờ duyệt:', error);
-                alert('Không thể lấy danh sách lô hàng. Vui lòng thử lại sau.');
-            }
-        }
+    
     </script>
+    <div class="modal fade" id="batchDetailsModal" tabindex="-1" aria-labelledby="batchDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="batchDetailsModalLabel">Chi tiết lô hàng</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="batchDetailsContent">
+                    <!-- Nội dung chi tiết lô hàng sẽ được thêm động từ JavaScript -->
+                </div>
+               
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <script>AOS.init();</script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="js_giaodien/sanpham.js"></script>
 </body>
-</html>
+</html> 
