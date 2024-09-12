@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bảng thông tin - Nhà kiểm duyệt</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/nhakiemduyet.css">
-    <link rel="stylesheet" href="css/nav-bar.css">
+    <link rel="stylesheet" href="../css/nhakiemduyet.css">
+    <link rel="stylesheet" href="../css/nav-bar.css">
     <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
 
    
@@ -16,7 +16,7 @@
     <!-- Thanh điều hướng -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light custom-navbar-height">
         <div class="logo">
-            <img src="\hinhanh\Bitcoin-Blockchain-Network-icon-on-transparent-background-PNG.png" alt="Logo" class="logo-image">
+            <img src="..\hinhanh\Bitcoin-Blockchain-Network-icon-on-transparent-background-PNG.png" alt="Logo" class="logo-image">
         </div>
         <a class="navbar-brand" href="#">Nhà kiểm duyệt</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,7 +46,8 @@
             </ul>
         </div>
     </nav>
-        
+    <div id="alertContainer" class="container mt-3"></div>
+
     <main>
         <div class="container mt-4">
             <div class="table-title">
@@ -183,46 +184,73 @@
             }
         }
        
-    
         async function approveBatch(batchId) {
-            try {
-                const response = await fetch(`/approve-batch/${batchId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
+        try {
+            const response = await fetch(`/approve-batch/${batchId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
                 }
-                const result = await response.json();
-                toastr.success('Lô hàng đã được phê duyệt thành công');
-                await loadPendingBatches();
-            } catch (error) {
-                console.error('Lỗi khi phê duyệt lô hàng:', error);
-                toastr.error('Không thể phê duyệt lô hàng. Vui lòng thử lại sau.');
-            }
-        }
+            });
 
-        async function rejectBatch(batchId) {
-            try {
-                const response = await fetch(`/reject-batch/${batchId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                const result = await response.json();
-                toastr.success('Lô hàng đã bị từ chối');
-                await loadPendingBatches();
-            } catch (error) {
-                console.error('Lỗi khi từ chối lô hàng:', error);
-                toastr.error('Không thể từ chối lô hàng. Vui lòng thử lại sau.');
+            if (response.ok) {
+                showAlert('Phê duyệt thành công!', 'success');
+            } else {
+                showAlert('Phê duyệt thất bại. Vui lòng thử lại.', 'danger');
             }
+        } catch (error) {
+            console.error('Lỗi khi phê duyệt lô hàng:', error);
+            showAlert('Đã xảy ra lỗi. Vui lòng thử lại sau.', 'danger');
         }
+    }
+
+    
+    async function rejectBatch(batchId) {
+        try {
+            const response = await fetch(`/reject-batch/${batchId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                showAlert('Từ chối thành công!', 'success');
+                await loadPendingBatches(); // Tải lại danh sách sau khi từ chối
+            } else {
+                showAlert('Từ chối thất bại. Vui lòng thử lại.', 'danger');
+            }
+        } catch (error) {
+            console.error('Lỗi khi từ chối lô hàng:', error);
+            showAlert('Đã xảy ra lỗi. Vui lòng thử lại sau.', 'danger');
+        }
+        
+    }
+ 
+    function showAlert(message, type) {
+        const alertContainer = document.getElementById('alertContainer');
+        const alert = document.createElement('div');
+        alert.className = `alert alert-${type}`;
+        alert.role = 'alert';
+        alert.innerText = message;
+
+        alertContainer.appendChild(alert);
+
+        setTimeout(() => {
+            alert.remove();
+        }, 3000); // Thông báo sẽ tự động biến mất sau 3 giây
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        loadPendingBatches();
+
+        function closeModal() {
+        $('#batchDetailsModal').modal('hide');
+    }
+
+    });
+
+
     function displayPendingBatches(batches) {
         const tableBody = document.getElementById('d-table');
         tableBody.innerHTML = '';
@@ -287,14 +315,19 @@
         document.getElementById('logoutButton').addEventListener('click', async function(e) {
             e.preventDefault();
             try {
-                const response = await fetch('/api/dangxuat', { method: 'POST' });
+                const response = await fetch('/api/dangxuat', { 
+                    method: 'POST',
+                    credentials: 'same-origin' // Đảm bảo gửi cookie session
+                });
                 if (response.ok) {
-                    window.location.href = '/dangnhap.html'; // Chuyển hướng về trang đăng nhập
+                    window.location.href = '../account/dangnhap.html'; // Sử dụng đường dẫn tương đối đến root
                 } else {
                     console.error('Không thể đăng xuất');
+                    alert('Đăng xuất không thành công. Vui lòng thử lại.');
                 }
             } catch (error) {
                 console.error('Lỗi khi đăng xuất:', error);
+                alert('Có lỗi xảy ra khi đăng xuất. Vui lòng thử lại sau.');
             }
         });
 
@@ -366,6 +399,17 @@
 
     
     </script>
+
+<script>
+    window.addEventListener('scroll', function() {
+        var navbar = document.querySelector('.navbar');
+        if (window.scrollY > 50) {
+            navbar.classList.add('navbar-scrolled');
+        } else {
+            navbar.classList.remove('navbar-scrolled');
+        }
+    });
+</script>
     <div class="modal fade" id="batchDetailsModal" tabindex="-1" aria-labelledby="batchDetailsModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">

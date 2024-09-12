@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trang chủ - Người sản xuất</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/san-xuat.css">
-    <link rel="stylesheet" href="css/nav-bar.css">
+    <link rel="stylesheet" href="../css/san-xuat.css">
+    <link rel="stylesheet" href="../css/nav-bar.css">
     <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
@@ -19,7 +19,7 @@
     <!-- Thanh điều hướng -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light custom-navbar-height">
         <div class="logo">
-            <img src=".\hinhanh\Bitcoin-Blockchain-Network-icon-on-transparent-background-PNG.png" alt="Logo" class="logo-image">
+            <img src="..\hinhanh\Bitcoin-Blockchain-Network-icon-on-transparent-background-PNG.png" alt="Logo" class="logo-image">
         </div>
         <a class="navbar-brand" href="sanxuat.html">Sản xuất</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -80,7 +80,7 @@
             
             <p></p>
             <div class="dashboard-table">
-                <a href="themlohang.html" class="check-button"><b>Tạo lô hàng</b></a>
+                <a href="them-lo-hang.html" class="check-button"><b>Tạo lô hàng</b></a>
               
             </div>
             <!-- Thêm spinner loading -->
@@ -144,7 +144,7 @@
         try {
             const response = await fetch('/api/dangxuat', { method: 'POST' });
             if (response.ok) {
-                window.location.href = '/dangnhap.html'; // Chuyển hướng về trang đăng nhập
+                window.location.href = '../account/dangnhap.html'; // Chuyển hướng về trang đăng nhập
             } else {
                 console.error('Không thể đăng xuất');
             }
@@ -224,6 +224,37 @@
     });
     </script>
 
+
+<script>
+
+async function fetchBatches() {
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const pendingBatchesList = document.getElementById('pendingBatchesList');
+    const statusFilter = document.getElementById('statusFilter');
+
+    try {
+        loadingSpinner.style.display = 'block';
+        pendingBatchesList.style.display = 'none';
+
+        const status = statusFilter.value;
+        const url = status ? `/api/batches?status=${encodeURIComponent(status)}` : '/api/batches';
+        const response = await fetch(url);
+
+        if (response.ok) {
+            const batches = await response.json();
+            displayBatches(batches);
+        } else {
+            throw new Error('Không thể lấy danh sách lô hàng');
+        }
+    } catch (error) {
+        console.error('Lỗi:', error);
+        loadingSpinner.innerHTML = '<p class="text-danger">Đã xảy ra lỗi khi tải dữ liệu. Vui lòng thử lại sau.</p>';
+    } finally {
+        loadingSpinner.style.display = 'none';
+        pendingBatchesList.style.display = 'block';
+    }
+}
+</script>
 <script>
 document.addEventListener('DOMContentLoaded', async function() {
     const loadingSpinner = document.getElementById('loadingSpinner');
@@ -309,6 +340,17 @@ function getStatusClass(status) {
             return '';
     }
 }
+</script>
+
+<script>
+    window.addEventListener('scroll', function() {
+        var navbar = document.querySelector('.navbar');
+        if (window.scrollY > 50) {
+            navbar.classList.add('navbar-scrolled');
+        } else {
+            navbar.classList.remove('navbar-scrolled');
+        }
+    });
 </script>
 </body>
 </html>

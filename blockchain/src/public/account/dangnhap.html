@@ -82,9 +82,9 @@
                     alert(data.message);
                     // Chuyển hướng dựa trên role_id
                     if (data.user.roleId === 1) {
-                        window.location.href = '/sanxuat.html';
+                        window.location.href = '../san-xuat/sanxuat.html';
                     } else if (data.user.roleId === 2) {
-                        window.location.href = '/nhakiemduyet.html';
+                        window.location.href = '../kiem-duyet/nhakiemduyet.html';
                     } else {
                         // Xử lý cho các role khác nếu cần
                         alert('Không có trang phù hợp cho vai trò của bạn');

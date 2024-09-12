@@ -26,7 +26,7 @@
 
     module.exports = function(db) {
         router.get('/dangky', function(req, res) {
-            res.sendFile(path.join(__dirname, '../../public/dangky.html'));
+            res.sendFile(path.join(__dirname, '../../public/account/dangky.html'));
         });
         
         async function recordExists(query, param) {
@@ -90,7 +90,7 @@
 
                 // Gửi email xác thực
                 const verificationLink = `http://localhost:3000/api/verify/${verificationToken}`;
-                const templatePath = path.join(__dirname, '../../public/xacthuc.html');
+                const templatePath = path.join(__dirname, '../../public/account/xacthuc.html');
                 await sendEmail(email, name, verificationLink, 'Xác thực tài khoản của bạn', templatePath);
 
 
@@ -109,7 +109,7 @@
             try {
                 const [result] = await db.query('UPDATE users SET is_approved = true WHERE verificationToken = ?', [token]);
                 if (result.affectedRows > 0) {
-                    res.redirect('/dangnhap.html'); // Chuyển hướng đến trang đăng nhập
+                    res.redirect('/api/dangnhap'); // Chuyển hướng đến trang đăng nhập
                 } else {
                     res.status(400).send('Token xác thực không hợp lệ hoặc đã hết hạn.');
                 }
