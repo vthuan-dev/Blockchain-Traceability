@@ -6,178 +6,11 @@
     <title>Bảng thông tin - Nhà kiểm duyệt</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/nhakiemduyet.css">
+    <link rel="stylesheet" href="css/nav-bar.css">
     <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
 
-    <style>
-      /* Đảm bảo modal được căn giữa màn hình */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1050; /* Đảm bảo modal nằm trên các thành phần khác */
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0,0,0,0.4); /* Màu nền mờ */
-    justify-content: center;
-    align-items: center;
-    display: flex;
-}
-
-/* Đảm bảo nội dung modal được căn giữa và có khoảng cách hợp lý */
-.modal-content {
-    background-color: #fefefe;
-    margin: auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 90%; /* Giới hạn chiều rộng tối đa */
-    max-width: 500px; /* Giới hạn chiều rộng tối đa */
-    border-radius: 10px; /* Bo tròn góc */
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3); /* Đổ bóng */
-    text-align: center; /* Căn giữa nội dung */
-    position: relative; /* Để căn chỉnh nút đóng */
-}
-
-/* Nút đóng modal */
-.close {
-    color: #aaa;
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 28px;
-    font-weight: bold;
-}
-
-.close:hover,
-.close:focus {
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
-}
-
-/* Nút chức năng */
-.function-button {
-    padding: 10px 20px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    cursor: pointer;
-    border-radius: 5px;
-    margin: 10px;
-    font-size: 16px;
-    transition: background-color 0.3s ease;
-}
-
-.function-button:hover {
-    background-color: #45a049;
-}
-
-/* Căn chỉnh các nút */
-.button-container {
-    display: flex;
-    justify-content: center;
-    gap: 20px; /* Khoảng cách giữa các nút */
-    margin-top: 20px;
-}
-
-/* Responsive adjustments */
-@media (max-width: 576px) {
-    .modal-content {
-        width: 95%; /* Giới hạn chiều rộng tối đa cho màn hình nhỏ */
-        padding: 15px;
-    }
-
-    .function-button {
-        padding: 8px 16px;
-        font-size: 14px;
-    }
-
-    .button-container {
-        flex-direction: column;
-        gap: 10px; /* Khoảng cách giữa các nút */
-    }
-}
-
-/* Đảm bảo modal backdrop có giá trị z-index thấp hơn modal */
-.modal-backdrop {
-    z-index: 1040; /* Đảm bảo backdrop nằm dưới modal */
-}
-        .status-pending { color: orange; }
-        .status-approved { color: green; }
-        .status-rejected { color: red; }
-
-        .table-container {
-            width: 100%;
-            overflow-x: auto;
-            margin-bottom: 1em;
-        }
-
-        .dashboard-table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 800px; /* Đảm bảo bảng có chiều rộng tối thiểu */
-        }
-
-        .dashboard-table th, .dashboard-table td {
-            border: 1px solid #ddd;
-            padding: 12px;
-            text-align: left;
-        }
-
-        .dashboard-table th {
-            background-color: #5bd657;
-            position: sticky;
-            top: 0;
-            z-index: 0;
-        }
-
-        .dashboard-table tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-
-        .dashboard-table tr:hover {
-            background-color: #f5f5f5;
-        }
-
-        .product-image, .certificate-image {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
-            margin: 2px;
-            cursor: pointer;
-        }
-
-        .function-button {
-            padding: 6px 12px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-
-        .function-button:hover {
-            background-color: #45a049;
-        }
-
-        .status-pending { color: orange; }
-        .status-approved { color: green; }
-        .status-rejected { color: red; }
-
-        /* Responsive design */
-        @media screen and (max-width: 600px) {
-            .dashboard-table {
-                font-size: 14px;
-            }
-
-            .dashboard-table th, .dashboard-table td {
-                padding: 8px;
-            }
-        }
-        
-        
-    </style>
+   
+    
 </head>
 <body>
     <!-- Thanh điều hướng -->
@@ -234,24 +67,25 @@
             </div>
             <p></p>
             <div class="table-container">
-                <table class="dashboard-table">
-                    <thead>
-                        <tr>
-                            <th>Tên lô</th>
-                            <th>Người sản xuất</th>
-                            <th>Số lượng (tấn)</th>
-                            <th>Ngày tạo</th>
-                            <th>Hình ảnh</th>
-                            <th>Giấy chứng nhận</th>
-                            <th>Trạng thái</th>
-                            <th>Chức năng</th>
-                        </tr>
-                    </thead>
-
-                    <tbody id="d-table">
-                        <!-- Các hàng sẽ được thêm động từ JavaScript -->
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="dashboard-table">
+                        <thead>
+                            <tr>
+                                <th>Tên lô</th>
+                                <th>Người sản xuất</th>
+                                <th>Số lượng (tấn)</th>
+                                <th>Ngày tạo</th>
+                                <th>Hình ảnh</th>
+                                <th>Giấy chứng nhận</th>
+                                <th>Trạng thái</th>
+                                <th>Chức năng</th>
+                            </tr>
+                        </thead>
+                        <tbody id="d-table">
+                            <!-- Các hàng sẽ được thêm động từ JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </main>
@@ -301,7 +135,7 @@
 
         function closeModal() {
             $('#batchDetailsModal').modal('hide'); // Sử dụng Bootstrap để ẩn modal
-}
+        }
 
         function addEventListeners() {
             const detailButtons = document.querySelectorAll('.detail-button');
@@ -349,6 +183,7 @@
             }
         }
        
+    
         async function approveBatch(batchId) {
             try {
                 const response = await fetch(`/approve-batch/${batchId}`, {
@@ -361,33 +196,33 @@
                     throw new Error('Network response was not ok');
                 }
                 const result = await response.json();
-                alert('Lô hàng đã được phê duyệt thành công');
+                toastr.success('Lô hàng đã được phê duyệt thành công');
                 await loadPendingBatches();
             } catch (error) {
                 console.error('Lỗi khi phê duyệt lô hàng:', error);
-                alert('Không thể phê duyệt lô hàng. Vui lòng thử lại sau.');
+                toastr.error('Không thể phê duyệt lô hàng. Vui lòng thử lại sau.');
             }
-}
-
-async function rejectBatch(batchId) {
-    try {
-        const response = await fetch(`/reject-batch/${batchId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
         }
-        const result = await response.json();
-        alert('Lô hàng đã bị từ chối');
-        await loadPendingBatches();
-    } catch (error) {
-        console.error('Lỗi khi từ chối lô hàng:', error);
-        alert('Không thể từ chối lô hàng. Vui lòng thử lại sau.');
-    }
-}
+
+        async function rejectBatch(batchId) {
+            try {
+                const response = await fetch(`/reject-batch/${batchId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const result = await response.json();
+                toastr.success('Lô hàng đã bị từ chối');
+                await loadPendingBatches();
+            } catch (error) {
+                console.error('Lỗi khi từ chối lô hàng:', error);
+                toastr.error('Không thể từ chối lô hàng. Vui lòng thử lại sau.');
+            }
+        }
     function displayPendingBatches(batches) {
         const tableBody = document.getElementById('d-table');
         tableBody.innerHTML = '';
@@ -547,6 +382,8 @@ async function rejectBatch(batchId) {
             </div>
         </div>
     </div>
+  
+    
     <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
     <script>AOS.init();</script>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>

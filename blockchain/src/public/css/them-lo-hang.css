@@ -1,0 +1,254 @@
+/* Background color for the entire webpage */
+body {
+    background-color: white; /* Màu xanh lá cây nhạt */
+    color: #333; /* Màu chữ */
+    font-family: Arial, sans-serif; /* Font chữ */
+    margin: 0;
+    padding: 0;
+  }
+  
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  
+  /* Styles for the Add Batch page */
+  .add-batch-container {
+    max-width: 800px;
+    margin: 30px auto;
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  .add-batch-container h1 {
+    color: #007bff;
+    text-align: center;
+    margin-bottom: 30px;
+    font-weight: 300;
+    font-size: 2.5rem;
+  }
+  
+  .add-batch-container .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .add-batch-container .form-group label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 5px;
+    display: block;
+  }
+  
+  .add-batch-container .form-control {
+    border-radius: 4px;
+    border: 1px solid #ced4da;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  }
+  
+  .add-batch-container .form-control:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  }
+  
+  .add-batch-container button[type="submit"] {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    font-size: 1rem;
+    border-radius: 5px;
+    transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+    width: 100%;
+    margin-top: 20px;
+  }
+  
+  .add-batch-container button[type="submit"]:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+  }
+  
+  #imagePreview, #certificatePreview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  
+  .image-container {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .img-preview {
+    max-width: 100px;
+    max-height: 100px;
+    border-radius: 4px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+  }
+  
+  .delete-btn {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.15s ease-in-out;
+  }
+  
+  .delete-btn:hover {
+    opacity: 1;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .add-batch-container {
+        padding: 20px;
+    }
+  
+    .add-batch-container h1 {
+        font-size: 2rem;
+    }
+  }
+  
+  /* Modal styles */
+  .modal-content {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    overflow: hidden;
+  }
+  
+  .modal-header {
+    background-color: #30af1f;
+    color: white;
+    border-bottom: none;
+    padding: 20px 30px;
+  }
+  
+  .modal-title {
+    font-weight: 600;
+    font-size: 1.5rem;
+  }
+  
+  .modal-body {
+    padding: 30px;
+  }
+  
+  .modal-footer {
+    border-top: none;
+    padding: 20px 30px;
+  }
+  
+  /* Spinner styles */
+  #loadingSpinner .spinner-border {
+    width: 3rem;
+    height: 3rem;
+  }
+  
+  /* Result message styles */
+  #resultMessage {
+    text-align: center;
+  }
+  
+  #resultText {
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin-bottom: 20px;
+  }
+  
+  /* Button styles */
+  .modal-footer .btn {
+    padding: 10px 20px;
+    border-radius: 50px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+  }
+  
+  .btn-secondary:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+  }
+  
+  /* Animation for modal */
+  .modal.fade .modal-dialog {
+    transition: transform 0.3s ease-out;
+    transform: scale(0.8);
+  }
+  
+  .modal.show .modal-dialog {
+    transform: scale(1);
+  }
+  
+  /* Custom animation for spinner */
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  #loadingSpinner .spinner-border {
+    animation: spin 1s linear infinite;
+  }
+  
+  /* Success and error styles */
+  .text-success {
+    color: #28a745 !important;
+  }
+  
+  .text-danger {
+    color: #dc3545 !important;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 576px) {
+    .modal-dialog {
+      margin: 1rem;
+    }
+    
+    .modal-content {
+      border-radius: 10px;
+    }
+    
+    .modal-header, .modal-body, .modal-footer {
+      padding: 15px;
+    }
+    
+    .modal-title {
+      font-size: 1.2rem;
+    }
+  }
+  
+  #countdownText {
+    font-size: 1rem;
+    color: #6c757d;
+    font-weight: 500;
+    margin-top: 15px;
+    animation: pulse 1s infinite;
+  }
+  
+  @keyframes pulse {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+    100% {
+        opacity: 1;
+    }
+  }
