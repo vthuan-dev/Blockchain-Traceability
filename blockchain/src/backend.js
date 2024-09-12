@@ -289,7 +289,7 @@ function setupRoutes(app, db){
   });
   
   app.get('/create-batch', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'themlohang.html'));
+    res.sendFile(path.join(__dirname, 'public', 'san-xuat', 'them-lo-hang.html'));
   });
   
   app.post('/checkdata', upload, (req, res) => {
@@ -424,7 +424,7 @@ function setupRoutes(app, db){
   });
   
   app.get('/create-activity', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'themnkhd.html'));
+    res.sendFile(path.join(__dirname, 'public',  'san-xuat','them-nkhd.html'));
   });
   
   app.post('/createactivity', (req, res, next) => {
@@ -789,7 +789,6 @@ app.get('/batch-details/:batchId', async (req, res) => {
   }
 });
 
-// Hàm hỗ trợ để lấy tên người sản xuất từ ID
 async function getProducerNameById(producerId) {
   return new Promise((resolve, reject) => {
       db.query('SELECT name FROM users WHERE uid = ?', [producerId], (err, results) => {
@@ -804,9 +803,60 @@ async function getProducerNameById(producerId) {
       });
   });
 }
+app.get('/api/batches', async (req, res) => {
+  try {
+    console.log('Bắt đầu xử lý yêu cầu lấy danh sách lô hàng');
+    if (!req.session.userId) {
+      console.log('Người dùng chưa đăng nhập');
+      return res.status(401).json({ error: 'Người dùng chưa đăng nhập' });
+    }
 
-// Hàm chuyển đổi trạng thái
+    const userId = req.session.userId;
+    console.log('Người dùng đã đăng nhập với ID:', userId);
 
+    const status = req.query.status; // Lấy trạng thái từ query parameter
+    console.log('Trạng thái lọc:', status);
+
+    // Lấy tất cả lô hàng của người sản xuất
+    const allBatches = await contract.methods.getBatchesByProducer(userId).call();
+    console.log('Tổng số lô hàng:', allBatches.length);
+
+    // Lọc lô hàng theo trạng thái nếu có
+    let filteredBatches = allBatches;
+    if (status) {
+      const statusMap = { 
+        'Chờ phê duyệt': 0, 
+        'Đã phê duyệt': 1, 
+        'Đã từ chối': 2 
+      };
+      filteredBatches = allBatches.filter(batch => translateStatus(batch.status) === status);
+    }
+    console.log('Số lô hàng sau khi lọc:', filteredBatches.length);
+
+    const serializedBatches = await Promise.all(filteredBatches.map(async batch => {
+      const [producers] = await db.query('SELECT name FROM users WHERE uid = ?', [batch.producerId]);
+      const producerName = producers.length > 0 ? producers[0].name : 'Unknown';
+      
+      return {
+        batchId: batch.batchId.toString(),
+        name: batch.name,
+        producerName: producerName,
+        quantity: batch.quantity.toString(),
+        productionDate: batch.productionDate.toString(),
+        status: translateStatus(batch.status),
+        productImageUrls: batch.productImageUrls,
+        certificateImageUrl: batch.certificateImageUrl
+      };
+    }));
+
+    res.status(200).json(serializedBatches);
+  } catch (error) {
+    console.error('Lỗi khi lấy danh sách lô hàng:', error);
+    res.status(500).json({ error: 'Không thể lấy danh sách lô hàng: ' + error.message });
+  }
+});
+
+// Sử dụng hàm translateStatus hiện có
 function translateStatus(status) {
   switch (status) {
       case 'PendingApproval':

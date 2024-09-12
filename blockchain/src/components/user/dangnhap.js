@@ -8,7 +8,7 @@ const router = express.Router();
 
 module.exports = function(db) {
     router.get('/dangnhap', (req, res) => {
-        res.sendFile(path.join(__dirname, '../../public/dangnhap.html'));
+        res.sendFile(path.join(__dirname, '../../public/account/dangnhap.html'));
     });
 
     router.post('/dangnhap', async function(req, res) {
@@ -62,7 +62,7 @@ module.exports = function(db) {
 
     // Thêm route để phục vụ trang quenmatkhau.html
     router.get('/quenmatkhau', (req, res) => {
-        res.sendFile(path.join(__dirname, '../../public/quenmatkhau.html'));
+        res.sendFile(path.join(__dirname, '../../public/account/quenmatkhau.html'));
     });
 
     // Tạo biến toàn cục để lưu trữ mật khẩu mới
@@ -95,7 +95,7 @@ module.exports = function(db) {
 
             // Gửi email thông báo đặt lại mật khẩu
             const resetLink = `http://localhost:3000/api/reset-password/${token}`;
-            const templatePath = path.join(__dirname, '../../public/xacthuc.html');
+            const templatePath = path.join(__dirname, '../../public/account/xacthuc.html');
             await sendEmail(email, user.name, resetLink, 'Xác thực đặt lại mật khẩu', templatePath);
             
             res.status(200).json({ message: 'Yêu cầu đặt lại mật khẩu đã được gửi' });
