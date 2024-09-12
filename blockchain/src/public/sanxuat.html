@@ -5,42 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trang chủ - Người sản xuất</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/nhakiemduyet.css">
+    <link rel="stylesheet" href="css/san-xuat.css">
+    <link rel="stylesheet" href="css/nav-bar.css">
     <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<style>
-.table-responsive {
-  overflow-x: auto;
-  max-width: 100%;
-}
 
-.table {
-  min-width: 1000px; /* Điều chỉnh giá trị này tùy theo nội dung của bảng */
-}
-
-.product-image, .certificate-image {
-  width: 50px;
-  height: 50px;
-  object-fit: cover;
-  margin: 2px;
-}
-
-/* Tùy chọn: Cố định header của bảng */
-.table thead th {
-  position: sticky;
-  top: 0;
-  background-color: #f8f9fa;
-  z-index: 1;
-}
-
-.spinner-border {
-    width: 3rem;
-    height: 3rem;
-}
-</style>
 </head>
 
 <body>
@@ -183,71 +155,74 @@
     </script>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    var navbarToggler = document.querySelector('.navbar-toggler');
-    var navbarCollapse = document.querySelector('.navbar-collapse');
-    var menuOverlay = document.querySelector('.menu-overlay');
-
-    function toggleMenu() {
-        navbarCollapse.classList.toggle('show');
-        document.body.classList.toggle('menu-open');
-        if (menuOverlay) {
-            menuOverlay.classList.toggle('show');
+    document.addEventListener('DOMContentLoaded', function() {
+        var navbarToggler = document.querySelector('.navbar-toggler');
+        var navbarCollapse = document.querySelector('.navbar-collapse');
+        var menuOverlay = document.querySelector('.menu-overlay');
+    
+        function toggleMenu() {
+            navbarCollapse.classList.toggle('show');
+            document.body.classList.toggle('menu-open');
+            if (menuOverlay) {
+                menuOverlay.classList.toggle('show');
+            }
         }
-    }
-
-    function closeMenu() {
-        navbarCollapse.classList.remove('show');
-        document.body.classList.remove('menu-open');
-        if (menuOverlay) {
-            menuOverlay.classList.remove('show');
+    
+        function closeMenu() {
+            navbarCollapse.classList.remove('show');
+            document.body.classList.remove('menu-open');
+            if (menuOverlay) {
+                menuOverlay.classList.remove('show');
+            }
         }
-    }
-
-    navbarToggler.addEventListener('click', function(e) {
-        e.stopPropagation();
-        toggleMenu();
-    });
-
-    if (menuOverlay) {
-        menuOverlay.addEventListener('click', closeMenu);
-    }
-
-    document.addEventListener('click', function(e) {
-        if (!navbarCollapse.contains(e.target) && !navbarToggler.contains(e.target)) {
-            closeMenu();
-        }
-    });
-
-    // Ngăn sự kiện click trên menu lan ra ngoài
-    navbarCollapse.addEventListener('click', function(e) {
-        e.stopPropagation();
-    });
-
-    // Xử lý cho dropdown trong menu
-    var dropdowns = document.querySelectorAll('.navbar-nav .dropdown');
-    dropdowns.forEach(function(dropdown) {
-        dropdown.addEventListener('click', function(e) {
+    
+        navbarToggler.addEventListener('click', function(e) {
             e.stopPropagation();
-            this.classList.toggle('show');
+            toggleMenu();
+        });
+    
+        if (menuOverlay) {
+            menuOverlay.addEventListener('click', function(e) {
+                e.stopPropagation();
+                closeMenu();
+            });
+        }
+    
+        document.addEventListener('click', function(e) {
+            if (!navbarCollapse.contains(e.target) && !navbarToggler.contains(e.target)) {
+                closeMenu();
+            }
+        });
+    
+        // Ngăn sự kiện click trên menu lan ra ngoài
+        navbarCollapse.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    
+        // Xử lý cho dropdown trong menu
+        var dropdowns = document.querySelectorAll('.navbar-nav .dropdown');
+        dropdowns.forEach(function(dropdown) {
+            dropdown.addEventListener('click', function(e) {
+                e.stopPropagation();
+                this.classList.toggle('show');
+            });
+        });
+    
+        var userDropdown = document.querySelector('.navbar-nav .dropdown');
+        var userDropdownMenu = userDropdown.querySelector('.dropdown-menu');
+    
+        userDropdown.addEventListener('click', function(e) {
+            e.stopPropagation();
+            userDropdownMenu.classList.toggle('show');
+        });
+    
+        document.addEventListener('click', function(e) {
+            if (!userDropdown.contains(e.target)) {
+                userDropdownMenu.classList.remove('show');
+            }
         });
     });
-
-    var userDropdown = document.querySelector('.navbar-nav .dropdown');
-    var userDropdownMenu = userDropdown.querySelector('.dropdown-menu');
-
-    userDropdown.addEventListener('click', function(e) {
-        e.stopPropagation();
-        userDropdownMenu.classList.toggle('show');
-    });
-
-    document.addEventListener('click', function(e) {
-        if (!userDropdown.contains(e.target)) {
-            userDropdownMenu.classList.remove('show');
-        }
-    });
-});
-</script>
+    </script>
 
 <script>
 document.addEventListener('DOMContentLoaded', async function() {

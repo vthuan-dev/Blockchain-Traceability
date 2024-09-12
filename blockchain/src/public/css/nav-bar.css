@@ -1,0 +1,78 @@
+/* CSS cho navbar */
+.navbar {
+    z-index: 4; /* Đảm bảo navbar nằm trên lớp phủ */
+    color: black;
+    background-color: #4cd137 !important; /* Màu xanh dương */
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+  
+  .navbar-brand {
+    display: flex;
+    align-items: center;
+  }
+  
+  .logo-image {
+    width: 67px;  /* Điều chỉnh kích thước logo */
+    height: 67px;
+    margin-right: 10px;  /* Khoảng cách giữa logo và tên */
+    object-fit: contain;  /* Đảm bảo logo không bị méo */
+  }
+  
+  .navbar-brand span {
+    font-size: 1.2rem;  /* Kích thước chữ cho tên */
+    font-weight: bold;
+  }
+  
+  /* Đảm bảo menu dropdown nằm trên cùng bên phải */
+  .dropdown-menu {
+    right: 0;
+    left: auto;
+    z-index: 2000;
+  }
+  
+  /* CSS cho lớp phủ */
+  .menu-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 2;
+  }
+  
+  .menu-overlay.show {
+    display: block;
+    z-index: 1;
+  }
+  
+  body.menu-open {
+    overflow: hidden;
+  }
+  
+  @media (max-width: 991px) {
+    .navbar-collapse {
+      position: fixed;
+      top: 75px;
+      left: 0;
+      right: 0;
+      max-height: calc(100vh - 75px);
+      background-color: white;
+      z-index: 1;
+      overflow-y: auto;
+      transition: transform 0.3s ease-in-out;
+      transform: translateX(-100%);
+      padding: 15px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      border-bottom-left-radius: 20px;
+      border-bottom-right-radius: 20px;
+    }
+  
+    .navbar-collapse.show {
+      transform: translateX(0);
+    }
+  }
