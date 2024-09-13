@@ -1,0 +1,136 @@
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Admin</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+        <link rel="stylesheet" href="./css/style.css">
+        <link rel="stylesheet" href="./css/responsive.css">
+        <link rel="stylesheet" href="./css/animation.css">
+
+    </head>
+    <body onload="time()">
+        <header class="bg-success text-white py-2">
+            <div class="container-fluid">
+                <div class="row align-items-center">
+                    <div class="col-3 col-md-3 header-logo">
+                        <a href="#"><img src=".\picture\Bitcoin-Blockchain-Network-icon-on-transparent-background-PNG.png" alt="Logo" class="img-fluid" style="max-height: 50px;"></a>
+                    </div>
+                    <div class="col-6 col-md-5 text-center header-title">
+                        <h2 class="mb-0 h4">THÊM ADMIN MỚI</h2>
+                    </div>
+                    <div class="col-3 col-md-3 text-right header-icons">
+                        <div class="d-inline-block position-relative mr-3">
+                            <i class="fas fa-bell" id="notificationIcon"></i>
+                            <span class="badge badge-danger noti_count">12</span>
+                        </div>
+                        <div class="d-inline-block position-relative ml-auto text-right">
+                            <i class="fas fa-user profile-pic" id="profileIcon"></i>
+                            <div class="dropdown-menu dropdown-menu-right" style="display: none;">
+                                <a class="dropdown-item" href="./caidat.html">Cài đặt</a>
+                                <a class="dropdown-item" href="./taikhoan/login/dangnhap.html">Đăng xuất</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <button class="sidebar-toggle">☰</button>
+
+        <div class="container-fluid">
+            <div class="row">
+                <nav class="col-md-2 sidebar">
+                    <div class="section-title">XIN CHÀO, ADMIN</div>
+                    <a href="#" class="menu-item"><i class="fas fa-home"></i> TRANG CHỦ</a>
+                    <div class="divider"></div>
+                    <div class="section-title">CHỨC NĂNG</div>
+                    <a href="user.html" class="menu-item"><i class="fas fa-users"></i> Quản lý người dùng</a>
+                    <!-- <a href="#" class="menu-item"><i class="fas fa-exchange-alt"></i> Quản lý giao dịch</a> -->
+                    <!-- <a href="#" class="menu-item"><i class="fas fa-cogs"></i> Quy trình</a> -->
+                    <a href="product.html" class="menu-item"><i class="fas fa-box"></i> Sản phẩm</a>
+                    <!-- <a href="#" class="menu-item"><i class="fas fa-shipping-fast"></i> Lô hàng</a> -->
+                    <div class="divider"></div>
+                    <div class="section-title">TIỆN ÍCH</div>
+                    <a href="#" class="menu-item"><i class="fas fa-chart-bar"></i> Báo cáo và thống kê</a>
+                    <a href="#" class="menu-item"><i class="fas fa-comments"></i> Phản hồi</a>
+                </nav>
+
+                <main class="col-md-10">
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="card card-custom">
+                                <div class="card-body d-flex justify-content-between align-items-center" style="padding: 10px;">
+                                    <h5 class="card-title" style="border-left: 5px solid yellow; padding-left: 10px; margin-bottom: 0;">Bảng Điều Khiển</h5>
+                                    <div id="clock" class="text-right" style="font-size: 0.9rem; color: #333;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3 stat-card-container">
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="stat-card-custom bg-green">
+                                <i class="fas fa-users stat-icon"></i>
+                                <div class="stat-info">
+                                    <h3>TỔNG KHÁCH HÀNG</h3>
+                                    <p>56 khách hàng</p>
+                                    <small>Tổng số khách hàng được quản lý.</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="stat-card-custom bg-blue">
+                                <i class="fas fa-database stat-icon"></i>
+                                <div class="stat-info">
+                                    <h3>TỔNG SẢN PHẨM</h3>
+                                    <p>1850 sản phẩm</p>
+                                    <small>Tổng số sản phẩm được quản lý.</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="stat-card-custom bg-orange">
+                                <i class="fas fa-shopping-cart stat-icon"></i>
+                                <div class="stat-info">
+                                    <h3>TỔNG ĐƠN HÀNG</h3>
+                                    <p>247 đơn hàng</p>
+                                    <small>Tổng số hóa đơn bán hàng trong tháng.</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="stat-card-custom bg-red">
+                                <i class="fas fa-exclamation-triangle stat-icon"></i>
+                                <div class="stat-info">
+                                    <h3>SẮP HẾT HÀNG</h3>
+                                    <p>4 sản phẩm</p>
+                                    <small>Số sản phẩm cảnh báo hết cần nhập thêm.</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="card card-custom">
+                                <div class="card-body">
+                                    <h5 class="card-title">Dữ liệu 6 tháng đầu vào</h5>
+                                    <canvas id="myChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="./js/feature.js"></script>
+        <script src="./js/admin.js"></script>
+        <script src="./js/settings.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', applySettings);
+        </script>
+    </body>
+    </html>

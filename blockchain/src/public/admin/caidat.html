@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cài đặt</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="./css/responsive.css">
+    <link rel="stylesheet" href="./css/animation.css">
+
+    <style>
+        /* Custom CSS for responsive design */
+        @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+            }
+            .form-field {
+                margin-right: 0;
+                margin-bottom: 15px;
+            }
+            .btn-center {
+                display: flex;
+                flex-direction: column;
+            }
+            .btn-center .btn {
+                margin-bottom: 10px;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body onload="time()">
+    <header class="bg-success text-white py-2">
+        <div class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col-3 col-md-3 header-logo">
+                    <a href="#"><img src=".\picture\Bitcoin-Blockchain-Network-icon-on-transparent-background-PNG.png" alt="Logo" class="img-fluid" style="max-height: 50px;"></a>
+                </div>
+                <div class="col-6 col-md-5 text-center header-title">
+                    <h2 class="mb-0 h4">THÊM ADMIN MỚI</h2>
+                </div>
+                <div class="col-3 col-md-3 text-right header-icons">
+                    <div class="d-inline-block position-relative mr-3">
+                        <i class="fas fa-bell" id="notificationIcon"></i>
+                        <span class="badge badge-danger noti_count">12</span>
+                    </div>
+                    <div class="d-inline-block position-relative ml-auto text-right">
+                        <i class="fas fa-user profile-pic" id="profileIcon"></i>
+                        <div class="dropdown-menu dropdown-menu-right" style="display: none;">
+                            <a class="dropdown-item" href="./caidat.html">Cài đặt</a>
+                            <a class="dropdown-item" href="./taikhoan/login/dangnhap.html">Đăng xuất</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <button class="sidebar-toggle">☰</button>
+
+    <div class="container-fluid">
+        <div class="row">
+            <nav class="col-md-2 sidebar">
+                <div class="section-title">XIN CHÀO, ADMIN</div>
+                <a href="admintest.html" class="menu-item"><i class="fas fa-home"></i> TRANG CHỦ</a>
+                <div class="divider"></div>
+                <div class="section-title">CHỨC NĂNG</div>
+                <a href="user.html" class="menu-item"><i class="fas fa-users"></i> Quản lý người dùng</a>
+                <a href="product.html" class="menu-item"><i class="fas fa-box"></i> Sản phẩm</a>
+                <div class="divider"></div>
+                <div class="section-title">TIỆN ÍCH</div>
+                <a href="#" class="menu-item"><i class="fas fa-chart-bar"></i> Báo cáo và thống kê</a>
+                <a href="#" class="menu-item"><i class="fas fa-comments"></i> Phản hồi</a>
+            </nav>
+
+            <main class="col-md-10 col-12 px-2">
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="card card-custom">
+                            <div class="card-body d-flex justify-content-between align-items-center" style="padding: 10px;">
+                                <h5 class="card-title" style="border-left: 5px solid yellow; padding-left: 10px; margin-bottom: 0;">Cài đặt tài khoản</h5>
+                                <div id="clock" class="text-right" style="font-size: 0.9rem; color: #333;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="card card-custom">
+                            <div class="card-body">
+                                <form class="settings-form">
+                                    <!-- <div class="form-row">
+                                        <div class="col-md-6 col-12 form-field">
+                                            <label for="username" class="form-label">Tên đăng nhập</label>
+                                            <input id="username" name="username" type="text" class="form-input" required />
+                                        </div>
+                                        <div class="col-md-6 col-12 form-field">
+                                            <label for="email" class="form-label">Email</label>
+                                            <input id="email" name="email" type="email" class="form-input" required />
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="col-md-6 col-12 form-field">
+                                            <label for="password" class="form-label">Mật khẩu</label>
+                                            <input id="password" name="password" type="password" class="form-input" required />
+                                        </div>
+                                        <div class="col-md-6 col-12 form-field">
+                                            <label for="confirm-password" class="form-label">Xác nhận mật khẩu</label>
+                                            <input id="confirm-password" name="confirm_password" type="password" class="form-input" required />
+                                        </div>
+                                    </div> -->
+                                    <div class="form-row">
+                                        <div class="col-md-6 col-12 form-field">
+                                            <label for="language" class="form-label">Ngôn ngữ</label>
+                                            <select id="language" name="language" class="form-input">
+                                                <option value="en">English</option>
+                                                <option value="vi">Tiếng Việt</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 col-12 form-field">
+                                            <label for="background-color" class="form-label">Màu nền</label>
+                                            <select id="background-color" name="background_color" class="form-input">
+                                                <option value="bg-light">Trắng</option>
+                                                <option value="bg-soft-blue">Xanh nhạt</option>
+                                                <option value="bg-soft-green">Xanh lá nhạt</option>
+                                                <option value="bg-soft-orange">Cam nhạt</option>
+                                                <option value="bg-soft-purple">Tím nhạt</option>
+                                                
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-actions btn-center">
+                                        <button type="submit" class="btn btn-save">Lưu thay đổi</button>
+                                        <button type="button" class="btn btn-cancel" onclick="window.location.href='admintest.html'">Hủy bỏ</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div id="overlay"></div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="./js/feature.js"></script>
+    <script src="./js/settings.js"></script>
+    <script>
+        document.querySelector('.settings-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            saveSettings();
+            alert('Đã lưu thay đổi thành công!');
+        });
+    </script>
+</body>
+</html>
