@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thêm Admin</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="./css/responsive.css">
+    <link rel="stylesheet" href="./css/animation.css">
+
+<body onload="time()">
+    <header class="bg-success text-white py-2">
+        <div class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col-3 col-md-3 header-logo">
+                    <a href="#"><img src=".\picture\Bitcoin-Blockchain-Network-icon-on-transparent-background-PNG.png" alt="Logo" class="img-fluid" style="max-height: 50px;"></a>
+                </div>
+                <div class="col-6 col-md-5 text-center header-title">
+                    <h2 class="mb-0 h4">THÊM ADMIN MỚI</h2>
+                </div>
+                <div class="col-3 col-md-3 text-right header-icons">
+                    <div class="d-inline-block position-relative mr-3">
+                        <i class="fas fa-bell" id="notificationIcon"></i>
+                        <span class="badge badge-danger noti_count">12</span>
+                    </div>
+                    <div class="d-inline-block position-relative ml-auto text-right">
+                        <i class="fas fa-user profile-pic" id="profileIcon"></i>
+                        <div class="dropdown-menu dropdown-menu-right" style="display: none;">
+                            <a class="dropdown-item" href="./caidat.html">Cài đặt</a>
+                            <a class="dropdown-item" href="./taikhoan/login/dangnhap.html">Đăng xuất</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <button class="sidebar-toggle">☰</button>
+
+    <div class="container-fluid">
+        <div class="row">
+            <nav class="col-md-2 sidebar">
+                <div class="section-title">XIN CHÀO, ADMIN</div>
+                <a href="admintest.html" class="menu-item"><i class="fas fa-home"></i> TRANG CHỦ</a>
+                <div class="divider"></div>
+                <div class="section-title">CHỨC NĂNG</div>
+                <a href="user.html" class="menu-item"><i class="fas fa-users"></i> Quản lý người dùng</a>
+                <a href="product.html" class="menu-item"><i class="fas fa-box"></i> Sản phẩm</a>
+                <div class="divider"></div>
+                <div class="section-title">TIỆN ÍCH</div>
+                <a href="#" class="menu-item"><i class="fas fa-chart-bar"></i> Báo cáo và thống kê</a>
+                <a href="#" class="menu-item"><i class="fas fa-comments"></i> Phản hồi</a>
+            </nav>
+
+            <main class="col-md-10 col-12 px-2">
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="card card-custom">
+                            <div class="card-body d-flex justify-content-between align-items-center" style="padding: 10px;">
+                                <h5 class="card-title" style="border-left: 5px solid yellow; padding-left: 10px; margin-bottom: 0;">Thêm admin mới</h5>
+                                <div id="clock" class="text-right" style="font-size: 0.9rem; color: #333;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="card card-custom">
+                            <div class="card-body">
+                                <form class="add-admin-form">
+                                    <div class="form-row">
+                                        <div class="col-md-6 col-12 form-field">
+                                            <label for="admin-email" class="form-label">Email</label>
+                                            <input id="admin-email" name="email" type="email" class="form-input" required />
+                                        </div>
+                                        <div class="col-md-6 col-12 form-field">
+                                            <label for="admin-name" class="form-label">Tên</label>
+                                            <input id="admin-name" name="name" type="text" class="form-input" required />
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="col-md-6 col-12 form-field">
+                                            <label for="admin-password" class="form-label">Mật khẩu</label>
+                                            <input id="admin-password" name="password" type="password" class="form-input" required />
+                                        </div>
+                                        <div class="col-md-6 col-12 form-field">
+                                            <label for="admin-confirm-password" class="form-label">Xác nhận mật khẩu</label>
+                                            <input id="admin-confirm-password" name="confirm_password" type="password" class="form-input" required />
+                                        </div>
+                                    </div>
+                                    <div class="form-actions btn-center">
+                                        <button type="submit" class="btn btn-save">Lưu admin</button>
+                                        <button type="button" class="btn btn-cancel" onclick="window.location.href='user.html'">Hủy bỏ</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>  
+    </div>
+
+    
+
+    <div id="overlay"></div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="./js/feature.js"></script>
+    <script src="./js/user.js"></script>
+    <script src="./js/settings.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', applySettings);
+    </script>
+</body>
+</html>
