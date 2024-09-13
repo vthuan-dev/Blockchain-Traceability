@@ -303,6 +303,25 @@ function getPendingBatchesByProducer(uint256 _producerId) public view returns (B
     return pendingBatches;
 }
 
+function getRejectedBatchesByProducer(uint256 _producerId) public view returns (Batch[] memory) {
+    uint256 rejectedCount = 0;
+    for (uint256 i = 1; i <= _batchIdCounter; i++) {
+        if (_batches[i].producerId == _producerId && _batches[i].status == BatchStatus.Rejected) {
+            rejectedCount++;
+        }
+    }
+
+    Batch[] memory rejectedBatches = new Batch[](rejectedCount);
+    uint256 index = 0;
+    for (uint256 i = 1; i <= _batchIdCounter; i++) {
+        if (_batches[i].producerId == _producerId && _batches[i].status == BatchStatus.Rejected) {
+            rejectedBatches[index] = _batches[i];
+            index++;
+        }
+    }
+
+    return rejectedBatches;
+}
 function getAllPendingBatches() public view returns (Batch[] memory) {
         uint256 pendingCount = 0;
         for (uint256 i = 1; i <= _batchIdCounter; i++) {
@@ -371,6 +390,42 @@ function approveBatch(uint256 _batchId) public onlyApprover {
     uint256[] memory relatedProductIds = new uint256[](1);
     relatedProductIds[0] = _batches[_batchId].productId;
     _addSystemActivityLog(_batches[_batchId].producerId, "Batch Approved", "Batch has been approved by the approver", relatedProductIds);
+}
+
+function rejectBatch(uint256 _batchId) public onlyApprover {
+    require(_batches[_batchId].batchId != 0, "Batch does not exist");
+    require(_batches[_batchId].status == BatchStatus.PendingApproval, "Batch is not pending approval");
+
+    _batches[_batchId].status = BatchStatus.Rejected;
+
+    emit BatchRejected(_batchId, _batches[_batchId].producerId, _batches[_batchId].sscc);
+    
+    // Add system activity log
+    uint256[] memory relatedProductIds = new uint256[](1);
+    relatedProductIds[0] = _batches[_batchId].productId;
+    _addSystemActivityLog(_batches[_batchId].producerId, "Batch Rejected", "Batch has been rejected by the approver", relatedProductIds);
+}
+
+event BatchRejected(uint256 indexed batchId, uint256 producerId, string sscc);
+
+function getApprovedBatchesByProducer(uint256 _producerId) public view returns (Batch[] memory) {
+    uint256 approvedCount = 0;
+    for (uint256 i = 1; i <= _batchIdCounter; i++) {
+        if (_batches[i].producerId == _producerId && _batches[i].status == BatchStatus.Approved) {
+            approvedCount++;
+        }
+    }
+
+    Batch[] memory approvedBatches = new Batch[](approvedCount);
+    uint256 index = 0;
+    for (uint256 i = 1; i <= _batchIdCounter; i++) {
+        if (_batches[i].producerId == _producerId && _batches[i].status == BatchStatus.Approved) {
+            approvedBatches[index] = _batches[i];
+            index++;
+        }
+    }
+
+    return approvedBatches;
 }
 
 function isBatchApproved(uint256 _batchId) public view returns (bool) {
