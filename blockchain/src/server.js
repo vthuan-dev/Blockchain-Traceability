@@ -129,7 +129,7 @@ function requireAuth(req, res, next) {
 }
 
 // Sử dụng middleware cho các route cần xác thực
-app.get('/sanxuat.html', requireAuth, (req, res) => {
+app.get('/san-xuat/sanxuat.html', requireAuth, (req, res) => {
   if (req.session.roleId === 1) {
     res.sendFile(path.join(__dirname, 'public', 'san-xuat', 'sanxuat.html'));
   } else {

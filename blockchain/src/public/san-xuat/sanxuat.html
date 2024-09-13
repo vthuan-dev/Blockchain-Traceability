@@ -107,6 +107,7 @@
 
             
         </div>
+        
     </main>
 
     <!-- Modal -->
@@ -310,6 +311,8 @@ function displayPendingBatches(batches) {
     `;
     
     batches.forEach(batch => {
+        const row = document.createElement('tr');
+
         const statusClass = getStatusClass(batch.status);
         html += `
             <tr>

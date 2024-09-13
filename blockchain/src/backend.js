@@ -51,7 +51,7 @@ web3.eth.net.isListening()
   .catch(e => console.log('Lỗi rồi', e));
 
 const contractABI = require('../build/contracts/TraceabilityContract.json').abi;
-const contractAddress = '0x724225d9BbC856286ee2d4a7553A19ba1bBD467b';
+const contractAddress = '0x310906d8c9cD14EE5aB33AF1BFdc905876b8D4B1';
 const contract = new web3.eth.Contract(contractABI, contractAddress);
 
 // tạo biến lưu trữ file, giới hạn số lượng file và tên file, maxCount: số lượng file, name: tên file
@@ -77,7 +77,7 @@ const { CID } = require('multiformats/cid');
 const { sha256 } = require('multiformats/hashes/sha2');
 const { base58btc } = require('multiformats/bases/base58');
 
-const BUCKET_NAME = 'truyxuat';
+const BUCKET_NAME = 'nckh';
 
 async function uploadFile(fileBuffer, fileName) {
   try {
