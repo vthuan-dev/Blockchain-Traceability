@@ -59,7 +59,6 @@
                 <div class="dropdown">
                     <button onclick="searchFilter()" class="check-button"><b>Lọc</b></button>
                     <div id="filterDropdown" class="dropdown-content">
-                        <a href="#all">Tất cả</a>
                         <a href="#checked">Đã kiểm định</a>
                         <a href="#uncheck">Chưa kiểm định</a>
                         <a href="#cancel">Đã từ chối</a>
@@ -195,6 +194,8 @@
 
             if (response.ok) {
                 showAlert('Phê duyệt thành công!', 'success');
+                $('#batchDetailsModal').modal('hide'); // Đóng modal
+                await loadPendingBatches(); // Tải lại danh sách sau khi phê duyệt
             } else {
                 showAlert('Phê duyệt thất bại. Vui lòng thử lại.', 'danger');
             }
@@ -216,6 +217,7 @@
 
             if (response.ok) {
                 showAlert('Từ chối thành công!', 'success');
+                $('#batchDetailsModal').modal('hide'); // Đóng modal
                 await loadPendingBatches(); // Tải lại danh sách sau khi từ chối
             } else {
                 showAlert('Từ chối thất bại. Vui lòng thử lại.', 'danger');
