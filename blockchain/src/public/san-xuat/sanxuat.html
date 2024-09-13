@@ -100,10 +100,14 @@
             </div>
             <!-- Container của bảng lô hàng -->
             <h5><i>Danh sách lô hàng :</i></h5>
+            
+            <div id="batchesList"></div>
 
-            <div class="table-responsive">
-                <div id="pendingBatchesList"></div>
-            </div>
+         <div class="table-responsive">
+    <div id="pendingBatchesList" style="display: none;"></div>
+    <div id="approvedBatchesList" style="display: none;"></div>
+    <div id="rejectedBatchesList" style="display: none;"></div>
+</div>
 
             
         </div>
@@ -122,7 +126,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="js_giaodien/sanpham.js"></script>
-    <script>
+   
+   <script>
     document.addEventListener('DOMContentLoaded', async function() {
         try {
             const response = await fetch('/api/user-info');
@@ -267,7 +272,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         pendingBatchesList.style.display = 'none';
 
         // Gọi API để lấy dữ liệu lô hàng
-        const response = await fetch('/pending-batches');
+        const response = await fetch('/api/pending-batches');
         if (response.ok) {
             const pendingBatches = await response.json();
             
@@ -286,6 +291,20 @@ document.addEventListener('DOMContentLoaded', async function() {
         loadingSpinner.innerHTML = '<p class="text-danger">Đã xảy ra lỗi khi tải dữ liệu. Vui lòng thử lại sau.</p>';
     }
 });
+
+function filterBatches() {
+    const statusFilter = document.getElementById('statusFilter');
+    const selectedStatus = statusFilter.value;
+    
+    let filteredBatches;
+    if (selectedStatus) {
+        filteredBatches = window.allBatches.filter(batch => batch.status === selectedStatus);
+    } else {
+        filteredBatches = window.allBatches;
+    }
+    
+    displayPendingBatches(filteredBatches);
+}
 
 function displayPendingBatches(batches) {
     const pendingBatchesList = document.getElementById('pendingBatchesList');
@@ -331,18 +350,264 @@ function displayPendingBatches(batches) {
     pendingBatchesList.innerHTML = html;
 }
 
+
+function displayRejectedBatches(batches) {
+    const rejectedBatchesList = document.getElementById('rejectedBatchesList');
+    if (batches.length === 0) {
+        rejectedBatchesList.innerHTML = '<p>Không có lô hàng nào bị từ chối.</p>';
+        return;
+    }
+
+    let html = `
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>Tên lô</th>
+                    <th>Mã lô</th>
+                    <th>Số lượng</th>
+                    <th>Ngày tạo</th>
+                    <th>Hình ảnh</th>
+                    <th>Giấy chứng nhận</th>
+                    <th>Trạng thái</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+    
+    batches.forEach(batch => {
+        const statusClass = getStatusClass(batch.status);
+        html += `
+            <tr>
+                <td>${batch.name}</td>
+                <td>${batch.batchId}</td>
+                <td>${batch.quantity}</td>
+                <td>${new Date(Number(batch.productionDate) * 1000).toLocaleDateString()}</td>
+                <td>${batch.productImageUrls.map(url => `<img src="${url}" alt="Product Image" class="product-image">`).join('')}</td>
+                <td><img src="${batch.certificateImageUrl}" alt="Certificate" class="certificate-image"></td>
+                <td class="${statusClass}">${batch.status}</td>
+            </tr>
+        `;
+    });
+    
+    html += '</tbody></table>';
+    rejectedBatchesList.innerHTML = html;
+}
+
+async function checkSession() {
+  try {
+    const response = await fetch('/api/check-session');
+    const data = await response.json();
+    if (!data.loggedIn) {
+      throw new Error('Phiên đăng nhập không hợp lệ');
+    }
+    return data.userId;
+  } catch (error) {
+    console.error('Lỗi kiểm tra phiên đăng nhập:', error);
+    throw error;
+  }
+}
+
+async function fetchAndDisplayApprovedBatches() {
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const approvedBatchesList = document.getElementById('approvedBatchesList');
+
+    try {
+        loadingSpinner.style.display = 'block';
+        approvedBatchesList.style.display = 'none';
+
+        // Kiểm tra session trước
+        const userId = await checkSession();
+
+        const response = await fetch('/api/approved-batches');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const approvedBatches = await response.json();
+        displayApprovedBatches(approvedBatches);
+    } catch (error) {
+        console.error('Lỗi khi tải dữ liệu lô hàng đã duyệt:', error);
+        approvedBatchesList.innerHTML = '<p class="text-danger">Đã xảy ra lỗi khi tải dữ liệu. Vui lòng thử lại sau.</p>';
+    } finally {
+        loadingSpinner.style.display = 'none';
+        approvedBatchesList.style.display = 'block';
+    }
+}
+
+async function fetchAndDisplayPendingBatches() {
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const pendingBatchesList = document.getElementById('pendingBatchesList');
+
+    try {
+        loadingSpinner.style.display = 'block';
+        pendingBatchesList.style.display = 'none';
+
+        const response = await fetch('/api/pending-batches', {
+            credentials: 'include'
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const pendingBatches = await response.json();
+        
+        if (pendingBatches.length === 0) {
+            pendingBatchesList.innerHTML = '<p>Chưa có lô hàng cần duyệt.</p>';
+        } else {
+            displayBatches(pendingBatches, 'pendingBatchesList');
+        }
+    } catch (error) {
+        console.error('Lỗi khi tải dữ liệu lô hàng chờ duyệt:', error);
+        pendingBatchesList.innerHTML = '<p class="text-danger">Đã xảy ra lỗi khi tải dữ liệu. Vui lòng thử lại sau.</p>';
+    } finally {
+        loadingSpinner.style.display = 'none';
+        pendingBatchesList.style.display = 'block';
+    }
+}
+
+
+async function fetchAndDisplayApprovedBatches() {
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const approvedBatchesList = document.getElementById('approvedBatchesList');
+
+    try {
+        loadingSpinner.style.display = 'block';
+        approvedBatchesList.style.display = 'none';
+
+        const response = await fetch('/api/approved-batches', {
+            credentials: 'include'
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const approvedBatches = await response.json();
+        displayBatches(approvedBatches, 'approvedBatchesList');
+    } catch (error) {
+        console.error('Lỗi khi tải dữ liệu lô hàng đã duyệt:', error);
+        approvedBatchesList.innerHTML = '<p class="text-danger">Đã xảy ra lỗi khi tải dữ liệu. Vui lòng thử lại sau.</p>';
+    } finally {
+        loadingSpinner.style.display = 'none';
+        approvedBatchesList.style.display = 'block';
+    }
+}
+
+async function fetchAndDisplayRejectedBatches() {
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const rejectedBatchesList = document.getElementById('rejectedBatchesList');
+
+    try {
+        loadingSpinner.style.display = 'block';
+        rejectedBatchesList.style.display = 'none';
+
+        // Kiểm tra session trước
+        const userId = await checkSession();
+
+        const response = await fetch('/api/rejected-batches');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const rejectedBatches = await response.json();
+        displayRejectedBatches(rejectedBatches);
+    } catch (error) {
+        console.error('Lỗi khi tải dữ liệu lô hàng bị từ chối:', error);
+        rejectedBatchesList.innerHTML = '<p class="text-danger">Đã xảy ra lỗi khi tải dữ liệu. Vui lòng thử lại sau.</p>';
+    } finally {
+        loadingSpinner.style.display = 'none';
+        rejectedBatchesList.style.display = 'block';
+    }
+}
+
+
+function displayBatches(batches, containerId) {
+    const container = document.getElementById(containerId);
+    if (batches.length === 0) {
+        container.innerHTML = '<p>Không có lô hàng nào.</p>';
+        return;
+    }
+
+    let html = `
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>Tên lô</th>
+                    <th>Mã lô</th>
+                    <th>Số lượng</th>
+                    <th>Ngày tạo</th>
+                    <th>Hình ảnh</th>
+                    <th>Giấy chứng nhận</th>
+                    <th>Trạng thái</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+    
+    batches.forEach(batch => {
+        const statusClass = getStatusClass(batch.status);
+        html += `
+            <tr>
+                <td>${batch.name}</td>
+                <td>${batch.batchId}</td>
+                <td>${batch.quantity}</td>
+                <td>${new Date(Number(batch.productionDate) * 1000).toLocaleDateString()}</td>
+                <td>${batch.productImageUrls.map(url => `<img src="${url}" alt="Product Image" class="product-image">`).join('')}</td>
+                <td><img src="${batch.certificateImageUrl}" alt="Certificate" class="certificate-image"></td>
+                <td class="${statusClass}">${batch.status}</td>
+            </tr>
+        `;
+    });
+    
+    html += '</tbody></table>';
+    container.innerHTML = html;
+}
+document.addEventListener('DOMContentLoaded', function() {
+    const statusFilter = document.getElementById('statusFilter');
+    statusFilter.addEventListener('change', function() {
+        const selectedStatus = this.value;
+        document.getElementById('pendingBatchesList').style.display = 'none';
+        document.getElementById('approvedBatchesList').style.display = 'none';
+        document.getElementById('rejectedBatchesList').style.display = 'none';
+
+        switch(selectedStatus) {
+            case 'Chờ phê duyệt':
+                fetchAndDisplayPendingBatches();
+                break;
+            case 'Đã phê duyệt':
+                fetchAndDisplayApprovedBatches();
+                break;
+            case 'Đã từ chối':
+                fetchAndDisplayRejectedBatches();
+                break;
+        }
+    });
+
+    // Gọi hàm mặc định khi trang được tải
+    fetchAndDisplayPendingBatches();
+});
 function getStatusClass(status) {
     switch (status) {
         case 'Chờ phê duyệt':
+        case '0':
+        case 0:
             return 'status-pending';
         case 'Đã phê duyệt':
+        case '1':
+        case 1:
             return 'status-approved';
         case 'Đã từ chối':
+        case '2':
+        case 2:
             return 'status-rejected';
         default:
             return '';
     }
 }
+
 </script>
 
 <script>

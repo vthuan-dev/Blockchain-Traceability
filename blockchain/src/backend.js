@@ -51,7 +51,7 @@ web3.eth.net.isListening()
   .catch(e => console.log('Lỗi rồi', e));
 
 const contractABI = require('../build/contracts/TraceabilityContract.json').abi;
-const contractAddress = '0x310906d8c9cD14EE5aB33AF1BFdc905876b8D4B1';
+const contractAddress = '0x1C2D11Eb54066ff0868c29A0868c81295db380E2';
 const contract = new web3.eth.Contract(contractABI, contractAddress);
 
 // tạo biến lưu trữ file, giới hạn số lượng file và tên file, maxCount: số lượng file, name: tên file
@@ -580,7 +580,7 @@ function setupRoutes(app, db){
   });
 
 
-  app.get('/pending-batches', async (req, res) => {
+  app.get('/api/pending-batches', async (req, res) => {
     try {
       
       if (!req.session.userId) {
@@ -671,18 +671,6 @@ function setupRoutes(app, db){
     }
   });
   
-  function translateStatus(status) {
-    switch (status) {
-      case 'PendingApproval':
-        return 'Chờ phê duyệt';
-      case 'Approved':
-        return 'Đã phê duyệt';
-      case 'Rejected':
-        return 'Đã từ chối';
-      default:
-        return 'Không xác định';
-    }
-  }
 
 
 // Hàm để lấy vùng sản xuất của người sản xuất từ SQL
@@ -730,6 +718,33 @@ app.post('/approve-batch/:batchId', async (req, res) => {
   }
 });
 
+app.post('/reject-batch/:batchId', async (req, res) => {
+  try {
+    if (!req.session.userId) {
+      return res.status(401).json({ error: 'Người dùng chưa đăng nhập' });
+    }
+
+    const batchId = req.params.batchId;
+    const userId = req.session.userId;
+
+    // Kiểm tra xem người dùng có phải là nhà kiểm định không
+    const [approvers] = await db.query('SELECT * FROM users WHERE uid = ? AND role_id = 2', [userId]);
+    if (approvers.length === 0) {
+      return res.status(403).json({ error: 'Người dùng không có quyền kiểm định' });
+    }
+
+    // Gọi hàm rejectBatch từ smart contract
+    const result = await contract.methods.rejectBatch(batchId).send({ from: account.address, gas: 3000000 });
+
+    res.status(200).json({
+      message: 'Lô hàng đã bị từ chối thành công',
+      transactionHash: result.transactionHash
+    });
+  } catch (error) {
+    console.error('Lỗi khi từ chối lô hàng:', error);
+    res.status(500).json({ error: 'Không thể từ chối lô hàng: ' + error.message });
+  }
+});
 app.post('/reject-batch/:batchId', async (req, res) => {
   try {
     if (!req.session.userId) {
@@ -825,11 +840,15 @@ app.get('/api/batches', async (req, res) => {
     let filteredBatches = allBatches;
     if (status) {
       const statusMap = { 
-        'Chờ phê duyệt': 0, 
-        'Đã phê duyệt': 1, 
-        'Đã từ chối': 2 
+        'Chờ phê duyệt': '0', 
+        'Đã phê duyệt': '1', 
+        'Đã từ chối': '2' 
       };
-      filteredBatches = allBatches.filter(batch => translateStatus(batch.status) === status);
+      filteredBatches = allBatches.filter(batch => {
+        const translatedStatus = translateStatus(batch.status.toString());
+        console.log(`Comparing: ${translatedStatus} with ${status}`);
+        return translatedStatus === status;
+      });
     }
     console.log('Số lô hàng sau khi lọc:', filteredBatches.length);
 
@@ -837,17 +856,23 @@ app.get('/api/batches', async (req, res) => {
       const [producers] = await db.query('SELECT name FROM users WHERE uid = ?', [batch.producerId]);
       const producerName = producers.length > 0 ? producers[0].name : 'Unknown';
       
+      console.log('Raw batch status:', batch.status);
+      const translatedStatus = translateStatus(batch.status.toString());
+      console.log('Translated status:', translatedStatus);
+      
       return {
         batchId: batch.batchId.toString(),
         name: batch.name,
         producerName: producerName,
         quantity: batch.quantity.toString(),
         productionDate: batch.productionDate.toString(),
-        status: translateStatus(batch.status),
+        status: translatedStatus,
         productImageUrls: batch.productImageUrls,
         certificateImageUrl: batch.certificateImageUrl
       };
     }));
+
+    console.log('Serialized batches:', JSON.stringify(serializedBatches, null, 2));
 
     res.status(200).json(serializedBatches);
   } catch (error) {
@@ -856,23 +881,114 @@ app.get('/api/batches', async (req, res) => {
   }
 });
 
-// Sử dụng hàm translateStatus hiện có
+app.get('/api/approved-batches', async (req, res) => {
+  try {
+    if (!req.session.userId) {
+      return res.status(401).json({ error: 'Người dùng chưa đăng nhập' });
+    }
+
+    const userId = req.session.userId;
+    console.log('Gọi hàm getApprovedBatchesByProducer với userId:', userId);
+
+    const approvedBatches = await contract.methods.getApprovedBatchesByProducer(userId).call({ from: account.address });
+    console.log('Số lượng lô hàng đã duyệt:', approvedBatches.length);
+
+    // Xử lý và gửi dữ liệu về client
+    const serializedBatches = approvedBatches.map(batch => ({
+      batchId: batch.batchId.toString(),
+      name: batch.name,
+      quantity: batch.quantity.toString(),
+      productionDate: batch.productionDate.toString(),
+      status: translateStatus(batch.status),
+      productImageUrls: batch.productImageUrls,
+      certificateImageUrl: batch.certificateImageUrl
+    }));
+
+    res.status(200).json(serializedBatches);
+  } catch (error) {
+    console.error('Lỗi khi lấy danh sách lô hàng đã duyệt:', error);
+    res.status(500).json({ error: 'Không thể lấy danh sách lô hàng đã duyệt: ' + error.message });
+  }
+});
+
+app.get('/api/rejected-batches', async (req, res) => {
+  try {
+    if (!req.session.userId) {
+      return res.status(401).json({ error: 'Người dùng chưa đăng nhập' });
+    }
+
+    const userId = req.session.userId;
+    console.log('Gọi hàm getRejectedBatchesByProducer với userId:', userId);
+
+    const rejectedBatches = await contract.methods.getRejectedBatchesByProducer(userId).call({ from: account.address });
+    console.log('Số lượng lô hàng bị từ chối:', rejectedBatches.length);
+
+    const serializedBatches = rejectedBatches.map(batch => ({
+      batchId: batch.batchId.toString(),
+      name: batch.name,
+      quantity: batch.quantity.toString(),
+      productionDate: batch.productionDate.toString(),
+      status: translateStatus(batch.status),
+      productImageUrls: batch.productImageUrls,
+      certificateImageUrl: batch.certificateImageUrl
+    }));
+
+    res.status(200).json(serializedBatches);
+  } catch (error) {
+    console.error('Lỗi khi lấy danh sách lô hàng bị từ chối:', error);
+    res.status(500).json({ error: 'Không thể lấy danh sách lô hàng bị từ chối: ' + error.message });
+  }
+});
+
+app.get('/api/check-session', (req, res) => {
+  if (req.session.userId) {
+    res.json({ loggedIn: true, userId: req.session.userId });
+  } else {
+    res.json({ loggedIn: false });
+  }
+});
+
 function translateStatus(status) {
-  switch (status) {
+  console.log('Status before translation:', status, 'Type:', typeof status);
+  
+  // Xử lý trường hợp status là chuỗi
+  if (typeof status === 'string') {
+    switch (status) {
       case 'PendingApproval':
-      case 0:
-          return 'Chờ phê duyệt';
+        return 'Chờ phê duyệt';
       case 'Approved':
-      case 1:
-          return 'Đã phê duyệt';
+        return 'Đã phê duyệt';
       case 'Rejected':
-      case 2:
-          return 'Đã từ chối';
-      default:
-          return 'Không xác định';
+        return 'Đã từ chối';
+    }
+  }
+  
+  // Xử lý trường hợp status là số hoặc BigInt
+  let statusNumber = status;
+  if (typeof status === 'bigint') {
+    statusNumber = Number(status);
+  } else if (typeof status === 'string') {
+    statusNumber = parseInt(status, 10);
+  }
+  
+  console.log('Status after conversion:', statusNumber, 'Type:', typeof statusNumber);
+
+  switch (statusNumber) {
+    case 0:
+      return 'Chờ phê duyệt';
+    case 1:
+      return 'Đã phê duyệt';
+    case 2:
+      return 'Đã từ chối';
+    default:
+      console.log('Unrecognized status:', status);
+      return 'Không xác định';
   }
 }
+
 }
+
+
 
 
 
