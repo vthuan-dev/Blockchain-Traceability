@@ -145,10 +145,8 @@ app.get('/nhakiemduyet.html', requireAuth, (req, res) => {
   }
 });
 
-app.listen(3000, () => {
-  console.log('Server đang chạy trên cổng 3000');
-});
-app.get('/api/user-info', async (req, res) => {
+
+app.get('/api/user-info', async (req, res) => { 
   if (req.session.userId) {
     try {
       const [users] = await db.query(`
@@ -189,5 +187,9 @@ app.post('/api/dangxuat', (req, res) => {
     });
 });
 
-const manageRoutes = require('./manage.js'); // Thêm dòng này để import các chức năng từ manage.js
-app.use('/api/manage', manageRoutes); // Thêm dòng này để sử dụng các route từ manage.js
+const manageRoutes = require('./manage.js');
+app.use('/', manageRoutes);
+
+app.listen(3000, () => {
+  console.log('Server đang chạy trên cổng 3000');
+});

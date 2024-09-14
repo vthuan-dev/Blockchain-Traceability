@@ -57,7 +57,7 @@ window.ProductManager = {
     },
 
     fetchProductData: function() {
-        fetch('http://localhost:3000/api/products')
+        fetch('http://localhost:3000/api/theproducts')
         .then(response => {
             if (!response.ok) {
                 throw new Error('Lỗi khi tải dữ liệu');

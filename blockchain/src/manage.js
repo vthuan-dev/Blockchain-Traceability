@@ -58,7 +58,7 @@ router.get('/api/users', (req, res) => {
     });
 });
 
-router.get('/api/products', (req, res) => {
+router.get('/api/theproducts', (req, res) => {
     const query = 'SELECT * FROM products';
     queryDatabase(query, [], (error, results) => {
         if (error) {
@@ -124,19 +124,19 @@ router.use(express.static(path.join(__dirname, 'public')));
 
 // Route để phục vụ tệp user.html
 router.get('/user.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'user.html'));
+    res.sendFile(path.join(__dirname, 'public', 'admin', 'user.html'));
 });
 
 router.get('/product', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'product.html'));
+    res.sendFile(path.join(__dirname, 'public', 'admin', 'product.html'));
 });
 
 router.get('/admin', (req, res) => {   
-    res.sendFile(path.join(__dirname, 'public', 'admintest.html'));
+    res.sendFile(path.join(__dirname, 'public', 'admin', 'admintest.html'));
 })
 
 router.get('/caidat', (req, res) => {   
-    res.sendFile(path.join(__dirname, 'public', 'caidat.html'));
+    res.sendFile(path.join(__dirname, 'public', 'admin', 'caidat.html'));
 })
 
 // Endpoint để cập nhật sản phẩm
