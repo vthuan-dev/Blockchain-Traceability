@@ -578,11 +578,12 @@ function displayBatches(batches, containerId) {
 
                 if (qrData) {
                     try {
-                        generateQRCodeWithLogo(qrCodeElement, qrData, 100, function (error) {
+                        generateQRCodeWithLogo(qrCodeElement, qrData, 100, true, function (error) {
                             if (error) {
                                 console.error('Error generating QR code:', error, 'Data:', qrData);
                                 qrCodeElement.textContent = 'QR Code không khả dụng';
                             } else {
+                                qrCodeElement.classList.add('qr-code-hover');
                                 qrCodeElement.onclick = function() {
                                     showLargeQRCode(qrData, batch.batchId);
                                 };
@@ -600,7 +601,6 @@ function displayBatches(batches, containerId) {
         }
     });
 }
-
 
 function showLargeQRCode(qrData, batchId) {
     const modal = document.createElement('div');
@@ -622,14 +622,29 @@ function showLargeQRCode(qrData, batchId) {
     container.style.display = 'flex';
     container.style.flexDirection = 'column';
     container.style.alignItems = 'center';
+    container.style.maxWidth = '90%';
+    container.style.maxHeight = '90%';
+    container.style.overflow = 'auto';
 
     const largeCanvas = document.createElement('canvas');
-    generateQRCodeWithLogo(largeCanvas, qrData, 300, function (error) {
+    const size = Math.min(300, window.innerWidth * 0.8);
+    generateQRCodeWithLogo(largeCanvas, qrData, size, true, function (error) {
         if (error) {
             console.error('Error generating large QR code:', error);
             container.innerHTML = '<p>Không thể tạo mã QR</p>';
         } else {
             container.appendChild(largeCanvas);
+
+            const toggleLogoButton = document.createElement('button');
+            toggleLogoButton.textContent = 'Ẩn/Hiện Logo';
+            toggleLogoButton.className = 'toggle-button';
+            toggleLogoButton.style.marginTop = '10px';
+            toggleLogoButton.onclick = function(event) {
+                event.stopPropagation();
+                generateQRCodeWithLogo(largeCanvas, qrData, size, !this.showLogo, function() {});
+                this.showLogo = !this.showLogo;
+            };
+            toggleLogoButton.showLogo = true;
 
             const downloadButton = document.createElement('button');
             downloadButton.textContent = 'Tải xuống QR Code';
@@ -643,6 +658,7 @@ function showLargeQRCode(qrData, batchId) {
                 link.click();
             };
 
+            container.appendChild(toggleLogoButton);
             container.appendChild(downloadButton);
         }
     });
@@ -655,35 +671,36 @@ function showLargeQRCode(qrData, batchId) {
 
     document.body.appendChild(modal);
 }
-function generateQRCodeWithLogo(canvas, data, size, callback) {
+function generateQRCodeWithLogo(canvas, data, size, showLogo, callback) {
     QRCode.toCanvas(canvas, data, { width: size, height: size, errorCorrectionLevel: 'H' }, function (error) {
         if (error) {
             callback(error);
             return;
         }
 
-        const ctx = canvas.getContext('2d');
-        const logo = new Image();
-        logo.onload = function () {
-            // Giảm kích thước logo
-            const logoSize = size * 0.2; // Giảm từ 0.3 xuống 0.2
-            const logoX = (size - logoSize) / 2;
-            const logoY = (size - logoSize) / 2;
+        if (showLogo) {
+            const ctx = canvas.getContext('2d');
+            const logo = new Image();
+            logo.onload = function () {
+                const logoSize = size * 0.2;
+                const logoX = (size - logoSize) / 2;
+                const logoY = (size - logoSize) / 2;
 
-            // Vẽ hình tròn trắng làm nền cho logo
-            ctx.beginPath();
-            ctx.arc(size / 2, size / 2, logoSize / 2, 0, 2 * Math.PI, false);
-            ctx.fillStyle = 'white';
-            ctx.fill();
+                ctx.beginPath();
+                ctx.arc(size / 2, size / 2, logoSize / 2, 0, 2 * Math.PI, false);
+                ctx.fillStyle = 'white';
+                ctx.fill();
 
-            // Vẽ logo
-            ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
+                ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
+                callback(null);
+            };
+            logo.onerror = function () {
+                callback(new Error('Failed to load logo'));
+            };
+            logo.src = '../hinhanh/logo_buoi.png';
+        } else {
             callback(null);
-        };
-        logo.onerror = function () {
-            callback(new Error('Failed to load logo'));
-        };
-        logo.src = '../hinhanh/logo_buoi.png';
+        }
     });
 }
 document.addEventListener('DOMContentLoaded', function() {
