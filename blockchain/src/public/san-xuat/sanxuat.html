@@ -12,9 +12,7 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-</head>
-
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
 <body>
     <!-- Thanh điều hướng -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light custom-navbar-height">
@@ -125,7 +123,7 @@
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script src="js_giaodien/sanpham.js"></script>
+    <script src="../js_giaodien/sanpham.js"></script>
    
    <script>
     document.addEventListener('DOMContentLoaded', async function() {
@@ -406,7 +404,6 @@ async function checkSession() {
     throw error;
   }
 }
-
 async function fetchAndDisplayApprovedBatches() {
     const loadingSpinner = document.getElementById('loadingSpinner');
     const approvedBatchesList = document.getElementById('approvedBatchesList');
@@ -415,17 +412,17 @@ async function fetchAndDisplayApprovedBatches() {
         loadingSpinner.style.display = 'block';
         approvedBatchesList.style.display = 'none';
 
-        // Kiểm tra session trước
-        const userId = await checkSession();
-
-        const response = await fetch('/api/approved-batches');
+        const response = await fetch('/api/approved-batches', {
+            credentials: 'include'
+        });
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
         const approvedBatches = await response.json();
-        displayApprovedBatches(approvedBatches);
+        console.log('Lo hang duoc phe duyet', approvedBatches);
+        displayBatches(approvedBatches, 'approvedBatchesList');
     } catch (error) {
         console.error('Lỗi khi tải dữ liệu lô hàng đã duyệt:', error);
         approvedBatchesList.innerHTML = '<p class="text-danger">Đã xảy ra lỗi khi tải dữ liệu. Vui lòng thử lại sau.</p>';
@@ -523,7 +520,6 @@ async function fetchAndDisplayRejectedBatches() {
     }
 }
 
-
 function displayBatches(batches, containerId) {
     const container = document.getElementById(containerId);
     if (batches.length === 0) {
@@ -542,6 +538,7 @@ function displayBatches(batches, containerId) {
                     <th>Hình ảnh</th>
                     <th>Giấy chứng nhận</th>
                     <th>Trạng thái</th>
+                    <th>Mã QR</th>
                 </tr>
             </thead>
             <tbody>
@@ -549,6 +546,7 @@ function displayBatches(batches, containerId) {
     
     batches.forEach(batch => {
         const statusClass = getStatusClass(batch.status);
+        const qrCodeId = `qr-${batch.batchId}`;
         html += `
             <tr>
                 <td>${batch.name}</td>
@@ -558,12 +556,135 @@ function displayBatches(batches, containerId) {
                 <td>${batch.productImageUrls.map(url => `<img src="${url}" alt="Product Image" class="product-image">`).join('')}</td>
                 <td><img src="${batch.certificateImageUrl}" alt="Certificate" class="certificate-image"></td>
                 <td class="${statusClass}">${batch.status}</td>
+                <td><canvas id="${qrCodeId}" class="qr-code-canvas" style="cursor: pointer;"></canvas></td>
             </tr>
         `;
     });
     
     html += '</tbody></table>';
     container.innerHTML = html;
+
+    batches.forEach(batch => {
+        if (batch.status === 'Đã phê duyệt' || batch.status === '1' || batch.status === 1) {
+            const qrCodeId = `qr-${batch.batchId}`;
+            const qrCodeElement = document.getElementById(qrCodeId);
+            if (qrCodeElement) {
+                let qrData = '';
+                if (batch.sscc && batch.sscc.trim() !== '') {
+                    qrData = `SSCC:${batch.sscc}`;
+                } else if (batch.batchId && batch.batchId.trim() !== '') {
+                    qrData = `BatchID:${batch.batchId}`;
+                }
+
+                if (qrData) {
+                    try {
+                        generateQRCodeWithLogo(qrCodeElement, qrData, 100, function (error) {
+                            if (error) {
+                                console.error('Error generating QR code:', error, 'Data:', qrData);
+                                qrCodeElement.textContent = 'QR Code không khả dụng';
+                            } else {
+                                qrCodeElement.onclick = function() {
+                                    showLargeQRCode(qrData, batch.batchId);
+                                };
+                            }
+                        });
+                    } catch (error) {
+                        console.error('Error creating QR code:', error, 'Data:', qrData);
+                        qrCodeElement.textContent = 'QR Code không khả dụng';
+                    }
+                } else {
+                    console.warn(`No valid data for QR code in batch ${batch.batchId}`);
+                    qrCodeElement.textContent = 'QR Code không khả dụng';
+                }
+            }
+        }
+    });
+}
+
+
+function showLargeQRCode(qrData, batchId) {
+    const modal = document.createElement('div');
+    modal.style.position = 'fixed';
+    modal.style.top = '0';
+    modal.style.left = '0';
+    modal.style.width = '100%';
+    modal.style.height = '100%';
+    modal.style.backgroundColor = 'rgba(0,0,0,0.8)';
+    modal.style.display = 'flex';
+    modal.style.justifyContent = 'center';
+    modal.style.alignItems = 'center';
+    modal.style.zIndex = '1000';
+
+    const container = document.createElement('div');
+    container.style.backgroundColor = 'white';
+    container.style.padding = '20px';
+    container.style.borderRadius = '10px';
+    container.style.display = 'flex';
+    container.style.flexDirection = 'column';
+    container.style.alignItems = 'center';
+
+    const largeCanvas = document.createElement('canvas');
+    generateQRCodeWithLogo(largeCanvas, qrData, 300, function (error) {
+        if (error) {
+            console.error('Error generating large QR code:', error);
+            container.innerHTML = '<p>Không thể tạo mã QR</p>';
+        } else {
+            container.appendChild(largeCanvas);
+
+            const downloadButton = document.createElement('button');
+            downloadButton.textContent = 'Tải xuống QR Code';
+            downloadButton.className = 'download-button';
+            downloadButton.style.marginTop = '10px';
+            downloadButton.onclick = function(event) {
+                event.stopPropagation();
+                const link = document.createElement('a');
+                link.download = `qr-code-batch-${batchId}.png`;
+                link.href = largeCanvas.toDataURL();
+                link.click();
+            };
+
+            container.appendChild(downloadButton);
+        }
+    });
+
+    modal.appendChild(container);
+
+    modal.onclick = function() {
+        document.body.removeChild(modal);
+    };
+
+    document.body.appendChild(modal);
+}
+function generateQRCodeWithLogo(canvas, data, size, callback) {
+    QRCode.toCanvas(canvas, data, { width: size, height: size, errorCorrectionLevel: 'H' }, function (error) {
+        if (error) {
+            callback(error);
+            return;
+        }
+
+        const ctx = canvas.getContext('2d');
+        const logo = new Image();
+        logo.onload = function () {
+            // Giảm kích thước logo
+            const logoSize = size * 0.2; // Giảm từ 0.3 xuống 0.2
+            const logoX = (size - logoSize) / 2;
+            const logoY = (size - logoSize) / 2;
+
+            // Vẽ hình tròn trắng làm nền cho logo
+            ctx.beginPath();
+            ctx.arc(size / 2, size / 2, logoSize / 2, 0, 2 * Math.PI, false);
+            ctx.fillStyle = 'white';
+            ctx.fill();
+
+            // Vẽ logo
+            ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
+            callback(null);
+        };
+        logo.onerror = function () {
+            callback(new Error('Failed to load logo'));
+        };
+        logo.src = '../hinhanh/logo_buoi.png';
+    });
 }
 document.addEventListener('DOMContentLoaded', function() {
     const statusFilter = document.getElementById('statusFilter');

@@ -220,3 +220,26 @@ body {
         gap: 10px; /* Khoảng cách giữa các nút */
     }
   }
+
+  .qr-code-canvas {
+    transition: transform 0.3s ease;
+}
+.qr-code-canvas:hover {
+    transform: scale(1.1);
+}
+.download-button {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+.download-button:hover {
+    background-color: #45a049;
+}

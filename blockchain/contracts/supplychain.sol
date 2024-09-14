@@ -349,11 +349,7 @@ function getBatchDetails(uint256 _batchId) public view returns (Batch memory) {
     require(_batches[_batchId].batchId != 0, "Batch does not exist");
     return _batches[_batchId];
 }
-function getBatchBySSCC(string memory _sscc) public view returns (Batch memory) {
-    uint256 batchId = _ssccToBatchId[_sscc];
-    require(batchId != 0, "Batch with this SSCC does not exist");
-    return _batches[batchId];
-}
+
 
 function getTotalBatches() public view returns (uint256) {
     return _batchIdCounter;
@@ -375,6 +371,7 @@ modifier onlyApprover() {
     // Implement logic to check if msg.sender is an approver
     _;
 }
+
 function approveBatch(uint256 _batchId) public onlyApprover {
     require(_batches[_batchId].batchId != 0, "Batch does not exist");
     require(_batches[_batchId].status == BatchStatus.PendingApproval, "Batch is not pending approval");
@@ -427,6 +424,13 @@ function getApprovedBatchesByProducer(uint256 _producerId) public view returns (
     return approvedBatches;
 }
 
+function getBatchBySSCC(string memory _sscc) public view returns (Batch memory) {
+    uint256 batchId = _ssccToBatchId[_sscc];
+    require(batchId != 0, "Batch does not exist with this SSCC");
+    return _batches[batchId];
+}
+
 function isBatchApproved(uint256 _batchId) public view returns (bool) {
     return _approvedBatches[_batchId];
+}
 }
