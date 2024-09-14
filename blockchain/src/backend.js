@@ -705,6 +705,12 @@ app.post('/approve-batch/:batchId', async (req, res) => {
       return res.status(403).json({ error: 'Người dùng không có quyền kiểm duyệt' });
     }
 
+    // Kiểm tra trạng thái hiện tại của lô hàng
+    const batchDetails = await contract.methods.getBatchDetails(batchId).call();
+    if (batchDetails.status != 0) { // 0 là trạng thái PendingApproval
+      return res.status(400).json({ error: 'Lô hàng này đã được xử lý bởi người kiểm duyệt khác' });
+    }
+
     // Gọi hàm updateBatchStatus từ smart contract để phê duyệt (status 1 = Approved)
     const result = await contract.methods.updateBatchStatus(batchId, 1).send({ from: account.address, gas: 3000000 });
 
@@ -733,38 +739,17 @@ app.post('/reject-batch/:batchId', async (req, res) => {
       return res.status(403).json({ error: 'Người dùng không có quyền kiểm định' });
     }
 
-    // Gọi hàm rejectBatch từ smart contract
-    const result = await contract.methods.rejectBatch(batchId).send({ from: account.address, gas: 3000000 });
-
-    res.status(200).json({
-      message: 'Lô hàng đã bị từ chối thành công',
-      transactionHash: result.transactionHash
-    });
-  } catch (error) {
-    console.error('Lỗi khi từ chối lô hàng:', error);
-    res.status(500).json({ error: 'Không thể từ chối lô hàng: ' + error.message });
-  }
-});
-app.post('/reject-batch/:batchId', async (req, res) => {
-  try {
-    if (!req.session.userId) {
-      return res.status(401).json({ error: 'Người dùng chưa đăng nhập' });
-    }
-
-    const batchId = req.params.batchId;
-    const userId = req.session.userId;
-
-    // Kiểm tra xem người dùng có phải là nhà kiểm duyệt không
-    const [approvers] = await db.query('SELECT * FROM users WHERE uid = ? AND role_id = 2', [userId]);
-    if (approvers.length === 0) {
-      return res.status(403).json({ error: 'Người dùng không có quyền kiểm duyệt' });
+    // Kiểm tra trạng thái hiện tại của lô hàng
+    const batchDetails = await contract.methods.getBatchDetails(batchId).call();
+    if (batchDetails.status != 0) { // 0 là trạng thái PendingApproval
+      return res.status(400).json({ error: 'Lô hàng này đã được xử lý bởi người kiểm duyệt khác' });
     }
 
     // Gọi hàm updateBatchStatus từ smart contract để từ chối (status 2 = Rejected)
     const result = await contract.methods.updateBatchStatus(batchId, 2).send({ from: account.address, gas: 3000000 });
 
     res.status(200).json({
-      message: 'Lô hàng đã bị từ chối',
+      message: 'Lô hàng đã bị từ chối thành công',
       transactionHash: result.transactionHash
     });
   } catch (error) {
@@ -990,8 +975,6 @@ function translateStatus(status) {
 
 
 
-
-
 module.exports = {
   s3Client,
   web3,
@@ -1008,6 +991,5 @@ module.exports = {
   replacer,
   cleanKeys,
   convertBigIntToString,  // dùng để chuyển đổi bigInt sang string, do lỗi in ra số lớn
-
   BUCKET_NAME
 };
