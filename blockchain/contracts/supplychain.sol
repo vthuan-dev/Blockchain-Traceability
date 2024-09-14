@@ -375,7 +375,6 @@ modifier onlyApprover() {
     // Implement logic to check if msg.sender is an approver
     _;
 }
-
 function approveBatch(uint256 _batchId) public onlyApprover {
     require(_batches[_batchId].batchId != 0, "Batch does not exist");
     require(_batches[_batchId].status == BatchStatus.PendingApproval, "Batch is not pending approval");
@@ -430,6 +429,4 @@ function getApprovedBatchesByProducer(uint256 _producerId) public view returns (
 
 function isBatchApproved(uint256 _batchId) public view returns (bool) {
     return _approvedBatches[_batchId];
-}
-
 }
