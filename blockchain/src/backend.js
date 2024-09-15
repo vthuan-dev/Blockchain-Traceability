@@ -2,6 +2,7 @@ const { S3Client, PutObjectCommand, HeadObjectCommand } = require("@aws-sdk/clie
 const { Upload } = require("@aws-sdk/lib-storage");
 const multer = require('multer');
 const express = require('express');
+const app = express();
 const { Web3 } = require('web3');
 const dotenv = require('dotenv');
 const mysql = require('mysql');
@@ -10,7 +11,7 @@ const axios = require('axios');
 const FormData = require('form-data');
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
-const app = express();
+
 const storage = multer.memoryStorage();
 
 const s3Client = new S3Client({
@@ -68,13 +69,12 @@ const activityUpload = multer({
   limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
 }).array('imageUrls', 5); // Thay đổi 'activityImages' thành 'imageUrls'
 
-app.use(express.static('public', {
-  setHeaders: (res, path, stat) => {
-    if (path.endsWith('.js')) {
-      res.set('Content-Type', 'application/javascript');
-    }
-  }
-}));
+app.use(express.static(path.join(__dirname, 'public')));
+app.get('*.css', (req, res, next) => {
+  res.set('Content-Type', 'text/css');
+  next();
+});
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
