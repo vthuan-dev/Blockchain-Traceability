@@ -26,7 +26,7 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav"> <!-- Các mục điều hướng bên trái -->
                 <li class="nav-item">
-                    <a class="nav-link" href="quanli-lohang.html"> Quản lí lô hàng</a>
+                    <a class="nav-link" href="sanxuat.html"> Quản lí lô hàng</a>
                 </li>
               
                 <li class="nav-item">
@@ -58,7 +58,7 @@
     <main>
         <div class="container mt-4">
             <div class="table-title">
-                <h5><b>Lô hàng đang chờ kiểm định</b></h5>
+                <h5><b>Quản lí lô hàng</b></h5>
             </div>
             <br>
             <div class="container-fluid mt-3">
@@ -629,39 +629,42 @@ function showLargeQRCode(qrData, batchId) {
     const largeCanvas = document.createElement('canvas');
     const size = Math.min(300, window.innerWidth * 0.8);
     generateQRCodeWithLogo(largeCanvas, qrData, size, true, function (error) {
-        if (error) {
-            console.error('Error generating large QR code:', error);
-            container.innerHTML = '<p>Không thể tạo mã QR</p>';
-        } else {
-            container.appendChild(largeCanvas);
+    if (error) {
+        console.error('Error generating large QR code:', error);
+        container.innerHTML = '<p>Không thể tạo mã QR</p>';
+    } else {
+        container.appendChild(largeCanvas);
 
-            const toggleLogoButton = document.createElement('button');
-            toggleLogoButton.textContent = 'Ẩn/Hiện Logo';
-            toggleLogoButton.className = 'toggle-button';
-            toggleLogoButton.style.marginTop = '10px';
-            toggleLogoButton.onclick = function(event) {
-                event.stopPropagation();
-                generateQRCodeWithLogo(largeCanvas, qrData, size, !this.showLogo, function() {});
-                this.showLogo = !this.showLogo;
-            };
-            toggleLogoButton.showLogo = true;
+        const buttonContainer = document.createElement('div');
+        buttonContainer.className = 'button-container';
 
-            const downloadButton = document.createElement('button');
-            downloadButton.textContent = 'Tải xuống QR Code';
-            downloadButton.className = 'download-button';
-            downloadButton.style.marginTop = '10px';
-            downloadButton.onclick = function(event) {
-                event.stopPropagation();
-                const link = document.createElement('a');
-                link.download = `qr-code-batch-${batchId}.png`;
-                link.href = largeCanvas.toDataURL();
-                link.click();
-            };
+        const toggleLogoButton = document.createElement('button');
+        toggleLogoButton.textContent = 'Ẩn Logo';
+        toggleLogoButton.className = 'toggle-button';
+        toggleLogoButton.onclick = function(event) {
+            event.stopPropagation();
+            generateQRCodeWithLogo(largeCanvas, qrData, size, !this.showLogo, function() {});
+            this.showLogo = !this.showLogo;
+            this.textContent = this.showLogo ? 'Ẩn Logo' : 'Hiện Logo';
+        };
+        toggleLogoButton.showLogo = true;
 
-            container.appendChild(toggleLogoButton);
-            container.appendChild(downloadButton);
-        }
-    });
+        const downloadButton = document.createElement('button');
+        downloadButton.textContent = 'Tải xuống QR Code';
+        downloadButton.className = 'download-button';
+        downloadButton.onclick = function(event) {
+            event.stopPropagation();
+            const link = document.createElement('a');
+            link.download = `qr-code-batch-${batchId}.png`;
+            link.href = largeCanvas.toDataURL();
+            link.click();
+        };
+
+        buttonContainer.appendChild(toggleLogoButton);
+        buttonContainer.appendChild(downloadButton);
+        container.appendChild(buttonContainer);
+    }
+});
 
     modal.appendChild(container);
 
@@ -748,15 +751,6 @@ function getStatusClass(status) {
 
 </script>
 
-<script>
-    window.addEventListener('scroll', function() {
-        var navbar = document.querySelector('.navbar');
-        if (window.scrollY > 50) {
-            navbar.classList.add('navbar-scrolled');
-        } else {
-            navbar.classList.remove('navbar-scrolled');
-        }
-    });
-</script>
+<script src="../js_giaodien/san-xuat.js"></script>
 </body>
 </html>
