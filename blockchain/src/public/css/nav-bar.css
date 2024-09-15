@@ -11,6 +11,9 @@
     top: 0;
     transition: all 0.1s ease;
   }
+  .navbar-item :hover{
+    color: #fff;
+  }
   
   .navbar-brand {
     display: flex;
@@ -179,4 +182,8 @@
 
 body.menu-open {
     overflow: hidden;
+}
+
+.nav-item{
+  align-items: center;
 }
