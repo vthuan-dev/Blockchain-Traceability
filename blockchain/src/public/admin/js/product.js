@@ -38,7 +38,6 @@ window.ProductManager = {
                     <td>${product.description}</td>
                     <td>${product.price}</td>
                     <td>${product.img}</td>
-                    <td>${product.process_img}</td>
                     <td>${this.formatDate(product.created_at)}</td>
                     <td>
                         <button class="action-icons bg-blue" title="Sửa" onclick="window.ProductManager.editProduct(${product.product_id}, '${product.product_name}', ${product.price}, '${product.description}', '${product.uses}', '${product.process}')"><i class="fas fa-edit"></i></button>
@@ -166,7 +165,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     <td>${product.description}</td>
                     <td>${product.price}</td>
                     <td>${product.img}</td>
-                    <td>${product.process_img}</td>
                     <td>${formatDate(product.created_at)}</td>
                     <td>
                         <button class="action-icons bg-blue" title="Sửa"><i class="fas fa-edit"></i></button>
