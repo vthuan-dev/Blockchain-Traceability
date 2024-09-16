@@ -170,7 +170,7 @@
                 res.status(500).json({ message: 'Internal server error', error: error.message });
             }
         });
-
+        
         router.get(['/api/verify/:token', '/verify/:token'], async function(req, res) {
             const { token } = req.params;
             try {
