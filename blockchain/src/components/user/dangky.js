@@ -23,6 +23,10 @@
 
     function validateInput(data) {
         const requiredFields = ['name', 'email', 'password', 'phone', 'dob', 'gender', 'role_id', 'province_id', 'district_id', 'ward_id', 'specific_address'];
+        // Chỉ yêu cầu region_id cho vai trò người sản xuất và kiểm định
+        if (data.role_id === '1' || data.role_id === '2') {
+            requiredFields.push('region_id');
+        }
         return requiredFields.filter(field => !data[field]);
     }
 
@@ -162,8 +166,17 @@
                 const avatar = req.file ? req.file.filename : null;
                 const verificationToken = crypto.randomBytes(20).toString('hex');
 
+                // Kiểm tra region_id
+                let finalRegionId = null;
+                if (region_id && region_id !== '') {
+                    if (!await recordExists('SELECT * FROM regions WHERE region_id = ?', [region_id])) {
+                        return res.status(400).json({ message: 'ID vùng sản xuất không hợp lệ' });
+                    }
+                    finalRegionId = region_id;
+                }
+
                 const sql = 'INSERT INTO users (name, email, passwd, phone, address, dob, gender, role_id, region_id, province_id, district_id, ward_id, avatar, verificationToken) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-                const values = [name, email, hashedPassword, phone, fullAddress, dob, gender, role_id, region_id, province_id, district_id, ward_id, avatar, verificationToken];
+                const values = [name, email, hashedPassword, phone, fullAddress, dob, gender, role_id, finalRegionId, province_id, district_id, ward_id, avatar, verificationToken];
 
                 await db.query(sql, values);
 
