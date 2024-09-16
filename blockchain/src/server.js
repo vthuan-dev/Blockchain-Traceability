@@ -187,6 +187,7 @@ app.post('/api/dangxuat', (req, res) => {
     });
 });
 
+
 const manageRoutes = require('./manage.js');
 app.use('/', manageRoutes);
 
