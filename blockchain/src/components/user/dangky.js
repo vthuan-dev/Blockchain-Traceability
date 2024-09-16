@@ -115,52 +115,63 @@
                     return res.status(400).json({ message: `Yêu cầu nhập đúng dữ liệu đầu vào. Missing: ${missingFields.join(', ')}` });
                 }
 
-                // Kiểm tra và xử lý region_id
-                let finalRegionId = null;
-                if (region_id && region_id !== '') {
-                    if (!await recordExists('SELECT * FROM regions WHERE region_id = ?', [region_id])) {
-                        return res.status(400).json({ message: 'ID vùng sản xuất không hợp lệ' });
-                    }
-                    finalRegionId = region_id;
+                // Kiểm tra và thêm tỉnh nếu chưa tồn tại
+                let [provinceExists] = await db.query('SELECT province_name FROM provinces WHERE province_id = ?', [province_id]);
+                if (provinceExists.length === 0) {
+                    const provinceResponse = await axios.get(`https://provinces.open-api.vn/api/p/${province_id}`);
+                    const [result] = await db.query('INSERT INTO provinces (province_id, province_name) VALUES (?, ?)', [province_id, provinceResponse.data.name]);
+                    provinceExists = [{ province_name: provinceResponse.data.name }];
                 }
 
-                // Lấy thông tin địa chỉ đầy đủ
-                const provinceResponse = await axios.get(`https://provinces.open-api.vn/api/p/${province_id}`);
-                const districtResponse = await axios.get(`https://provinces.open-api.vn/api/d/${district_id}`);
-                const wardResponse = await axios.get(`https://provinces.open-api.vn/api/w/${ward_id}`);
+                // Kiểm tra và thêm huyện nếu chưa tồn tại
+                let [districtExists] = await db.query('SELECT district_name FROM districts WHERE district_id = ?', [district_id]);
+                if (districtExists.length === 0) {
+                    const districtResponse = await axios.get(`https://provinces.open-api.vn/api/d/${district_id}`);
+                    await db.query('INSERT INTO districts (district_id, district_name, province_id) VALUES (?, ?, ?)', [district_id, districtResponse.data.name, province_id]);
+                    districtExists = [{ district_name: districtResponse.data.name }];
+                }
 
-                const fullAddress = `${specific_address}, ${wardResponse.data.name}, ${districtResponse.data.name}, ${provinceResponse.data.name}`;
+                // Kiểm tra và thêm xã nếu chưa tồn tại
+                let [wardExists] = await db.query('SELECT ward_name FROM wards WHERE ward_id = ?', [ward_id]);
+                if (wardExists.length === 0) {
+                    const wardResponse = await axios.get(`https://provinces.open-api.vn/api/w/${ward_id}`);
+                    await db.query('INSERT INTO wards (ward_id, ward_name, district_id) VALUES (?, ?, ?)', [ward_id, wardResponse.data.name, district_id]);
+                    wardExists = [{ ward_name: wardResponse.data.name }];
+                }
 
+                const fullAddress = `${specific_address}, ${wardExists[0].ward_name}, ${districtExists[0].district_name}, ${provinceExists[0].province_name}`;
+
+                // Các kiểm tra khác (email, số điện thoại, vùng sản xuất, vai trò)
                 if (await recordExists('SELECT * FROM users WHERE email = ?', [email])) {
                     return res.status(400).json({ message: 'Email đã tồn tại' });
                 }
-        
+
                 if (await recordExists('SELECT * FROM users WHERE phone = ?', [phone])) {
                     return res.status(400).json({ message: 'Số điện thoại đã tồn tại' });
                 }
-        
+
                 if (region_id && !await recordExists('SELECT * FROM regions WHERE region_id = ?', [region_id])) {
                     return res.status(400).json({ message: 'ID vùng sản xuất không hợp lệ' });
                 }
-        
+
                 if (!await recordExists('SELECT * FROM roles WHERE role_id = ?', [role_id])) {
                     return res.status(400).json({ message: 'ID quyền hạn không hợp lệ' });
                 }
-        
+
                 const hashedPassword = await bcrypt.hash(password, 10);
                 const avatar = req.file ? req.file.filename : null;
                 const verificationToken = crypto.randomBytes(20).toString('hex');
-        
+
                 const sql = 'INSERT INTO users (name, email, passwd, phone, address, dob, gender, role_id, region_id, province_id, district_id, ward_id, avatar, verificationToken) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-                const values = [name, email, hashedPassword, phone, fullAddress, dob, gender, role_id, finalRegionId, province_id, district_id, ward_id, avatar, verificationToken];
-        
+                const values = [name, email, hashedPassword, phone, fullAddress, dob, gender, role_id, region_id, province_id, district_id, ward_id, avatar, verificationToken];
+
                 await db.query(sql, values);
-        
+
                 // Gửi email xác thực
                 const verificationLink = `http://localhost:3000/api/verify/${verificationToken}`;
                 const templatePath = path.join(__dirname, '../../public/account/xacthuc.html');
                 await sendEmail(email, name, verificationLink, 'Xác thực tài khoản của bạn', templatePath);
-        
+
                 res.status(201).json({ 
                     message: 'Đã đăng ký tài khoản người dùng thành công. Vui lòng kiểm tra email của bạn để xác thực tài khoản.',
                     email: email
