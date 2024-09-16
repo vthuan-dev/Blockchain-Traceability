@@ -433,4 +433,29 @@ function getBatchBySSCC(string memory _sscc) public view returns (Batch memory) 
 function isBatchApproved(uint256 _batchId) public view returns (bool) {
     return _approvedBatches[_batchId];
 }
+
+
+
+    // hàm ghi nhận sự tham gia của các bên liên quan đến lô hàng
+    enum ParticipantType { Producer, Transporter, Warehouse, Consumer }
+    // tạo 1 struct lưu trữ thông tin sự tham gia của các bên liên quan đến lô hàng
+  struct Participation {
+        uint256 participantId;
+        ParticipantType participantType;
+        uint256 timestamp;
+        string action;
+    }
+    // tạo 1 mapping lưu trữ thông tin sự tham gia của các bên liên quan đến lô hàng
+    mapping(uint256 => Participation[]) private _batchParticipations;
+   function recordParticipation(uint256 _batchId, uint256 _participantId, ParticipantType _participantType, string memory _action) public {
+        require(_batches[_batchId].batchId != 0, "Batch does not exist");
+        _batchParticipations[_batchId].push(Participation(_participantId, _participantType, block.timestamp, _action));
+        emit ParticipationRecorded(_batchId, _participantId, _participantType, _action);
+    }
+    // hàm lấy thông tin sự tham gia của các bên liên quan đến lô hàng
+    function getBatchParticipations(uint256 _batchId) public view returns (Participation[] memory) {
+        return _batchParticipations[_batchId];
+    }
+        event ParticipationRecorded(uint256 indexed batchId, uint256 participantId, ParticipantType participantType, string action);
+
 }
