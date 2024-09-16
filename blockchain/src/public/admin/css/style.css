@@ -7,14 +7,16 @@ body {
 }
 
 /* Header styles */
+:root {
+    --header-height: 70px; /* Thay đổi giá trị này nếu chiều cao header thay đổi */
+}
+
 header {
     position: fixed;
     top: 0;
     width: 100%;
-    height: 70px;
-    background-color: #6ab04c;
+    height: var(--header-height);
     color: #fff;
-    padding: 20px 40px;
     display: flex;
     align-items: center;
     z-index: 1000;
@@ -55,17 +57,18 @@ header {
 /* Sidebar styles */
 .sidebar {
     width: 250px;
-    height: calc(100vh - 70px);
+    height: calc(100vh - var(--header-height));
     background-color: #343a40;
     color: white;
     padding: 20px;
     position: fixed;
-    top: 70px;
+    top: var(--header-height);
     left: 0;
     overflow-y: auto;
     z-index: 999;
 }
 
+/* Đảm bảo rằng các phần tử trong sidebar không bị tràn ra ngoài */
 .sidebar .menu-item {
     display: flex;
     align-items: center;
@@ -73,10 +76,12 @@ header {
     color: white;
     text-decoration: none;
     transition: background-color 0.3s ease;
+    word-wrap: break-word; /* Thêm thuộc tính này để xử lý các từ dài */
 }
 
 .sidebar .menu-item:hover {
-    background-color: #495057;
+    background-color: #28a745;
+    border-radius: 15%;
 }
 
 .sidebar .menu-item i {
@@ -95,9 +100,8 @@ header {
 
 /* Main content styles */
 main {
-    padding-top: 70px; /* Tăng padding-top để tránh nội dung bị che khuất bởi header */
-    margin-left: 230px; /* Điều chỉnh margin để phù hợp với chiều rộng của sidebar */
     transition: margin-left 0.3s ease;
+    word-wrap: break-word; /* Thêm thuộc tính này để xử lý các từ dài */
 }
 
 /* Card styles */
