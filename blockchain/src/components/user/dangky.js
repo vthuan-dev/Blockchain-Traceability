@@ -87,6 +87,7 @@
                 res.status(500).json({ error: 'Lỗi khi lấy danh sách xã/phường' });
             }
         });
+        
         router.get('/regions', async (req, res) => {
             try {
                 console.log('Đang truy vấn regions...');
