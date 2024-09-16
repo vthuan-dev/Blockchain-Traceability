@@ -12,47 +12,78 @@ module.exports = function(db) {
     });
 
     router.post('/dangnhap', async function(req, res) {
-        const { email, password } = req.body;
+        const { email, password, isAdmin } = req.body;
 
         if (!email || !password) {
             return res.status(400).json({ message: 'Vui lòng nhập email và mật khẩu' });
         }
 
         try {
-            const [users] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
-            const user = users[0];
+            if (isAdmin) {
+                const adminQuery = 'SELECT * FROM admin WHERE admin_email = ?';
+                const [admins] = await db.query(adminQuery, [email]);
+                const admin = admins[0];
 
-            if (!user) {
-                return res.status(401).json({ message: 'Email hoặc mật khẩu không đúng' });
-            }
-            if (!user.passwd) {
-                return res.status(500).json({ message: 'Internal server error', error: 'Password not found in database' });
-            }
-
-            const isPasswordValid = await bcrypt.compare(password, user.passwd);
-
-            if (!isPasswordValid) {
-                return res.status(401).json({ message: 'Email hoặc mật khẩu không đúng' });
-            }
-
-            if (!user.is_approved) {
-                return res.status(403).json({ message: 'Tài khoản của bạn chưa xác thực, vui lòng xác thực Email trước khi đăng nhập.' });
-            }
-
-            // Tạo session cho người dùng
-            req.session.userId = user.uid;
-            req.session.roleId = user.role_id;
-
-            // Trả về thông tin người dùng và role_id
-            res.status(200).json({ 
-                message: 'Đăng nhập thành công', 
-                user: {
-                    uid: user.uid,
-                    name: user.name,
-                    email: user.email,
-                    roleId: user.role_id
+                if (!admin) {
+                    return res.status(401).json({ message: 'Email hoặc mật khẩu không đúng' });
                 }
-            });
+                const isPasswordValid = await bcrypt.compare(password, admin.admin_pass);
+
+                if (!isPasswordValid) {
+                    return res.status(401).json({ message: 'Email hoặc mật khẩu không đúng' });
+                }
+
+                // Tạo session cho admin
+                req.session.adminEmail = admin.admin_email;
+
+                // Trả về thông tin admin
+                res.status(200).json({ 
+                    message: 'Đăng nhập thành công', 
+                    admin: {
+                        adminEmail: admin.admin_email,
+                        roleId: 3 // Giả sử tất cả admin đều có roleId là 3
+                    }
+                });
+            } else {
+                const [users] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
+                const user = users[0];
+
+                if (!user) {
+                    return res.status(401).json({ message: 'Email hoặc mật khẩu không đúng' });
+                }
+                if (!user.passwd) {
+                    return res.status(500).json({ message: 'Internal server error', error: 'Mật khẩu không đúng' });
+                }
+
+                const isPasswordValid = await bcrypt.compare(password, user.passwd);
+
+                if (!isPasswordValid) {
+                    return res.status(401).json({ message: 'Email hoặc mật khẩu không đúng' });
+                }
+
+                if (!user.is_approved) {
+                    return res.status(403).json({ message: 'Tài khoản của bạn chưa xác thực, vui lòng xác thực Email trước khi đăng nhập.' });
+                }
+
+                if (isAdmin && user.role_id !== 3) { // Giả sử role_id 3 là Admin
+                    return res.status(403).json({ message: 'Bạn không có quyền đăng nhập với tư cách Admin' });
+                }
+
+                // Tạo session cho người dùng
+                req.session.userId = user.uid;
+                req.session.roleId = user.role_id;
+
+                // Trả về thông tin người dùng và role_id
+                res.status(200).json({ 
+                    message: 'Đăng nhập thành công', 
+                    user: {
+                        uid: user.uid,
+                        name: user.name,
+                        email: user.email,
+                        roleId: user.role_id
+                    }
+                });
+            }
 
         } catch (error) {
             console.error('Lỗi khi đăng nhập:', error);
