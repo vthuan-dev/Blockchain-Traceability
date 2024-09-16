@@ -117,8 +117,34 @@
             </div>
 
             <div class="form-group">
-                <label for="address">Địa Chỉ:</label>
-                <input type="text" class="form-control" id="address" name="address" required>
+                <label for="province">Tỉnh/Thành phố:</label>
+                <select class="form-control" id="province" name="province_id" required>
+                    <option value="">Chọn Tỉnh/Thành phố</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="district">Quận/Huyện:</label>
+                <select class="form-control" id="district" name="district_id" required disabled>
+                    <option value="">Chọn Quận/Huyện</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="ward">Xã/Phường:</label>
+                <select class="form-control" id="ward" name="ward_id" required disabled>
+                    <option value="">Chọn Xã/Phường</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="specific_address">Địa chỉ cụ thể:</label>
+                <input type="text" class="form-control" id="specific_address" name="specific_address" required placeholder="Số nhà, tên đường, thôn/ấp">
+            </div>
+
+            <div class="form-group">
+                <label for="full_address">Địa chỉ đầy đủ:</label>
+                <input type="text" class="form-control" id="full_address" name="address" readonly>
             </div>
 
             <div class="form-group">
@@ -172,7 +198,10 @@
         document.addEventListener('DOMContentLoaded', async function() {
             const regionSelect = document.getElementById('region_id');
             try {
-                const response = await fetch('http://localhost:3000/api/regions');
+                const response = await fetch('/api/regions');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
                 const regions = await response.json();
                 regions.forEach(region => {
                     const option = document.createElement('option');
@@ -182,6 +211,7 @@
                 });
             } catch (error) {
                 console.error('Lỗi khi lấy danh sách vùng sản xuất:', error);
+                // Hiển thị thông báo lỗi cho người dùng
             }
         });
 
@@ -335,6 +365,114 @@
                     roleAnnounce.style.display = 'block'; // Hiển thị lại thông báo
                 }
             });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const provinceSelect = document.getElementById('province');
+            const districtSelect = document.getElementById('district');
+            const wardSelect = document.getElementById('ward');
+            const specificAddressInput = document.getElementById('specific_address');
+            const fullAddressInput = document.getElementById('full_address');
+
+            // Load provinces
+            fetch('/api/provinces')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(provinces => {
+                    console.log('Provinces data:', provinces);
+                    provinces.forEach(province => {
+                        const option = document.createElement('option');
+                        option.value = province.province_id;
+                        option.textContent = province.province_name;
+                        provinceSelect.appendChild(option);
+                    });
+                    provinceSelect.disabled = false; // Enable the select after loading
+                })
+                .catch(error => {
+                    console.error('Error fetching provinces:', error);
+                    // Hiển thị thông báo lỗi cho người dùng
+                });
+
+            // Load districts when province is selected
+            provinceSelect.addEventListener('change', function() {
+                districtSelect.innerHTML = '<option value="">Chọn Quận/Huyện</option>';
+                wardSelect.innerHTML = '<option value="">Chọn Xã/Phường</option>';
+                districtSelect.disabled = !this.value;
+                wardSelect.disabled = true;
+                updateFullAddress();
+
+                if (this.value) {
+                    fetch(`/api/districts/${this.value}`)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! status: ${response.status}`);
+                            }
+                            return response.json();
+                        })
+                        .then(districts => {
+                            console.log('Districts data:', districts);
+                            districts.forEach(district => {
+                                const option = document.createElement('option');
+                                option.value = district.district_id;
+                                option.textContent = district.district_name;
+                                districtSelect.appendChild(option);
+                            });
+                        })
+                        .catch(error => {
+                            console.error('Error fetching districts:', error);
+                            alert('Không thể lấy danh sách quận/huyện. Vui lòng thử lại sau.');
+                        });
+                }
+            });
+
+            // Load wards when district is selected
+            districtSelect.addEventListener('change', function() {
+                wardSelect.innerHTML = '<option value="">Chọn Xã/Phường</option>';
+                wardSelect.disabled = !this.value;
+                updateFullAddress();
+
+                if (this.value) {
+                    fetch(`/api/wards/${this.value}`)
+                        .then(response => {
+                            console.log('Nhận được phản hồi từ API wards:', response.status);
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! status: ${response.status}`);
+                            }
+                            return response.json();
+                        })
+                        .then(wards => {
+                            console.log('Dữ liệu wards nhận được:', wards);
+                            wards.forEach(ward => {
+                                const option = document.createElement('option');
+                                option.value = ward.ward_id;
+                                option.textContent = ward.ward_name;
+                                wardSelect.appendChild(option);
+                            });
+                        })
+                        .catch(error => {
+                            console.error('Lỗi khi fetch wards:', error);
+                            alert('Không thể lấy danh sách xã/phường. Vui lòng thử lại sau.');
+                        });
+                }
+            });
+
+            wardSelect.addEventListener('change', updateFullAddress);
+            specificAddressInput.addEventListener('input', updateFullAddress);
+
+            function updateFullAddress() {
+                const province = provinceSelect.options[provinceSelect.selectedIndex].text;
+                const district = districtSelect.options[districtSelect.selectedIndex].text;
+                const ward = wardSelect.options[wardSelect.selectedIndex].text;
+                const specificAddress = specificAddressInput.value.trim();
+
+                const addressParts = [specificAddress, ward, district, province].filter(part => part && part !== 'Chọn Xã/Phường' && part !== 'Chọn Quận/Huyện' && part !== 'Chọn Tỉnh/Thành phố');
+                fullAddressInput.value = addressParts.join(', ');
+            }
         });
     </script>
 </body>
