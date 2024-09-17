@@ -530,5 +530,31 @@
             }
         });
     </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('registrationForm');
+            const passwordInput = document.getElementById('password');
+            const confirmPasswordInput = document.getElementById('confirmPassword');
+            const submitButton = form.querySelector('button[type="submit"]');
+
+            function checkPasswordMatch() {
+                if (passwordInput.value !== confirmPasswordInput.value) {
+                    confirmPasswordInput.setCustomValidity("Mật khẩu không khớp");
+                } else {
+                    confirmPasswordInput.setCustomValidity("");
+                }
+            }
+
+            passwordInput.addEventListener('change', checkPasswordMatch);
+            confirmPasswordInput.addEventListener('keyup', checkPasswordMatch);
+
+            form.addEventListener('submit', function(event) {
+                if (passwordInput.value !== confirmPasswordInput.value) {
+                    event.preventDefault();
+                    alert("Mật khẩu và xác nhận mật khẩu không khớp. Vui lòng kiểm tra lại.");
+                }
+            });
+        });
+    </script>
 </body>
 </html>
