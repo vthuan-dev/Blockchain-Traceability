@@ -277,17 +277,8 @@
                     return;
                 }
 
-                const data = await response.json();
-                document.getElementById('registrationForm').style.display = 'none';
-                const verificationLink = `https://mail.google.com/mail/u/0/#search/from:truyxuat.blockchain@gmail.com`;
-                const alertBox = document.createElement('div');
-                alertBox.textContent = 'Đăng ký thành công! Vui lòng kiểm tra email của bạn để xác thực tài khoản.';
-                alertBox.className = 'alert-box';
-                alertBox.onclick = function() {
-                    window.open(verificationLink, '_blank', 'noopener,noreferrer');
-                };
-                document.body.appendChild(alertBox);
-                const formData = new FormData(this);
+
+                const formData = new FormData(this);    
 
                 try {
                     const response = await fetch('/api/register', {
