@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý người dùng</title>
+    <title>Quản lý vùng sản xuất</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="./css/style.css">
     <link rel="stylesheet" href="./css/responsive.css">
     <link rel="stylesheet" href="./css/animation.css">
-
 </head>
 <body onload="time()">
     <header class="bg-success text-white py-2">
@@ -19,7 +18,7 @@
                     <a href="#"><img src="..\hinhanh\Bitcoin-Blockchain-Network-icon-on-transparent-background-PNG.png" alt="Logo" class="img-fluid" style="max-height: 50px;"></a>
                 </div>
                 <div class="col-6 col-md-5 text-center header-title">
-                    <h2 class="mb-0 h4">QUẢN LÝ NGƯỜI DÙNG</h2>
+                    <h2 class="mb-0 h4">QUẢN LÝ VÙNG SẢN XUẤT</h2>
                 </div>
                 <div class="col-3 col-md-3 text-right header-icons">
                     <div class="d-inline-block position-relative mr-3">
@@ -30,7 +29,8 @@
                         <i class="fas fa-user profile-pic" id="profileIcon"></i>
                         <div class="dropdown-menu dropdown-menu-right" style="display: none;">
                             <a class="dropdown-item" href="./caidat.html">Cài đặt</a>
-                            <a class="dropdown-item" href="../account/dangnhap.html">Đăng xuất</a>                        </div>
+                            <a class="dropdown-item" href="../account/dangnhap.html">Đăng xuất</a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -46,11 +46,10 @@
                 <a href="admintest.html" class="menu-item rounded"><i class="fas fa-home"></i> Trang chủ</a>
                 <div class="divider"></div>
                 <div class="section-title">CHỨC NĂNG</div>
-                <a href="#" class="menu-item rounded"><i class="fas fa-users"></i> Quản lý người dùng</a>
-                <!-- <a href="#" class="menu-item"><i class="fas fa-exchange-alt"></i> Quản lý giao dịch</a> -->
-                <!-- <a href="#" class="menu-item"><i class="fas fa-cogs"></i> Quy trình</a> -->
+                <a href="user.html" class="menu-item rounded"><i class="fas fa-users"></i> Quản lý người dùng</a>
                 <a href="product.html" class="menu-item rounded"><i class="fas fa-box"></i> Sản phẩm</a>
-                <a href="region.html" class="menu-item rounded"><i class="fas fa-map-marker-alt"></i> Vùng sản xuất</a>                <div class="divider"></div>
+                <a href="#" class="menu-item rounded"><i class="fas fa-map-marker-alt"></i> Vùng sản xuất</a>
+                <div class="divider"></div>
                 <div class="section-title">TIỆN ÍCH</div>
                 <a href="#" class="menu-item rounded"><i class="fas fa-chart-bar"></i> Báo cáo và thống kê</a>
                 <a href="#" class="menu-item rounded"><i class="fas fa-comments"></i> Phản hồi</a>
@@ -61,7 +60,7 @@
                     <div class="col-12">
                         <div class="card card-custom">
                             <div class="card-body d-flex justify-content-between align-items-center" style="padding: 10px;">
-                                <h5 class="card-title" style="border-left: 5px solid yellow; padding-left: 10px; margin-bottom: 0;">Quản lý người dùng</h5>
+                                <h5 class="card-title" style="border-left: 5px solid yellow; padding-left: 10px; margin-bottom: 0;">Quản lý vùng sản xuất</h5>
                                 <div id="clock" class="text-right" style="font-size: 0.9rem; color: #333;"></div>
                             </div>
                         </div>
@@ -71,7 +70,7 @@
                     <div class="col-12">
                         <div class="card card-custom">
                             <div class="card-body">
-                                <h5 class="card-title">Danh sách người dùng</h5>
+                                <h5 class="card-title">Danh sách vùng sản xuất</h5>
                                 <div class="controls-container flex-column flex-md-row">
                                     <div class="entries-display mb-2 mb-md-0">
                                         <span>Hiện</span>
@@ -86,29 +85,22 @@
                                     <div class="search-container">
                                         <input type="search" id="search-input" placeholder="Tìm kiếm" class="form-control">
                                     </div>
-                                    <button id="add-product-btn" class="btn btn-success ml-md-2 mt-2 mt-md-0" onclick="window.location.href='addadmin.html'">Thêm Admin</button>
+                                    <button id="add-region-btn" class="btn btn-success ml-md-2 mt-2 mt-md-0" onclick="window.location.href='addregion.html'">Thêm vùng sản xuất</button>
                                 </div>
                                 <div class="table-responsive">
                                     <table class="table table-hover">
                                         <thead>
                                             <tr>
-                                                <th>ID</th>
-                                                <th>Số điện thoại</th>
-                                                <th>Tên</th>
-                                                <th>Email</th>
-                                                <th>Ảnh thẻ</th>
-                                                <th>Địa chỉ</th>
                                                 <th>Mã vùng</th>
-                                                <th>Ngày sinh</th>
-                                                <th>Giới tính</th>
-                                                <th>Ngày tham gia</th>
-                                                <th>Vai trò</th>
-                                                <th>Xác thực</th>
+                                                <th>Tên vùng</th>
+                                                <th>Quận/Huyện</th>
+                                                <th>Phường/Xã</th>
+                                                <th>Ngày tạo</th>
                                                 <th>Hành động</th>  
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <!-- Dữ liệu người dùng sẽ được thêm vào đây -->
+                                            <!-- Dữ liệu vùng sản xuất sẽ được thêm vào đây -->
                                         </tbody>
                                     </table>
                                 </div>
@@ -131,7 +123,7 @@
     <!-- Thêm Remove Panel -->
     <section class="remove">
         <h1 class="remove-header">Cảnh báo</h1>
-        <p class="remove-warning">Bạn có chắc chắn muốn xóa người dùng này?</p>
+        <p class="remove-warning">Bạn có chắc chắn muốn xóa vùng sản xuất này?</p>
 
         <div class="action-buttons btn-center">
           <button class="btn btn-cancel mr-2" id="cancel-remove">Hủy bỏ</button>
@@ -143,7 +135,6 @@
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="./js/feature.js"></script>
-    <script src="./js/user.js"></script>
     <script src="./js/settings.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', applySettings);
