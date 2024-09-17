@@ -269,31 +269,46 @@
         event.preventDefault();
         loadingModal.show(); // Hiển thị modal loading
 
-        const formData = new FormData(this);
-
-        try {
-            const response = await fetch('/api/register', {
-                method: 'POST',
-                body: formData
-            });
-
-            loadingModal.hide(); // Ẩn modal loading
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                alert('Lỗi: ' + errorData.message);
+            if (password !== confirmPassword) {
+                alert('Mật khẩu không khớp. Vui lòng thử lại.');
+                loadingModal.hide(); // Ẩn modal loading
                 return;
             }
 
-            const data = await response.json();
-            successModal.show(); // Hiển thị modal thành công
-            form.reset(); // Reset form sau khi đăng ký thành công
-        } catch (error) {
-            loadingModal.hide(); // Ẩn modal loading nếu có lỗi
-            console.error('Lỗi khi gửi form đăng ký:', error);
-            alert('Lỗi khi đăng ký: ' + error.message);
-        }
-    });
+
+            const formData = new FormData(this);    
+
+            try {
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                loadingModal.hide(); // Ẩn modal loading
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    alert('Lỗi: ' + errorData.message);
+                    return;
+                }
+
+                const data = await response.json();
+                successModal.show(); // Hiển thị modal thành công
+                form.reset();
+                window.location.href = '/api/dangnhap'; // Đường dẫn đến trang đăng nhập
+
+                successModal._element.addEventListener('shown.bs.modal', function() {
+                    setTimeout(function() {
+                        window.location.href = '/api/dangnhap'; // Đường dẫn đến trang đăng nhập
+                    }, 3000); // 3000 milliseconds = 3 giây
+                });
+                
+            } catch (error) {
+                loadingModal.hide(); // Ẩn modal loading nếu có lỗi
+                console.error('Lỗi khi gửi form đăng ký:', error);
+                alert('Lỗi khi đăng ký: ' + error.message);
+            }
+        });
 
     // Xử lý sự kiện đóng modal thành công
     closeSuccessModalButton.addEventListener('click', function() {
