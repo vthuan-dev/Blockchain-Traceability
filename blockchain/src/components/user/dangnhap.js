@@ -41,6 +41,7 @@ module.exports = function(db) {
                     message: 'Đăng nhập thành công', 
                     admin: {
                         adminEmail: admin.admin_email,
+                        adminName: admin.admin_name,
                         roleId: 3 // Giả sử tất cả admin đều có roleId là 3
                     }
                 });
