@@ -13,6 +13,10 @@
         .form-group {
             margin-bottom: 15px;
         }
+        .form-control:disabled {
+            background-color: #e9ecef;
+            opacity: 0.65;
+        }
         .form-control {
             padding: 5px 10px;
         }
@@ -51,12 +55,37 @@
         .alert-box.show {
             opacity: 1;
         }
+        .anncounce {
+        text-align: center;
+        color: #be3636;
+   
+        padding: 10px;
+        margin-bottom: 20px;
+        font-weight: bold;
+        font-size: 16px;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
     </style>
 </head>
 <body>
     <div class="container">
         <h1 class="text-center">Đăng Ký</h1>
         <form id="registrationForm" class="mt-3">
+            <div id="roleAnnounce" class="anncounce">
+                Hãy chọn vai trò bên dưới trước để nhập thông tin nhé !
+            </div>
             <div class="form-group">
                 <label for="name">Họ và Tên:</label>
                 <input type="text" class="form-control" id="name" name="name" required>
@@ -88,8 +117,34 @@
             </div>
 
             <div class="form-group">
-                <label for="address">Địa Chỉ:</label>
-                <input type="text" class="form-control" id="address" name="address" required>
+                <label for="province">Tỉnh/Thành phố:</label>
+                <select class="form-control" id="province" name="province_id" required>
+                    <option value="">Chọn Tỉnh/Thành phố</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="district">Quận/Huyện:</label>
+                <select class="form-control" id="district" name="district_id" required disabled>
+                    <option value="">Chọn Quận/Huyện</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="ward">Xã/Phường:</label>
+                <select class="form-control" id="ward" name="ward_id" required disabled>
+                    <option value="">Chọn Xã/Phường</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="specific_address">Địa chỉ cụ thể:</label>
+                <input type="text" class="form-control" id="specific_address" name="specific_address" required placeholder="Số nhà, tên đường, thôn/ấp">
+            </div>
+
+            <div class="form-group">
+                <label for="full_address">Địa chỉ đầy đủ:</label>
+                <input type="text" class="form-control" id="full_address" name="address" readonly>
             </div>
 
             <div class="form-group">
@@ -112,15 +167,19 @@
                     <option value="">Chọn vai trò</option>
                     <option value="1">Người Sản Xuất</option>
                     <option value="2">Người Kiểm Duyệt</option>
+                    <option value="6">Người Vận Chuyển</option>
+                    <option value="8">Nhà Kho</option>
+                   
                 </select>
             </div>
 
-            <div class="form-group">
-                <label for="region_id">Vùng sản xuất:</label>
-                <select class="form-control" id="region_id" name="region_id" required>
-                    <option value="">Chọn vùng sản xuất</option>
-                </select>
-            </div>
+           <div class="form-group" id="regionGroup" style="display: none;">
+    <label for="region_id">Vùng sản xuất:</label>
+    <select class="form-control" id="region_id" name="region_id">
+        <option value="">Chọn vùng sản xuất</option>
+        <!-- Các option sẽ được thêm bằng JavaScript -->
+    </select>
+</div>
 
             <button type="submit" class="btn btn-primary btn-block">Đăng Ký</button>
         </form>
@@ -139,7 +198,10 @@
         document.addEventListener('DOMContentLoaded', async function() {
             const regionSelect = document.getElementById('region_id');
             try {
-                const response = await fetch('http://localhost:3000/api/regions');
+                const response = await fetch('/api/regions');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
                 const regions = await response.json();
                 regions.forEach(region => {
                     const option = document.createElement('option');
@@ -149,6 +211,7 @@
                 });
             } catch (error) {
                 console.error('Lỗi khi lấy danh sách vùng sản xuất:', error);
+                // Hiển thị thông báo lỗi cho người dùng
             }
         });
 
@@ -201,6 +264,214 @@
             } catch (error) {
                 console.error('Lỗi:', error);
                 alert('Lỗi khi đăng ký: ' + error.message);
+            }
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const roleSelect = document.getElementById('role');
+            const regionGroup = document.getElementById('regionGroup');
+
+            roleSelect.addEventListener('change', function() {
+                if (this.value === '1' || this.value === '2') { // Người sản xuất hoặc kiểm định
+                    regionGroup.style.display = 'block';
+            document.getElementById('region_id').required = true;
+            } else {
+                regionGroup.style.display = 'none';
+                document.getElementById('region_id').required = false;
+                document.getElementById('region_id').value = ''; // Reset giá trị
+            }
+    });
+});
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const roleSelect = document.getElementById('role');
+            const regionGroup = document.getElementById('regionGroup');
+            const form = document.getElementById('registrationForm');
+            const submitButton = form.querySelector('button[type="submit"]');
+    
+            // Hàm để bật/tắt các trường input
+            function toggleInputs(disabled) {
+                const inputs = form.querySelectorAll('input, select');
+                inputs.forEach(input => {
+                    if (input.id !== 'role') {
+                        input.disabled = disabled;
+                    }
+                });
+                submitButton.disabled = disabled;
+            }
+    
+            // Vô hiệu hóa tất cả các trường input khi trang được tải
+            toggleInputs(true);
+    
+            roleSelect.addEventListener('change', function() {
+                if (this.value) {
+                    toggleInputs(false);
+                    
+                    if (this.value === '1' || this.value === '2') { // Người sản xuất hoặc kiểm định
+                        regionGroup.style.display = 'block';
+                        document.getElementById('region_id').required = true;
+                    } else {
+                        regionGroup.style.display = 'none';
+                        document.getElementById('region_id').required = false;
+                        document.getElementById('region_id').value = ''; // Reset giá trị
+                    }
+                } else {
+                    toggleInputs(true);
+                    regionGroup.style.display = 'none';
+                }
+            });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const roleSelect = document.getElementById('role');
+            const regionGroup = document.getElementById('regionGroup');
+            const form = document.getElementById('registrationForm');
+            const submitButton = form.querySelector('button[type="submit"]');
+            const roleAnnounce = document.getElementById('roleAnnounce');
+    
+            // Hàm để bật/tắt các trường input
+            function toggleInputs(disabled) {
+                const inputs = form.querySelectorAll('input, select');
+                inputs.forEach(input => {
+                    if (input.id !== 'role') {
+                        input.disabled = disabled;
+                    }
+                });
+                submitButton.disabled = disabled;
+            }
+    
+            // Vô hiệu hóa tất cả các trường input khi trang được tải
+            toggleInputs(true);
+    
+            roleSelect.addEventListener('change', function() {
+                if (this.value) {
+                    toggleInputs(false);
+                    roleAnnounce.style.display = 'none'; // Ẩn thông báo
+    
+                    if (this.value === '1' || this.value === '2') { // Người sản xuất hoặc kiểm định
+                        regionGroup.style.display = 'block';
+                        document.getElementById('region_id').required = true;
+                    } else {
+                        regionGroup.style.display = 'none';
+                        document.getElementById('region_id').required = false;
+                        document.getElementById('region_id').value = ''; // Reset giá trị
+                    }
+                } else {
+                    toggleInputs(true);
+                    regionGroup.style.display = 'none';
+                    roleAnnounce.style.display = 'block'; // Hiển thị lại thông báo
+                }
+            });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const provinceSelect = document.getElementById('province');
+            const districtSelect = document.getElementById('district');
+            const wardSelect = document.getElementById('ward');
+            const specificAddressInput = document.getElementById('specific_address');
+            const fullAddressInput = document.getElementById('full_address');
+
+            // Load provinces
+            fetch('/api/provinces')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(provinces => {
+                    console.log('Provinces data:', provinces);
+                    provinces.forEach(province => {
+                        const option = document.createElement('option');
+                        option.value = province.province_id;
+                        option.textContent = province.province_name;
+                        provinceSelect.appendChild(option);
+                    });
+                    provinceSelect.disabled = false; // Enable the select after loading
+                })
+                .catch(error => {
+                    console.error('Error fetching provinces:', error);
+                    // Hiển thị thông báo lỗi cho người dùng
+                });
+
+            // Load districts when province is selected
+            provinceSelect.addEventListener('change', function() {
+                districtSelect.innerHTML = '<option value="">Chọn Quận/Huyện</option>';
+                wardSelect.innerHTML = '<option value="">Chọn Xã/Phường</option>';
+                districtSelect.disabled = !this.value;
+                wardSelect.disabled = true;
+                updateFullAddress();
+
+                if (this.value) {
+                    fetch(`/api/districts/${this.value}`)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! status: ${response.status}`);
+                            }
+                            return response.json();
+                        })
+                        .then(districts => {
+                            console.log('Districts data:', districts);
+                            districts.forEach(district => {
+                                const option = document.createElement('option');
+                                option.value = district.district_id;
+                                option.textContent = district.district_name;
+                                districtSelect.appendChild(option);
+                            });
+                        })
+                        .catch(error => {
+                            console.error('Error fetching districts:', error);
+                            alert('Không thể lấy danh sách quận/huyện. Vui lòng thử lại sau.');
+                        });
+                }
+            });
+
+            // Load wards when district is selected
+            districtSelect.addEventListener('change', function() {
+                wardSelect.innerHTML = '<option value="">Chọn Xã/Phường</option>';
+                wardSelect.disabled = !this.value;
+                updateFullAddress();
+
+                if (this.value) {
+                    fetch(`/api/wards/${this.value}`)
+                        .then(response => {
+                            console.log('Nhận được phản hồi từ API wards:', response.status);
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! status: ${response.status}`);
+                            }
+                            return response.json();
+                        })
+                        .then(wards => {
+                            console.log('Dữ liệu wards nhận được:', wards);
+                            wards.forEach(ward => {
+                                const option = document.createElement('option');
+                                option.value = ward.ward_id;
+                                option.textContent = ward.ward_name;
+                                wardSelect.appendChild(option);
+                            });
+                        })
+                        .catch(error => {
+                            console.error('Lỗi khi fetch wards:', error);
+                            alert('Không thể lấy danh sách xã/phường. Vui lòng thử lại sau.');
+                        });
+                }
+            });
+
+            wardSelect.addEventListener('change', updateFullAddress);
+            specificAddressInput.addEventListener('input', updateFullAddress);
+
+            function updateFullAddress() {
+                const province = provinceSelect.options[provinceSelect.selectedIndex].text;
+                const district = districtSelect.options[districtSelect.selectedIndex].text;
+                const ward = wardSelect.options[wardSelect.selectedIndex].text;
+                const specificAddress = specificAddressInput.value.trim();
+
+                const addressParts = [specificAddress, ward, district, province].filter(part => part && part !== 'Chọn Xã/Phường' && part !== 'Chọn Quận/Huyện' && part !== 'Chọn Tỉnh/Thành phố');
+                fullAddressInput.value = addressParts.join(', ');
             }
         });
     </script>

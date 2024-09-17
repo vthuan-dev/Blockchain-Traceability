@@ -197,7 +197,10 @@
                 $('#batchDetailsModal').modal('hide'); // Đóng modal
                 await loadPendingBatches(); // Tải lại danh sách sau khi phê duyệt
             } else {
-                showAlert('Phê duyệt thất bại. Vui lòng thử lại.', 'danger');
+                showAlert('Phê duyệt lô hàng thất bại. Do có người kiểm duyệt khác đã xử lý lô hàng này.', 'danger');
+                $('#batchDetailsModal').modal('hide'); // Đóng modal
+                await loadPendingBatches(); // Tải lại danh sách sau khi phê duyệt thất bại
+
             }
         } catch (error) {
             console.error('Lỗi khi phê duyệt lô hàng:', error);
@@ -220,7 +223,10 @@
                 $('#batchDetailsModal').modal('hide'); // Đóng modal
                 await loadPendingBatches(); // Tải lại danh sách sau khi từ chối
             } else {
-                showAlert('Từ chối thất bại. Vui lòng thử lại.', 'danger');
+                showAlert('Từ chối lô hàng thất bại. Do có người kiểm duyệt khác đã xử lý lô hàng này.', 'danger');
+                $('#batchDetailsModal').modal('hide'); // Đóng modal
+                await loadPendingBatches(); // Tải lại danh sách sau khi từ chối
+
             }
         } catch (error) {
             console.error('Lỗi khi từ chối lô hàng:', error);
@@ -435,6 +441,6 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script src="js_giaodien/sanpham.js"></script>
+    <script type="text/javascript" src="../js_giaodien/sanpham.js"></script>
 </body>
 </html> 

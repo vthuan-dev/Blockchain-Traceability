@@ -93,7 +93,11 @@
                         window.location.href = '../san-xuat/sanxuat.html';
                         } else if (data.user.roleId === 2) {
                             window.location.href = '../kiem-duyet/nhakiemduyet.html';
-                        } 
+                        } else if (data.user.roleId === 6) {
+                            window.location.href = '../van-chuyen/vanchuyen.html';
+                        } else if (data.user.roleId === 8) {
+                            window.location.href = '../nha-kho/nha-kho.html';
+                        }
                         else {
                             alert('Không có trang phù hợp cho vai trò của bạn');
                         }

@@ -13,6 +13,8 @@ window.UserManager = {
         switch (roleId) {
             case 1: return 'Nhà sản xuất';
             case 2: return 'Nhà kiểm duyệt';
+            case 6: return 'Vận chuyển';
+            case 8: return 'Nhà kho';
             default: return 'Không xác định';
         }
     },

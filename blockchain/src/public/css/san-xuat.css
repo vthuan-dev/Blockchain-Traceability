@@ -220,3 +220,57 @@ body {
         gap: 10px; /* Khoảng cách giữa các nút */
     }
   }
+
+
+  .qr-code-hover {
+    transition: transform 0.3s ease;
+}
+.qr-code-hover:hover {
+    transform: scale(1.1);
+}
+/* CSS cho các nút */
+.toggle-button, .download-button {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.toggle-button:hover, .download-button:hover {
+    background-color: #0d6e12;
+}
+
+/* Căn chỉnh các nút */
+.button-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px; /* Khoảng cách giữa các nút */
+    margin-top: 20px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .toggle-button, .download-button {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+
+    .button-container {
+        flex-direction: column;
+        gap: 10px; /* Khoảng cách giữa các nút */
+    }
+}
+
+/* CSS cho mục điều hướng active */
+.nav-link.active {
+    font-weight: bold;
+    color: #000; /* Màu chữ in đậm */
+}
