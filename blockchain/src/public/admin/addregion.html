@@ -3,32 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thêm sản phẩm mới</title>
+    <title>Thêm Vùng Sản Xuất</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="./css/style.css">
     <link rel="stylesheet" href="./css/responsive.css">
     <link rel="stylesheet" href="./css/animation.css">
-
-    <style>
-        @media (max-width: 768px) {
-            .form-row {
-                flex-direction: column;
-            }
-            .form-field {
-                margin-right: 0;
-                margin-bottom: 15px;
-            }
-            .btn-center {
-                display: flex;
-                flex-direction: column;
-            }
-            .btn-center .btn {
-                margin-bottom: 10px;
-                width: 100%;
-            }
-        }
-    </style>
 </head>
 <body onload="time()">
     <header class="bg-success text-white py-2">
@@ -38,7 +18,7 @@
                     <a href="#"><img src="..\hinhanh\Bitcoin-Blockchain-Network-icon-on-transparent-background-PNG.png" alt="Logo" class="img-fluid" style="max-height: 50px;"></a>
                 </div>
                 <div class="col-6 col-md-5 text-center header-title">
-                    <h2 class="mb-0 h4">THÊM SẢN PHẨM MỚI</h2>
+                    <h2 class="mb-0 h4">THÊM VÙNG SẢN XUẤT</h2>
                 </div>
                 <div class="col-3 col-md-3 text-right header-icons">
                     <div class="d-inline-block position-relative mr-3">
@@ -62,15 +42,14 @@
     <div class="container-fluid">
         <div class="row">
             <nav class="col-md-2 sidebar">
-                <div class="section-title" id="section-title-red"">XIN CHÀO</div>
+                <div class="section-title" id="section-title-red">XIN CHÀO</div>
                 <a href="admintest.html" class="menu-item rounded"><i class="fas fa-home"></i> Trang chủ</a>
                 <div class="divider"></div>
                 <div class="section-title">CHỨC NĂNG</div>
                 <a href="user.html" class="menu-item rounded"><i class="fas fa-users"></i> Quản lý người dùng</a>
-                <!-- <a href="#" class="menu-item"><i class="fas fa-exchange-alt"></i> Quản lý giao dịch</a> -->
-                <!-- <a href="#" class="menu-item"><i class="fas fa-cogs"></i> Quy trình</a> -->
                 <a href="product.html" class="menu-item rounded"><i class="fas fa-box"></i> Sản phẩm</a>
-                <a href="region.html" class="menu-item rounded"><i class="fas fa-map-marker-alt"></i> Vùng sản xuất</a>                <div class="divider"></div>
+                <a href="region.html" class="menu-item rounded"><i class="fas fa-map-marker-alt"></i> Vùng sản xuất</a>
+                <div class="divider"></div>
                 <div class="section-title">TIỆN ÍCH</div>
                 <a href="#" class="menu-item rounded"><i class="fas fa-chart-bar"></i> Báo cáo và thống kê</a>
                 <a href="#" class="menu-item rounded"><i class="fas fa-comments"></i> Phản hồi</a>
@@ -81,7 +60,7 @@
                     <div class="col-12">
                         <div class="card card-custom">
                             <div class="card-body d-flex justify-content-between align-items-center" style="padding: 10px;">
-                                <h5 class="card-title" style="border-left: 5px solid yellow; padding-left: 10px; margin-bottom: 0;">Thêm sản phẩm mới</h5>
+                                <h5 class="card-title" style="border-left: 5px solid yellow; padding-left: 10px; margin-bottom: 0;">Thêm vùng sản xuất mới</h5>
                                 <div id="clock" class="text-right" style="font-size: 0.9rem; color: #333;"></div>
                             </div>
                         </div>
@@ -91,45 +70,36 @@
                     <div class="col-12">
                         <div class="card card-custom">
                             <div class="card-body">
-                                <form class="add-product-form" enctype="multipart/form-data">
+                                <form class="add-region-form">
                                     <div class="form-row">
                                         <div class="col-md-6 col-12 form-field">
-                                            <label for="product-name" class="form-label">Tên sản phẩm</label>
-                                            <input id="product-name" name="product_name" type="text" class="form-input" required />
-                                        </div>
-                                        <div class="col-md-6 col-12 form-field">
-                                            <label for="product-price" class="form-label">Giá sản phẩm</label>
-                                            <input id="product-price" name="price" type="number" class="form-input" required />
-                                        </div>
-                                    </div>
-                                    <div class="form-row">
-                                        <div class="col-12 form-field">
-                                            <label for="product-description" class="form-label">Mô tả sản phẩm</label>
-                                            <textarea id="product-description" name="description" class="form-input" rows="3" required></textarea>
+                                            <label for="province" class="form-label">Tỉnh bạn đang làm việc</label>
+                                            <input id="province" name="province" type="text" class="form-input" value="" readonly />
                                         </div>
                                     </div>
                                     <div class="form-row">
                                         <div class="col-md-6 col-12 form-field">
-                                            <label for="product-image" class="form-label">Ảnh sản phẩm</label>
-                                            <input id="product-image" name="img" type="file" class="form-input" accept="image/*" required />
+                                            <label for="district" class="form-label">Chọn quận/huyện</label>
+                                            <select id="district" name="district" class="form-input">
+                                                <!-- Options sẽ được thêm vào đây từ API -->
+                                            </select>
                                         </div>
-                                        
+                                        <div class="col-md-6 col-12 form-field">
+                                            <label for="ward" class="form-label">Chọn phường/xã</label>
+                                            <select id="ward" name="ward" class="form-input">
+                                                <!-- Options sẽ được thêm vào đây từ API -->
+                                            </select>
+                                        </div>
                                     </div>
                                     <div class="form-row">
                                         <div class="col-12 form-field">
-                                            <label for="product-uses" class="form-label">Công dụng</label>
-                                            <textarea id="product-uses" name="uses" class="form-input" rows="3" required></textarea>
-                                        </div>
-                                    </div>
-                                    <div class="form-row">
-                                        <div class="col-12 form-field">
-                                            <label for="product-process" class="form-label">Quy trình</label>
-                                            <textarea id="product-process" name="process" class="form-input" rows="5" required></textarea>
+                                            <label for="region-name" class="form-label">Tên vùng sản xuất</label>
+                                            <input id="region-name" name="region_name" type="text" class="form-input" required />
                                         </div>
                                     </div>
                                     <div class="form-actions btn-center">
-                                        <button type="submit" class="btn btn-save">Lưu sản phẩm</button>
-                                        <button type="button" class="btn btn-cancel" onclick="window.location.href='product.html'">Hủy bỏ</button>
+                                        <button type="submit" class="btn btn-save">Lưu vùng sản xuất</button>
+                                        <button type="button" class="btn btn-cancel" onclick="window.location.href='region.html'">Hủy bỏ</button>
                                     </div>
                                 </form>
                             </div>
@@ -137,15 +107,15 @@
                     </div>
                 </div>
             </main>
-        </div>
+        </div>  
     </div>
 
     <div id="overlay"></div>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="./js/feature.js"></script>
-    <script src="./js/product.js"></script>
     <script src="./js/settings.js"></script>
+    <script src="./js/region.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', applySettings);
     </script>

@@ -222,4 +222,30 @@ router.post('/api/admin', (req, res) => {
     });
 });
 
+// Endpoint để lấy thông tin tỉnh dựa trên province_id
+router.get('/api/province/:id', (req, res) => {
+    const { id } = req.params;
+    const query = 'SELECT province_name FROM provinces WHERE province_id = ?';
+    queryDatabase(query, [id], (error, results) => {
+        if (error) {
+            console.error('Lỗi khi truy vấn dữ liệu: ' + error.stack);
+            return res.status(500).json({ error: 'Lỗi khi truy vấn dữ liệu' });
+        }
+        if (results.length > 0) {
+            res.json(results[0]);
+        } else {
+            res.status(404).json({ error: 'Không tìm thấy tỉnh' });
+        }
+    });
+});
+
+// Endpoint để lấy thông tin session
+router.get('/api/session', (req, res) => {
+    const provinceId = req.session.province_id; // Giả sử bạn lưu province_id trong session
+    if (!provinceId) {
+        return res.status(400).json({ error: 'Không tìm thấy province_id trong session' });
+    }
+    res.json({ province_id: provinceId });
+});
+
 module.exports = router; // Xuất router
