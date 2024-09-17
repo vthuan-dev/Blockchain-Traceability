@@ -11,8 +11,8 @@ async function sendEmail(userEmail, userName, link, subject, templatePath) {
     let transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
-            user: 'locb2111807@student.ctu.edu.vn',
-            pass: 'wsib uqog gcbz bprl'
+            user: 'truyxuat.blockchain@gmail.com',
+            pass: 'ylml gpnp lgmz wpwz'
         }
     });
 
@@ -23,7 +23,7 @@ async function sendEmail(userEmail, userName, link, subject, templatePath) {
 
     // Cấu hình email
     let mailOptions = {
-        from: 'locb2111807@student.ctu.edu.vn',
+        from: 'truyxuat.blockchain@gmail.com',
         to: userEmail,
         subject: subject,
         html: emailContent
