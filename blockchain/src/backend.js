@@ -2,6 +2,7 @@ const { S3Client, PutObjectCommand, HeadObjectCommand } = require("@aws-sdk/clie
 const { Upload } = require("@aws-sdk/lib-storage");
 const multer = require('multer');
 const express = require('express');
+const app = express();
 const { Web3 } = require('web3');
 const dotenv = require('dotenv');
 const mysql = require('mysql');
@@ -10,7 +11,7 @@ const axios = require('axios');
 const FormData = require('form-data');
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
-const app = express();
+
 const storage = multer.memoryStorage();
 
 const s3Client = new S3Client({
@@ -51,7 +52,7 @@ web3.eth.net.isListening()
   .catch(e => console.log('Lỗi rồi', e));
 
 const contractABI = require('../build/contracts/TraceabilityContract.json').abi;
-const contractAddress = '0x7cB94E1CE56345764d0D774931A824f253fb8E9f';
+const contractAddress = '0xFAd7ad2C732f19747CD2E5eD95F5d154A8A1E66E';
 const contract = new web3.eth.Contract(contractABI, contractAddress);
 
 // tạo biến lưu trữ file, giới hạn số lượng file và tên file, maxCount: số lượng file, name: tên file
@@ -68,10 +69,16 @@ const activityUpload = multer({
   limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
 }).array('imageUrls', 5); // Thay đổi 'activityImages' thành 'imageUrls'
 
+app.use(express.static(path.join(__dirname, 'public')));
+app.get('*.css', (req, res, next) => {
+  res.set('Content-Type', 'text/css');
+  next();
+});
 
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
 
 const { CID } = require('multiformats/cid');
 const { sha256 } = require('multiformats/hashes/sha2');
@@ -291,14 +298,7 @@ function setupRoutes(app, db){
   app.get('/create-batch', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'san-xuat', 'them-lo-hang.html'));
   });
-  
-  app.post('/checkdata', upload, (req, res) => {
-    res.status(200).send({
-      body: req.body,
-      files: req.files
-    });
-  });
-  
+
   app.post('/createbatch', (req, res, next) => {
     upload(req, res, function (err) {
       if (err instanceof multer.MulterError) {
@@ -670,8 +670,56 @@ function setupRoutes(app, db){
       res.status(500).json({ error: 'Lỗi khi lấy danh sách lô hàng đang chờ kiểm duyệt: ' + err.message });
     }
   });
-  
 
+  // Lấy SSCC của lô hàng đã được phê duyệt
+  app.get('/api/approved-batch-sscc/:batchId', async (req, res) => {
+    try {
+      const batchId = req.params.batchId;
+      const batchDetails = await contract.methods.getBatchDetails(batchId).call();
+      
+      if (batchDetails.status.toString() !== '1') { // 1 tương ứng với BatchStatus.Approved
+        return res.status(400).json({ error: 'Lô hàng chưa được phê duyệt' });
+      }
+      
+      res.json({ sscc: batchDetails.sscc });
+    } catch (error) {
+      res.status(500).json({ error: 'Không thể lấy SSCC của lô hàng: ' + error.message });
+    }
+  });
+
+  // Lấy thông tin lô hàng từ SSCC
+app.get('/api/batch/:sscc', async (req, res) => {
+  try {
+    const sscc = req.params.sscc;
+    const batchDetails = await contract.methods.getBatchBySSCC(sscc).call();
+    const serializedBatch = {
+      batchId: batchDetails.batchId.toString(),
+      name: batchDetails.name,
+      sscc: batchDetails.sscc,
+      producerId: batchDetails.producerId.toString(),
+      quantity: batchDetails.quantity,
+      productionDate: new Date(batchDetails.productionDate * 1000).toISOString(),
+      status: translateStatus(batchDetails.status),
+      productImageUrls: batchDetails.productImageUrls,
+      certificateImageUrl: batchDetails.certificateImageUrl,
+      farmPlotNumber: batchDetails.farmPlotNumber,
+      productId: batchDetails.productId.toString()
+    };
+    res.json(serializedBatch);
+  } catch (error) {
+    res.status(500).json({ error: 'Không thể lấy thông tin lô hàng: ' + error.message });
+  }
+});
+// Cập nhật trạng thái lô hàng khi được phê duyệt hoặc từ chối
+app.post('/api/update-batch-status', async (req, res) => {
+  try {
+    const { batchId, newStatus } = req.body;
+    await contract.methods.updateBatchStatus(batchId, newStatus).send({ from: account.address });
+    res.json({ message: 'Cập nhật trạng thái thành công' });
+  } catch (error) {
+    res.status(500).json({ error: 'Không thể cập nhật trạng thái: ' + error.message });
+  }
+});
 
 // Hàm để lấy vùng sản xuất của người sản xuất từ SQL
 async function getProducerRegion(producerId) {
@@ -705,6 +753,12 @@ app.post('/approve-batch/:batchId', async (req, res) => {
       return res.status(403).json({ error: 'Người dùng không có quyền kiểm duyệt' });
     }
 
+    // Kiểm tra trạng thái hiện tại của lô hàng
+    const batchDetails = await contract.methods.getBatchDetails(batchId).call();
+    if (batchDetails.status != 0) { // 0 là trạng thái PendingApproval
+      return res.status(400).json({ error: 'Lô hàng này đã được xử lý bởi người kiểm duyệt khác' });
+    }
+
     // Gọi hàm updateBatchStatus từ smart contract để phê duyệt (status 1 = Approved)
     const result = await contract.methods.updateBatchStatus(batchId, 1).send({ from: account.address, gas: 3000000 });
 
@@ -733,38 +787,17 @@ app.post('/reject-batch/:batchId', async (req, res) => {
       return res.status(403).json({ error: 'Người dùng không có quyền kiểm định' });
     }
 
-    // Gọi hàm rejectBatch từ smart contract
-    const result = await contract.methods.rejectBatch(batchId).send({ from: account.address, gas: 3000000 });
-
-    res.status(200).json({
-      message: 'Lô hàng đã bị từ chối thành công',
-      transactionHash: result.transactionHash
-    });
-  } catch (error) {
-    console.error('Lỗi khi từ chối lô hàng:', error);
-    res.status(500).json({ error: 'Không thể từ chối lô hàng: ' + error.message });
-  }
-});
-app.post('/reject-batch/:batchId', async (req, res) => {
-  try {
-    if (!req.session.userId) {
-      return res.status(401).json({ error: 'Người dùng chưa đăng nhập' });
-    }
-
-    const batchId = req.params.batchId;
-    const userId = req.session.userId;
-
-    // Kiểm tra xem người dùng có phải là nhà kiểm duyệt không
-    const [approvers] = await db.query('SELECT * FROM users WHERE uid = ? AND role_id = 2', [userId]);
-    if (approvers.length === 0) {
-      return res.status(403).json({ error: 'Người dùng không có quyền kiểm duyệt' });
+    // Kiểm tra trạng thái hiện tại của lô hàng
+    const batchDetails = await contract.methods.getBatchDetails(batchId).call();
+    if (batchDetails.status != 0) { // 0 là trạng thái PendingApproval
+      return res.status(400).json({ error: 'Lô hàng này đã được xử lý bởi người kiểm duyệt khác' });
     }
 
     // Gọi hàm updateBatchStatus từ smart contract để từ chối (status 2 = Rejected)
     const result = await contract.methods.updateBatchStatus(batchId, 2).send({ from: account.address, gas: 3000000 });
 
     res.status(200).json({
-      message: 'Lô hàng đã bị từ chối',
+      message: 'Lô hàng đã bị từ chối thành công',
       transactionHash: result.transactionHash
     });
   } catch (error) {
@@ -880,7 +913,6 @@ app.get('/api/batches', async (req, res) => {
     res.status(500).json({ error: 'Không thể lấy danh sách lô hàng: ' + error.message });
   }
 });
-
 app.get('/api/approved-batches', async (req, res) => {
   try {
     if (!req.session.userId) {
@@ -893,16 +925,20 @@ app.get('/api/approved-batches', async (req, res) => {
     const approvedBatches = await contract.methods.getApprovedBatchesByProducer(userId).call({ from: account.address });
     console.log('Số lượng lô hàng đã duyệt:', approvedBatches.length);
 
-    // Xử lý và gửi dữ liệu về client
-    const serializedBatches = approvedBatches.map(batch => ({
-      batchId: batch.batchId.toString(),
-      name: batch.name,
-      quantity: batch.quantity.toString(),
-      productionDate: batch.productionDate.toString(),
-      status: translateStatus(batch.status),
-      productImageUrls: batch.productImageUrls,
-      certificateImageUrl: batch.certificateImageUrl
-    }));
+    const serializedBatches = approvedBatches.map(batch => {
+      const serializedBatch = {
+        batchId: batch.batchId.toString(),
+        name: batch.name,
+        sscc: batch.sscc || '',
+        quantity: batch.quantity.toString(),
+        productionDate: batch.productionDate.toString(),
+        status: translateStatus(batch.status),
+        productImageUrls: batch.productImageUrls,
+        certificateImageUrl: batch.certificateImageUrl
+      };
+      console.log('Serialized batch:', JSON.stringify(serializedBatch, null, 2));
+      return serializedBatch;
+    });
 
     res.status(200).json(serializedBatches);
   } catch (error) {
@@ -990,8 +1026,6 @@ function translateStatus(status) {
 
 
 
-
-
 module.exports = {
   s3Client,
   web3,
@@ -1008,6 +1042,5 @@ module.exports = {
   replacer,
   cleanKeys,
   convertBigIntToString,  // dùng để chuyển đổi bigInt sang string, do lỗi in ra số lớn
-
   BUCKET_NAME
 };

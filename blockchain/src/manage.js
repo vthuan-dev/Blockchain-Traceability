@@ -74,17 +74,16 @@ router.get('/api/theproducts', (req, res) => {
 router.post('/api/products', (req, res) => {
     const { product_name, price, description, uses, process } = req.body;
     const img = req.files ? req.files.img : null;
-    const process_img = req.files ? req.files.process_img : null;
 
     // Kiểm tra dữ liệu nhận được từ client
     console.log('Dữ liệu nhận được từ client:', req.body, req.files);
 
-    if (!product_name || !price || !description || !img || !process_img || !uses || !process) {
+    if (!product_name || !price || !description || !img || !uses || !process) {
         return res.status(400).json({ error: 'Thiếu thông tin sản phẩm' }); // Trả về JSON
     }
 
-    const query = 'INSERT INTO products (product_name, price, description, img, process_img, uses, process) VALUES (?, ?, ?, ?, ?, ?, ?)';
-    queryDatabase(query, [product_name, price, description, img.name, process_img.name, uses, process], (error, results) => {
+    const query = 'INSERT INTO products (product_name, price, description, img, uses, process) VALUES (?, ?, ?, ?, ?, ?)';
+    queryDatabase(query, [product_name, price, description, img.name, uses, process], (error, results) => {
         if (error) {
             console.error('Lỗi khi thêm sản phẩm: ' + error.stack);
             return res.status(500).json({ error: 'Lỗi khi thêm sản phẩm' }); // Trả về JSON
@@ -143,7 +142,7 @@ router.get('/caidat', (req, res) => {
 router.post('/api/products/update', (req, res) => {
     console.log('Dữ liệu nhận được:', req.body, req.files);
 
-    const { product_id, product_name, price, description, uses, process, original_product_id, original_product_name, original_price, original_description, original_uses, original_process } = req.body;
+    const { product_id, product_name, price, description, uses, process, original_product_name, original_price, original_description, original_uses, original_process } = req.body;
     
     console.log('So sánh giá trị:');
     console.log('product_name:', product_name, 'original_product_name:', original_product_name);
@@ -153,17 +152,10 @@ router.post('/api/products/update', (req, res) => {
     console.log('process:', process, 'original_process:', original_process);
 
     let img = null;
-    let process_img = null;
 
-    if (req.files) {
-        if (req.files.img) {
-            img = req.files.img.name;
-            req.files.img.mv(`./uploads/${img}`);
-        }
-        if (req.files.process_img) {
-            process_img = req.files.process_img.name;
-            req.files.process_img.mv(`./uploads/${process_img}`);
-        }
+    if (req.files && req.files.img) {
+        img = req.files.img.name;
+        req.files.img.mv(`./uploads/${img}`);
     }
 
     let updateFields = [];
@@ -173,7 +165,6 @@ router.post('/api/products/update', (req, res) => {
     if (uses !== original_uses) updateFields.push(`uses = ?`);
     if (process !== original_process) updateFields.push(`process = ?`);
     if (img) updateFields.push(`img = ?`);
-    if (process_img) updateFields.push(`process_img = ?`);
 
     console.log('Số trường cần cập nhật:', updateFields.length);
 
@@ -186,7 +177,6 @@ router.post('/api/products/update', (req, res) => {
             ...(uses !== original_uses ? [uses] : []),
             ...(process !== original_process ? [process] : []),
             ...(img ? [img] : []),
-            ...(process_img ? [process_img] : []),
             product_id
         ];
 

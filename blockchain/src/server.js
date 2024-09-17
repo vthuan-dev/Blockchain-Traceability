@@ -4,15 +4,16 @@ const bodyParser = require('body-parser');
 const mysql = require('mysql2/promise');
 const path = require('path');
 const multer = require('multer');
-const dangkyRoutes = require('./components/user/dangky.js');
-const dangnhapRoutes = require('./components/user/dangnhap.js');
+
 const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer');
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 const session = require('express-session');
 
-
+const cors = require('cors');
 const app = express();
+
+app.use(cors());
 app.use(bodyParser.json());
 
 
@@ -34,9 +35,10 @@ const db = mysql.createPool({
   database: process.env.DB_DATABASE,
   connectTimeout: 10000
 });
-
-app.use('/api', dangkyRoutes(db));
-app.use('/api', dangnhapRoutes(db));
+const dangkyRoutes = require('./components/user/dangky')(db);
+const dangnhapRoutes = require('./components/user/dangnhap')(db);
+app.use('/api', dangkyRoutes);
+app.use('/api', dangnhapRoutes);
 
 
 const { 
@@ -186,6 +188,7 @@ app.post('/api/dangxuat', (req, res) => {
         res.json({ message: 'Đăng xuất thành công' });
     });
 });
+console.log('Các route đã đăng ký:', app._router.stack.filter(r => r.route).map(r => r.route.path));
 
 
 const manageRoutes = require('./manage.js');
