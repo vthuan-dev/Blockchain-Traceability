@@ -214,24 +214,25 @@
     </div>
 
     <!-- Modal Thông báo thành công -->
-    <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Đăng ký thành công</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <p>Tài khoản của bạn đã được đăng ký thành công. Vui lòng kiểm tra email để xác thực tài khoản.</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal">Đóng</button>
-                </div>
+  <!-- Modal Thông báo thành công -->
+<div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Đăng ký thành công</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Tài khoản của bạn đã được đăng ký thành công. Vui lòng kiểm tra email để xác thực tài khoản.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="closeSuccessModal" data-dismiss="modal">Đóng</button>
             </div>
         </div>
     </div>
+</div>
 
     <!-- Bootstrap JS và các thư viện phụ thuộc -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
@@ -258,69 +259,51 @@
                 // Hiển thị thông báo lỗi cho người dùng
             }
         });
-
         document.addEventListener('DOMContentLoaded', function() {
-            const form = document.getElementById('registrationForm');
-            const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
-            const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+    const form = document.getElementById('registrationForm');
+    const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+    const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+    const closeSuccessModalButton = document.getElementById('closeSuccessModal');
 
-            form.addEventListener('submit', async function(event) {
-                event.preventDefault();
-                loadingModal.show(); // Hiển thị modal loading
+    form.addEventListener('submit', async function(event) {
+        event.preventDefault();
+        loadingModal.show(); // Hiển thị modal loading
 
-                const password = document.getElementById('password').value;
-                const confirmPassword = document.getElementById('confirmPassword').value;
+        const formData = new FormData(this);
 
-                if (password !== confirmPassword) {
-                    alert('Mật khẩu không khớp. Vui lòng thử lại.');
-                    loadingModal.hide(); // Ẩn modal loading
-                    return;
-                }
-
-                const formData = new FormData(this);    
-
-                try {
-                    const response = await fetch('/api/register', {
-                        method: 'POST',
-                        body: formData
-                    });
-
-                    loadingModal.hide(); // Ẩn modal loading
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        alert('Lỗi: ' + errorData.message);
-                        return;
-                    }
-
-                    const data = await response.json();
-                    successModal.show(); // Hiển thị modal thành công
-                    form.reset();
-                    window.location.href = '/api/dangnhap'; // Đường dẫn đến trang đăng nhập
-
-                    successModal._element.addEventListener('shown.bs.modal', function() {
-                        setTimeout(function() {
-                            window.location.href = '/api/dangnhap'; // Đường dẫn đến trang đăng nhập
-                        }, 3000); // 3000 milliseconds = 3 giây
-                    });
-                   
-                } catch (error) {
-                    loadingModal.hide(); // Ẩn modal loading nếu có lỗi
-                    console.error('Lỗi khi gửi form đăng ký:', error);
-                    alert('Lỗi khi đăng ký: ' + error.message);
-                }
+        try {
+            const response = await fetch('/api/register', {
+                method: 'POST',
+                body: formData
             });
 
-              // Xử lý chuyển hướng khi nhấn nút trong modal thành công
-    redirectButton.addEventListener('click', function() {
-        window.location.href = '/api/dangnhap'; // Đường dẫn đến trang đăng nhập
+            loadingModal.hide(); // Ẩn modal loading
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                alert('Lỗi: ' + errorData.message);
+                return;
+            }
+
+            const data = await response.json();
+            successModal.show(); // Hiển thị modal thành công
+            form.reset(); // Reset form sau khi đăng ký thành công
+        } catch (error) {
+            loadingModal.hide(); // Ẩn modal loading nếu có lỗi
+            console.error('Lỗi khi gửi form đăng ký:', error);
+            alert('Lỗi khi đăng ký: ' + error.message);
+        }
     });
 
-    // Tự động chuyển hướng sau 3 giây
-    successModal._element.addEventListener('shown.bs.modal', function() {
-        setTimeout(function() {
-            window.location.href = '/api/dangnhap'; // Đường dẫn đến trang đăng nhập
-        }, 3000); // 3000 milliseconds = 3 giây
+    // Xử lý sự kiện đóng modal thành công
+    closeSuccessModalButton.addEventListener('click', function() {
+        successModal.hide(); // Ẩn modal thành công
+        window.location.href = '/api/dangnhap'; // Chuyển hướng đến trang đăng nhập
+    });
+
+    // Xử lý sự kiện khi modal được ẩn đi (để đảm bảo chuyển hướng ngay cả khi người dùng nhấn nút X hoặc click bên ngoài modal)
+    document.getElementById('successModal').addEventListener('hidden.bs.modal', function () {
+        window.location.href = '/api/dangnhap'; // Chuyển hướng đến trang đăng nhập
     });
 });
     </script>
