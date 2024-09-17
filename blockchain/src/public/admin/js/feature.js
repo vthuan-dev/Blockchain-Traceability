@@ -40,6 +40,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize clock
     time();
+
+    // Fetch admin info and update section title
+    fetchAdminInfo();
 });
 
 // Function to toggle sidebar and manage toggle button position
@@ -85,6 +88,20 @@ function time() {
     setTimeout(time, 1000);
 }
 
+// Function to fetch admin info and update section title
+async function fetchAdminInfo() {
+    try {
+        const response = await fetch('/api/admin-info');
+        if (response.ok) {
+            const data = await response.json();
+            document.querySelector('.section-title').textContent = `Xin chào, ${data.adminName}`;
+        } else {
+            console.error('Không thể lấy thông tin admin');
+        }
+    } catch (error) {
+        console.error('Lỗi:', error);
+    }
+}
 
 function debounce(func, delay) {
     let timeoutId;

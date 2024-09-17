@@ -35,6 +35,7 @@ module.exports = function(db) {
 
                 // Tạo session cho admin
                 req.session.adminEmail = admin.admin_email;
+                req.session.adminName = admin.admin_name; // Lưu adminName vào session
 
                 // Trả về thông tin admin
                 res.status(200).json({ 
@@ -158,6 +159,14 @@ module.exports = function(db) {
         } catch (error) {
             console.error('Lỗi khi đặt lại mật khẩu:', error);
             res.status(500).send('Đã xảy ra lỗi khi đặt lại mật khẩu.');
+        }
+    });
+
+    router.get('/admin-info', (req, res) => {
+        if (req.session.adminName) {
+            res.json({ adminName: req.session.adminName });
+        } else {
+            res.status(401).json({ message: 'Chưa đăng nhập' });
         }
     });
 
