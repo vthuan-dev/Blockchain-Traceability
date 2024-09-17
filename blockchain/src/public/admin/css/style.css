@@ -97,6 +97,14 @@ header {
     margin: 10px 0;
 }
 
+.section-title {
+    text-transform: uppercase;
+}
+
+#section-title-red {
+    color: #dc3545;
+}
+
 /* Main content styles */
 main {
     transition: margin-left 0.3s ease;
