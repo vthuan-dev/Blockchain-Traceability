@@ -131,6 +131,7 @@ function hideDeleteConfirmation() {
 document.getElementById('accept-remove').addEventListener('click', () => {
     if (deleteType === 'product') deleteProduct(deleteId);
     if (deleteType === 'user') deleteUser(deleteId);
+    if (deleteType === 'region') deleteRegion(deleteId); // Thêm dòng này
     hideDeleteConfirmation();
 });
 
