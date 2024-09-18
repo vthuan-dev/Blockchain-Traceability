@@ -33,11 +33,15 @@ module.exports = function(db) {
                     return res.status(401).json({ message: 'Email hoặc mật khẩu không đúng' });
                 }
 
-                // Thiết lập session cho admin
-                req.session.userId = admin.admin_id; // Giả sử có trường admin_id
-                req.session.isAdmin = true;
-                req.session.name = admin.admin_name;
-                req.session.email = admin.admin_email;
+ // Giả sử có trường admin_id
+           //     req.session.isAdmin = true;
+   
+
+                // Tạo session cho admin
+                req.session.adminEmail = admin.admin_email;
+                req.session.adminName = admin.admin_name; 
+                req.session.province_id = admin.province_id; // Lưu province_id vào session
+
 
                 // Trả về thông tin admin
                 res.status(200).json({ 
@@ -45,6 +49,7 @@ module.exports = function(db) {
                     admin: {
                         adminEmail: admin.admin_email,
                         adminName: admin.admin_name,
+                        province_id: admin.province_id,
                         roleId: 3 // Giả sử tất cả admin đều có roleId là 3
                     }
                 });
@@ -79,6 +84,7 @@ module.exports = function(db) {
                 req.session.name = user.name;
                 req.session.email = user.email;
                 req.session.roleId = user.role_id;
+                req.session.province_id = user.province_id; // Lưu province_id vào session
 
                 // Trả về thông tin người dùng và role_id
                 res.status(200).json({ 
@@ -87,7 +93,8 @@ module.exports = function(db) {
                         uid: user.uid,
                         name: user.name,
                         email: user.email,
-                        roleId: user.role_id
+                        roleId: user.role_id,
+                        province_id: user.province_id
                     }
                 });
             }

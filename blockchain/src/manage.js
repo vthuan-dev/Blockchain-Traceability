@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 const fileUpload = require('express-fileupload'); // Thêm middleware để xử lý file upload
 const multer = require('multer');
 const bcrypt = require('bcrypt');
+const axios = require('axios');
 
 const router = express.Router(); // Sử dụng Router
 router.use(cors()); // Cho phép CORS để client có thể gọi API
@@ -219,6 +220,131 @@ router.post('/api/admin', (req, res) => {
             }
             res.status(201).json({ message: 'Admin đã được thêm thành công', id: results.insertId });
         });
+    });
+});
+
+// Endpoint để lấy thông tin tỉnh dựa trên province_id
+router.get('/api/province/:id', (req, res) => {
+    const { id } = req.params;
+    const query = 'SELECT province_name FROM provinces WHERE province_id = ?';
+    queryDatabase(query, [id], (error, results) => {
+        if (error) {
+            console.error('Lỗi khi truy vấn dữ liệu: ' + error.stack);
+            return res.status(500).json({ error: 'Lỗi khi truy vấn dữ liệu' });
+        }
+        if (results.length > 0) {
+            res.json(results[0]);
+        } else {
+            res.status(404).json({ error: 'Không tìm thấy tỉnh' });
+        }
+    });
+});
+
+// Endpoint để lấy thông tin session
+router.get('/api/session', (req, res) => {
+    const provinceId = req.session.province_id; // Giả sử bạn lưu province_id trong session
+    if (!provinceId) {
+        return res.status(400).json({ error: 'Không tìm thấy province_id trong session' });
+    }
+    res.json({ province_id: provinceId });
+});
+
+// Endpoint để lấy danh sách quận/huyện từ API
+router.get('/api/districts/:provinceCode', async (req, res) => {
+    try {
+        console.log('Đang gọi API districts cho tỉnh:', req.params.provinceCode);
+        const response = await axios.get(`https://provinces.open-api.vn/api/p/${req.params.provinceCode}?depth=2`);
+        const districts = response.data.districts.map(d => ({ district_id: d.code, district_name: d.name }));
+        console.log('Kết quả API districts:', districts);
+        res.json(districts);
+    } catch (error) {
+        console.error('Lỗi khi lấy danh sách quận/huyện:', error);
+        res.status(500).json({ error: 'Lỗi khi lấy danh sách quận/huyện' });
+    }
+});
+
+// Endpoint để lấy danh sách xã/phường từ API
+router.get('/api/wards/:districtCode', async (req, res) => {
+    try {
+        console.log('Đang xử lý yêu cầu wards cho quận/huyện:', req.params.districtCode);
+        const response = await axios.get(`https://provinces.open-api.vn/api/d/${req.params.districtCode}?depth=2`);
+        const wards = response.data.wards.map(w => ({ ward_id: w.code, ward_name: w.name }));
+        console.log('Kết quả API wards:', wards);
+        res.json(wards);
+    } catch (error) {
+        console.error('Lỗi khi lấy danh sách xã/phường:', error);
+        res.status(500).json({ error: 'Lỗi khi lấy danh sách xã/phường' });
+    }
+});
+
+// Endpoint để thêm vùng sản xuất mới
+router.post('/api/regions', (req, res) => {
+    const { province_id, district_id, region_name, ward_name, district_name } = req.body;
+
+    if (!province_id || !district_id || !region_name || !ward_name) {
+        return res.status(400).json({ error: 'Thiếu thông tin vùng sản xuất' });
+    }
+
+    // Tạo region_id
+    const queryMaxId = 'SELECT MAX(region_id) AS max_id FROM regions WHERE region_id LIKE ?';
+    const regionPrefix = `${province_id}${district_id}%`;
+
+    queryDatabase(queryMaxId, [regionPrefix], (error, results) => {
+        if (error) {
+            console.error('Lỗi khi tìm mã vùng lớn nhất:', error);
+            return res.status(500).json({ error: 'Lỗi khi tìm mã vùng lớn nhất' });
+        }
+
+        let newRegionId;
+        if (results[0].max_id) {
+            const maxId = results[0].max_id;
+            const currentNumber = parseInt(maxId.slice(-3), 10);
+            newRegionId = `${province_id}${district_id}${String(currentNumber + 1).padStart(3, '0')}`;
+        } else {
+            newRegionId = `${province_id}${district_id}001`;
+        }
+
+        const queryInsert = 'INSERT INTO regions (region_id, region_name, ward_name, district_name) VALUES (?, ?, ?, ?)';
+        queryDatabase(queryInsert, [newRegionId, region_name, ward_name, district_name], (error, results) => {
+            if (error) {
+                console.error('Lỗi khi thêm vùng sản xuất:', error);
+                return res.status(500).json({ error: 'Lỗi khi thêm vùng sản xuất' });
+            }
+            res.status(201).json({ success: true, message: 'Vùng sản xuất đã được thêm thành công' });
+        });
+    });
+});
+
+// Endpoint để lấy danh sách vùng sản xuất
+router.get('/api/regions', (req, res) => {
+    const adminProvinceId = req.query.province_id;
+
+    if (!adminProvinceId) {
+        return res.status(400).json({ error: 'Thiếu mã tỉnh của admin' });
+    }
+
+    // Sửa đổi câu truy vấn để chỉ lấy các vùng có 2 chữ số đầu của region_id trùng với adminProvinceId
+    const query = 'SELECT * FROM regions WHERE LEFT(region_id, 2) = ?';
+    
+    queryDatabase(query, [adminProvinceId], (error, results) => {
+        if (error) {
+            console.error('Lỗi khi truy vấn dữ liệu: ' + error.stack);
+            return res.status(500).json({ error: 'Lỗi khi truy vấn dữ liệu' });
+        }
+        res.json(results);
+    });
+});
+
+// Endpoint để xóa vùng sản xuất
+router.delete('/api/regions/:id', (req, res) => {
+    const { id } = req.params;
+    const query = 'DELETE FROM regions WHERE region_id = ?';
+    queryDatabase(query, [id], (error, results) => {
+        if (error) {
+            console.error('Lỗi khi xóa vùng sản xuất: ' + error.stack);
+            return res.status(500).json({ error: 'Lỗi khi xóa vùng sản xuất' });
+        }
+        res.status(200).json({ message: 'Vùng sản xuất đã được xóa thành công' });
     });
 });
 
