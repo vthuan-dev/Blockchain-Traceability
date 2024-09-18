@@ -184,12 +184,11 @@
             </div>
 
            <div class="form-group" id="regionGroup" style="display: none;">
-    <label for="region_id">Vùng sản xuất:</label>
-    <select class="form-control" id="region_id" name="region_id">
-        <option value="">Chọn vùng sản xuất</option>
-        <!-- Các option sẽ được thêm bằng JavaScript -->
-    </select>
-</div>
+                <label for="region_id">Vùng sản xuất:</label>
+                <select class="form-control" id="region_id" name="region_id">
+                    <option value="">Chọn vùng sản xuất</option>
+                </select>
+            </div>
 
             <button type="submit" class="btn btn-primary btn-block">Đăng Ký</button>
         </form>
@@ -539,6 +538,37 @@
                     alert("Mật khẩu và xác nhận mật khẩu không khớp. Vui lòng kiểm tra lại.");
                 }
             });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const provinceSelect = document.getElementById('province');
+            const regionSelect = document.getElementById('region_id');
+
+            provinceSelect.addEventListener('change', function() {
+                const selectedProvinceId = this.value;
+                if (selectedProvinceId) {
+                    fetchRegions(selectedProvinceId);
+                } else {
+                    // Xóa các option trong region select nếu không có tỉnh nào được chọn
+                    regionSelect.innerHTML = '<option value="">Chọn vùng sản xuất</option>';
+                }
+            });
+
+            function fetchRegions(provinceId) {
+                fetch(`/api/regions?province_id=${provinceId}`)
+                    .then(response => response.json())
+                    .then(regions => {
+                        regionSelect.innerHTML = '<option value="">Chọn vùng sản xuất</option>';
+                        regions.forEach(region => {
+                            const option = document.createElement('option');
+                            option.value = region.region_id;
+                            option.textContent = region.region_name;
+                            regionSelect.appendChild(option);
+                        });
+                    })
+                    .catch(error => console.error('Lỗi khi lấy danh sách vùng sản xuất:', error));
+            }
         });
     </script>
 </body>
