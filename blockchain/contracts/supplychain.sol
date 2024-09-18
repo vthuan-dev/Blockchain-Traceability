@@ -51,7 +51,7 @@ enum ParticipantType { Producer, Transporter, Warehouse, Consumer }
     
     event BatchApproved(uint256 indexed batchId, uint256 indexed producerId, string sscc);
     event BatchApprovedForQR(uint256 indexed batchId, uint256 indexed producerId, string sscc);
-event ParticipationRecorded(uint256 indexed batchId, uint256 participantId, string participantType, string action);
+    event ParticipationRecorded(uint256 indexed batchId, uint256 participantId, string participantType, string action);
     event BatchCreated(uint256 indexed batchId, string sscc, uint256 producerId);
     event ActivityLogAdded(
         uint256 indexed uid,
