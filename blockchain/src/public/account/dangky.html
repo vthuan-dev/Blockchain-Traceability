@@ -15,9 +15,15 @@
         .form-group {
             margin-bottom: 15px;
         }
-        .form-control:disabled {
-            background-color: #e9ecef;
-            opacity: 0.65;
+        .form-control:disabled,
+        .form-control[readonly],
+        select:disabled {
+            background-color: #e9ecef !important;
+            opacity: 0.65 !important;
+            cursor: not-allowed !important;
+        }
+        select:disabled {
+            color: #6c757d !important;
         }
         .form-control {
             padding: 5px 10px;
@@ -191,7 +197,7 @@
     </select>
 </div>
 
-            <button type="submit" class="btn btn-primary btn-block">Đăng Ký</button>
+            <button type="submit" class="btn btn-success btn-block">Đăng Ký</button>
         </form>
         <br>
         <div class="dangnhap">
@@ -324,46 +330,59 @@
     });
 });
     </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const roleSelect = document.getElementById('role');
-            const regionGroup = document.getElementById('regionGroup');
-            const form = document.getElementById('registrationForm');
-            const submitButton = form.querySelector('button[type="submit"]');
-    
-            // Hàm để bật/tắt các trường input
-            function toggleInputs(disabled) {
-                const inputs = form.querySelectorAll('input, select');
-                inputs.forEach(input => {
-                    if (input.id !== 'role') {
-                        input.disabled = disabled;
-                    }
-                });
-                submitButton.disabled = disabled;
-            }
-    
-            // Vô hiệu hóa tất cả các trường input khi trang được tải
-            toggleInputs(true);
-    
-            roleSelect.addEventListener('change', function() {
-                if (this.value) {
-                    toggleInputs(false);
-                    
-                    if (this.value === '1' || this.value === '2') { // Người sản xuất hoặc kiểm định
-                        regionGroup.style.display = 'block';
-                        document.getElementById('region_id').required = true;
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const roleSelect = document.getElementById('role');
+        const regionGroup = document.getElementById('regionGroup');
+        const form = document.getElementById('registrationForm');
+        const submitButton = form.querySelector('button[type="submit"]');
+        const roleAnnounce = document.getElementById('roleAnnounce');
+
+        // Hàm để bật/tắt các trường input
+        function toggleInputs(disabled) {
+            const inputs = form.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                if (input.id !== 'role') {
+                    input.disabled = disabled;
+                    if (disabled) {
+                        input.classList.add('form-control-disabled');
                     } else {
-                        regionGroup.style.display = 'none';
-                        document.getElementById('region_id').required = false;
-                        document.getElementById('region_id').value = ''; // Reset giá trị
+                        input.classList.remove('form-control-disabled');
                     }
-                } else {
-                    toggleInputs(true);
-                    regionGroup.style.display = 'none';
                 }
             });
+            submitButton.disabled = disabled;
+        }
+
+        // Vô hiệu hóa tất cả các trường input ngay khi trang được tải
+        toggleInputs(true);
+
+        roleSelect.addEventListener('change', function() {
+            if (this.value) {
+                toggleInputs(false);
+                roleAnnounce.style.display = 'none';
+
+                if (this.value === '1' || this.value === '2') {
+                    regionGroup.style.display = 'block';
+                    document.getElementById('region_id').required = true;
+                } else {
+                    regionGroup.style.display = 'none';
+                    document.getElementById('region_id').required = false;
+                    document.getElementById('region_id').value = '';
+                }
+            } else {
+                toggleInputs(true);
+                regionGroup.style.display = 'none';
+                roleAnnounce.style.display = 'block';
+            }
         });
-    </script>
+
+        // Gọi toggleInputs(true) một lần nữa để đảm bảo tất cả các trường đều bị vô hiệu hóa khi trang tải xong
+        toggleInputs(true);
+    });
+</script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const roleSelect = document.getElementById('role');
@@ -378,6 +397,11 @@
                 inputs.forEach(input => {
                     if (input.id !== 'role') {
                         input.disabled = disabled;
+                        if (disabled) {
+                            input.classList.add('form-control-disabled');
+                        } else {
+                            input.classList.remove('form-control-disabled');
+                        }
                     }
                 });
                 submitButton.disabled = disabled;
