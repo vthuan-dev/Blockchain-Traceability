@@ -44,12 +44,12 @@ document.addEventListener('DOMContentLoaded', function() {
             paginatedData.forEach(region => {
                 const row = `
                     <tr>
-                        <td>${region.region_id || 'N/A'}</td>
-                        <td>${region.region_name || 'N/A'}</td>
-                        <td>${region.district_name || 'N/A'}</td>
-                        <td>${region.ward_name || 'N/A'}</td>
-                        <td>${this.formatDate(region.created_at) || 'N/A'}</td>
-                        <td>
+                        <td style="text-align: center; vertical-align: middle;">${region.region_id || 'N/A'}</td>
+                        <td style="text-align: center; vertical-align: middle;">${region.region_name || 'N/A'}</td>
+                        <td style="text-align: center; vertical-align: middle;">${region.district_name || 'N/A'}</td>
+                        <td style="text-align: center; vertical-align: middle;">${region.ward_name || 'N/A'}</td>
+                        <td style="text-align: center; vertical-align: middle;">${this.formatDate(region.created_at) || 'N/A'}</td>
+                        <td style="text-align: center; vertical-align: middle;">
                             <button class="action-icons bg-red" title="Xóa"><i class="fas fa-trash-alt"></i></button>
                         </td>
                     </tr>
