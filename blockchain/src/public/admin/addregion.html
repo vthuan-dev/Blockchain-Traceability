@@ -9,9 +9,10 @@
     <link rel="stylesheet" href="./css/style.css">
     <link rel="stylesheet" href="./css/responsive.css">
     <link rel="stylesheet" href="./css/animation.css">
+    <link rel="stylesheet" href="./css/theme.css">
 </head>
 <body onload="time()">
-    <header class="bg-success text-white py-2">
+    <header class="text-white py-2">
         <div class="container-fluid">
             <div class="row align-items-center">
                 <div class="col-3 col-md-3 header-logo">
@@ -74,7 +75,7 @@
                                     <div class="form-row">
                                         <div class="col-md-6 col-12 form-field">
                                             <label for="province" class="form-label">Tỉnh bạn đang làm việc</label>
-                                            <input id="province" name="province" type="text" class="form-input" value="" readonly />
+                                            <input id="province" name="province" type="text" class="form-input" value="" readonly data-province-id="" />
                                         </div>
                                     </div>
                                     <div class="form-row">
@@ -115,7 +116,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="./js/feature.js"></script>
     <script src="./js/settings.js"></script>
-    <script src="./js/region.js"></script>
+    <script src="./js/addregion.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', applySettings);
     </script>

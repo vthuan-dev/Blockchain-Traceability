@@ -393,21 +393,7 @@ textarea.form-input {
     font-size: 16px;
 }
 
-.bg-soft-blue {
-    background-color: #e6f2ff !important;
-}
 
-.bg-soft-green {
-    background-color: #e8f5e9 !important;
-}
-
-.bg-soft-orange {
-    background-color: #fff3e0 !important;
-}
-
-.bg-soft-purple {
-    background-color: #f3e5f5 !important;
-}
 
 /* Điều chỉnh phần controls-container */
 .controls-container {
