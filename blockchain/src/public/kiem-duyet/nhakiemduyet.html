@@ -309,7 +309,7 @@
                 if (response.ok) {
                     const data = await response.json();
                     document.getElementById('userName').textContent = data.name;
-                    document.getElementById('userRole').textContent = `Vai trò: ${data.role}`;
+                    document.getElementById('userRole').textContent = `Vai trò: ${getRoleName(data.roleId)}`;
                     document.getElementById('userRegion').textContent = `Khu vực: ${data.region}`;
                 } else {
                     console.error('Không thể lấy thông tin người dùng');
@@ -338,6 +338,18 @@
                 alert('Có lỗi xảy ra khi đăng xuất. Vui lòng thử lại sau.');
             }
         });
+
+        function getRoleName(roleId) {
+        switch (roleId) {
+            case 1: return 'Người sản xuất';
+            case 2: return 'Người kiểm duyệt';
+            case 6: return 'Người vận chuyển';
+            case 8: return 'Nhà kho';
+            case 3: return 'Admin';
+            default: return 'Không xác định';
+        }
+    }
+
 
         document.addEventListener('DOMContentLoaded', function() {
             var navbarToggler = document.querySelector('.navbar-toggler');

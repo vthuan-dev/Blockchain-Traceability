@@ -85,6 +85,8 @@ module.exports = function(db) {
                 req.session.email = user.email;
                 req.session.roleId = user.role_id;
                 req.session.province_id = user.province_id; // Lưu province_id vào session
+                req.session.region_id = user.region_id; // Lưu region_id vào session
+                req.session.region = user.region; // Lưu region vào session
 
                 // Trả về thông tin người dùng và role_id
                 res.status(200).json({ 
@@ -94,7 +96,9 @@ module.exports = function(db) {
                         name: user.name,
                         email: user.email,
                         roleId: user.role_id,
-                        province_id: user.province_id
+                        province_id: user.province_id,
+                        region_id: user.region_id,
+                        region: user.region
                     }
                 });
             }
@@ -182,18 +186,32 @@ module.exports = function(db) {
         }
     });
 
-    router.get('/user-info', (req, res) => {
+    router.get('/user-info', async (req, res) => {
         if (req.session.userId) {
-            res.json({
-                userId: req.session.userId,
-                name: req.session.name,
-                email: req.session.email,
-                roleId: req.session.roleId,
-                isAdmin: req.session.isAdmin
-            });
+            try {
+                // Truy vấn để lấy region dựa trên region_id
+                const [regions] = await db.query('SELECT region_name FROM regions WHERE region_id = ?', [req.session.region_id]);
+                const region = regions[0] ? regions[0].region_name : undefined;
+    
+                res.json({
+                    userId: req.session.userId,
+                    name: req.session.name,
+                    email: req.session.email,
+                    roleId: req.session.roleId,
+                    isAdmin: req.session.isAdmin,
+                    province_id: req.session.province_id,
+                    region_id: req.session.region_id,
+                    region: region // Sử dụng giá trị region từ truy vấn
+                });
+            } catch (error) {
+                console.error('Lỗi khi lấy thông tin region:', error);
+                res.status(500).json({ message: 'Lỗi server' });
+            }
         } else {
             res.status(401).json({ message: 'Chưa đăng nhập' });
         }
+        console.log('Thông tin session:', req.session);
+        console.log('Vùng sản xuất:', req.session.region);
     });
 
     return router;
