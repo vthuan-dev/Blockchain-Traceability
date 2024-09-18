@@ -1,3 +1,76 @@
+document.addEventListener('DOMContentLoaded', () => {
+    const profileIcon = document.getElementById('profileIcon');
+    const dropdownMenu = document.querySelector('.dropdown-menu');
+    const notificationPanel = document.querySelector('.notification-panel');
+    const sidebar = document.querySelector('.sidebar');
+    const sidebarToggle = document.querySelector('.sidebar-toggle');
+
+    // Toggle dropdown menu
+    if (profileIcon && dropdownMenu) {
+        profileIcon.addEventListener('click', () => {
+            dropdownMenu.style.display = dropdownMenu.style.display === 'none' ? 'block' : 'none';
+        });
+    }
+
+    // Toggle notification panel
+    document.getElementById('notificationIcon').addEventListener('click', () => {
+        notificationPanel.classList.toggle('show');
+    });
+
+    // Close dropdown or notification panel when clicking outside
+    window.addEventListener('click', (e) => {
+        if (!document.getElementById('notificationIcon').contains(e.target) && !notificationPanel.contains(e.target)) {
+            notificationPanel.classList.remove('show');
+        }
+        if (!profileIcon.contains(e.target) && !dropdownMenu.contains(e.target)) {
+            dropdownMenu.style.display = 'none';
+        }
+    });
+
+    // Sidebar toggle button click
+    sidebarToggle.addEventListener('click', toggleSidebar);
+
+    // Close sidebar when clicking outside and reset toggle button position
+    document.addEventListener('click', (event) => {
+        if (!sidebar.contains(event.target) && !sidebarToggle.contains(event.target)) {
+            sidebar.classList.remove('show');
+            resetSidebarToggle();
+        }
+    });
+
+    // Initialize clock
+    time();
+
+    // Fetch admin info and update section title
+    fetchAdminInfo();
+});
+
+// Function to toggle sidebar and manage toggle button position
+function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const toggleButton = document.querySelector('.sidebar-toggle');
+    
+    sidebar.classList.toggle('show');
+    
+    if (sidebar.classList.contains('show')) {
+        // When sidebar is open, fix the position of the toggle button
+        toggleButton.style.position = 'fixed';
+        toggleButton.style.left = '200px';
+        toggleButton.style.top = '80px'; // Adjust as needed
+    } else {
+        resetSidebarToggle();
+    }
+}
+
+// Function to reset the sidebar toggle button to its original state
+function resetSidebarToggle() {
+    const toggleButton = document.querySelector('.sidebar-toggle');
+    toggleButton.style.position = '';
+    toggleButton.style.left = '';
+    toggleButton.style.top = '';
+}
+
+// Clock function (unchanged)
 function time() {
     const today = new Date();
     const weekday = ["Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"];
@@ -15,53 +88,19 @@ function time() {
     setTimeout(time, 1000);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM đã được tải');
-    const profileIcon = document.getElementById('profileIcon');
-    const dropdownMenu = document.querySelector('.dropdown-menu');
-    const notificationPanel = document.querySelector('.notification-panel');
-    
-    if (profileIcon && dropdownMenu) {
-        profileIcon.addEventListener('click', () => {
-            dropdownMenu.style.display = dropdownMenu.style.display === 'none' ? 'block' : 'none';
-        });
-    } else {
-        console.error('Không tìm thấy profileIcon hoặc dropdownMenu');
+// Function to fetch admin info and update section title
+async function fetchAdminInfo() {
+    try {
+        const response = await fetch('/api/admin-info');
+        if (response.ok) {
+            const data = await response.json();
+            document.querySelector('.section-title').textContent = `Xin chào, ${data.adminName}`;
+        } else {
+            console.error('Không thể lấy thông tin admin');
+        }
+    } catch (error) {
+        console.error('Lỗi:', error);
     }
-
-    document.getElementById('notificationIcon').addEventListener('click', () => {
-        notificationPanel.classList.toggle('show');
-    });
-
-    window.addEventListener('click', (e) => {
-        if (!document.getElementById('notificationIcon').contains(e.target) && !notificationPanel.contains(e.target)) {
-            notificationPanel.classList.remove('show');
-        }
-        if (!profileIcon.contains(e.target) && !dropdownMenu.contains(e.target)) {
-            dropdownMenu.style.display = 'none';
-        }
-    });
-
-    document.querySelector('.sidebar-toggle').addEventListener('click', toggleSidebar);
-
-    document.addEventListener('click', (event) => {
-        const sidebar = document.querySelector('.sidebar');
-        const sidebarToggle = document.querySelector('.sidebar-toggle');
-        if (!sidebar.contains(event.target) && !sidebarToggle.contains(event.target)) {
-            sidebar.classList.remove('show');
-        }
-    });
-
-    time();
-});
-
-function toggleSidebar() {
-    const sidebar = document.querySelector('.sidebar');
-    const toggleButton = document.querySelector('.sidebar-toggle');
-    sidebar.classList.toggle('show');
-    toggleButton.style.position = 'fixed';
-    toggleButton.style.left = sidebar.classList.contains('show') ? '200px' : '10px';
-    toggleButton.style.top = sidebar.classList.contains('show') ? '' : '80px';
 }
 
 function debounce(func, delay) {
@@ -151,5 +190,5 @@ function hidePanel(panel) {
         panel.classList.remove('fade-in', 'fade-out');
         document.getElementById('overlay').style.display = 'none';
         document.querySelector('main').classList.remove('disable-pointer');
-    }, 300);
+    }, 300);    
 }
