@@ -11,7 +11,7 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 </head>
 <body>
     <!-- Thanh điều hướng -->
@@ -63,21 +63,19 @@
             <div class="qr-scanner-container">
                 <h5>Quét mã QR</h5>
                 <div class="row">
-                    <div class="col-md-6">
-                        <label for="qr-input" class="custom-file-upload">
+                    <div class="col-md-6 mb-3">
+                        <button id="start-camera" class="btn btn-primary btn-block">Quét QR bằng camera</button>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="qr-input" class="custom-file-upload btn btn-secondary btn-block">
                             <i class="fas fa-upload"></i> Chọn ảnh QR
                         </label>
-                        <input type="file" id="qr-input" accept="image/*">
-                    </div>
-                    <div class="col-md-6">
-                        <p id="file-selected" class="mt-2 mb-0" style="display: none;">Đã chọn 1 hình ảnh</p>
+                        <input type="file" id="qr-input" accept="image/*" style="display: none;">
                     </div>
                 </div>
-                <div class="row mt-3">
-                    <div class="col-12">
-                        <button id="scan-button" class="btn btn-primary btn-block" disabled>Quét mã QR</button>
-                    </div>
-                </div>
+                <div id="qr-reader" style="width: 100%; display: none;"></div>
+                <div id="file-selected" class="mt-2 mb-2" style="display: none;">Đã chọn 1 hình ảnh</div>
+                <button id="scan-button" class="btn btn-success btn-block mt-3" disabled>Quét mã QR</button>
             </div>
 
             <div id="batchInfo" style="display: none;">

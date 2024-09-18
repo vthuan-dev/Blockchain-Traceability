@@ -1,77 +1,101 @@
 .batch-info-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     margin-bottom: 20px;
+    background-color: #ffffff;
 }
 
 .batch-info-table th, .batch-info-table td {
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
 }
 
 .batch-info-table th {
-    width: 40%;
-    text-align: left;
-    font-weight: bold;
-    background-color: #f2f2f2;
+    background-color: #f5f5f5;
+    font-weight: 600;
+    color: #333;
+    text-transform: uppercase;
+    font-size: 0.9em;
+    letter-spacing: 0.5px;
 }
 
-.batch-info-table td {
-    width: 60%;
-}
-
-.batch-info-table tr:last-child th, .batch-info-table tr:last-child td {
+.batch-info-table tr:last-child th,
+.batch-info-table tr:last-child td {
     border-bottom: none;
 }
 
-#batchInfo {
-    background-color: #fff;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    padding: 20px;
-    margin-top: 20px;
+.batch-info-table td {
+    color: #555;
 }
 
-#batchInfo h5 {
-    margin-bottom: 15px;
-    border-bottom: 2px solid #007bff;
-    padding-bottom: 10px;
-    color: #007bff;
+.status-approved {
+    color: #28a745;
+    font-weight: 600;
 }
 
-.image-gallery {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
+.status-approved i {
+    margin-right: 5px;
 }
 
-.batch-image {
-    width: 100%;
-    height: 100px;
-    object-fit: cover;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: transform 0.3s ease;
-}
-
-.batch-image:hover {
-    transform: scale(1.1);
-}
-
+.product-image,
+.batch-image,
 .certificate-image {
-    max-width: 100%;
-    height: auto;
-    object-fit: contain;
-    border-radius: 5px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
     cursor: pointer;
-    transition: transform 0.3s ease;
 }
 
+.product-image:hover,
+.batch-image:hover,
 .certificate-image:hover {
-    transform: scale(1.1);
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-/* Modal styles for image preview */
+#acceptTransportBtn {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: background-color 0.3s ease;
+}
+
+#acceptTransportBtn:hover {
+    background-color: #0056b3;
+}
+
+#acceptTransportBtn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .batch-info-table th,
+    .batch-info-table td {
+        padding: 10px;
+    }
+
+    .batch-info-table th {
+        font-size: 0.8em;
+    }
+}
+
+/* Modal styles */
 .modal {
     display: none;
     position: fixed;
@@ -89,6 +113,8 @@
     display: block;
     width: 80%;
     max-width: 700px;
+    max-height: 80vh;
+    object-fit: contain;
 }
 
 .close {
@@ -106,149 +132,4 @@
     color: #bbb;
     text-decoration: none;
     cursor: pointer;
-}
-.status-approved {
-    color: #28a745; /* Màu xanh lá */
-    font-weight: bold;
-}
-.status-approved i {
-    margin-right: 5px;
-}
-
-.table th {
-    width: 40%;
-    background-color: #f8f9fa;
-}
-
-.table td {
-    width: 60%;
-}
-
-/* Styles hiện có giữ nguyên */
-
-/* Cải thiện cho phần quét mã QR */
-.qr-scanner-container {
-    background-color: #f8f9fa;
-    border: 1px solid #e9ecef;
-    border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.qr-scanner-container h5 {
-    color: #007bff;
-    margin-bottom: 15px;
-    font-weight: bold;
-}
-
-#qr-input {
-    display: none;
-}
-
-.custom-file-upload {
-    border: 1px solid #007bff;
-    display: inline-block;
-    padding: 10px 15px;
-    cursor: pointer;
-    background-color: #fff;
-    color: #007bff;
-    border-radius: 4px;
-    transition: all 0.3s ease;
-    width: 100%;
-    text-align: center;
-}
-
-.custom-file-upload:hover {
-    background-color: #007bff;
-    color: #fff;
-}
-
-#scan-button {
-    background-color: #28a745;
-    border: none;
-    color: white;
-    padding: 10px 20px;
-    text-align: center;
-    text-decoration: none;
-    display: block;
-    font-size: 16px;
-    transition-duration: 0.4s;
-    cursor: pointer;
-    border-radius: 4px;
-    width: 100%;
-    margin-top: 15px;
-}
-
-#scan-button:hover {
-    background-color: #218838;
-}
-
-#scan-button:disabled {
-    background-color: #6c757d;
-    cursor: not-allowed;
-}
-
-#file-selected {
-    color: #28a745;
-    font-weight: bold;
-}
-
-/* Cải thiện cho bảng thông tin lô hàng */
-.batch-info-table {
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.batch-info-table th {
-    background-color: #e9ecef;
-    color: #495057;
-}
-
-.batch-info-table td {
-    background-color: #fff;
-}
-
-/* Cải thiện cho gallery ảnh */
-.image-gallery {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 10px;
-}
-
-.batch-image, .certificate-image {
-    width: 100%;
-    height: 120px;
-    object-fit: cover;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.batch-image:hover, .certificate-image:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-}
-
-/* Cải thiện cho nút chấp nhận vận chuyển */
-.btn-success {
-    padding: 10px 20px;
-    font-size: 16px;
-    border-radius: 4px;
-    transition: all 0.3s ease;
-}
-
-.btn-success:hover {
-    background-color: #218838;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-}
-
-/* Responsive design */
-@media (max-width: 768px) {
-    .image-gallery {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    
-    .batch-image, .certificate-image {
-        height: 100px;
-    }
 }

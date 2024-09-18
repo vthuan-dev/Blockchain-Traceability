@@ -1018,20 +1018,35 @@ app.get('/api/batch-info-by-sscc/:sscc', async (req, res) => {
     const batchInfo = await contract.methods.getBatchBySSCC(sscc).call();
     const transportStatus = await contract.methods.getBatchTransportStatus(batchInfo.batchId).call();
     
-    const serializedBatchInfo = {
-      batchId: batchInfo.batchId.toString(),
+    // Hàm để chuyển đổi an toàn các giá trị
+    const safeConvert = (value) => {
+      if (typeof value === 'bigint') {
+        return value.toString();
+      }
+      if (typeof value === 'object' && value !== null) {
+        return Object.fromEntries(
+          Object.entries(value).map(([k, v]) => [k, safeConvert(v)])
+        );
+      }
+      return value;
+    };
+
+    const serializedBatchInfo = safeConvert({
+      batchId: batchInfo.batchId,
       name: batchInfo.name,
       sscc: batchInfo.sscc,
-      producerId: batchInfo.producerId.toString(),
+      producerId: batchInfo.producerId,
       quantity: batchInfo.quantity,
-      productionDate: new Date(batchInfo.productionDate * 1000).toISOString(),
+      productionDate: new Date(Number(batchInfo.productionDate) * 1000).toISOString(),
       status: translateStatus(batchInfo.status),
       productImageUrls: batchInfo.productImageUrls,
       certificateImageUrl: batchInfo.certificateImageUrl,
       farmPlotNumber: batchInfo.farmPlotNumber,
-      productId: batchInfo.productId.toString(),
-      transportStatus: transportStatus === '1' ? 'Đã vận chuyển' : 'Chưa vận chuyển'
-    };
+      productId: batchInfo.productId,
+      transportStatus: translateTransportStatus(transportStatus)
+    });
+
+    console.log('Serialized Batch Info:', JSON.stringify(serializedBatchInfo, null, 2));
 
     res.json(serializedBatchInfo);
   } catch (error) {
@@ -1039,6 +1054,11 @@ app.get('/api/batch-info-by-sscc/:sscc', async (req, res) => {
     res.status(500).json({ error: 'Không thể lấy thông tin lô hàng: ' + error.message });
   }
 });
+
+// Giữ nguyên các hàm translateStatus và translateTransportStatus
+
+
+
 app.post('/api/record-participation', async (req, res) => {
   try {
     const { batchId, participantType, action } = req.body;
@@ -1163,20 +1183,20 @@ function safeToString(value) {
       }
       const transportStatus = await contract.methods.getBatchTransportStatus(batchInfo.batchId).call();
 
-      const serializedBatchInfo = {
-        batchId: safeToString(batchInfo.batchId),
+      const serializedBatchInfo = safeConvert({
+        batchId: batchInfo.batchId,
         name: batchInfo.name,
         sscc: batchInfo.sscc,
-        producerId: safeToString(batchInfo.producerId),
-        quantity: safeToString(batchInfo.quantity),
-        productionDate: new Date(Number(safeToString(batchInfo.productionDate)) * 1000).toISOString(),
-        status: translateStatus(safeToString(batchInfo.status)),
+        producerId: batchInfo.producerId,
+        quantity: batchInfo.quantity,
+        productionDate: new Date(Number(batchInfo.productionDate) * 1000).toISOString(),
+        status: translateStatus(batchInfo.status),
         productImageUrls: batchInfo.productImageUrls,
         certificateImageUrl: batchInfo.certificateImageUrl,
         farmPlotNumber: batchInfo.farmPlotNumber,
-        productId: safeToString(batchInfo.productId),
-        transportStatus: translateTransportStatus(safeToString(transportStatus))
-      };
+        productId: batchInfo.productId,
+        transportStatus: translateTransportStatus(transportStatus)
+      });
   
 
       res.json(serializedBatchInfo);
