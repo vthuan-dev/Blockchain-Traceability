@@ -5,6 +5,8 @@ contract TraceabilityContract {
     uint256 private _batchIdCounter;
 
 enum BatchStatus { PendingApproval, Approved, Rejected }
+enum TransportStatus { NotTransported, Transported }
+enum ParticipantType { Producer, Transporter, Warehouse, Consumer }
 
     struct Batch {
         uint256 batchId;
@@ -21,6 +23,14 @@ enum BatchStatus { PendingApproval, Approved, Rejected }
         string farmPlotNumber;
         bytes32 dataHash;
         uint256 productId;
+        TransportStatus transportStatus;
+    }
+    
+    struct Participation {
+        uint256 participantId;
+        string participantType;
+        uint256 timestamp;
+        string action;
     }
       struct ActivityLog {
         uint256 timestamp;
@@ -35,12 +45,13 @@ enum BatchStatus { PendingApproval, Approved, Rejected }
 
     mapping(uint256 => Batch) private _batches;
     mapping(string => uint256) private _ssccToBatchId;
-        mapping(uint256 => ActivityLog[]) private _producerActivityLogs;
+    mapping(uint256 => ActivityLog[]) private _producerActivityLogs;
     mapping(uint256 => bool) private _approvedBatches;
+    mapping(uint256 => Participation[]) private _batchParticipations;
     
     event BatchApproved(uint256 indexed batchId, uint256 indexed producerId, string sscc);
     event BatchApprovedForQR(uint256 indexed batchId, uint256 indexed producerId, string sscc);
-
+event ParticipationRecorded(uint256 indexed batchId, uint256 participantId, string participantType, string action);
     event BatchCreated(uint256 indexed batchId, string sscc, uint256 producerId);
     event ActivityLogAdded(
         uint256 indexed uid,
@@ -180,7 +191,8 @@ enum BatchStatus { PendingApproval, Approved, Rejected }
             certificateImageUrl: params.certificateImageUrl,
             farmPlotNumber: params.farmPlotNumber,
             dataHash: dataHash,
-            productId: params.productId
+            productId: params.productId,
+            transportStatus: TransportStatus.NotTransported
         });
 
         _batches[newBatchId] = newBatch;
@@ -430,32 +442,45 @@ function getBatchBySSCC(string memory _sscc) public view returns (Batch memory) 
     return _batches[batchId];
 }
 
+function isValidSSCC(string memory _sscc) public view returns (bool) {
+    return _ssccToBatchId[_sscc] != 0;
+}
+
 function isBatchApproved(uint256 _batchId) public view returns (bool) {
     return _approvedBatches[_batchId];
 }
 
-
-
-    // hàm ghi nhận sự tham gia của các bên liên quan đến lô hàng
-    enum ParticipantType { Producer, Transporter, Warehouse, Consumer }
-    // tạo 1 struct lưu trữ thông tin sự tham gia của các bên liên quan đến lô hàng
-  struct Participation {
-        uint256 participantId;
-        ParticipantType participantType;
-        uint256 timestamp;
-        string action;
+function recordParticipation(uint256 _batchId, address _participantAddress, string memory _participantType, string memory _action) public {
+    require(_batches[_batchId].batchId != 0, "Batch does not exist");
+    _batchParticipations[_batchId].push(Participation(uint256(uint160(_participantAddress)), _participantType, block.timestamp, _action));
+    
+    if (keccak256(abi.encodePacked(_participantType)) == keccak256(abi.encodePacked("Transporter"))) {
+        if (keccak256(abi.encodePacked(_action)) == keccak256(abi.encodePacked("Da van chuyen"))) {
+            require(_batches[_batchId].transportStatus == TransportStatus.NotTransported, "Batch already transported");
+            _batches[_batchId].transportStatus = TransportStatus.Transported;
+            emit TransportStatusUpdated(_batchId, TransportStatus.Transported);
+        }
     }
-    // tạo 1 mapping lưu trữ thông tin sự tham gia của các bên liên quan đến lô hàng
-    mapping(uint256 => Participation[]) private _batchParticipations;
-   function recordParticipation(uint256 _batchId, uint256 _participantId, ParticipantType _participantType, string memory _action) public {
-        require(_batches[_batchId].batchId != 0, "Batch does not exist");
-        _batchParticipations[_batchId].push(Participation(_participantId, _participantType, block.timestamp, _action));
-        emit ParticipationRecorded(_batchId, _participantId, _participantType, _action);
-    }
-    // hàm lấy thông tin sự tham gia của các bên liên quan đến lô hàng
-    function getBatchParticipations(uint256 _batchId) public view returns (Participation[] memory) {
-        return _batchParticipations[_batchId];
-    }
-        event ParticipationRecorded(uint256 indexed batchId, uint256 participantId, ParticipantType participantType, string action);
+    
+    emit ParticipationRecorded(_batchId, uint256(uint160(_participantAddress)), _participantType, _action);
+}
 
+function updateTransportStatus(uint256 _batchId) public {
+    require(_batches[_batchId].batchId != 0, "Batch does not exist");
+    require(_batches[_batchId].status == BatchStatus.Approved, "Batch must be approved");
+    require(_batches[_batchId].transportStatus == TransportStatus.NotTransported, "Batch already transported");
+    _batches[_batchId].transportStatus = TransportStatus.Transported;
+    
+    // Ghi nhận sự tham gia của người vận chuyển
+    recordParticipation(_batchId, msg.sender, "Transporter", "Da van chuyen");
+    
+    emit TransportStatusUpdated(_batchId, TransportStatus.Transported);
+}
+// Thêm hàm để kiểm tra trạng thái vận chuyển
+function getBatchTransportStatus(uint256 _batchId) public view returns (TransportStatus) {
+    require(_batches[_batchId].batchId != 0, "Batch does not exist");
+    return _batches[_batchId].transportStatus;
+}
+
+event TransportStatusUpdated(uint256 indexed batchId, TransportStatus newStatus);
 }

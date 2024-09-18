@@ -33,9 +33,11 @@ module.exports = function(db) {
                     return res.status(401).json({ message: 'Email hoặc mật khẩu không đúng' });
                 }
 
-                // Tạo session cho admin
-                req.session.adminEmail = admin.admin_email;
-                req.session.adminName = admin.admin_name; // Lưu adminName vào session
+                // Thiết lập session cho admin
+                req.session.userId = admin.admin_id; // Giả sử có trường admin_id
+                req.session.isAdmin = true;
+                req.session.name = admin.admin_name;
+                req.session.email = admin.admin_email;
 
                 // Trả về thông tin admin
                 res.status(200).json({ 
@@ -71,8 +73,11 @@ module.exports = function(db) {
                     return res.status(403).json({ message: 'Bạn không có quyền đăng nhập với tư cách Admin' });
                 }
 
-                // Tạo session cho người dùng
+                // Thiết lập session cho user
                 req.session.userId = user.uid;
+                req.session.isAdmin = false;
+                req.session.name = user.name;
+                req.session.email = user.email;
                 req.session.roleId = user.role_id;
 
                 // Trả về thông tin người dùng và role_id
@@ -165,6 +170,20 @@ module.exports = function(db) {
     router.get('/admin-info', (req, res) => {
         if (req.session.adminName) {
             res.json({ adminName: req.session.adminName });
+        } else {
+            res.status(401).json({ message: 'Chưa đăng nhập' });
+        }
+    });
+
+    router.get('/user-info', (req, res) => {
+        if (req.session.userId) {
+            res.json({
+                userId: req.session.userId,
+                name: req.session.name,
+                email: req.session.email,
+                roleId: req.session.roleId,
+                isAdmin: req.session.isAdmin
+            });
         } else {
             res.status(401).json({ message: 'Chưa đăng nhập' });
         }

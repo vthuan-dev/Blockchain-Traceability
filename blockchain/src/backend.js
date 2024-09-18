@@ -10,6 +10,8 @@ require('dotenv').config();
 const axios = require('axios');
 const FormData = require('form-data');
 const path = require('path');
+const sharp = require('sharp');
+const QrCode = require('qrcode-reader');
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 
 const storage = multer.memoryStorage();
@@ -41,6 +43,11 @@ db.connect((err) => {
 
 
 
+const uploadQR = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+});
+
 const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
 
 const account = web3.eth.accounts.privateKeyToAccount('0xe9437cabf0c3b29aac95c0338c1177a53f6a2487e15480d959f37cb1597b5795');
@@ -52,7 +59,7 @@ web3.eth.net.isListening()
   .catch(e => console.log('Lỗi rồi', e));
 
 const contractABI = require('../build/contracts/TraceabilityContract.json').abi;
-const contractAddress = '0xFAd7ad2C732f19747CD2E5eD95F5d154A8A1E66E';
+const contractAddress = '0x145073C522D064be4E1B93171955F27F9ABB0A75';
 const contract = new web3.eth.Contract(contractABI, contractAddress);
 
 // tạo biến lưu trữ file, giới hạn số lượng file và tên file, maxCount: số lượng file, name: tên file
@@ -975,6 +982,247 @@ app.get('/api/rejected-batches', async (req, res) => {
     res.status(500).json({ error: 'Không thể lấy danh sách lô hàng bị từ chối: ' + error.message });
   }
 });
+
+// Thêm route để cập nhật trạng thái vận chuyển
+// ... (các import và cấu hình khác)
+
+// Cập nhật route để cập nhật trạng thái vận chuyển
+app.post('/api/update-transport-status', async (req, res) => {
+  try {
+    const { batchId } = req.body;
+    const userId = req.session.userId; // Giả sử bạn đang sử dụng session để lưu trữ userId
+
+    // Kiểm tra quyền của người dùng (phải là người vận chuyển)
+    const [transporter] = await db.query('SELECT * FROM users WHERE uid = ? AND role_id = ?', [userId, 6]); // Giả sử 6 là role_id cho người vận chuyển
+    if (!transporter) {
+      return res.status(403).json({ error: 'Người dùng không có quyền cập nhật trạng thái vận chuyển' });
+    }
+
+    // Gọi hàm smart contract để cập nhật trạng thái
+    await contract.methods.updateTransportStatus(batchId).send({ from: account.address, gas: 500000 });
+
+    res.json({ success: true, message: 'Đã cập nhật trạng thái vận chuyển thành công' });
+  } catch (error) {
+    console.error('Lỗi khi cập nhật trạng thái vận chuyển:', error);
+    res.status(500).json({ error: 'Không thể cập nhật trạng thái vận chuyển: ' + error.message });
+  }
+});
+
+
+
+// Cập nhật route để lấy thông tin lô hàng
+// Cập nhật route để lấy thông tin lô hàng bằng SSCC
+app.get('/api/batch-info-by-sscc/:sscc', async (req, res) => {
+  try {
+    const sscc = req.params.sscc;
+    const batchInfo = await contract.methods.getBatchBySSCC(sscc).call();
+    const transportStatus = await contract.methods.getBatchTransportStatus(batchInfo.batchId).call();
+    
+    const serializedBatchInfo = {
+      batchId: batchInfo.batchId.toString(),
+      name: batchInfo.name,
+      sscc: batchInfo.sscc,
+      producerId: batchInfo.producerId.toString(),
+      quantity: batchInfo.quantity,
+      productionDate: new Date(batchInfo.productionDate * 1000).toISOString(),
+      status: translateStatus(batchInfo.status),
+      productImageUrls: batchInfo.productImageUrls,
+      certificateImageUrl: batchInfo.certificateImageUrl,
+      farmPlotNumber: batchInfo.farmPlotNumber,
+      productId: batchInfo.productId.toString(),
+      transportStatus: transportStatus === '1' ? 'Đã vận chuyển' : 'Chưa vận chuyển'
+    };
+
+    res.json(serializedBatchInfo);
+  } catch (error) {
+    console.error('Lỗi khi lấy thông tin lô hàng từ SSCC:', error);
+    res.status(500).json({ error: 'Không thể lấy thông tin lô hàng: ' + error.message });
+  }
+});
+app.post('/api/record-participation', async (req, res) => {
+  try {
+    const { batchId, participantType, action } = req.body;
+    const userId = req.session.userId; // Giả sử bạn đang sử dụng session để lưu trữ userId
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Người dùng chưa đăng nhập' });
+    }
+
+    // Chuyển đổi userId thành địa chỉ Ethereum
+    const userAddress = await getUserEthereumAddress(userId);
+
+    await contract.methods.recordParticipation(batchId, userAddress, participantType, action)
+      .send({ from: account.address, gas: 500000 });
+
+    res.json({ success: true, message: 'Đã ghi nhận sự tham gia thành công' });
+  } catch (error) {
+    console.error('Lỗi khi ghi nhận sự tham gia:', error);
+    res.status(500).json({ error: 'Không thể ghi nhận sự tham gia: ' + error.message });
+  }
+});
+
+app.get('/api/pending-transport-batches', async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    if (!userId) {
+      return res.status(401).json({ error: 'Người dùng chưa đăng nhập' });
+    }
+
+    // Lấy danh sách lô hàng chờ vận chuyển từ smart contract
+    const pendingBatches = await contract.methods.getPendingTransportBatches().call();
+
+    // Chuyển đổi dữ liệu và gửi về client
+    const formattedBatches = pendingBatches.map(batch => ({
+      batchId: batch.batchId.toString(),
+      name: batch.name,
+      sscc: batch.sscc,
+      quantity: batch.quantity,
+      productionDate: new Date(batch.productionDate * 1000).toISOString(),
+      status: translateApprovalStatus(batch.status),
+      transportStatus: translateTransportStatus(batch.transportStatus)
+    }));
+
+    res.json(formattedBatches);
+  } catch (error) {
+    console.error('Lỗi khi lấy danh sách lô hàng chờ vận chuyển:', error);
+    res.status(500).json({ error: 'Không thể lấy danh sách lô hàng chờ vận chuyển' });
+  }
+});
+app.post('/api/accept-transport', async (req, res) => {
+  try {
+    const { batchId } = req.body;
+    const userId = req.session.userId;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Người dùng chưa đăng nhập' });
+    }
+
+    // Kiểm tra quyền của người dùng (phải là người vận chuyển)
+    const [transporter] = await db.query('SELECT * FROM users WHERE uid = ? AND role_id = ?', [userId, 6]);
+    if (!transporter) {
+      return res.status(403).json({ error: 'Người dùng không có quyền vận chuyển' });
+    }
+
+    // Cập nhật trạng thái vận chuyển trong smart contract
+    await contract.methods.updateTransportStatus(batchId).send({ from: account.address, gas: 500000 });
+
+    // Ghi nhận sự tham gia của người vận chuyển
+    await contract.methods.recordParticipation(batchId, userId, "Transporter", "Bắt đầu vận chuyển")
+      .send({ from: account.address, gas: 500000 });
+
+    res.json({ success: true, message: 'Đã chấp nhận vận chuyển và ghi nhận sự tham gia thành công' });
+  } catch (error) {
+    console.error('Lỗi khi chấp nhận vận chuyển:', error);
+    res.status(500).json({ error: 'Không thể chấp nhận vận chuyển: ' + error.message });
+  }
+});
+
+function safeToString(value) {
+  if (typeof value === 'bigint') {
+    return value.toString();
+  }
+  return String(value); // Chuyển đổi tất cả các giá trị khác thành chuỗi
+}
+
+  // Route để quét mã QR và lấy thông tin lô hàng
+  app.post('/api/scan-qr-and-get-batch', uploadQR.single('qrImage'), async (req, res) => {
+    try {
+      console.log('Đã nhận được file ảnh QR');
+      if (!req.file) {
+        return res.status(400).json({ error: 'Không có file ảnh được tải lên' });
+      }
+      const image = sharp(req.file.buffer);
+      const metadata = await image.metadata();
+      const buffer = await image.raw().toBuffer();
+  
+      // Tạo đối tượng qr
+      const qr = new QrCode();
+      const value = await new Promise((resolve, reject) => {
+        qr.callback = (err, v) => err != null ? reject(err) : resolve(v);
+        qr.decode({
+          width: metadata.width,
+          height: metadata.height,
+          data: buffer
+        });
+      });
+  
+      console.log('Kết quả giải mã QR:', value);
+  
+      if (!value.result) {
+        return res.status(400).json({ error: 'Không thể đọc mã QR hoặc không tìm thấy SSCC' });
+      }
+
+      const sscc = value.result.split(':')[1]; // lấy phần sau của :
+      console.log('SSCC:', sscc);
+      // kiểm tra sscc có hợp lệ không
+      const batchInfo = await contract.methods.getBatchBySSCC(sscc).call();
+      const isValidSSCC = batchInfo !== null;
+
+      if (!isValidSSCC) {
+        return res.status(400).json({ error: 'SSCC không hợp lệ' });
+      }
+      const transportStatus = await contract.methods.getBatchTransportStatus(batchInfo.batchId).call();
+
+      const serializedBatchInfo = {
+        batchId: safeToString(batchInfo.batchId),
+        name: batchInfo.name,
+        sscc: batchInfo.sscc,
+        producerId: safeToString(batchInfo.producerId),
+        quantity: safeToString(batchInfo.quantity),
+        productionDate: new Date(Number(safeToString(batchInfo.productionDate)) * 1000).toISOString(),
+        status: translateStatus(safeToString(batchInfo.status)),
+        productImageUrls: batchInfo.productImageUrls,
+        certificateImageUrl: batchInfo.certificateImageUrl,
+        farmPlotNumber: batchInfo.farmPlotNumber,
+        productId: safeToString(batchInfo.productId),
+        transportStatus: translateTransportStatus(safeToString(transportStatus))
+      };
+  
+
+      res.json(serializedBatchInfo);
+    } catch (error) {
+      console.error('Lỗi khi quét mã QR và lấy thông tin lô hàng:', error);
+      res.status(500).json({ error: 'Không thể xử lý mã QR hoặc lấy thông tin lô hàng: ' + error.message });
+    }
+  });
+
+  app.post('/api/accept-transport', async (req, res) => {
+    try {
+      const { batchId } = req.body;
+      const userId = req.session.userId;
+
+      if (!userId) {
+        return res.status(401).json({ error: 'Người dùng chưa đăng nhập' });
+      }
+
+      // Kiểm tra quyền của người dùng (phải là người vận chuyển)
+      const [transporter] = await db.query('SELECT * FROM users WHERE uid = ? AND role_id = ?', [userId, 6]);
+      if (!transporter) {
+        return res.status(403).json({ error: 'Người dùng không có quyền vận chuyển' });
+      }
+
+      // Cập nhật trạng thái vận chuyển
+      await contract.methods.updateTransportStatus(batchId).send({ from: account.address, gas: 500000 });
+
+      // Ghi nhận sự tham gia của người vận chuyển
+      await contract.methods.recordParticipation(batchId, userId, "Transporter", "Da van chuyen")
+        .send({ from: account.address, gas: 500000 });
+
+      res.json({ success: true, message: 'Đã chấp nhận vận chuyển và ghi nhận sự tham gia thành công' });
+    } catch (error) {
+      console.error('Lỗi khi chấp nhận vận chuyển:', error);
+      res.status(500).json({ error: 'Không thể chấp nhận vận chuyển: ' + error.message });
+    }
+  });
+  function translateTransportStatus(status) {
+    switch (String(status)) {
+      case '0': return 'Chưa vận chuyển';
+      case '1': return 'Đang vận chuyển';
+      case '2': return 'Đã vận chuyển';
+      default: return 'Không xác định';
+    }
+  }
+
 
 app.get('/api/check-session', (req, res) => {
   if (req.session.userId) {
