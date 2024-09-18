@@ -132,29 +132,39 @@
             if (response.ok) {
                 const data = await response.json();
                 document.getElementById('userName').textContent = data.name;
-                document.getElementById('userRole').textContent = `Vai trò: ${data.role}`;
+                document.getElementById('userRole').textContent = `Vai trò: ${getRoleName(data.roleId)}`;
                 document.getElementById('userRegion').textContent = `Khu vực: ${data.region}`;
             } else {
                 console.error('Không thể lấy thông tin người dùng');
+                alert('Phiên đăng nhập đã hết hạn hoặc không hợp lệ. Vui lòng đăng nhập lại.');
+                window.location.href = '../account/dangnhap.html';
             }
         } catch (error) {
             console.error('Lỗi:', error);
+            alert('Có lỗi xảy ra khi kiểm tra thông tin đăng nhập. Vui lòng thử lại sau.');
         }
-    });
 
-    // Xử lý đăng xuất
-    document.getElementById('logoutButton').addEventListener('click', async function(e) {
-        e.preventDefault();
-        try {
-            const response = await fetch('/api/dangxuat', { method: 'POST' });
-            if (response.ok) {
-                window.location.href = '../account/dangnhap.html'; // Chuyển hướng về trang đăng nhập
-            } else {
-                console.error('Không thể đăng xuất');
+        // Xử lý đăng xuất
+        document.getElementById('logoutButton').addEventListener('click', async function(e) {
+            e.preventDefault();
+            try {
+                const response = await fetch('/api/dangxuat', { 
+                    method: 'POST',
+                    credentials: 'same-origin'
+                });
+                if (response.ok) {
+                    window.location.href = '../account/dangnhap.html';
+                } else {
+                    console.error('Không thể đăng xuất');
+                    alert('Đăng xuất không thành công. Vui lòng thử lại.');
+                }
+            } catch (error) {
+                console.error('Lỗi khi đăng xuất:', error);
+                alert('Có lỗi xảy ra khi đăng xuất. Vui lòng thử lại sau.');
             }
-        } catch (error) {
-            console.error('Lỗi khi đăng xuất:', error);
-        }
+        });
+
+        // Gọi hàm mặc định khi trang được tải
     });
     </script>
 
@@ -229,6 +239,19 @@
     </script>
 
 
+
+<script>
+      function getRoleName(roleId) {
+        switch (roleId) {
+            case 1: return 'Người sản xuất';
+            case 2: return 'Người kiểm duyệt';
+            case 6: return 'Người vận chuyển';
+            case 8: return 'Nhà kho';
+            case 3: return 'Admin';
+            default: return 'Không xác định';
+        }
+    }
+</script>
 <script>
 
 async function fetchBatches() {
