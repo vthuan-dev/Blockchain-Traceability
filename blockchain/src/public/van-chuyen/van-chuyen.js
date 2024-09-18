@@ -1,4 +1,6 @@
 // Thêm các hàm xử lý quét QR và chấp nhận vận chuyển
+let batchInfo; // Khai báo ở đầu file, ngoài hàm DOMContentLoaded
+
 
 document.addEventListener('DOMContentLoaded', function() {
     const startCameraButton = document.getElementById('start-camera');
@@ -114,7 +116,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Thêm hàm displayBatchInfo
-    function displayBatchInfo(batchInfo) {
+    function displayBatchInfo(info) {
+        batchInfo = info; // Lưu thông tin lô hàng vào biến toàn cục
         const batchInfoDiv = document.getElementById('batchInfo');
         const batchDetailsDiv = document.getElementById('batchDetails');
         
@@ -138,37 +141,20 @@ document.addEventListener('DOMContentLoaded', function() {
         addRow('Ngày tạo lô hàng', new Date(batchInfo.productionDate).toLocaleDateString());
         addRow('Trạng thái vận chuyển', batchInfo.transportStatus);
     
-        // Hiển thị hình ảnh sản phẩm
+        // Hiển thị nút xem hình ảnh sản phẩm
         if (batchInfo.productImageUrls && Object.keys(batchInfo.productImageUrls).length > 0) {
-            let imageGalleryHtml = '<div class="row">';
-            Object.values(batchInfo.productImageUrls).forEach(url => {
-                imageGalleryHtml += `
-                    <div class="col-6 mb-2">
-                        <img src="${url}" alt="Hình ảnh sản phẩm" class="img-fluid rounded product-image" onclick="openImageModal(this.src)">
-                    </div>
-                `;
-            });
-            imageGalleryHtml += '</div>';
-            addRow('Hình ảnh sản phẩm', imageGalleryHtml);
+            const imageCount = Object.keys(batchInfo.productImageUrls).length;
+            addRow('Hình ảnh sản phẩm', `<button class="btn btn-primary" onclick="openImageGallery('product')">Xem ${imageCount} ảnh sản phẩm</button>`);
         }
     
-        // Hiển thị hình ảnh lô hàng (nếu có)
+        // Hiển thị nút xem hình ảnh lô hàng (nếu có)
         if (batchInfo.batchImageUrls && batchInfo.batchImageUrls.length > 0) {
-            let batchImageGalleryHtml = '<div class="row">';
-            batchInfo.batchImageUrls.forEach(url => {
-                batchImageGalleryHtml += `
-                    <div class="col-6 mb-2">
-                        <img src="${url}" alt="Hình ảnh lô hàng" class="img-fluid rounded batch-image" onclick="openImageModal(this.src)">
-                    </div>
-                `;
-            });
-            batchImageGalleryHtml += '</div>';
-            addRow('Hình ảnh lô hàng', batchImageGalleryHtml);
+            addRow('Hình ảnh lô hàng', `<button class="btn btn-primary" onclick="openImageGallery('batch')">Xem ${batchInfo.batchImageUrls.length} ảnh lô hàng</button>`);
         }
     
-        // Hiển thị hình ảnh giấy chứng nhận
+        // Hiển thị nút xem giấy chứng nhận
         if (batchInfo.certificateImageUrl) {
-            addRow('Giấy chứng nhận', `<img src="${batchInfo.certificateImageUrl}" alt="Giấy chứng nhận" class="img-fluid rounded certificate-image" onclick="openImageModal(this.src)">`);
+            addRow('Giấy chứng nhận', `<button class="btn btn-primary" onclick="openImageModal('${batchInfo.certificateImageUrl}')">Xem giấy chứng nhận</button>`);
         }
     
         tableHTML += '</table>';
@@ -185,18 +171,67 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Hàm để mở modal khi click vào ảnh
+    // Hàm để mở modal khi click vào nút xem ảnh
     function openImageModal(src) {
+        console.log('Opening modal for:', src);
         const modal = document.getElementById('imageModal');
         const modalImg = document.getElementById('modalImage');
         modal.style.display = "block";
         modalImg.src = src;
+
+        // Thêm event listener để đóng modal khi nhấn vào overlay
+        modal.querySelector('.modal-overlay').addEventListener('click', closeModal);
+    }
+    
+    // Hàm để mở gallery khi click vào nút xem nhiều ảnh
+    function openImageGallery(type) {
+        console.log('Opening gallery for:', type);
+        console.log('Batch Info:', batchInfo);
+        const modal = document.getElementById('imageModal');
+        const modalContent = document.getElementById('modalContent');
+        modal.style.display = "block";
+        
+        let galleryHTML = '<div class="image-gallery">';
+        const images = type === 'product' ? batchInfo.productImageUrls : batchInfo.batchImageUrls;
+        
+        console.log('Images:', images);
+        
+        if (images && Object.keys(images).length > 0) {
+            Object.values(images).forEach(url => {
+                console.log('Adding image:', url);
+                galleryHTML += `<img src="${url}" alt="${type} image" class="gallery-image" onclick="expandImage('${url}')">`;
+            });
+        } else {
+            galleryHTML += '<p>Không có hình ảnh để hiển thị.</p>';
+        }
+        
+        galleryHTML += '</div>';
+        modalContent.innerHTML = galleryHTML;
+
+        // Thêm event listener để đóng modal khi nhấn vào overlay
+        modal.querySelector('.modal-overlay').addEventListener('click', closeModal);
+    }
+    
+    // Hàm để phóng to ảnh trong gallery
+    function expandImage(src) {
+        const modalImg = document.getElementById('modalImage');
+        modalImg.src = src;
+        modalImg.style.display = 'block';
     }
 
-    // Đảm bảo rằng bạn có đoạn code này để đóng modal
-    document.querySelector('.close').onclick = function() { 
-        document.getElementById('imageModal').style.display = "none";
+    // Thêm hàm này vào phạm vi toàn cục
+    window.closeModal = function() {
+        const modal = document.getElementById('imageModal');
+        modal.style.display = "none";
     }
+
+    // Thêm đoạn code này vào cuối file hoặc trong hàm init của bạn
+    document.addEventListener('DOMContentLoaded', function() {
+        const closeButton = document.querySelector('.close');
+        if (closeButton) {
+            closeButton.addEventListener('click', closeModal);
+        }
+    });
 
     async function acceptTransport(batchId) {
         try {
@@ -229,3 +264,53 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 5000); // Xóa thông báo sau 5 giây
     }
 });
+
+// Định nghĩa các hàm này ở phạm vi toàn cục
+window.openImageGallery = function(type) {
+    console.log('Opening gallery for:', type);
+    console.log('Batch Info:', batchInfo);
+    const modal = document.getElementById('imageModal');
+    const modalContent = document.getElementById('modalContent');
+    modal.style.display = "block";
+    
+    let galleryHTML = '<div class="image-gallery">';
+    const images = type === 'product' ? batchInfo.productImageUrls : batchInfo.batchImageUrls;
+    
+    console.log('Images:', images);
+    
+    if (images && Object.keys(images).length > 0) {
+        Object.values(images).forEach(url => {
+            console.log('Adding image:', url);
+            galleryHTML += `<img src="${url}" alt="${type} image" class="gallery-image" onclick="expandImage('${url}')">`;
+        });
+    } else {
+        galleryHTML += '<p>Không có hình ảnh để hiển thị.</p>';
+    }
+    
+    galleryHTML += '</div>';
+    modalContent.innerHTML = galleryHTML;
+
+    // Thêm event listener để đóng modal khi nhấn vào overlay
+    modal.querySelector('.modal-overlay').addEventListener('click', closeModal);
+}
+
+window.openImageModal = function(src) {
+    console.log('Opening modal for:', src);
+    const modal = document.getElementById('imageModal');
+    const modalImg = document.getElementById('modalImage');
+    modal.style.display = "block";
+    modalImg.src = src;
+
+    // Thêm event listener để đóng modal khi nhấn vào overlay
+    modal.querySelector('.modal-overlay').addEventListener('click', closeModal);
+}
+
+window.expandImage = function(src) {
+    const modalImg = document.getElementById('modalImage');
+    modalImg.src = src;
+    modalImg.style.display = 'block';
+}
+
+window.acceptTransport = function(batchId) {
+    // ... giữ nguyên nội dung hàm này
+}
