@@ -196,3 +196,70 @@
 }
 
 /* Các styles khác giữ nguyên */
+
+.qr-scanner-container {
+    background-color: #ffffff;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.qr-scanner-container h5 {
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.qr-scanner-container .btn {
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+}
+
+.qr-scanner-container .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.qr-scanner-container .btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.qr-scanner-container .btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.qr-scanner-container .btn-success {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+#file-selected {
+    color: #28a745;
+    font-style: italic;
+    margin-top: 10px;
+}
+
+#qr-reader {
+    border: 2px solid #007bff;
+    border-radius: 5px;
+    overflow: hidden;
+    margin-top: 20px;
+}
+
+.custom-file-upload {
+    display: inline-block;
+    cursor: pointer;
+}
+
+#scan-button:disabled {
+    background-color: #cccccc;
+    border-color: #cccccc;
+    cursor: not-allowed;
+}
