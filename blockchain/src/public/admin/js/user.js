@@ -23,6 +23,11 @@ window.UserManager = {
         return approved === 1 ? 'Đã xác thực' : 'Chưa xác thực';
     },
 
+    getAvatarPath: function(avatarPath) {
+        if (!avatarPath) return 'uploads/avatars/default-avatar.png'; // Đường dẫn mặc định nếu không có avatar
+        return '../uploads/avatars' + avatarPath.split('avatars').pop();
+    },
+
     renderTable: function() {
         const tbody = document.querySelector('.table tbody');
         if (!tbody) return;
@@ -45,21 +50,22 @@ window.UserManager = {
         }
 
         paginatedData.forEach(user => {
+            const avatarPath = this.getAvatarPath(user.avatar);
             const row = `
                 <tr>
-                    <td>${user.uid}</td>
-                    <td>${user.phone}</td>
-                    <td>${user.name}</td>
-                    <td>${user.email}</td>
-                    <td>${user.avatars}</td>
-                    <td>${user.address}</td>
-                    <td>${user.region_id}</td>
-                    <td>${this.formatDate(user.dob)}</td>
-                    <td>${user.gender}</td>
-                    <td>${this.formatDate(user.created_at)}</td>
-                    <td>${this.getRole(user.role_id)}</td>
-                    <td>${this.getApproved(user.is_approved)}</td>
-                    <td>
+                    <td style="text-align: center; vertical-align: middle;">${user.uid}</td>
+                    <td style="text-align: center; vertical-align: middle;">${user.phone}</td>
+                    <td style="text-align: center; vertical-align: middle;">${user.name}</td>
+                    <td style="text-align: center; vertical-align: middle;">${user.email}</td>
+                    <td style="text-align: center; vertical-align: middle;"><img src="${avatarPath}" alt="Avatar" class="user-avatar" style="width: 50px; height: 50px; object-fit: cover; border-radius: 50%;"></td>
+                    <td style="text-align: center; vertical-align: middle;">${user.address}</td>
+                    <td style="text-align: center; vertical-align: middle;">${user.region_id}</td>
+                    <td style="text-align: center; vertical-align: middle;">${this.formatDate(user.dob)}</td>
+                    <td style="text-align: center; vertical-align: middle;">${user.gender}</td>
+                    <td style="text-align: center; vertical-align: middle;">${this.formatDate(user.created_at)}</td>
+                    <td style="text-align: center; vertical-align: middle;">${this.getRole(user.role_id)}</td>
+                    <td style="text-align: center; vertical-align: middle;">${this.getApproved(user.is_approved)}</td>
+                    <td style="text-align: center; vertical-align: middle;">
                         <button class="action-icons bg-red" title="Xóa"><i class="fas fa-trash-alt"></i></button>
                     </td>
                 </tr>

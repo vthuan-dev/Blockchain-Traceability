@@ -22,7 +22,7 @@ window.ProductManager = {
         if (this.filteredData.length === 0) {
             const emptyRow = `
                 <tr>
-                    <td colspan="8" class="text-center">Không tìm thấy kết quả phù hợp</td>
+                    <td colspan="7" class="text-center">Không tìm thấy kết quả phù hợp</td>
                 </tr>
             `;
             tbody.innerHTML = emptyRow;
@@ -33,13 +33,13 @@ window.ProductManager = {
         paginatedData.forEach(product => {
             const row = `
                 <tr>
-                    <td>${product.product_id}</td>
-                    <td>${product.product_name}</td>
-                    <td>${product.description}</td>
-                    <td>${product.price}</td>
-                    <td>${product.img}</td>
-                    <td>${this.formatDate(product.created_at)}</td>
-                    <td>
+                    <td style="text-align: center; vertical-align: middle;">${product.product_id}</td>
+                    <td style="text-align: center; vertical-align: middle;">${product.product_name}</td>
+                    <td style="text-align: center; vertical-align: middle;">${product.description}</td>
+                    <td style="text-align: center; vertical-align: middle;">${product.price}</td>
+                    <td style="text-align: center; vertical-align: middle;"><img src="${product.img}" alt="Ảnh sản phẩm" style="width: 50px; height: 50px; object-fit: cover;"></td>
+                    <td style="text-align: center; vertical-align: middle;">${this.formatDate(product.created_at)}</td>
+                    <td style="text-align: center; vertical-align: middle;">
                         <button class="action-icons bg-blue" title="Sửa" onclick="window.ProductManager.editProduct(${product.product_id}, '${product.product_name}', ${product.price}, '${product.description}', '${product.uses}', '${product.process}')"><i class="fas fa-edit"></i></button>
                         <button class="action-icons bg-red" title="Xóa"><i class="fas fa-trash-alt"></i></button>
                     </td>
