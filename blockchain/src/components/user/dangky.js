@@ -90,8 +90,17 @@
         
         router.get('/regions', async (req, res) => {
             try {
-                console.log('Đang truy vấn regions...');
-                const [regions] = await db.query('SELECT * FROM regions');
+                const provinceId = req.query.province_id;
+                
+                if (!provinceId) {
+                    return res.status(400).json({ error: 'Thiếu mã tỉnh' });
+                }
+        
+                console.log('Đang truy vấn regions cho tỉnh:', provinceId);
+                
+                // Sửa đổi câu truy vấn để chỉ lấy các vùng có 2 chữ số đầu của region_id trùng với provinceId
+                const [regions] = await db.query('SELECT * FROM regions WHERE LEFT(region_id, 2) = ?', [provinceId.substring(0, 2)]);
+                
                 console.log('Kết quả truy vấn regions:', regions);
                 res.json(regions);
             } catch (error) {
