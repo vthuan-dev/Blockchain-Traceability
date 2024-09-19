@@ -9,6 +9,14 @@ window.ProductManager = {
         return formatDate(dateString); // Sử dụng hàm từ feature.js
     },
 
+    getProductImagePath: function(imagePath) {
+        if (!imagePath || imagePath === 'path/to/default-product-image.png') {
+            return 'path/to/default-product-image.png';
+        }
+        console.log('Image Path:', imagePath); // Thêm dòng này để kiểm tra URL của ảnh
+        return imagePath;
+    },
+
     renderTable: function() {
         const tbody = document.querySelector('.table tbody');
         if (!tbody) return;
@@ -31,16 +39,20 @@ window.ProductManager = {
         }
 
         paginatedData.forEach(product => {
+            const imagePath = this.getProductImagePath(product.img);
+            console.log('Rendering Image Path:', imagePath); // Thêm dòng này để kiểm tra URL của ảnh khi render
             const row = `
                 <tr>
                     <td style="text-align: center; vertical-align: middle;">${product.product_id}</td>
                     <td style="text-align: center; vertical-align: middle;">${product.product_name}</td>
                     <td style="text-align: center; vertical-align: middle;">${product.description}</td>
                     <td style="text-align: center; vertical-align: middle;">${product.price}</td>
-                    <td style="text-align: center; vertical-align: middle;"><img src="${product.img}" alt="Ảnh sản phẩm" style="width: 50px; height: 50px; object-fit: cover;"></td>
+                    <td style="text-align: center; vertical-align: middle;">
+                        <img src="${imagePath}" alt="Ảnh sản phẩm" title="${imagePath}" style="width: 50px; height: 50px; object-fit: cover;">
+                    </td>
                     <td style="text-align: center; vertical-align: middle;">${this.formatDate(product.created_at)}</td>
                     <td style="text-align: center; vertical-align: middle;">
-                        <button class="action-icons bg-blue" title="Sửa" onclick="window.ProductManager.editProduct(${product.product_id}, '${product.product_name}', ${product.price}, '${product.description}', '${product.uses}', '${product.process}')"><i class="fas fa-edit"></i></button>
+                        <button class="action-icons bg-blue" title="Sửa" onclick="window.ProductManager.editProduct(${product.product_id}, '${product.product_name}', ${product.price}, '${product.description}', '${product.uses}', '${product.process}', '${product.img}')"><i class="fas fa-edit"></i></button>
                         <button class="action-icons bg-red" title="Xóa"><i class="fas fa-trash-alt"></i></button>
                     </td>
                 </tr>
@@ -76,9 +88,9 @@ window.ProductManager = {
         .catch(error => console.error('Lỗi khi lấy dữ liệu sản phẩm:', error));
     },
 
-    editProduct: function(id, name, price, description, uses, process) {
+    editProduct: function(id, name, price, description, uses, process, img) {
         const editLink = document.createElement('a');
-        editLink.href = `editproduct.html?id=${id}&name=${encodeURIComponent(name)}&price=${price}&description=${encodeURIComponent(description)}&uses=${encodeURIComponent(uses)}&process=${encodeURIComponent(process)}`;
+        editLink.href = `editproduct.html?id=${id}&name=${encodeURIComponent(name)}&price=${price}&description=${encodeURIComponent(description)}&uses=${encodeURIComponent(uses)}&process=${encodeURIComponent(process)}&img=${encodeURIComponent(img)}`;
         editLink.style.display = 'none';
         document.body.appendChild(editLink);
         editLink.click();
@@ -158,13 +170,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     
         paginatedData.forEach(product => {
+            const imagePath = window.ProductManager.getProductImagePath(product.img);
             const row = `
                 <tr>
                     <td>${product.product_id}</td>
                     <td>${product.product_name}</td>
                     <td>${product.description}</td>
                     <td>${product.price}</td>
-                    <td>${product.img}</td>
+                    <td>${imagePath}</td>
                     <td>${formatDate(product.created_at)}</td>
                     <td>
                         <button class="action-icons bg-blue" title="Sửa"><i class="fas fa-edit"></i></button>

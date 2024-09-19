@@ -7,19 +7,12 @@
     const crypto = require('crypto');
     const { sendEmail } = require('./sendmail');
     const axios = require('axios');
+    const { storage, ref, uploadBytes, getDownloadURL, authenticateAnonymously } = require('../../firebase');
 
     const router = express.Router();
-
     
-    const storage = multer.diskStorage({
-        destination: function (req, file, cb) {
-            cb(null, path.join(__dirname, '../../public/uploads/avatars'));
-        },
-        filename: function (req, file, cb) {
-            cb(null, Date.now() + path.extname(file.originalname));
-        }
-    });
-    const upload = multer({ storage: storage });
+    // Sử dụng memoryStorage thay vì diskStorage
+    const upload = multer({ storage: multer.memoryStorage() });
 
     function validateInput(data) {
         const requiredFields = ['name', 'email', 'password', 'phone', 'dob', 'gender', 'role_id', 'province_id', 'district_id', 'ward_id', 'specific_address'];
@@ -122,6 +115,8 @@
         });
         router.post('/register', upload.single('avatar'), async function(req, res) {
             try {
+                await authenticateAnonymously(); // Thêm dòng này
+
                 const { name, email, password, phone, dob, gender, role_id, region_id, province_id, district_id, ward_id, specific_address } = req.body;
                 const missingFields = validateInput(req.body);
 
@@ -173,7 +168,13 @@
                 }
 
                 const hashedPassword = await bcrypt.hash(password, 10);
-                const avatar = req.file ? req.file.filename : null;
+                let avatarUrl = null;
+                if (req.file) {
+                    const avatarRef = ref(storage, `avatars/${Date.now()}_${req.file.originalname}`);
+                    const snapshot = await uploadBytes(avatarRef, req.file.buffer);
+                    avatarUrl = await getDownloadURL(snapshot.ref);
+                }
+
                 const verificationToken = crypto.randomBytes(20).toString('hex');
 
                 // Kiểm tra region_id
@@ -186,7 +187,7 @@
                 }
 
                 const sql = 'INSERT INTO users (name, email, passwd, phone, address, dob, gender, role_id, region_id, province_id, district_id, ward_id, avatar, verificationToken) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-                const values = [name, email, hashedPassword, phone, fullAddress, dob, gender, role_id, finalRegionId, province_id, district_id, ward_id, avatar, verificationToken];
+                const values = [name, email, hashedPassword, phone, fullAddress, dob, gender, role_id, finalRegionId, province_id, district_id, ward_id, avatarUrl, verificationToken];
 
                 await db.query(sql, values);
 

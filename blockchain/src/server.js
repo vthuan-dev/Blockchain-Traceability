@@ -16,7 +16,6 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
@@ -35,11 +34,11 @@ const db = mysql.createPool({
   database: process.env.DB_DATABASE,
   connectTimeout: 10000
 });
-const dangkyRoutes = require('./components/user/dangky')(db);
+const upload = multer({ storage: multer.memoryStorage() });
+const dangkyRoutes = require('./components/user/dangky')(db, upload);
 const dangnhapRoutes = require('./components/user/dangnhap')(db);
 app.use('/api', dangkyRoutes);
 app.use('/api', dangnhapRoutes);
-
 
 const { 
   s3Client, 
@@ -48,7 +47,6 @@ const {
   uploadFile, 
   checkFileStatusWithRetry, 
   setupRoutes,
-  upload,
   activityUpload,
   processFiles,
   checkUserExists,
@@ -68,17 +66,11 @@ app.use((req, res, next) => {
   next();
 });
 
-
-
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'trangchu.html'));
 });
-
-//app.post('/api/register', upload.single('avatar'), (req, res) => {
-  // Xử lý logic đăng ký ở đây
-//});
 
 app.post('/api/dangnhap', async (req, res) => {
   const { email, password } = req.body;
@@ -147,7 +139,6 @@ app.get('/nhakiemduyet.html', requireAuth, (req, res) => {
   }
 });
 
-
 app.get('/api/user-info', async (req, res) => { 
   if (req.session.userId) {
     try {
@@ -189,7 +180,6 @@ app.post('/api/dangxuat', (req, res) => {
     });
 });
 console.log('Các route đã đăng ký:', app._router.stack.filter(r => r.route).map(r => r.route.path));
-
 
 const manageRoutes = require('./manage.js');
 app.use('/', manageRoutes);
