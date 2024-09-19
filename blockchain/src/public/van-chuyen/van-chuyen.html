@@ -82,6 +82,15 @@
             <div id="batchInfo" style="display: none;">
                 <h5>Thông tin lô hàng</h5>
                 <div id="batchDetails"></div>
+                <div id="transportHistory"></div>
+            </div>
+            
+            <!-- Thêm các nút mới vào phần hiển thị thông tin lô hàng -->
+            <div id="transportActions" style="display: none;">
+                <button id="start-transport" class="btn btn-primary">Bắt đầu vận chuyển</button>
+                <button id="pause-transport" class="btn btn-warning" style="display: none;">Tạm dừng vận chuyển</button>
+                <button id="resume-transport" class="btn btn-info" style="display: none;">Tiếp tục vận chuyển</button>
+                <button id="complete-transport" class="btn btn-success" style="display: none;">Hoàn thành vận chuyển</button>
             </div>
         </div>
     </main>
@@ -154,6 +163,15 @@
             <span class="close">&times;</span>
             <div id="modalContent"></div>
             <img class="modal-image" id="modalImage">
+        </div>
+    </div>
+
+    <!-- Thêm modal vào cuối body -->
+    <div id="completionModal" class="modal">
+        <div class="modal-content">
+            <h2>Hoàn thành vận chuyển</h2>
+            <p>Bạn đã hoàn thành vận chuyển lô hàng này.</p>
+            <button id="closeCompletionModal" class="btn btn-primary">Đóng</button>
         </div>
     </div>
 </body>

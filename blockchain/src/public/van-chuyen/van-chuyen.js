@@ -1,6 +1,40 @@
 // Khai báo các hàm ở phạm vi toàn cục
 let batchInfo;
 let html5QrCode;
+async function displayTransportHistory(sscc) {
+    try {
+        const response = await fetch(`/api/batch-transport-history/${sscc}`);
+        const history = await response.json();
+        
+        console.log('Transport History:', history);
+        
+        if (!Array.isArray(history)) {
+            throw new Error('Lịch sử vận chuyển không phải là một mảng');
+        }
+        
+        let historyHTML = '<h3>Lịch sử vận chuyển</h3><ul>';
+        history.forEach(event => {
+            historyHTML += `
+                <li>
+                    <strong>Hành động:</strong> ${event.action}<br>
+                    <strong>Thời gian:</strong> ${new Date(parseInt(event.timestamp) * 1000).toLocaleString()}<br>
+                    <strong>Loại người tham gia:</strong> ${event.participantType}<br>
+                    <strong>Người vận chuyển:</strong> ${event.transporterName || 'N/A'}<br>
+                    <strong>Số điện thoại:</strong> ${event.transporterPhone || 'N/A'}<br>
+                    <strong>Địa chỉ:</strong> ${event.transporterAddress || 'N/A'}
+                </li>
+            `;
+        });
+        historyHTML += '</ul>';
+        
+        document.getElementById('transportHistory').innerHTML = historyHTML;
+    } catch (error) {
+        console.error('Error displaying transport history:', error);
+        alert('Không thể lấy lịch sử vận chuyển. Vui lòng thử lại.');
+    }
+}
+
+
 
 function displayBatchInfo(info) {
     console.log('Displaying batch info:', info);
@@ -57,6 +91,9 @@ function displayBatchInfo(info) {
     tableHTML += transportButton;
     batchDetailsDiv.innerHTML = tableHTML;
     batchInfoDiv.style.display = 'block';
+
+    displayTransportHistory(info.sscc);
+
 }
 
 async function fetchBatchInfoBySSCC(sscc) {
@@ -71,6 +108,18 @@ async function fetchBatchInfoBySSCC(sscc) {
         console.error('Lỗi khi lấy thông tin lô hàng:', error);
         alert('Có lỗi xảy ra khi lấy thông tin lô hàng. Vui lòng thử lại.');
     }
+}
+
+function showCompletionModal() {
+    const modal = document.getElementById('completionModal');
+    modal.style.display = 'block';
+}
+
+// Thêm hàm để đóng modal và làm mới trang
+function closeCompletionModalAndRefresh() {
+    const modal = document.getElementById('completionModal');
+    modal.style.display = 'none';
+    location.reload(); // Làm mới trang
 }
 
 async function updateTransportStatus(sscc, action) {
@@ -90,7 +139,12 @@ async function updateTransportStatus(sscc, action) {
             throw new Error(data.error || 'Không thể cập nhật trạng thái vận chuyển');
         }
 
-        alert(data.message);
+        if (action === 'Hoan thanh van chuyen') {
+            showTransportCompletionMessage();
+        } else {
+            alert(data.message);
+            await fetchBatchInfoBySSCC(sscc);
+        }
 
         // Lấy thông tin lô hàng mới sau khi cập nhật trạng thái
         await fetchBatchInfoBySSCC(sscc);
@@ -98,6 +152,36 @@ async function updateTransportStatus(sscc, action) {
         console.error('Error:', error);
         alert('Có lỗi xảy ra khi cập nhật trạng thái vận chuyển: ' + error.message);
     }
+}
+
+// Cập nhật hàm showTransportCompletionMessage
+function showTransportCompletionMessage() {
+    const successMessage = document.createElement('div');
+    successMessage.className = 'alert alert-success mt-3';
+    successMessage.innerHTML = `
+        <h4 class="alert-heading">Vận chuyển thành công!</h4>
+        <p>Bạn đã hoàn thành vận chuyển lô hàng này.</p>
+        <hr>
+        <p class="mb-0">Trang sẽ tự động tải lại sau 5 giây.</p>
+    `;
+    
+    // Ẩn thông tin lô hàng và các nút hành động nếu có
+    const batchInfoDiv = document.getElementById('batchInfo');
+    const transportActionsDiv = document.getElementById('transportActions');
+    if (batchInfoDiv) batchInfoDiv.style.display = 'none';
+    if (transportActionsDiv) transportActionsDiv.style.display = 'none';
+    
+    // Chèn thông báo vào đầu trang
+    const container = document.querySelector('.container');
+    container.insertBefore(successMessage, container.firstChild);
+    
+    // Cuộn trang đến thông báo
+    successMessage.scrollIntoView({ behavior: 'smooth' });
+
+    // Đợi 2 giây và sau đó tải lại trang
+    setTimeout(() => {
+        window.location.reload();
+    }, 5000);
 }
 
 function openImageModal(src) {
@@ -152,6 +236,8 @@ function closeModal() {
 
 // Event listener cho DOMContentLoaded
 document.addEventListener('DOMContentLoaded', function() {
+   
+    
     const startCameraButton = document.getElementById('start-camera');
     const qrInput = document.getElementById('qr-input');
     const fileSelected = document.getElementById('file-selected');
@@ -174,11 +260,12 @@ document.addEventListener('DOMContentLoaded', function() {
         html5QrCode = new Html5Qrcode("qr-reader");
         qrReader.style.display = 'block';
         const qrCodeSuccessCallback = (decodedText, decodedResult) => {
+            console.log("QR Code from camera:", decodedText); // Thêm log để kiểm tra giá trị từ camera
             stopScanner();
             handleQRCode(decodedText);
         };
         const config = { fps: 10, qrbox: { width: 250, height: 250 } };
-
+    
         html5QrCode.start({ facingMode: "environment" }, config, qrCodeSuccessCallback)
             .then(() => {
                 console.log("QR Code scanning is started");
@@ -266,6 +353,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const parts = decodedText.split(':');
         if (parts.length === 2 && parts[0] === 'SSCC') {
             const sscc = parts[1];
+            console.log("Extracted SSCC:", sscc); // Thêm log để kiểm tra giá trị SSCC
             fetchBatchInfoBySSCC(sscc);
         } else {
             alert('Mã QR không hợp lệ');
@@ -275,6 +363,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const closeButton = document.querySelector('.close');
     if (closeButton) {
         closeButton.addEventListener('click', closeModal);
+    }
+
+
+    const completionMessage = localStorage.getItem('transportCompletionMessage');
+    if (completionMessage) {
+        showTransportCompletionMessage();
     }
 });
 
