@@ -4,6 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const notificationPanel = document.querySelector('.notification-panel');
     const sidebar = document.querySelector('.sidebar');
     const sidebarToggle = document.querySelector('.sidebar-toggle');
+    const notificationList = document.getElementById('notificationList');
+    const confirmReadButton = document.getElementById('confirmRead');
 
     // Toggle dropdown menu
     if (profileIcon && dropdownMenu) {
@@ -43,7 +45,57 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Fetch admin info and update section title
     fetchAdminInfo();
+
+    // Fetch notifications
+    fetchNotifications();
+
+    // Initialize WebSocket connection
+    const socket = new WebSocket('ws://localhost:8080');
+
+    socket.addEventListener('message', (event) => {
+        const notification = JSON.parse(event.data);
+        const li = document.createElement('li');
+        li.textContent = notification.message;
+        li.setAttribute('data-id', notification.notification_id); // Lưu ID thông báo
+        notificationList.appendChild(li);
+        confirmReadButton.style.display = 'block'; // Hiện nút xác nhận
+    });
+
+    // Xóa đoạn code liên quan đến việc đánh dấu thông báo đã xem
+    confirmReadButton.addEventListener('click', async () => {
+        // Không cần logic này nữa
+        notificationList.innerHTML = ''; // Xóa danh sách thông báo 
+    });
+
+    async function markAsRead(notificationId) {
+        try {
+            await fetch(`/api/notifications/${notificationId}/read`, { method: 'POST' });
+        } catch (error) {
+            console.error('Lỗi khi đánh dấu thông báo đã xem:', error);
+        }
+    }
 });
+
+// Function to fetch notifications
+async function fetchNotifications() {
+    try {
+        const response = await fetch('/api/notifications');
+        if (response.ok) {
+            const notifications = await response.json();
+            const notificationList = document.getElementById('notificationList');
+            notifications.forEach(notification => {
+                const li = document.createElement('li');
+                li.textContent = notification.message;
+                li.setAttribute('data-id', notification.notification_id); // Lưu ID thông báo
+                notificationList.appendChild(li);
+            });
+        } else {
+            console.error('Không thể lấy thông báo');
+        }
+    } catch (error) {
+        console.error('Lỗi:', error);
+    }
+}
 
 // Function to toggle sidebar and manage toggle button position
 function toggleSidebar() {

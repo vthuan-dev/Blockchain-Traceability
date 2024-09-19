@@ -196,6 +196,10 @@
                 const templatePath = path.join(__dirname, '../../public/account/xacthuc.html');
                 await sendEmail(email, name, verificationLink, 'Xác thực tài khoản của bạn', templatePath);
 
+                // Lưu thông báo vào CSDL
+                const notificationMessage = `Người dùng mới đã đăng ký: ${name} (${email})`;
+                await saveNotification(db, email, notificationMessage, 3);
+
                 res.status(201).json({ 
                     message: 'Đã đăng ký tài khoản người dùng thành công. Vui lòng kiểm tra email của bạn để xác thực tài khoản.',
                     email: email
@@ -229,3 +233,13 @@
 
         return router;
     };
+
+    async function saveNotification(db, email, message, role_id) {
+        const sql = 'INSERT INTO notifications (email, message, role_id) VALUES (?, ?, ?)';
+        const values = [email, message, role_id];
+        try {
+            await db.query(sql, values);
+        } catch (error) {
+            console.error('Lỗi khi lưu thông báo:', error);
+        }
+    }
