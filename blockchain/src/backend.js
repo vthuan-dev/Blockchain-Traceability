@@ -59,7 +59,7 @@ web3.eth.net.isListening()
   .catch(e => console.log('Lỗi rồi', e));
 
 const contractABI = require('../build/contracts/TraceabilityContract.json').abi;
-const contractAddress = '0x697F2FcDe38B05c0B694516E48875B18b73C6C33';
+const contractAddress = '0xa4D6D9441A57d9F66ef9e5Ab3d55fe911a126F36';
 const contract = new web3.eth.Contract(contractABI, contractAddress);
 
 // tạo biến lưu trữ file, giới hạn số lượng file và tên file, maxCount: số lượng file, name: tên file
@@ -1307,31 +1307,56 @@ function safeToString(value) {
       res.status(500).json({ error: 'Không thể xử lý mã QR hoặc lấy thông tin lô hàng: ' + error.message });
     }
   });
+
+
   app.post('/api/accept-transport', async (req, res) => {
     try {
-      const { batchId, action } = req.body;
+      const { sscc, action } = req.body;
       const userId = req.session.userId;
+      const roleId = req.session.roleId;
+  
+      console.log('Received request:', { sscc, action, userId, roleId });
   
       if (!userId) {
         return res.status(401).json({ error: 'Người dùng chưa đăng nhập' });
       }
   
-      // Kiểm tra quyền của người dùng (phải là người vận chuyển hoặc nhà kho)
+      // Kiểm tra quyền của người dùng
       const [participant] = await db.query('SELECT * FROM users WHERE uid = ? AND role_id IN (6, 8)', [userId]);
       if (!participant) {
         return res.status(403).json({ error: 'Người dùng không có quyền vận chuyển hoặc nhận hàng' });
       }
   
+   
+      let participantType;
+      if (roleId === 6) {
+        participantType = "Transporter";
+      } else if (roleId === 8) {
+        participantType = "Warehouse";
+      } else {
+        return res.status(403).json({ error: 'Người dùng không có quyền vận chuyển hoặc nhận hàng' });
+      }
+  
+  
+      console.log('Participant type:', participantType);
+
+      console.log('Before calling updateTransportStatus:', { batchId, userId, action, participantType });
+      const result = await contract.methods.updateTransportStatus(batchId, userId, action, participantType)
+        .send({ from: account.address, gas: 500000 });
+      console.log('After calling updateTransportStatus:', result);
+      // Lấy batchId từ SSCC
+      const batchId = await contract.methods.getBatchIdBySSCC(sscc).call();
+      if (!batchId) {
+        return res.status(404).json({ error: 'Không tìm thấy lô hàng với SSCC này' });
+      }
+  
+      console.log('Updating transport status with:', { batchId, userId, action, participantType });
+  
       // Cập nhật trạng thái vận chuyển
-      await contract.methods.updateTransportStatus(batchId, userId, action)
+      await contract.methods.updateTransportStatus(batchId, userId, action, participantType)
         .send({ from: account.address, gas: 500000 });
   
-      // Ghi nhận sự tham gia
-      const participantType = participant.role_id === 6 ? "Transporter" : "Warehouse";
-      await contract.methods.recordParticipation(batchId, userId, participantType, action)
-        .send({ from: account.address, gas: 500000 });
-  
-      res.json({ success: true, message: 'Đã cập nhật trạng thái vận chuyển và ghi nhận sự tham gia thành công' });
+      res.json({ success: true, message: 'Đã cập nhật trạng thái vận chuyển thành công' });
     } catch (error) {
       console.error('Lỗi khi cập nhật trạng thái vận chuyển:', error);
       res.status(500).json({ error: 'Không thể cập nhật trạng thái vận chuyển: ' + error.message });
@@ -1392,6 +1417,41 @@ function translateStatus(status) {
       return 'Không xác định';
   }
 }
+app.get('/api/batch-transport-history/:sscc', async (req, res) => {
+  try {
+      const sscc = req.params.sscc;
+      
+      // Lấy lịch sử vận chuyển từ blockchain bằng SSCC
+      const transportHistory = await contract.methods.getTransportHistoryBySSCC(sscc).call();
+      console.log('Transport History from blockchain:', transportHistory);
+      
+      // Hàm để chuyển đổi BigInt thành string
+      const convertBigIntToString = (obj) => {
+          return Object.keys(obj).reduce((acc, key) => {
+              acc[key] = typeof obj[key] === 'bigint' ? obj[key].toString() : obj[key];
+              return acc;
+          }, {});
+      };
+
+      // Lấy thông tin chi tiết về người vận chuyển từ cơ sở dữ liệu MySQL và chuyển đổi BigInt
+      const enrichedHistory = await Promise.all(transportHistory.map(async (event) => {
+          const [transporter] = await db.query('SELECT name, phone, address FROM users WHERE uid = ?', [event.participantId]);
+          const convertedEvent = convertBigIntToString(event);
+          return {
+              ...convertedEvent,
+              transporterName: transporter ? transporter.name : 'Unknown',
+              transporterPhone: transporter ? transporter.phone : 'N/A',
+              transporterAddress: transporter ? transporter.address : 'N/A'
+          };
+      }));
+      
+      console.log('Enriched Transport History:', enrichedHistory);
+      res.json(enrichedHistory);
+  } catch (error) {
+      console.error('Error fetching transport history:', error);
+      res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 }
 

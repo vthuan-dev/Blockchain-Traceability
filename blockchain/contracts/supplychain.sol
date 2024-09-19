@@ -7,7 +7,7 @@ contract TraceabilityContract {
 enum BatchStatus { PendingApproval, Approved, Rejected }
 enum TransportStatus { NotTransported, InTransit, Delivered }
 enum ParticipantType { Producer, Transporter, Warehouse, Consumer }
-enum DetailedTransportStatus { NotStarted, InTransit, Delivered }
+enum DetailedTransportStatus { NotStarted, InTransit, Paused, Delivered }
 
     struct Batch {
         uint256 batchId;
@@ -467,10 +467,22 @@ function recordParticipation(uint256 _batchId, uint256 _participantId, string me
     
     emit ParticipationRecorded(_batchId, _participantId, _participantType, _action);
 }
+event LogParticipantType(uint256 indexed batchId, string participantType);
+
 function updateTransportStatus(uint256 _batchId, uint256 _participantId, string memory _action, string memory _participantType) public {
+
+    
     require(_batches[_batchId].batchId != 0, "Batch does not exist");
     require(_batches[_batchId].status == BatchStatus.Approved, "Batch must be approved");
     
+    emit LogParticipantType(_batchId, _participantType);
+
+
+    require(
+        keccak256(abi.encodePacked(_participantType)) == keccak256(abi.encodePacked("Warehouse")) ||
+        keccak256(abi.encodePacked(_participantType)) == keccak256(abi.encodePacked("Transporter")),
+        "Invalid participant type"
+    );
     TransportEvent memory newEvent = TransportEvent({
         participantId: _participantId,
         timestamp: block.timestamp,
@@ -484,12 +496,21 @@ function updateTransportStatus(uint256 _batchId, uint256 _participantId, string 
         _batches[_batchId].detailedTransportStatus = DetailedTransportStatus.InTransit;
         _batches[_batchId].transportStatus = TransportStatus.InTransit;
         _batches[_batchId].lastTransporterId = _participantId;
+    } else if (keccak256(abi.encodePacked(_action)) == keccak256(abi.encodePacked("Tam dung van chuyen"))) {
+        _batches[_batchId].detailedTransportStatus = DetailedTransportStatus.Paused;
+    } else if (keccak256(abi.encodePacked(_action)) == keccak256(abi.encodePacked("Tiep tuc van chuyen"))) {
+        _batches[_batchId].detailedTransportStatus = DetailedTransportStatus.InTransit;
     } else if (keccak256(abi.encodePacked(_action)) == keccak256(abi.encodePacked("Hoan thanh van chuyen"))) {
         _batches[_batchId].detailedTransportStatus = DetailedTransportStatus.Delivered;
         _batches[_batchId].transportStatus = TransportStatus.Delivered;
     }
     
     emit TransportStatusUpdated(_batchId, _batches[_batchId].detailedTransportStatus, _action, _participantId, _participantType);
+}
+function updateTransportStatusBySSCC(string memory _sscc, uint256 _participantId, string memory _action, string memory _participantType) public {
+    uint256 batchId = _ssccToBatchId[_sscc];
+    require(batchId != 0, "Batch does not exist with this SSCC");
+    updateTransportStatus(batchId, _participantId, _action, _participantType);
 }
 function getBatchIdBySSCC(string memory _sscc) public view returns (uint256) {
     return _ssccToBatchId[_sscc];
@@ -503,8 +524,10 @@ function canStartTransport(uint256 _batchId, uint256 _transporterId) public view
     return _batches[_batchId].detailedTransportStatus == DetailedTransportStatus.NotStarted ||
            (_batches[_batchId].detailedTransportStatus == DetailedTransportStatus.Delivered && _batches[_batchId].lastTransporterId != _transporterId);
 }
-function getTransportHistory(uint256 _batchId) public view returns (TransportEvent[] memory) {
-    return _batchTransportEvents[_batchId];
+function getTransportHistoryBySSCC(string memory _sscc) public view returns (TransportEvent[] memory) {
+    uint256 batchId = _ssccToBatchId[_sscc];
+    require(batchId != 0, "Batch does not exist with this SSCC");
+    return _batchTransportEvents[batchId];
 }
 // Thêm hàm để kiểm tra trạng thái vận chuyển
 function getBatchTransportStatus(uint256 _batchId) public view returns (TransportStatus) {
