@@ -184,6 +184,14 @@ console.log('Các route đã đăng ký:', app._router.stack.filter(r => r.route
 const manageRoutes = require('./manage.js');
 app.use('/', manageRoutes);
 
+const { sendNotification } = require('./notification.js');
+
+// Thêm clientId vào thông báo
+app.post('/api/notifications/:id/read', async (req, res) => {
+  // Không cần đoạn này nữa vì không sử dụng is_sent
+  res.status(200).json({ message: 'Thông báo đã được đánh dấu là đã xem' });
+});
+
 app.listen(3000, () => {
   console.log('Server đang chạy trên cổng 3000');
 });
