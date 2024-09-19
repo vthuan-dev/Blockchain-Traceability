@@ -59,6 +59,14 @@ document.addEventListener('DOMContentLoaded', function() {
     function handleFileInput(event) {
         const file = event.target.files[0];
         if (file) {
+            if (file.size > 5 * 1024 * 1024) { // Giới hạn 5MB
+                alert('File quá lớn. Vui lòng chọn file nhỏ hơn 5MB.');
+                return;
+            }
+            if (!['image/jpeg', 'image/png', 'image/gif'].includes(file.type)) {
+                alert('Định dạng file không hỗ trợ. Vui lòng chọn file JPEG, PNG hoặc GIF.');
+                return;
+            }
             fileSelected.style.display = 'block';
             scanButton.disabled = false;
         } else {
@@ -75,22 +83,34 @@ document.addEventListener('DOMContentLoaded', function() {
             startScanner();
         }
     }
-
     function scanQRFromImage(file) {
-        if (html5QrCode && html5QrCode.isScanning) {
-            html5QrCode.stop();
-        }
-        html5QrCode = new Html5Qrcode("qr-reader");
-        html5QrCode.scanFile(file, true)
-            .then(decodedText => {
-                handleQRCode(decodedText);
-            })
-            .catch(err => {
-                console.error(`Lỗi quét QR từ ảnh:`, err);
-                alert('Không thể quét mã QR từ ảnh này. Vui lòng thử lại với ảnh khác.');
-            });
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                context.drawImage(img, 0, 0, img.width, img.height);
+                const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                const code = jsQR(imageData.data, imageData.width, imageData.height);
+                
+                if (code) {
+                    handleQRCode(code.data);
+                } else {
+                    console.error('Không tìm thấy mã QR trong ảnh');
+                    alert('Không tìm thấy mã QR trong ảnh. Vui lòng thử lại với ảnh khác.');
+                }
+            };
+            img.src = event.target.result;
+        };
+        reader.onerror = function() {
+            console.error('Lỗi khi đọc file');
+            alert('Có lỗi xảy ra khi đọc file. Vui lòng thử lại.');
+        };
+        reader.readAsDataURL(file);
     }
-
     function handleQRCode(decodedText) {
         console.log("QR Code detected:", decodedText);
         const sscc = decodedText.split(':')[1]; // Giả sử QR code có định dạng "SSCC:123456789"
@@ -133,14 +153,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 </tr>
             `;
         };
-    
+       
         addRow('Trạng thái', `<span class="status-approved"><i class="fas fa-check-circle"></i> ${batchInfo.status}</span>`);
         addRow('Mã Lô hàng', batchInfo.batchId);
-        addRow('Tên', batchInfo.name);
+        addRow('Tên lô hàng', batchInfo.name);
         addRow('Số lượng (tấn)', batchInfo.quantity);
         addRow('Ngày tạo lô hàng', new Date(batchInfo.productionDate).toLocaleDateString());
         addRow('Trạng thái vận chuyển', batchInfo.transportStatus);
-    
+        addRow('Người sản xuất', batchInfo.producer.name);
+        addRow('Địa chỉ', batchInfo.producer.address);
+        addRow('Số điện thoại', batchInfo.producer.phone);
         // Hiển thị nút xem hình ảnh sản phẩm
         if (batchInfo.productImageUrls && Object.keys(batchInfo.productImageUrls).length > 0) {
             const imageCount = Object.keys(batchInfo.productImageUrls).length;
@@ -159,16 +181,17 @@ document.addEventListener('DOMContentLoaded', function() {
     
         tableHTML += '</table>';
     
-        // Thêm nút chấp nhận vận chuyển
-        tableHTML += `<button id="acceptTransportBtn" onclick="acceptTransport('${batchInfo.batchId}')" class="btn btn-success mt-3">Chấp nhận vận chuyển</button>`;
-    
+        // Thêm nút cập nhật trạng thái vận chuyển
+        let transportButton = '';
+        if (info.transportStatus === 'Chưa vận chuyển') {
+            transportButton = `<button id="startTransportBtn" onclick="updateTransportStatus('${info.batchId}', 'Bat dau van chuyen')" class="btn btn-success mt-3">Bắt đầu vận chuyển</button>`;
+        } else if (info.transportStatus === 'Đang vận chuyển') {
+            transportButton = `<button id="completeTransportBtn" onclick="updateTransportStatus('${info.batchId}', 'Hoan thanh van chuyen')" class="btn btn-success mt-3">Hoàn thành vận chuyển</button>`;
+        }
+
+        tableHTML += transportButton;
         batchDetailsDiv.innerHTML = tableHTML;
         batchInfoDiv.style.display = 'block';
-    
-        // Disable nút nếu đã vận chuyển
-        if (batchInfo.transportStatus === 'Đã vận chuyển') {
-            document.getElementById('acceptTransportBtn').disabled = true;
-        }
     }
     
     // Hàm để mở modal khi click vào nút xem ảnh
@@ -233,35 +256,28 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    async function acceptTransport(batchId) {
-        try {
-            const response = await fetch('/api/accept-transport', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ batchId: batchId })
-            });
-
-            if (response.ok) {
-                showMessage('Đã chấp nhận vận chuyển thành công!', 'success');
-                document.getElementById('acceptTransportBtn').disabled = true;
+    function updateTransportStatus(batchId, action) {
+        fetch('/api/accept-transport', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ batchId, action })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                // Refresh batch info
+                fetchBatchInfo(batchInfo.sscc);
             } else {
-                const errorData = await response.json();
-                showMessage(`Lỗi: ${errorData.error}`, 'error');
+                alert('Lỗi: ' + data.error);
             }
-        } catch (error) {
-            console.error('Lỗi khi chấp nhận vận chuyển:', error);
-            showMessage('Có lỗi xảy ra khi chấp nhận vận chuyển. Vui lòng thử lại.', 'error');
-        }
-    }
-
-    function showMessage(message, type) {
-        const messageDiv = document.getElementById('messageDiv');
-        messageDiv.innerHTML = `<div class="message ${type}-message">${message}</div>`;
-        setTimeout(() => {
-            messageDiv.innerHTML = '';
-        }, 5000); // Xóa thông báo sau 5 giây
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Có lỗi xảy ra khi cập nhật trạng thái vận chuyển');
+        });
     }
 });
 
