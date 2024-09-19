@@ -59,7 +59,7 @@ web3.eth.net.isListening()
   .catch(e => console.log('Lỗi rồi', e));
 
 const contractABI = require('../build/contracts/TraceabilityContract.json').abi;
-const contractAddress = '0xD91E51f978CED7B45b348D68A36b07d294bf0C45';
+const contractAddress = '0x697F2FcDe38B05c0B694516E48875B18b73C6C33';
 const contract = new web3.eth.Contract(contractABI, contractAddress);
 
 // tạo biến lưu trữ file, giới hạn số lượng file và tên file, maxCount: số lượng file, name: tên file
@@ -1068,6 +1068,47 @@ app.get('/api/batch-info-by-sscc/:sscc', async (req, res) => {
     res.status(500).json({ error: 'Không thể lấy thông tin lô hàng: ' + error.message });
   }
 });
+
+app.get('/api/batch-info/:batchId', async (req, res) => {
+  try {
+      const batchId = req.params.batchId;
+      const batchInfo = await contract.methods.getBatchDetails(batchId).call();
+      const transportStatus = await contract.methods.getBatchTransportStatus(batchId).call();
+      const detailedTransportStatus = await contract.methods.getDetailedTransportStatus(batchId).call();
+      
+      // Lấy thông tin người sản xuất
+      const producerInfo = await getProducerById(batchInfo.producerId);
+
+      const serializedBatchInfo = {
+          batchId: batchInfo.batchId.toString(),
+          name: batchInfo.name,
+          sscc: batchInfo.sscc,
+          producerId: batchInfo.producerId.toString(),
+          quantity: batchInfo.quantity,
+          productionDate: new Date(Number(batchInfo.productionDate) * 1000).toISOString(),
+          status: translateStatus(batchInfo.status),
+          productImageUrls: batchInfo.productImageUrls,
+          certificateImageUrl: batchInfo.certificateImageUrl,
+          farmPlotNumber: batchInfo.farmPlotNumber,
+          productId: batchInfo.productId.toString(),
+          transportStatus: translateTransportStatus(transportStatus),
+          detailedTransportStatus: translateDetailedTransportStatus(detailedTransportStatus),
+          producer: {
+              name: producerInfo.name,
+              address: producerInfo.address,
+              phone: producerInfo.phone
+          }
+      };
+
+      res.json(serializedBatchInfo);
+  } catch (error) {
+      console.error('Lỗi khi lấy thông tin lô hàng:', error);
+      res.status(500).json({ error: 'Không thể lấy thông tin lô hàng: ' + error.message });
+  }
+});
+
+
+
 function translateDetailedTransportStatus(status) {
   const statusMap = {
     0: 'Chưa bắt đầu',
@@ -1148,10 +1189,13 @@ app.get('/api/pending-transport-batches', async (req, res) => {
     res.status(500).json({ error: 'Không thể lấy danh sách lô hàng chờ vận chuyển' });
   }
 });
+
 app.post('/api/accept-transport', async (req, res) => {
   try {
-    const { batchId, action } = req.body;
+    const { sscc, action } = req.body;
     const userId = req.session.userId;
+
+    console.log('Received request:', { sscc, action, userId });
 
     if (!userId) {
       return res.status(401).json({ error: 'Người dùng chưa đăng nhập' });
@@ -1163,12 +1207,10 @@ app.post('/api/accept-transport', async (req, res) => {
       return res.status(403).json({ error: 'Người dùng không có quyền vận chuyển hoặc nhận hàng' });
     }
 
-    // Kiểm tra xem người vận chuyển có thể bắt đầu vận chuyển không
-    if (action === "Bat dau van chuyen") {
-      const canStart = await contract.methods.canStartTransport(batchId, userId).call();
-      if (!canStart) {
-        return res.status(400).json({ error: 'Không thể bắt đầu vận chuyển lô hàng này' });
-      }
+    // Lấy batchId từ SSCC
+    const batchId = await contract.methods.getBatchIdBySSCC(sscc).call();
+    if (!batchId) {
+      return res.status(404).json({ error: 'Không tìm thấy lô hàng với SSCC này' });
     }
 
     // Cập nhật trạng thái vận chuyển

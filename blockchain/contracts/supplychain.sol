@@ -482,12 +482,17 @@ function updateTransportStatus(uint256 _batchId, uint256 _participantId, string 
     
     if (keccak256(abi.encodePacked(_action)) == keccak256(abi.encodePacked("Bat dau van chuyen"))) {
         _batches[_batchId].detailedTransportStatus = DetailedTransportStatus.InTransit;
+        _batches[_batchId].transportStatus = TransportStatus.InTransit;
         _batches[_batchId].lastTransporterId = _participantId;
     } else if (keccak256(abi.encodePacked(_action)) == keccak256(abi.encodePacked("Hoan thanh van chuyen"))) {
         _batches[_batchId].detailedTransportStatus = DetailedTransportStatus.Delivered;
+        _batches[_batchId].transportStatus = TransportStatus.Delivered;
     }
     
     emit TransportStatusUpdated(_batchId, _batches[_batchId].detailedTransportStatus, _action, _participantId, _participantType);
+}
+function getBatchIdBySSCC(string memory _sscc) public view returns (uint256) {
+    return _ssccToBatchId[_sscc];
 }
 
 function getDetailedTransportStatus(uint256 _batchId) public view returns (DetailedTransportStatus) {
