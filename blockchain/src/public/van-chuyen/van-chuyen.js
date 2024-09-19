@@ -1,14 +1,162 @@
-// Thêm các hàm xử lý quét QR và chấp nhận vận chuyển
-let batchInfo; // Khai báo ở đầu file, ngoài hàm DOMContentLoaded
+// Khai báo các hàm ở phạm vi toàn cục
+let batchInfo;
+let html5QrCode;
 
+function displayBatchInfo(info) {
+    console.log('Displaying batch info:', info);
+    const batchInfoDiv = document.getElementById('batchInfo');
+    const batchDetailsDiv = document.getElementById('batchDetails');
+    
+    let tableHTML = '<table class="batch-info-table">';
+    
+    const addRow = (label, value, className = '') => {
+        tableHTML += `
+            <tr>
+                <th>${label}</th>
+                <td class="${className}">${value}</td>
+            </tr>
+        `;
+    };
+   
+    addRow('Trạng thái', `<span class="status-approved"><i class="fas fa-check-circle"></i> ${info.status}</span>`);
+    addRow('Mã Lô hàng', info.batchId);
+    addRow('Tên lô hàng', info.name);
+    addRow('Số lượng (tấn)', info.quantity);
+    addRow('Ngày tạo lô hàng', new Date(info.productionDate).toLocaleDateString());
+    addRow('Trạng thái vận chuyển', info.transportStatus);
+    addRow('Người sản xuất', info.producer.name);
+    addRow('Địa chỉ', info.producer.address);
+    addRow('Số điện thoại', info.producer.phone);
 
+    // Hiển thị nút xem hình ảnh sản phẩm
+    if (info.productImageUrls && Object.keys(info.productImageUrls).length > 0) {
+        const imageCount = Object.keys(info.productImageUrls).length;
+        addRow('Hình ảnh sản phẩm', `<button class="btn btn-primary" onclick="openImageGallery('product')">Xem ${imageCount} ảnh sản phẩm</button>`);
+    }
+
+    // Hiển thị nút xem giấy chứng nhận
+    if (info.certificateImageUrl) {
+        addRow('Giấy chứng nhận', `<button class="btn btn-primary" onclick="openImageModal('${info.certificateImageUrl}')">Xem giấy chứng nhận</button>`);
+    }
+
+    tableHTML += '</table>';
+
+    // Thêm nút cập nhật trạng thái vận chuyển
+    let transportButton = '';
+    if (info.detailedTransportStatus === 'Chưa bắt đầu' || info.detailedTransportStatus === 'Tạm dừng') {
+        transportButton = `<button onclick="updateTransportStatus('${info.sscc}', 'Bat dau van chuyen')" class="btn btn-success mt-3">Bắt đầu vận chuyển</button>`;
+    } else if (info.detailedTransportStatus === 'Đang vận chuyển') {
+        transportButton = `
+            <button onclick="updateTransportStatus('${info.sscc}', 'Tam dung van chuyen')" class="btn btn-warning mt-3">Tạm dừng vận chuyển</button>
+            <button onclick="updateTransportStatus('${info.sscc}', 'Hoan thanh van chuyen')" class="btn btn-success mt-3">Hoàn thành vận chuyển</button>
+        `;
+    } else if (info.detailedTransportStatus === 'Đã giao') {
+        transportButton = `<button onclick="updateTransportStatus('${info.sscc}', 'Bat dau van chuyen')" class="btn btn-success mt-3">Bắt đầu vận chuyển mới</button>`;
+    }
+
+    tableHTML += transportButton;
+    batchDetailsDiv.innerHTML = tableHTML;
+    batchInfoDiv.style.display = 'block';
+}
+
+async function fetchBatchInfoBySSCC(sscc) {
+    try {
+        const response = await fetch(`/api/batch-info-by-sscc/${sscc}`);
+        if (!response.ok) {
+            throw new Error('Không thể lấy thông tin lô hàng');
+        }
+        batchInfo = await response.json();
+        displayBatchInfo(batchInfo);
+    } catch (error) {
+        console.error('Lỗi khi lấy thông tin lô hàng:', error);
+        alert('Có lỗi xảy ra khi lấy thông tin lô hàng. Vui lòng thử lại.');
+    }
+}
+
+async function updateTransportStatus(sscc, action) {
+    console.log('Updating transport status:', { sscc, action });
+    try {
+        const response = await fetch('/api/accept-transport', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ sscc, action })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || 'Không thể cập nhật trạng thái vận chuyển');
+        }
+
+        alert(data.message);
+
+        // Lấy thông tin lô hàng mới sau khi cập nhật trạng thái
+        await fetchBatchInfoBySSCC(sscc);
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Có lỗi xảy ra khi cập nhật trạng thái vận chuyển: ' + error.message);
+    }
+}
+
+function openImageModal(src) {
+    console.log('Opening modal for:', src);
+    const modal = document.getElementById('imageModal');
+    const modalImg = document.getElementById('modalImage');
+    modal.style.display = "block";
+    modalImg.src = src;
+
+    // Thêm event listener để đóng modal khi nhấn vào overlay
+    modal.querySelector('.modal-overlay').addEventListener('click', closeModal);
+}
+
+function openImageGallery(type) {
+    console.log('Opening gallery for:', type);
+    console.log('Batch Info:', batchInfo);
+    const modal = document.getElementById('imageModal');
+    const modalContent = document.getElementById('modalContent');
+    modal.style.display = "block";
+    
+    let galleryHTML = '<div class="image-gallery">';
+    const images = type === 'product' ? batchInfo.productImageUrls : batchInfo.batchImageUrls;
+    
+    console.log('Images:', images);
+    
+    if (images && Object.keys(images).length > 0) {
+        Object.values(images).forEach(url => {
+            console.log('Adding image:', url);
+            galleryHTML += `<img src="${url}" alt="${type} image" class="gallery-image" onclick="expandImage('${url}')">`;
+        });
+    } else {
+        galleryHTML += '<p>Không có hình ảnh để hiển thị.</p>';
+    }
+    
+    galleryHTML += '</div>';
+    modalContent.innerHTML = galleryHTML;
+
+    // Thêm event listener để đóng modal khi nhấn vào overlay
+    modal.querySelector('.modal-overlay').addEventListener('click', closeModal);
+}
+
+function expandImage(src) {
+    const modalImg = document.getElementById('modalImage');
+    modalImg.src = src;
+    modalImg.style.display = 'block';
+}
+
+function closeModal() {
+    const modal = document.getElementById('imageModal');
+    modal.style.display = "none";
+}
+
+// Event listener cho DOMContentLoaded
 document.addEventListener('DOMContentLoaded', function() {
     const startCameraButton = document.getElementById('start-camera');
     const qrInput = document.getElementById('qr-input');
     const fileSelected = document.getElementById('file-selected');
     const scanButton = document.getElementById('scan-button');
     const qrReader = document.getElementById('qr-reader');
-    let html5QrCode;
 
     startCameraButton.addEventListener('click', toggleQRScanner);
     qrInput.addEventListener('change', handleFileInput);
@@ -83,6 +231,7 @@ document.addEventListener('DOMContentLoaded', function() {
             startScanner();
         }
     }
+
     function scanQRFromImage(file) {
         const reader = new FileReader();
         reader.onload = function(event) {
@@ -111,226 +260,29 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         reader.readAsDataURL(file);
     }
+
     function handleQRCode(decodedText) {
         console.log("QR Code detected:", decodedText);
-        const sscc = decodedText.split(':')[1]; // Giả sử QR code có định dạng "SSCC:123456789"
-        if (sscc) {
-            fetchBatchInfo(sscc);
+        const parts = decodedText.split(':');
+        if (parts.length === 2 && parts[0] === 'SSCC') {
+            const sscc = parts[1];
+            fetchBatchInfoBySSCC(sscc);
         } else {
             alert('Mã QR không hợp lệ');
         }
     }
 
-    async function fetchBatchInfo(sscc) {
-        try {
-            const response = await fetch(`/api/batch-info-by-sscc/${sscc}`);
-            if (!response.ok) {
-                throw new Error('Không thể lấy thông tin lô hàng');
-            }
-            const batchInfo = await response.json();
-            displayBatchInfo(batchInfo);
-        } catch (error) {
-            console.error('Lỗi khi lấy thông tin lô hàng:', error);
-            alert('Có lỗi xảy ra khi lấy thông tin lô hàng. Vui lòng thử lại.');
-        }
+    const closeButton = document.querySelector('.close');
+    if (closeButton) {
+        closeButton.addEventListener('click', closeModal);
     }
-
-    // Thêm hàm displayBatchInfo
-    function displayBatchInfo(info) {
-        batchInfo = info; // Lưu thông tin lô hàng vào biến toàn cục
-        const batchInfoDiv = document.getElementById('batchInfo');
-        const batchDetailsDiv = document.getElementById('batchDetails');
-        
-        console.log('Batch Info:', batchInfo); // Để kiểm tra dữ liệu
-    
-        let tableHTML = '<table class="batch-info-table">';
-        
-        const addRow = (label, value, className = '') => {
-            tableHTML += `
-                <tr>
-                    <th>${label}</th>
-                    <td class="${className}">${value}</td>
-                </tr>
-            `;
-        };
-       
-        addRow('Trạng thái', `<span class="status-approved"><i class="fas fa-check-circle"></i> ${batchInfo.status}</span>`);
-        addRow('Mã Lô hàng', batchInfo.batchId);
-        addRow('Tên lô hàng', batchInfo.name);
-        addRow('Số lượng (tấn)', batchInfo.quantity);
-        addRow('Ngày tạo lô hàng', new Date(batchInfo.productionDate).toLocaleDateString());
-        addRow('Trạng thái vận chuyển', batchInfo.transportStatus);
-        addRow('Người sản xuất', batchInfo.producer.name);
-        addRow('Địa chỉ', batchInfo.producer.address);
-        addRow('Số điện thoại', batchInfo.producer.phone);
-        // Hiển thị nút xem hình ảnh sản phẩm
-        if (batchInfo.productImageUrls && Object.keys(batchInfo.productImageUrls).length > 0) {
-            const imageCount = Object.keys(batchInfo.productImageUrls).length;
-            addRow('Hình ảnh sản phẩm', `<button class="btn btn-primary" onclick="openImageGallery('product')">Xem ${imageCount} ảnh sản phẩm</button>`);
-        }
-    
-        // Hiển thị nút xem hình ảnh lô hàng (nếu có)
-        if (batchInfo.batchImageUrls && batchInfo.batchImageUrls.length > 0) {
-            addRow('Hình ảnh lô hàng', `<button class="btn btn-primary" onclick="openImageGallery('batch')">Xem ${batchInfo.batchImageUrls.length} ảnh lô hàng</button>`);
-        }
-    
-        // Hiển thị nút xem giấy chứng nhận
-        if (batchInfo.certificateImageUrl) {
-            addRow('Giấy chứng nhận', `<button class="btn btn-primary" onclick="openImageModal('${batchInfo.certificateImageUrl}')">Xem giấy chứng nhận</button>`);
-        }
-    
-        tableHTML += '</table>';
-    
-        // Thêm nút cập nhật trạng thái vận chuyển
-        let transportButton = '';
-        if (info.detailedTransportStatus === 'Chưa bắt đầu' || info.detailedTransportStatus === 'Tạm dừng') {
-          transportButton = `<button onclick="updateTransportStatus('${info.batchId}', 'Bat dau van chuyen')" class="btn btn-success mt-3">Bắt đầu vận chuyển</button>`;
-        } else if (info.detailedTransportStatus === 'Đang vận chuyển') {
-          transportButton = `
-            <button onclick="updateTransportStatus('${info.batchId}', 'Tam dung van chuyen')" class="btn btn-warning mt-3">Tạm dừng vận chuyển</button>
-            <button onclick="updateTransportStatus('${info.batchId}', 'Hoan thanh van chuyen')" class="btn btn-success mt-3">Hoàn thành vận chuyển</button>
-          `;
-        } else if (info.detailedTransportStatus === 'Đã giao') {
-          transportButton = `<button onclick="updateTransportStatus('${info.batchId}', 'Bat dau van chuyen')" class="btn btn-success mt-3">Bắt đầu vận chuyển mới</button>`;
-        }
-
-        tableHTML += transportButton;
-        batchDetailsDiv.innerHTML = tableHTML;
-        batchInfoDiv.style.display = 'block';
-    }
-    
-    // Hàm để mở modal khi click vào nút xem ảnh
-    function openImageModal(src) {
-        console.log('Opening modal for:', src);
-        const modal = document.getElementById('imageModal');
-        const modalImg = document.getElementById('modalImage');
-        modal.style.display = "block";
-        modalImg.src = src;
-
-        // Thêm event listener để đóng modal khi nhấn vào overlay
-        modal.querySelector('.modal-overlay').addEventListener('click', closeModal);
-    }
-    
-    // Hàm để mở gallery khi click vào nút xem nhiều ảnh
-    function openImageGallery(type) {
-        console.log('Opening gallery for:', type);
-        console.log('Batch Info:', batchInfo);
-        const modal = document.getElementById('imageModal');
-        const modalContent = document.getElementById('modalContent');
-        modal.style.display = "block";
-        
-        let galleryHTML = '<div class="image-gallery">';
-        const images = type === 'product' ? batchInfo.productImageUrls : batchInfo.batchImageUrls;
-        
-        console.log('Images:', images);
-        
-        if (images && Object.keys(images).length > 0) {
-            Object.values(images).forEach(url => {
-                console.log('Adding image:', url);
-                galleryHTML += `<img src="${url}" alt="${type} image" class="gallery-image" onclick="expandImage('${url}')">`;
-            });
-        } else {
-            galleryHTML += '<p>Không có hình ảnh để hiển thị.</p>';
-        }
-        
-        galleryHTML += '</div>';
-        modalContent.innerHTML = galleryHTML;
-
-        // Thêm event listener để đóng modal khi nhấn vào overlay
-        modal.querySelector('.modal-overlay').addEventListener('click', closeModal);
-    }
-    
-    // Hàm để phóng to ảnh trong gallery
-    function expandImage(src) {
-        const modalImg = document.getElementById('modalImage');
-        modalImg.src = src;
-        modalImg.style.display = 'block';
-    }
-
-    // Thêm hàm này vào phạm vi toàn cục
-    window.closeModal = function() {
-        const modal = document.getElementById('imageModal');
-        modal.style.display = "none";
-    }
-
-    // Thêm đoạn code này vào cuối file hoặc trong hàm init của bạn
-    document.addEventListener('DOMContentLoaded', function() {
-        const closeButton = document.querySelector('.close');
-        if (closeButton) {
-            closeButton.addEventListener('click', closeModal);
-        }
-    });
-
-   
 });
-function updateTransportStatus(batchId, action) {
-    fetch('/api/accept-transport', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ batchId, action })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert(data.message);
-            fetchBatchInfo(batchInfo.sscc);
-        } else {
-            alert('Lỗi: ' + data.error);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Có lỗi xảy ra khi cập nhật trạng thái vận chuyển');
-    });
-}
-// Định nghĩa các hàm này ở phạm vi toàn cục
-window.openImageGallery = function(type) {
-    console.log('Opening gallery for:', type);
-    console.log('Batch Info:', batchInfo);
-    const modal = document.getElementById('imageModal');
-    const modalContent = document.getElementById('modalContent');
-    modal.style.display = "block";
-    
-    let galleryHTML = '<div class="image-gallery">';
-    const images = type === 'product' ? batchInfo.productImageUrls : batchInfo.batchImageUrls;
-    
-    console.log('Images:', images);
-    
-    if (images && Object.keys(images).length > 0) {
-        Object.values(images).forEach(url => {
-            console.log('Adding image:', url);
-            galleryHTML += `<img src="${url}" alt="${type} image" class="gallery-image" onclick="expandImage('${url}')">`;
-        });
-    } else {
-        galleryHTML += '<p>Không có hình ảnh để hiển thị.</p>';
-    }
-    
-    galleryHTML += '</div>';
-    modalContent.innerHTML = galleryHTML;
 
-    // Thêm event listener để đóng modal khi nhấn vào overlay
-    modal.querySelector('.modal-overlay').addEventListener('click', closeModal);
-}
-
-window.openImageModal = function(src) {
-    console.log('Opening modal for:', src);
-    const modal = document.getElementById('imageModal');
-    const modalImg = document.getElementById('modalImage');
-    modal.style.display = "block";
-    modalImg.src = src;
-
-    // Thêm event listener để đóng modal khi nhấn vào overlay
-    modal.querySelector('.modal-overlay').addEventListener('click', closeModal);
-}
-
-window.expandImage = function(src) {
-    const modalImg = document.getElementById('modalImage');
-    modalImg.src = src;
-    modalImg.style.display = 'block';
-}
-
-window.acceptTransport = function(batchId) {
-    // ... giữ nguyên nội dung hàm này
-}
+// Gán các hàm cần thiết cho window object
+window.displayBatchInfo = displayBatchInfo;
+window.fetchBatchInfoBySSCC = fetchBatchInfoBySSCC;
+window.updateTransportStatus = updateTransportStatus;
+window.openImageModal = openImageModal;
+window.openImageGallery = openImageGallery;
+window.expandImage = expandImage;
+window.closeModal = closeModal;
