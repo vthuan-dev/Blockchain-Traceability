@@ -6,7 +6,7 @@ contract TraceabilityContract {
 
 enum BatchStatus { PendingApproval, Approved, Rejected }
 enum TransportStatus { NotTransported, InTransit, Delivered }
-enum ParticipantType { Producer, Transporter, Warehouse, Consumer }
+enum ParticipantType { Transporter, Warehouse }
 enum DetailedTransportStatus { NotStarted, InTransit, Paused, Delivered }
 
     struct Batch {
@@ -27,6 +27,19 @@ enum DetailedTransportStatus { NotStarted, InTransit, Paused, Delivered }
         TransportStatus transportStatus;
         DetailedTransportStatus detailedTransportStatus;
       uint256 lastTransporterId;
+    }
+
+     struct BatchParams {
+        string name;
+        string sscc;
+        uint256 producerId;
+        string quantity;
+        string[] productImageUrls;
+        string certificateImageUrl;
+        string farmPlotNumber;
+        uint256 productId;
+        uint256 startDate;
+        uint256 endDate;
     }
     
     struct Participation {
@@ -72,18 +85,13 @@ mapping(uint256 => TransportEvent[]) private _batchTransportEvents;
         string[] imageUrls,
         uint256[] relatedProductIds
     );
-event TransportStatusUpdated(uint256 indexed batchId, DetailedTransportStatus newStatus, string action, uint256 participantId, string participantType);    struct BatchParams {
-        string name;  // Thêm trường tên lô hàng
-        string sscc;
-        uint256 producerId;
-        string quantity;
-        string[] productImageUrls;
-        string certificateImageUrl;
-        string farmPlotNumber;
-        uint256 productId;
-        uint256 startDate;
-        uint256 endDate;
-    }
+event TransportStatusUpdated(
+    uint256 indexed batchId, 
+    DetailedTransportStatus newStatus, 
+    string action, 
+    uint256 participantId, 
+    string participantType
+);
 
     function createBatch(
         string memory _name,  // Thêm tham số tên lô hàng
@@ -468,21 +476,21 @@ function recordParticipation(uint256 _batchId, uint256 _participantId, string me
     emit ParticipationRecorded(_batchId, _participantId, _participantType, _action);
 }
 event LogParticipantType(uint256 indexed batchId, string participantType);
-
-function updateTransportStatus(uint256 _batchId, uint256 _participantId, string memory _action, string memory _participantType) public {
-
+function updateTransportStatus(
+    uint256 _batchId, 
+    uint256 _participantId, 
+    string memory _action, 
+    string memory _participantType
+) public {
+    require(
+        keccak256(abi.encodePacked(_participantType)) == keccak256(abi.encodePacked("Transporter")) ||
+        keccak256(abi.encodePacked(_participantType)) == keccak256(abi.encodePacked("Warehouse")),
+        "Invalid participant type"
+    );
     
     require(_batches[_batchId].batchId != 0, "Batch does not exist");
     require(_batches[_batchId].status == BatchStatus.Approved, "Batch must be approved");
-    
-    emit LogParticipantType(_batchId, _participantType);
 
-
-    require(
-        keccak256(abi.encodePacked(_participantType)) == keccak256(abi.encodePacked("Warehouse")) ||
-        keccak256(abi.encodePacked(_participantType)) == keccak256(abi.encodePacked("Transporter")),
-        "Invalid participant type"
-    );
     TransportEvent memory newEvent = TransportEvent({
         participantId: _participantId,
         timestamp: block.timestamp,
@@ -507,7 +515,12 @@ function updateTransportStatus(uint256 _batchId, uint256 _participantId, string 
     
     emit TransportStatusUpdated(_batchId, _batches[_batchId].detailedTransportStatus, _action, _participantId, _participantType);
 }
-function updateTransportStatusBySSCC(string memory _sscc, uint256 _participantId, string memory _action, string memory _participantType) public {
+function updateTransportStatusBySSCC(
+    string memory _sscc, 
+    uint256 _participantId, 
+    string memory _action, 
+    string memory _participantType
+) public {
     uint256 batchId = _ssccToBatchId[_sscc];
     require(batchId != 0, "Batch does not exist with this SSCC");
     updateTransportStatus(batchId, _participantId, _action, _participantType);
