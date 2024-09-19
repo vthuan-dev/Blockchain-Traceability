@@ -183,10 +183,15 @@ document.addEventListener('DOMContentLoaded', function() {
     
         // Thêm nút cập nhật trạng thái vận chuyển
         let transportButton = '';
-        if (info.transportStatus === 'Chưa vận chuyển') {
-            transportButton = `<button id="startTransportBtn" onclick="updateTransportStatus('${info.batchId}', 'Bat dau van chuyen')" class="btn btn-success mt-3">Bắt đầu vận chuyển</button>`;
-        } else if (info.transportStatus === 'Đang vận chuyển') {
-            transportButton = `<button id="completeTransportBtn" onclick="updateTransportStatus('${info.batchId}', 'Hoan thanh van chuyen')" class="btn btn-success mt-3">Hoàn thành vận chuyển</button>`;
+        if (info.detailedTransportStatus === 'Chưa bắt đầu' || info.detailedTransportStatus === 'Tạm dừng') {
+          transportButton = `<button onclick="updateTransportStatus('${info.batchId}', 'Bat dau van chuyen')" class="btn btn-success mt-3">Bắt đầu vận chuyển</button>`;
+        } else if (info.detailedTransportStatus === 'Đang vận chuyển') {
+          transportButton = `
+            <button onclick="updateTransportStatus('${info.batchId}', 'Tam dung van chuyen')" class="btn btn-warning mt-3">Tạm dừng vận chuyển</button>
+            <button onclick="updateTransportStatus('${info.batchId}', 'Hoan thanh van chuyen')" class="btn btn-success mt-3">Hoàn thành vận chuyển</button>
+          `;
+        } else if (info.detailedTransportStatus === 'Đã giao') {
+          transportButton = `<button onclick="updateTransportStatus('${info.batchId}', 'Bat dau van chuyen')" class="btn btn-success mt-3">Bắt đầu vận chuyển mới</button>`;
         }
 
         tableHTML += transportButton;
@@ -256,31 +261,30 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    function updateTransportStatus(batchId, action) {
-        fetch('/api/accept-transport', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ batchId, action })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert(data.message);
-                // Refresh batch info
-                fetchBatchInfo(batchInfo.sscc);
-            } else {
-                alert('Lỗi: ' + data.error);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Có lỗi xảy ra khi cập nhật trạng thái vận chuyển');
-        });
-    }
+   
 });
-
+function updateTransportStatus(batchId, action) {
+    fetch('/api/accept-transport', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ batchId, action })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            fetchBatchInfo(batchInfo.sscc);
+        } else {
+            alert('Lỗi: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Có lỗi xảy ra khi cập nhật trạng thái vận chuyển');
+    });
+}
 // Định nghĩa các hàm này ở phạm vi toàn cục
 window.openImageGallery = function(type) {
     console.log('Opening gallery for:', type);

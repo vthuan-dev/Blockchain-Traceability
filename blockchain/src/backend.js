@@ -59,7 +59,7 @@ web3.eth.net.isListening()
   .catch(e => console.log('Lỗi rồi', e));
 
 const contractABI = require('../build/contracts/TraceabilityContract.json').abi;
-const contractAddress = '0xc909bbB84255EFC8060dF483fdAdE1BD2A34b85d';
+const contractAddress = '0xD91E51f978CED7B45b348D68A36b07d294bf0C45';
 const contract = new web3.eth.Contract(contractABI, contractAddress);
 
 // tạo biến lưu trữ file, giới hạn số lượng file và tên file, maxCount: số lượng file, name: tên file
@@ -212,6 +212,11 @@ function cleanKeys(obj) {
   }
   return cleanedObj;
 }
+function convertBigIntToString(obj) {
+  return JSON.parse(JSON.stringify(obj, (key, value) =>
+    typeof value === 'bigint' ? value.toString() : value
+  ));
+}
 
 app.use(express.urlencoded({ extended: true }));
 
@@ -303,130 +308,129 @@ function setupRoutes(app, db){
     res.sendFile(path.join(__dirname, 'public', 'san-xuat', 'them-lo-hang.html'));
   });
 
-  app.post('/createbatch', (req, res, next) => {
-    upload(req, res, function (err) {
-      if (err instanceof multer.MulterError) {
-        // Lỗi Multer
-        return res.status(400).json({ error: 'Lỗi upload file: ' + err.message });
-      } else if (err) {
-        // Lỗi không xác định
-        return res.status(500).json({ error: 'Lỗi server: ' + err.message });
-      }
-      // Nếu không có lỗi, tiếp tục xử lý
-      next();
-    });
-  }, async (req, res) => {
-    console.log('Received body:', req.body);
-    console.log('Received files:', req.files);
-  
-    try {
-      const { name, quantity, farmPlotNumber, productId, producerId, startDate, endDate } = req.body;
-  
-      // Kiểm tra các trường bắt buộc
-      if (!name || !quantity || !farmPlotNumber || !productId || !producerId || !startDate || !endDate) {
-        return res.status(400).json({ error: 'Thiếu thông tin bắt buộc' });
-      }
-  
-      // Kiểm tra và chuyển đổi các giá trị số
-      const cleanProductId = parseInt(productId, 10);
-      const cleanProducerId = parseInt(producerId, 10);
-      const cleanStartDate = new Date(startDate).getTime() / 1000;
-      const cleanEndDate = new Date(endDate).getTime() / 1000;
-  
-      if (isNaN(cleanProductId) || cleanProductId <= 0) {
-        return res.status(400).json({ error: 'Product ID không hợp lệ' });
-      }
-      if (isNaN(cleanProducerId) || cleanProducerId <= 0) {
-        return res.status(400).json({ error: 'Producer ID không hợp lệ' });
-      }
-  
-      if (isNaN(cleanStartDate) || cleanStartDate <= 0) {
-        return res.status(400).json({ error: 'Ngày bắt đầu không hợp lệ' });
-      }
-      if (isNaN(cleanEndDate) || cleanEndDate <= 0) {
-        return res.status(400).json({ error: 'Ngày kết thúc không hợp lệ' });
-      }
-      if (cleanStartDate >= cleanEndDate) {
-        return res.status(400).json({ error: 'Ngày kết thúc phải sau ngày bắt đầu' });
-      }
-  
-      // Kiểm tra sự tồn tại của userId và productId trong MySQL
-      const userExists = await checkUserExists(cleanProducerId);
-      const productExists = await checkProductExists(cleanProductId);
-  
-      if (!userExists) {
-        return res.status(400).json({ error: 'Producer ID không tồn tại' });
-      }
-      if (!productExists) {
-        return res.status(400).json({ error: 'Product ID không tồn tại' });
-      }
-  
-      let productImageUrls = [];
-  
-      // Xử lý productImages
-      if (req.files && req.files['productImages'] && req.files['productImages'].length > 0) {
-        console.log(`Số lượng ảnh sản phẩm nhận được: ${req.files['productImages'].length}`);
-        
-        for (const file of req.files['productImages']) {
-          try {
-            const result = await uploadFile(file.buffer, file.originalname);
-            productImageUrls.push(result.ipfsUrl);
-            console.log(`Đã thêm URL ảnh sản phẩm: ${result.ipfsUrl}`);
-          } catch (uploadError) {
-            console.error(`Lỗi khi tải lên ảnh ${file.originalname}:`, uploadError);
-          }
-        }
-        
-        console.log(`Tổng số URL ảnh sản phẩm sau khi xử lý: ${productImageUrls.length}`);
-      } else {
-        console.log('Không có ảnh sản phẩm được gửi lên');
-        return res.status(400).json({ error: 'Thiếu ảnh sản phẩm' });
-      }
-  
-      let certificateImageUrl = '';
-  
-      // Xử lý certificateImage (nếu có)
-      if (req.files['certificateImage'] && req.files['certificateImage'][0]) {
-        const certificateImageFile = req.files['certificateImage'][0];
-        const certificateImageResult = await uploadFile(certificateImageFile.buffer, certificateImageFile.originalname);
-        certificateImageUrl = certificateImageResult.ipfsUrl;
-        console.log('Certificate image uploaded:', certificateImageUrl);
-      } else {
-        console.log('Không có ảnh chứng nhận được tải lên');
-        certificateImageUrl = 'default_certificate_image_url';
-      }
-  
-      // Trước khi gọi createBatch
-      console.log('productImageUrls trước khi gọi createBatch:', productImageUrls);
-  
-      // Gọi hàm createBatch của smart contract
-      const result = await contract.methods.createBatch(
-        name,  // Thêm tên lô hàng
-        cleanProducerId,
-        quantity,
-        productImageUrls,
-        certificateImageUrl,
-        farmPlotNumber,
-        cleanProductId,
-        cleanStartDate,
-        cleanEndDate
-      ).send({ from: account.address, gas: 3000000 });
-  
-      // Chuyển đổi kết quả thành chuỗi JSON
-      const safeResult = JSON.parse(JSON.stringify(result, replacer));
-      console.log('Number of product images:', req.files['productImages'] ? req.files['productImages'].length : 0);
-  
-      res.status(200).json({
-        message: 'Lô hàng đã được tạo thành công và đang chờ phê duyệt',
-        batchId: safeResult.events.BatchCreated.returnValues.batchId,
-        status: 'PendingApproval'
-      });
-    } catch (err) {
-      console.error('Error creating batch:', err);
-      res.status(500).json({ error: 'Lỗi khi tạo lô hàng: ' + err.message });
+app.post('/createbatch', (req, res, next) => {
+  upload(req, res, function (err) {
+    if (err instanceof multer.MulterError) {
+      return res.status(400).json({ error: 'Lỗi upload file: ' + err.message });
+    } else if (err) {
+      return res.status(500).json({ error: 'Lỗi server: ' + err.message });
     }
+    next();
   });
-  
+}, async (req, res) => {
+  console.log('Received body:', req.body);
+  console.log('Received files:', req.files);
+
+  try {
+    const { name, quantity, farmPlotNumber, productId, producerId, startDate, endDate } = req.body;
+
+    if (!name || !quantity || !farmPlotNumber || !productId || !producerId || !startDate || !endDate) {
+      return res.status(400).json({ error: 'Thiếu thông tin bắt buộc' });
+    }
+
+    const cleanProductId = parseInt(productId, 10);
+    const cleanProducerId = parseInt(producerId, 10);
+    const cleanStartDate = Math.floor(new Date(startDate).getTime() / 1000);
+    const cleanEndDate = Math.floor(new Date(endDate).getTime() / 1000);
+
+    if (isNaN(cleanProductId) || cleanProductId <= 0) {
+      return res.status(400).json({ error: 'Product ID không hợp lệ' });
+    }
+    if (isNaN(cleanProducerId) || cleanProducerId <= 0) {
+      return res.status(400).json({ error: 'Producer ID không hợp lệ' });
+    }
+    if (isNaN(cleanStartDate) || cleanStartDate <= 0) {
+      return res.status(400).json({ error: 'Ngày bắt đầu không hợp lệ' });
+    }
+    if (isNaN(cleanEndDate) || cleanEndDate <= 0) {
+      return res.status(400).json({ error: 'Ngày kết thúc không hợp lệ' });
+    }
+    if (cleanStartDate >= cleanEndDate) {
+      return res.status(400).json({ error: 'Ngày kết thúc phải sau ngày bắt đầu' });
+    }
+
+    const userExists = await checkUserExists(cleanProducerId);
+    const productExists = await checkProductExists(cleanProductId);
+
+    if (!userExists) {
+      return res.status(400).json({ error: 'Producer ID không tồn tại' });
+    }
+    if (!productExists) {
+      return res.status(400).json({ error: 'Product ID không tồn tại' });
+    }
+
+    let productImageUrls = [];
+
+    if (req.files && req.files['productImages'] && req.files['productImages'].length > 0) {
+      console.log(`Số lượng ảnh sản phẩm nhận được: ${req.files['productImages'].length}`);
+      
+      for (const file of req.files['productImages']) {
+        try {
+          const result = await uploadFile(file.buffer, file.originalname);
+          productImageUrls.push(result.ipfsUrl);
+          console.log(`Đã thêm URL ảnh sản phẩm: ${result.ipfsUrl}`);
+        } catch (uploadError) {
+          console.error(`Lỗi khi tải lên ảnh ${file.originalname}:`, uploadError);
+        }
+      }
+      
+      console.log(`Tổng số URL ảnh sản phẩm sau khi xử lý: ${productImageUrls.length}`);
+    } else {
+      console.log('Không có ảnh sản phẩm được gửi lên');
+      return res.status(400).json({ error: 'Thiếu ảnh sản phẩm' });
+    }
+
+    let certificateImageUrl = '';
+
+    if (req.files['certificateImage'] && req.files['certificateImage'][0]) {
+      const certificateImageFile = req.files['certificateImage'][0];
+      const certificateImageResult = await uploadFile(certificateImageFile.buffer, certificateImageFile.originalname);
+      certificateImageUrl = certificateImageResult.ipfsUrl;
+      console.log('Certificate image uploaded:', certificateImageUrl);
+    } else {
+      console.log('Không có ảnh chứng nhận được tải lên');
+      certificateImageUrl = 'default_certificate_image_url';
+    }
+
+    console.log('Calling createBatch with params:', {
+      name, cleanProducerId, quantity, productImageUrls, certificateImageUrl,
+      farmPlotNumber, cleanProductId, cleanStartDate, cleanEndDate
+    });
+
+    const result = await contract.methods.createBatch(
+      name,
+      cleanProducerId,
+      quantity,
+      productImageUrls,
+      certificateImageUrl,
+      farmPlotNumber,
+      cleanProductId,
+      cleanStartDate,
+      cleanEndDate
+    ).send({ from: account.address, gas: 3000000 });
+
+    console.log('Transaction result:', JSON.stringify(convertBigIntToString(result), null, 2));
+
+    let batchId;
+    if (result.events && result.events.BatchCreated) {
+      batchId = result.events.BatchCreated.returnValues.batchId;
+    } else {
+      const log = result.logs.find(log => log.event === 'BatchCreated');
+      batchId = log ? log.returnValues.batchId : 'Unknown';
+    }
+
+    console.log('Extracted batchId:', batchId);
+
+    res.status(200).json({
+      message: 'Lô hàng đã được tạo thành công và đang chờ phê duyệt',
+      batchId: batchId.toString(), // Chuyển đổi batchId thành chuỗi
+      status: 'PendingApproval'
+    });
+  } catch (err) {
+    console.error('Error creating batch:', err);
+    res.status(500).json({ error: 'Lỗi khi tạo lô hàng: ' + err.message });
+  }
+});
   app.get('/create-activity', (req, res) => {
     res.sendFile(path.join(__dirname, 'public',  'san-xuat','them-nkhd.html'));
   });
@@ -1016,6 +1020,7 @@ app.get('/api/batch-info-by-sscc/:sscc', async (req, res) => {
     const sscc = req.params.sscc;
     const batchInfo = await contract.methods.getBatchBySSCC(sscc).call();
     const transportStatus = await contract.methods.getBatchTransportStatus(batchInfo.batchId).call();
+    const detailedTransportStatus = await contract.methods.getDetailedTransportStatus(batchInfo.batchId).call();
     
     // Lấy thông tin người sản xuất
     const producerInfo = await getProducerById(batchInfo.producerId);
@@ -1046,6 +1051,7 @@ app.get('/api/batch-info-by-sscc/:sscc', async (req, res) => {
       farmPlotNumber: batchInfo.farmPlotNumber,
       productId: batchInfo.productId,
       transportStatus: translateTransportStatus(transportStatus),
+      detailedTransportStatus: translateDetailedTransportStatus(detailedTransportStatus),
       producer: {
         name: producerInfo.name,
         address: producerInfo.address,
@@ -1062,6 +1068,14 @@ app.get('/api/batch-info-by-sscc/:sscc', async (req, res) => {
     res.status(500).json({ error: 'Không thể lấy thông tin lô hàng: ' + error.message });
   }
 });
+function translateDetailedTransportStatus(status) {
+  const statusMap = {
+    0: 'Chưa bắt đầu',
+    1: 'Đang vận chuyển',
+    2: 'Đã giao'
+  };
+  return statusMap[status] || 'Không xác định';
+}
 // Giữ nguyên các hàm translateStatus và translateTransportStatus
 
 app.get('/api/transport-history/:sscc', async (req, res) => {
@@ -1136,32 +1150,52 @@ app.get('/api/pending-transport-batches', async (req, res) => {
 });
 app.post('/api/accept-transport', async (req, res) => {
   try {
-    const { batchId } = req.body;
+    const { batchId, action } = req.body;
     const userId = req.session.userId;
 
     if (!userId) {
       return res.status(401).json({ error: 'Người dùng chưa đăng nhập' });
     }
 
-    // Kiểm tra quyền của người dùng (phải là người vận chuyển)
-    const [transporter] = await db.query('SELECT * FROM users WHERE uid = ? AND role_id = ?', [userId, 6]);
-    if (!transporter) {
-      return res.status(403).json({ error: 'Người dùng không có quyền vận chuyển' });
+    // Kiểm tra quyền của người dùng
+    const [participant] = await db.query('SELECT * FROM users WHERE uid = ? AND role_id IN (6, 8)', [userId]);
+    if (!participant) {
+      return res.status(403).json({ error: 'Người dùng không có quyền vận chuyển hoặc nhận hàng' });
     }
 
-    // Cập nhật trạng thái vận chuyển trong smart contract
-    await contract.methods.updateTransportStatus(batchId).send({ from: account.address, gas: 500000 });
+    // Kiểm tra xem người vận chuyển có thể bắt đầu vận chuyển không
+    if (action === "Bat dau van chuyen") {
+      const canStart = await contract.methods.canStartTransport(batchId, userId).call();
+      if (!canStart) {
+        return res.status(400).json({ error: 'Không thể bắt đầu vận chuyển lô hàng này' });
+      }
+    }
 
-    // Ghi nhận sự tham gia của người vận chuyển
-    await contract.methods.recordParticipation(batchId, userId, "Transporter", "Bắt đầu vận chuyển")
+    // Cập nhật trạng thái vận chuyển
+    await contract.methods.updateTransportStatus(batchId, userId, action, participant.role_id === 6 ? "Transporter" : "Warehouse")
       .send({ from: account.address, gas: 500000 });
 
-    res.json({ success: true, message: 'Đã chấp nhận vận chuyển và ghi nhận sự tham gia thành công' });
+    // Ghi nhận sự tham gia
+    await contract.methods.recordParticipation(batchId, userId, participant.role_id === 6 ? "Transporter" : "Warehouse", action)
+      .send({ from: account.address, gas: 500000 });
+
+    res.json({ success: true, message: 'Đã cập nhật trạng thái vận chuyển và ghi nhận sự tham gia thành công' });
   } catch (error) {
-    console.error('Lỗi khi chấp nhận vận chuyển:', error);
-    res.status(500).json({ error: 'Không thể chấp nhận vận chuyển: ' + error.message });
+    console.error('Lỗi khi cập nhật trạng thái vận chuyển:', error);
+    res.status(500).json({ error: 'Không thể cập nhật trạng thái vận chuyển: ' + error.message });
   }
 });
+
+function translateDetailedTransportStatus(status) {
+  switch (String(status)) {
+    case '0': return 'Chưa bắt đầu';
+    case '1': return 'Đang vận chuyển';
+    case '2': return 'Tạm dừng';
+    case '3': return 'Đã giao';
+    default: return 'Không xác định';
+  }
+}
+
 
 function safeToString(value) {
   if (typeof value === 'bigint') {

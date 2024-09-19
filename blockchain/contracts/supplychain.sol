@@ -7,6 +7,7 @@ contract TraceabilityContract {
 enum BatchStatus { PendingApproval, Approved, Rejected }
 enum TransportStatus { NotTransported, InTransit, Delivered }
 enum ParticipantType { Producer, Transporter, Warehouse, Consumer }
+enum DetailedTransportStatus { NotStarted, InTransit, Delivered }
 
     struct Batch {
         uint256 batchId;
@@ -24,6 +25,8 @@ enum ParticipantType { Producer, Transporter, Warehouse, Consumer }
         bytes32 dataHash;
         uint256 productId;
         TransportStatus transportStatus;
+        DetailedTransportStatus detailedTransportStatus;
+      uint256 lastTransporterId;
     }
     
     struct Participation {
@@ -69,8 +72,7 @@ mapping(uint256 => TransportEvent[]) private _batchTransportEvents;
         string[] imageUrls,
         uint256[] relatedProductIds
     );
-event TransportStatusUpdated(uint256 indexed batchId, TransportStatus newStatus, string action, uint256 participantId, string participantType);
-    struct BatchParams {
+event TransportStatusUpdated(uint256 indexed batchId, DetailedTransportStatus newStatus, string action, uint256 participantId, string participantType);    struct BatchParams {
         string name;  // Thêm trường tên lô hàng
         string sscc;
         uint256 producerId;
@@ -200,7 +202,9 @@ event TransportStatusUpdated(uint256 indexed batchId, TransportStatus newStatus,
             farmPlotNumber: params.farmPlotNumber,
             dataHash: dataHash,
             productId: params.productId,
-            transportStatus: TransportStatus.NotTransported
+            transportStatus: TransportStatus.NotTransported,
+            detailedTransportStatus: DetailedTransportStatus.NotStarted,
+            lastTransporterId: 0
         });
 
         _batches[newBatchId] = newBatch;
@@ -463,7 +467,6 @@ function recordParticipation(uint256 _batchId, uint256 _participantId, string me
     
     emit ParticipationRecorded(_batchId, _participantId, _participantType, _action);
 }
-
 function updateTransportStatus(uint256 _batchId, uint256 _participantId, string memory _action, string memory _participantType) public {
     require(_batches[_batchId].batchId != 0, "Batch does not exist");
     require(_batches[_batchId].status == BatchStatus.Approved, "Batch must be approved");
@@ -478,13 +481,23 @@ function updateTransportStatus(uint256 _batchId, uint256 _participantId, string 
     _batchTransportEvents[_batchId].push(newEvent);
     
     if (keccak256(abi.encodePacked(_action)) == keccak256(abi.encodePacked("Bat dau van chuyen"))) {
-        _batches[_batchId].transportStatus = TransportStatus.InTransit;
+        _batches[_batchId].detailedTransportStatus = DetailedTransportStatus.InTransit;
+        _batches[_batchId].lastTransporterId = _participantId;
     } else if (keccak256(abi.encodePacked(_action)) == keccak256(abi.encodePacked("Hoan thanh van chuyen"))) {
-        _batches[_batchId].transportStatus = TransportStatus.Delivered;
+        _batches[_batchId].detailedTransportStatus = DetailedTransportStatus.Delivered;
     }
     
+    emit TransportStatusUpdated(_batchId, _batches[_batchId].detailedTransportStatus, _action, _participantId, _participantType);
 }
 
+function getDetailedTransportStatus(uint256 _batchId) public view returns (DetailedTransportStatus) {
+    require(_batches[_batchId].batchId != 0, "Batch does not exist");
+    return _batches[_batchId].detailedTransportStatus;
+}
+function canStartTransport(uint256 _batchId, uint256 _transporterId) public view returns (bool) {
+    return _batches[_batchId].detailedTransportStatus == DetailedTransportStatus.NotStarted ||
+           (_batches[_batchId].detailedTransportStatus == DetailedTransportStatus.Delivered && _batches[_batchId].lastTransporterId != _transporterId);
+}
 function getTransportHistory(uint256 _batchId) public view returns (TransportEvent[] memory) {
     return _batchTransportEvents[_batchId];
 }
