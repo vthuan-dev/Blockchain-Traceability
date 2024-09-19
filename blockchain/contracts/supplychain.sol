@@ -5,7 +5,7 @@ contract TraceabilityContract {
     uint256 private _batchIdCounter;
 
 enum BatchStatus { PendingApproval, Approved, Rejected }
-enum TransportStatus { NotTransported, Transported }
+enum TransportStatus { NotTransported, InTransit, Delivered }
 enum ParticipantType { Producer, Transporter, Warehouse, Consumer }
 
     struct Batch {
@@ -41,6 +41,14 @@ enum ParticipantType { Producer, Transporter, Warehouse, Consumer }
         string[] imageUrls;
         uint256[] relatedProductIds;
     }
+    struct TransportEvent {
+    uint256 participantId;
+    uint256 timestamp;
+    string action;
+    string participantType;
+}
+
+mapping(uint256 => TransportEvent[]) private _batchTransportEvents;
 
 
     mapping(uint256 => Batch) private _batches;
@@ -61,7 +69,7 @@ enum ParticipantType { Producer, Transporter, Warehouse, Consumer }
         string[] imageUrls,
         uint256[] relatedProductIds
     );
-
+event TransportStatusUpdated(uint256 indexed batchId, TransportStatus newStatus, string action, uint256 participantId, string participantType);
     struct BatchParams {
         string name;  // Thêm trường tên lô hàng
         string sscc;
@@ -302,7 +310,6 @@ function getPendingBatchesByProducer(uint256 _producerId) public view returns (B
             pendingCount++;
         }
     }
-
     Batch[] memory pendingBatches = new Batch[](pendingCount);
     uint256 index = 0;
     for (uint256 i = 1; i <= _batchIdCounter; i++) {
@@ -450,31 +457,36 @@ function isBatchApproved(uint256 _batchId) public view returns (bool) {
     return _approvedBatches[_batchId];
 }
 
-function recordParticipation(uint256 _batchId, address _participantAddress, string memory _participantType, string memory _action) public {
+function recordParticipation(uint256 _batchId, uint256 _participantId, string memory _participantType, string memory _action) public {
     require(_batches[_batchId].batchId != 0, "Batch does not exist");
-    _batchParticipations[_batchId].push(Participation(uint256(uint160(_participantAddress)), _participantType, block.timestamp, _action));
+    _batchParticipations[_batchId].push(Participation(_participantId, _participantType, block.timestamp, _action));
     
-    if (keccak256(abi.encodePacked(_participantType)) == keccak256(abi.encodePacked("Transporter"))) {
-        if (keccak256(abi.encodePacked(_action)) == keccak256(abi.encodePacked("Da van chuyen"))) {
-            require(_batches[_batchId].transportStatus == TransportStatus.NotTransported, "Batch already transported");
-            _batches[_batchId].transportStatus = TransportStatus.Transported;
-            emit TransportStatusUpdated(_batchId, TransportStatus.Transported);
-        }
-    }
-    
-    emit ParticipationRecorded(_batchId, uint256(uint160(_participantAddress)), _participantType, _action);
+    emit ParticipationRecorded(_batchId, _participantId, _participantType, _action);
 }
 
-function updateTransportStatus(uint256 _batchId) public {
+function updateTransportStatus(uint256 _batchId, uint256 _participantId, string memory _action, string memory _participantType) public {
     require(_batches[_batchId].batchId != 0, "Batch does not exist");
     require(_batches[_batchId].status == BatchStatus.Approved, "Batch must be approved");
-    require(_batches[_batchId].transportStatus == TransportStatus.NotTransported, "Batch already transported");
-    _batches[_batchId].transportStatus = TransportStatus.Transported;
     
-    // Ghi nhận sự tham gia của người vận chuyển
-    recordParticipation(_batchId, msg.sender, "Transporter", "Da van chuyen");
+    TransportEvent memory newEvent = TransportEvent({
+        participantId: _participantId,
+        timestamp: block.timestamp,
+        action: _action,
+        participantType: _participantType
+    });
     
-    emit TransportStatusUpdated(_batchId, TransportStatus.Transported);
+    _batchTransportEvents[_batchId].push(newEvent);
+    
+    if (keccak256(abi.encodePacked(_action)) == keccak256(abi.encodePacked("Bat dau van chuyen"))) {
+        _batches[_batchId].transportStatus = TransportStatus.InTransit;
+    } else if (keccak256(abi.encodePacked(_action)) == keccak256(abi.encodePacked("Hoan thanh van chuyen"))) {
+        _batches[_batchId].transportStatus = TransportStatus.Delivered;
+    }
+    
+}
+
+function getTransportHistory(uint256 _batchId) public view returns (TransportEvent[] memory) {
+    return _batchTransportEvents[_batchId];
 }
 // Thêm hàm để kiểm tra trạng thái vận chuyển
 function getBatchTransportStatus(uint256 _batchId) public view returns (TransportStatus) {
@@ -482,5 +494,4 @@ function getBatchTransportStatus(uint256 _batchId) public view returns (Transpor
     return _batches[_batchId].transportStatus;
 }
 
-event TransportStatusUpdated(uint256 indexed batchId, TransportStatus newStatus);
 }

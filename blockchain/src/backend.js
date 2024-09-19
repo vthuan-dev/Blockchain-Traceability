@@ -59,7 +59,7 @@ web3.eth.net.isListening()
   .catch(e => console.log('Lỗi rồi', e));
 
 const contractABI = require('../build/contracts/TraceabilityContract.json').abi;
-const contractAddress = '0x145073C522D064be4E1B93171955F27F9ABB0A75';
+const contractAddress = '0xc909bbB84255EFC8060dF483fdAdE1BD2A34b85d';
 const contract = new web3.eth.Contract(contractABI, contractAddress);
 
 // tạo biến lưu trữ file, giới hạn số lượng file và tên file, maxCount: số lượng file, name: tên file
@@ -235,21 +235,18 @@ async function checkProductExists(productId) {
 
 async function getProducerById(producerId) {
   return new Promise((resolve, reject) => {
-    db.query('SELECT * FROM users WHERE uid = ?', [producerId], (error, results) => {
-      if (error) {
-        console.error('Lỗi truy vấn cơ sở dữ liệu:', error);
-        reject(error);
-      } else if (results.length > 0) {
-        console.log(`Thông tin nhà sản xuất cho UID ${producerId}:`, results[0]);
-        resolve(results[0]);
-      } else {
-        console.log(`Không tìm thấy nhà sản xuất cho UID ${producerId}`);
-        reject(new Error(`Không tìm thấy nhà sản xuất cho UID ${producerId}`));
+    db.query('SELECT name, address, phone FROM users WHERE uid = ?', [producerId], (err, results) => {
+      if (err) {
+        console.error('Lỗi truy vấn cơ sở dữ liệu:', err);
+        return reject(err);
       }
+      if (results.length === 0) {
+        return resolve({ name: 'Không xác định', address: 'Không xác định', phone: 'Không xác định' });
+      }
+      resolve(results[0]);
     });
   });
 }
-
 function setupRoutes(app, db){
   app.get('/batches/:producerId', async (req, res) => {
     try {
@@ -985,21 +982,26 @@ app.get('/api/rejected-batches', async (req, res) => {
 
 // Thêm route để cập nhật trạng thái vận chuyển
 // ... (các import và cấu hình khác)
-
-// Cập nhật route để cập nhật trạng thái vận chuyển
 app.post('/api/update-transport-status', async (req, res) => {
   try {
-    const { batchId } = req.body;
-    const userId = req.session.userId; // Giả sử bạn đang sử dụng session để lưu trữ userId
+    const { sscc, action } = req.body;
+    const userId = req.session.userId;
 
-    // Kiểm tra quyền của người dùng (phải là người vận chuyển)
-    const [transporter] = await db.query('SELECT * FROM users WHERE uid = ? AND role_id = ?', [userId, 6]); // Giả sử 6 là role_id cho người vận chuyển
-    if (!transporter) {
+    if (!userId) {
+      return res.status(401).json({ error: 'Người dùng chưa đăng nhập' });
+    }
+
+    // Kiểm tra quyền của người dùng (phải là người vận chuyển hoặc nhà kho)
+    const [participant] = await db.query('SELECT * FROM users WHERE uid = ? AND role_id IN (6, 8)', [userId]);
+    if (!participant) {
       return res.status(403).json({ error: 'Người dùng không có quyền cập nhật trạng thái vận chuyển' });
     }
 
-    // Gọi hàm smart contract để cập nhật trạng thái
-    await contract.methods.updateTransportStatus(batchId).send({ from: account.address, gas: 500000 });
+    const participantType = participant.role_id === 6 ? "Transporter" : "Warehouse";
+
+    // Cập nhật trạng thái vận chuyển
+    await contract.methods.updateTransportStatus(sscc, userId, action, participantType)
+      .send({ from: account.address, gas: 500000 });
 
     res.json({ success: true, message: 'Đã cập nhật trạng thái vận chuyển thành công' });
   } catch (error) {
@@ -1008,16 +1010,16 @@ app.post('/api/update-transport-status', async (req, res) => {
   }
 });
 
-
-
 // Cập nhật route để lấy thông tin lô hàng
-// Cập nhật route để lấy thông tin lô hàng bằng SSCC
 app.get('/api/batch-info-by-sscc/:sscc', async (req, res) => {
   try {
     const sscc = req.params.sscc;
     const batchInfo = await contract.methods.getBatchBySSCC(sscc).call();
     const transportStatus = await contract.methods.getBatchTransportStatus(batchInfo.batchId).call();
     
+    // Lấy thông tin người sản xuất
+    const producerInfo = await getProducerById(batchInfo.producerId);
+
     // Hàm để chuyển đổi an toàn các giá trị
     const safeConvert = (value) => {
       if (typeof value === 'bigint') {
@@ -1043,7 +1045,13 @@ app.get('/api/batch-info-by-sscc/:sscc', async (req, res) => {
       certificateImageUrl: batchInfo.certificateImageUrl,
       farmPlotNumber: batchInfo.farmPlotNumber,
       productId: batchInfo.productId,
-      transportStatus: translateTransportStatus(transportStatus)
+      transportStatus: translateTransportStatus(transportStatus),
+      producer: {
+        name: producerInfo.name,
+        address: producerInfo.address,
+        phone: producerInfo.phone
+        // Thêm các thông tin khác của người sản xuất nếu cần
+      }
     });
 
     console.log('Serialized Batch Info:', JSON.stringify(serializedBatchInfo, null, 2));
@@ -1054,9 +1062,27 @@ app.get('/api/batch-info-by-sscc/:sscc', async (req, res) => {
     res.status(500).json({ error: 'Không thể lấy thông tin lô hàng: ' + error.message });
   }
 });
-
 // Giữ nguyên các hàm translateStatus và translateTransportStatus
 
+app.get('/api/transport-history/:sscc', async (req, res) => {
+  try {
+    const sscc = req.params.sscc;
+    const batchId = await contract.methods.getBatchIdBySSCC(sscc).call();
+    const history = await contract.methods.getTransportHistory(batchId).call();
+    
+    const formattedHistory = history.map(event => ({
+      participantId: event.participantId.toString(),
+      timestamp: new Date(event.timestamp * 1000).toISOString(),
+      action: event.action,
+      participantType: event.participantType
+    }));
+
+    res.json(formattedHistory);
+  } catch (error) {
+    console.error('Lỗi khi lấy lịch sử vận chuyển:', error);
+    res.status(500).json({ error: 'Không thể lấy lịch sử vận chuyển: ' + error.message });
+  }
+});
 
 
 app.post('/api/record-participation', async (req, res) => {
@@ -1205,33 +1231,34 @@ function safeToString(value) {
       res.status(500).json({ error: 'Không thể xử lý mã QR hoặc lấy thông tin lô hàng: ' + error.message });
     }
   });
-
   app.post('/api/accept-transport', async (req, res) => {
     try {
-      const { batchId } = req.body;
+      const { batchId, action } = req.body;
       const userId = req.session.userId;
-
+  
       if (!userId) {
         return res.status(401).json({ error: 'Người dùng chưa đăng nhập' });
       }
-
-      // Kiểm tra quyền của người dùng (phải là người vận chuyển)
-      const [transporter] = await db.query('SELECT * FROM users WHERE uid = ? AND role_id = ?', [userId, 6]);
-      if (!transporter) {
-        return res.status(403).json({ error: 'Người dùng không có quyền vận chuyển' });
+  
+      // Kiểm tra quyền của người dùng (phải là người vận chuyển hoặc nhà kho)
+      const [participant] = await db.query('SELECT * FROM users WHERE uid = ? AND role_id IN (6, 8)', [userId]);
+      if (!participant) {
+        return res.status(403).json({ error: 'Người dùng không có quyền vận chuyển hoặc nhận hàng' });
       }
-
+  
       // Cập nhật trạng thái vận chuyển
-      await contract.methods.updateTransportStatus(batchId).send({ from: account.address, gas: 500000 });
-
-      // Ghi nhận sự tham gia của người vận chuyển
-      await contract.methods.recordParticipation(batchId, userId, "Transporter", "Da van chuyen")
+      await contract.methods.updateTransportStatus(batchId, userId, action)
         .send({ from: account.address, gas: 500000 });
-
-      res.json({ success: true, message: 'Đã chấp nhận vận chuyển và ghi nhận sự tham gia thành công' });
+  
+      // Ghi nhận sự tham gia
+      const participantType = participant.role_id === 6 ? "Transporter" : "Warehouse";
+      await contract.methods.recordParticipation(batchId, userId, participantType, action)
+        .send({ from: account.address, gas: 500000 });
+  
+      res.json({ success: true, message: 'Đã cập nhật trạng thái vận chuyển và ghi nhận sự tham gia thành công' });
     } catch (error) {
-      console.error('Lỗi khi chấp nhận vận chuyển:', error);
-      res.status(500).json({ error: 'Không thể chấp nhận vận chuyển: ' + error.message });
+      console.error('Lỗi khi cập nhật trạng thái vận chuyển:', error);
+      res.status(500).json({ error: 'Không thể cập nhật trạng thái vận chuyển: ' + error.message });
     }
   });
   function translateTransportStatus(status) {
