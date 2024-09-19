@@ -35,7 +35,6 @@ async function displayTransportHistory(sscc) {
 }
 
 
-
 function displayBatchInfo(info) {
     console.log('Displaying batch info:', info);
     const batchInfoDiv = document.getElementById('batchInfo');

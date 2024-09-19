@@ -59,7 +59,7 @@ web3.eth.net.isListening()
   .catch(e => console.log('Lỗi rồi', e));
 
 const contractABI = require('../build/contracts/TraceabilityContract.json').abi;
-const contractAddress = '0xa4D6D9441A57d9F66ef9e5Ab3d55fe911a126F36';
+const contractAddress = '0xE8d82F4dDA42235a553E8f08DBEFBFAa5e72cBCc';
 const contract = new web3.eth.Contract(contractABI, contractAddress);
 
 // tạo biến lưu trữ file, giới hạn số lượng file và tên file, maxCount: số lượng file, name: tên file
@@ -1002,7 +1002,6 @@ app.post('/api/update-transport-status', async (req, res) => {
     }
 
     const participantType = participant.role_id === 6 ? "Transporter" : "Warehouse";
-
     // Cập nhật trạng thái vận chuyển
     await contract.methods.updateTransportStatus(sscc, userId, action, participantType)
       .send({ from: account.address, gas: 500000 });
@@ -1202,7 +1201,7 @@ app.post('/api/accept-transport', async (req, res) => {
     }
 
     // Kiểm tra quyền của người dùng
-    const [participant] = await db.query('SELECT * FROM users WHERE uid = ? AND role_id IN (6, 8)', [userId]);
+    const [participant] = await db.query('SELECT * FROM users WHERE uid = ? AND role_id IN (8, 6)', [userId]);
     if (!participant) {
       return res.status(403).json({ error: 'Người dùng không có quyền vận chuyển hoặc nhận hàng' });
     }
@@ -1327,29 +1326,32 @@ function safeToString(value) {
         return res.status(403).json({ error: 'Người dùng không có quyền vận chuyển hoặc nhận hàng' });
       }
   
-   
       let participantType;
       if (roleId === 6) {
-        participantType = "Transporter";
+        console.log('roleId của người vận chuyển :', roleId);
+        participantType = 0; // Transporter
       } else if (roleId === 8) {
-        participantType = "Warehouse";
+        console.log('roleId của nhà kho:', roleId);
+        participantType = 1; // Warehouse
       } else {
         return res.status(403).json({ error: 'Người dùng không có quyền vận chuyển hoặc nhận hàng' });
       }
+      console.log('roleId:', roleId);
+      console.log('participantType:', participantType);
+      console.log('Session roleId:', req.session.roleId);
   
-  
-      console.log('Participant type:', participantType);
-
-      console.log('Before calling updateTransportStatus:', { batchId, userId, action, participantType });
-      const result = await contract.methods.updateTransportStatus(batchId, userId, action, participantType)
-        .send({ from: account.address, gas: 500000 });
-      console.log('After calling updateTransportStatus:', result);
-      // Lấy batchId từ SSCC
       const batchId = await contract.methods.getBatchIdBySSCC(sscc).call();
+
       if (!batchId) {
         return res.status(404).json({ error: 'Không tìm thấy lô hàng với SSCC này' });
       }
   
+      console.log('Before calling updateTransportStatus:', { batchId, userId, action, participantType });
+      await contract.methods.updateTransportStatus(batchId, userId, action, participantType)
+      .send({ from: account.address, gas: 500000 });
+      console.log('After calling updateTransportStatus:', result);
+      // Lấy batchId từ SSCC
+    
       console.log('Updating transport status with:', { batchId, userId, action, participantType });
   
       // Cập nhật trạng thái vận chuyển
@@ -1417,6 +1419,7 @@ function translateStatus(status) {
       return 'Không xác định';
   }
 }
+
 app.get('/api/batch-transport-history/:sscc', async (req, res) => {
   try {
       const sscc = req.params.sscc;
