@@ -1449,19 +1449,26 @@ app.get('/api/batch-transport-history/:sscc', async (req, res) => {
     
     const enrichedHistory = await Promise.all(transportHistory.map(async (event) => {
       console.log('Querying for participantId:', event.participantId);
-      const [transporter] = await db.query(`
-        SELECT u.name, u.phone, u.address, 
-               p.province_name, d.district_name, w.ward_name
-        FROM users u
-        LEFT JOIN provinces p ON u.province_id = p.province_id
-        LEFT JOIN districts d ON u.district_id = d.district_id
-        LEFT JOIN wards w ON u.ward_id = w.ward_id
-        WHERE u.uid = ?
-      `, [event.participantId]);
+      let transporter;
+      try {
+        const [results] = await db.query(`
+          SELECT u.name, u.phone, u.address, 
+                 p.province_name, d.district_name, w.ward_name
+          FROM users u
+          LEFT JOIN provinces p ON u.province_id = p.province_id
+          LEFT JOIN districts d ON u.district_id = d.district_id
+          LEFT JOIN wards w ON u.ward_id = w.ward_id
+          WHERE u.uid = ?
+        `, [event.participantId.toString()]); // Chuyển đổi participantId thành chuỗi
+        
+        transporter = results[0]; // Lấy phần tử đầu tiên của mảng kết quả
+        console.log('SQL query result:', transporter);
+      } catch (dbError) {
+        console.error('Database query error:', dbError);
+        transporter = null;
+      }
       
-      console.log('SQL query result:', transporter);
-      
-      return {
+      const enrichedEvent = {
         action: event.action.toString(),
         timestamp: event.timestamp.toString(),
         participantType: event.participantType.toString(),
@@ -1471,6 +1478,9 @@ app.get('/api/batch-transport-history/:sscc', async (req, res) => {
           `${transporter.address || ''}${transporter.ward_name ? ', ' + transporter.ward_name : ''}${transporter.district_name ? ', ' + transporter.district_name : ''}${transporter.province_name ? ', ' + transporter.province_name : ''}`.trim() : 
           'Không có thông tin'
       };
+      
+      console.log('Enriched event:', enrichedEvent);
+      return enrichedEvent;
     }));
     
     console.log('Enriched Transport History:', enrichedHistory);
@@ -1480,6 +1490,7 @@ app.get('/api/batch-transport-history/:sscc', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 }
 
 module.exports = {
