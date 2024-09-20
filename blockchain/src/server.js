@@ -23,7 +23,8 @@ app.use(session({
   saveUninitialized: false,
   cookie: { 
     secure: process.env.NODE_ENV === 'production',
-    maxAge: 24 * 60 * 60 * 1000 // 24 giờ
+    httpOnly: true,
+    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 ngày
   }
 }));
 
@@ -40,6 +41,18 @@ const dangnhapRoutes = require('./components/user/dangnhap')(db);
 app.use('/api', dangkyRoutes);
 app.use('/api', dangnhapRoutes);
 
+app.use((req, res, next) => {
+  if (req.session.userId) {
+    req.session.touch(); // Cập nhật thời gian hoạt động của session
+  }
+  next();
+});
+app.use((req, res, next) => {
+  if (!req.session.userId) {
+    console.log('No userId in session');
+  }
+  next();
+});
 
 const { 
   s3Client, 
@@ -116,6 +129,21 @@ app.get('/api/nhakiemduyet', async (req, res) => {
   } catch (err) {
     console.error('Lỗi khi lấy danh sách nhà kiểm duyệt:', err.message);
     res.status(500).json({ error: 'Lỗi khi lấy danh sách nhà kiểm duyệt' });
+  }
+});
+
+app.get('/nha-kho/nha-kho.html', requireAuth, (req, res) => {
+  if (req.session.roleId === 8) {
+    res.sendFile(path.join(__dirname, 'public', 'nha-kho', 'nha-kho.html'));
+  } else {
+    res.status(403).send('Forbidden');
+  }
+});
+app.get('/van-chuyen/van-chuyen.html', requireAuth, (req, res) => {
+  if (req.session.roleId === 6) {
+    res.sendFile(path.join(__dirname, 'public', 'van-chuyen', 'van-chuyen.html'));
+  } else {
+    res.status(403).send('Forbidden');
   }
 });
 

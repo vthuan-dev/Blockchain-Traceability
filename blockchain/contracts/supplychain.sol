@@ -26,7 +26,9 @@ enum DetailedTransportStatus { NotStarted, InTransit, Paused, Delivered }
         uint256 productId;
         TransportStatus transportStatus;
         DetailedTransportStatus detailedTransportStatus;
-      uint256 lastTransporterId;
+        uint256 lastTransporterId;
+        bool warehouseConfirmed;  // Thêm trường này
+
     }
 
      struct BatchParams {
@@ -92,6 +94,8 @@ event TransportStatusUpdated(
     uint256 participantId, 
     string participantType
 );
+
+event WarehouseConfirmed(uint256 indexed batchId, uint256 warehouseId);
 
     function createBatch(
         string memory _name,  // Thêm tham số tên lô hàng
@@ -212,7 +216,8 @@ event TransportStatusUpdated(
             productId: params.productId,
             transportStatus: TransportStatus.NotTransported,
             detailedTransportStatus: DetailedTransportStatus.NotStarted,
-            lastTransporterId: 0
+            lastTransporterId: 0,
+            warehouseConfirmed: false  // Thêm trường mới này
         });
 
         _batches[newBatchId] = newBatch;
@@ -525,6 +530,28 @@ function updateTransportStatusBySSCC(
     require(batchId != 0, "Batch does not exist with this SSCC");
     updateTransportStatus(batchId, _participantId, _action, _participantType);
 }
+
+// Đổi tên sự kiện
+
+function warehouseConfirmation(uint256 _batchId, uint256 _warehouseId) public {
+    require(_batches[_batchId].transportStatus == TransportStatus.Delivered, "Batch must be delivered before warehouse confirmation");
+    require(_batches[_batchId].detailedTransportStatus == DetailedTransportStatus.Delivered, "Batch must be in Delivered status");
+    
+    // Thêm logic xác nhận của nhà kho ở đây
+    _batches[_batchId].warehouseConfirmed = true;
+    
+    // Ghi nhận sự tham gia của nhà kho
+    Participation memory newParticipation = Participation({
+        participantId: _warehouseId,
+        participantType: "Warehouse",
+        timestamp: block.timestamp,
+        action: "Confirmed receipt at warehouse"
+    });
+    _batchParticipations[_batchId].push(newParticipation);
+    
+    // Phát ra sự kiện với tên mới
+    emit WarehouseConfirmed(_batchId, _warehouseId);
+}
 function getBatchIdBySSCC(string memory _sscc) public view returns (uint256) {
     return _ssccToBatchId[_sscc];
 }
@@ -547,5 +574,7 @@ function getBatchTransportStatus(uint256 _batchId) public view returns (Transpor
     require(_batches[_batchId].batchId != 0, "Batch does not exist");
     return _batches[_batchId].transportStatus;
 }
+
+
 
 }

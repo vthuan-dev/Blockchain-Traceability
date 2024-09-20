@@ -988,51 +988,40 @@ app.get('/api/rejected-batches', async (req, res) => {
 // ... (các import và cấu hình khác)
 app.post('/api/accept-transport', async (req, res) => {
   try {
-    const { sscc, action } = req.body;
-    const userId = req.session.userId;
-    const roleId = req.session.roleId;
+      const { sscc, action } = req.body;
+      const userId = req.session.userId;
+      const roleId = req.session.roleId;
 
-    console.log('Received request:', { sscc, action, userId, roleId });
+      console.log('Received request:', { sscc, action, userId, roleId });
 
-    if (!userId) {
-      return res.status(401).json({ error: 'Người dùng chưa đăng nhập' });
-    }
+      if (!userId) {
+          return res.status(401).json({ error: 'Người dùng chưa đăng nhập' });
+      }
 
-    // Kiểm tra quyền của người dùng
-    const [participant] = await db.query('SELECT * FROM users WHERE uid = ? AND role_id IN (6, 8)', [userId]);
-    if (!participant) {
-      return res.status(403).json({ error: 'Người dùng không có quyền vận chuyển hoặc nhận hàng' });
-    }
+      // Kiểm tra quyền của người dùng
+      const [participant] = await db.query('SELECT * FROM users WHERE uid = ? AND role_id IN (6, 8)', [userId]);
+      if (!participant) {
+          return res.status(403).json({ error: 'Người dùng không có quyền vận chuyển hoặc nhận hàng' });
+      }
 
-    let participantType;
-    if (roleId === 6) {
-      participantType = "Transporter";
-    } else if (roleId === 8) {
-      participantType = "Warehouse";
-    } else {
-      return res.status(403).json({ error: 'Người dùng không có quyền vận chuyển hoặc nhận hàng' });
-    }
+      let participantType = roleId === 8 ? "Warehouse" : "Transporter";
+      console.log('Participant type:', participantType);
 
-    console.log('Determined participantType:', participantType);
+      const batchId = await contract.methods.getBatchIdBySSCC(sscc).call();
+      if (!batchId) {
+          return res.status(404).json({ error: 'Không tìm thấy lô hàng với SSCC này' });
+      }
 
-    const batchId = await contract.methods.getBatchIdBySSCC(sscc).call();
-    if (!batchId) {
-      return res.status(404).json({ error: 'Không tìm thấy lô hàng với SSCC này' });
-    }
+      console.log('Updating transport status:', { batchId, userId, action, participantType });
+      await contract.methods.updateTransportStatus(batchId, userId, action, participantType)
+          .send({ from: account.address, gas: 500000 });
 
-    console.log('Before calling updateTransportStatus:', { batchId, userId, action, participantType });
-    await contract.methods.updateTransportStatus(batchId, userId, action, participantType)
-      .send({ from: account.address, gas: 500000 });
-
-    console.log('After calling updateTransportStatus');
-
-    res.json({ success: true, message: 'Đã cập nhật trạng thái vận chuyển thành công' });
+      res.json({ success: true, message: 'Đã cập nhật trạng thái vận chuyển thành công' });
   } catch (error) {
-    console.error('Lỗi khi cập nhật trạng thái vận chuyển:', error);
-    res.status(500).json({ error: 'Không thể cập nhật trạng thái vận chuyển: ' + error.message });
+      console.error('Lỗi khi cập nhật trạng thái vận chuyển:', error);
+      res.status(500).json({ error: 'Không thể cập nhật trạng thái vận chuyển: ' + error.message });
   }
 });
-
 // Cập nhật route để lấy thông tin lô hàng
 app.get('/api/batch-info-by-sscc/:sscc', async (req, res) => {
   try {
@@ -1384,6 +1373,8 @@ function safeToString(value) {
       res.status(500).json({ error: 'Không thể cập nhật trạng thái vận chuyển: ' + error.message });
     }
   });
+
+  
   function translateTransportStatus(status) {
     switch (String(status)) {
       case '0': return 'Chưa vận chuyển';
@@ -1459,9 +1450,9 @@ app.get('/api/batch-transport-history/:sscc', async (req, res) => {
           LEFT JOIN districts d ON u.district_id = d.district_id
           LEFT JOIN wards w ON u.ward_id = w.ward_id
           WHERE u.uid = ?
-        `, [event.participantId.toString()]); // Chuyển đổi participantId thành chuỗi
+        `, [event.participantId.toString()]);
         
-        transporter = results[0]; // Lấy phần tử đầu tiên của mảng kết quả
+        transporter = results[0];
         console.log('SQL query result:', transporter);
       } catch (dbError) {
         console.error('Database query error:', dbError);
@@ -1469,14 +1460,16 @@ app.get('/api/batch-transport-history/:sscc', async (req, res) => {
       }
       
       const enrichedEvent = {
-        action: event.action.toString(),
-        timestamp: event.timestamp.toString(),
-        participantType: event.participantType.toString(),
+        action: translateAction(event.action.toString()),
+        timestamp: new Date(parseInt(event.timestamp) * 1000).toLocaleString('vi-VN'),
+        participantType: translateParticipantType(event.participantType.toString()),
         transporterName: transporter ? transporter.name : 'Không có thông tin',
         transporterPhone: transporter ? transporter.phone : 'Không có thông tin',
         transporterAddress: transporter ? 
-          `${transporter.address || ''}${transporter.ward_name ? ', ' + transporter.ward_name : ''}${transporter.district_name ? ', ' + transporter.district_name : ''}${transporter.province_name ? ', ' + transporter.province_name : ''}`.trim() : 
-          'Không có thông tin'
+          [...new Set([transporter.address, transporter.ward_name, transporter.district_name, transporter.province_name])]
+            .filter(Boolean)
+            .join(', ')
+          : 'Không có thông tin'
       };
       
       console.log('Enriched event:', enrichedEvent);
@@ -1490,6 +1483,71 @@ app.get('/api/batch-transport-history/:sscc', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+function translateAction(action) {
+  const actions = {
+    'Bat dau van chuyen': 'Bắt đầu vận chuyển',
+    'Tam dung van chuyen': 'Tạm dừng vận chuyển',
+    'Tiep tuc van chuyen': 'Tiếp tục vận chuyển',
+    'Hoan thanh van chuyen': 'Hoàn thành vận chuyển'
+  };
+  return actions[action] || action;
+}
+
+function translateParticipantType(type) {
+  const types = {
+    'Transporter': 'Người vận chuyển',
+    'Warehouse': 'Kho'
+  };
+  return types[type] || type;
+}
+
+app.post('/api/warehouse-confirm', async (req, res) => {
+  try {
+      const { sscc } = req.body;
+      const userId = req.session.userId;
+
+      // Kiểm tra xem người dùng có phải là nhà kho không
+      const userRole = await getUserRole(userId);
+      if (userRole !== 8) { // Giả sử 8 là role_id của nhà kho
+          return res.status(403).json({ error: 'Không có quyền thực hiện hành động này' });
+      }
+
+      const batchId = await contract.methods.getBatchIdBySSCC(sscc).call();
+      
+      // Kiểm tra trạng thái vận chuyển trước khi xác nhận
+      const transportStatus = await contract.methods.getBatchTransportStatus(batchId).call();
+      const detailedTransportStatus = await contract.methods.getDetailedTransportStatus(batchId).call();
+      
+      if (transportStatus !== '2' || detailedTransportStatus !== '3') { // Assuming 2 is Delivered for TransportStatus and 3 is Delivered for DetailedTransportStatus
+          return res.status(400).json({ error: 'Lô hàng chưa được hoàn thành vận chuyển' });
+      }
+
+      // Gọi hàm warehouseConfirmation trên smart contract
+      await contract.methods.warehouseConfirmation(batchId, userId).send({ from: account.address });
+
+      res.json({ success: true, message: 'Đã xác nhận nhận hàng thành công' });
+  } catch (error) {
+      console.error('Lỗi khi xác nhận nhận hàng:', error);
+      res.status(500).json({ error: 'Có lỗi xảy ra khi xác nhận nhận hàng: ' + error.message });
+  }
+});
+
+// Hàm hỗ trợ để lấy role của người dùng
+async function getUserRole(userId) {
+  return new Promise((resolve, reject) => {
+      db.query('SELECT role_id FROM users WHERE uid = ?', [userId], (error, results) => {
+          if (error) {
+              reject(error);
+          } else if (results.length > 0) {
+              resolve(results[0].role_id);
+          } else {
+              reject(new Error('User not found'));
+          }
+      });
+  });
+}
+
 
 }
 
