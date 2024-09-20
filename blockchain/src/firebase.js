@@ -1,20 +1,19 @@
 const { initializeApp } = require("firebase/app");
 const { getStorage, ref, uploadBytes, getDownloadURL } = require("firebase/storage");
 const { getAuth, signInAnonymously } = require("firebase/auth");
+require('dotenv').config(); // Thêm dòng này để sử dụng biến môi trường
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// Sử dụng biến môi trường để cấu hình Firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyD7HbIpcDVFoAHZ4TwmFRDVksz6SJaupL4",
-  authDomain: "nckh-d946f.firebaseapp.com",
-  projectId: "nckh-d946f",
-  storageBucket: "nckh-d946f.appspot.com",
-  messagingSenderId: "87511226036",
-  appId: "1:87511226036:web:5573fccb7d6188d3ece9e1",
-  measurementId: "G-5L9MTF0CXK"
+  apiKey: process.env.FIREBASE_API_KEY,
+  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.FIREBASE_PROJECT_ID,
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.FIREBASE_APP_ID,
+  measurementId: process.env.FIREBASE_MEASUREMENT_ID
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const storage = getStorage(app);
 const auth = getAuth(app);

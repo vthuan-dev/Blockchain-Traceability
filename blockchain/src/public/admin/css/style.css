@@ -61,9 +61,10 @@ header {
     top: var(--header-height); /* Đặt bên dưới chuông thông báo */
     right: 20px;
     width: 350px;
-    max-height: 400px;
+    max-height: 80vh;
     overflow-y: auto;
-    background-color: #fff;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
     z-index: 2000;
@@ -83,6 +84,12 @@ header {
     margin-bottom: 10px;
     border-bottom: 1px solid #eee;
     padding-bottom: 10px;
+    position: sticky;
+    top: 0;
+    background-color: #fff;
+    z-index: 1;
+    padding: 15px;
+    border-bottom: 1px solid #dee2e6;
 }
 
 .notification-header h5 {
@@ -92,17 +99,18 @@ header {
 }
 
 .btn-mark-read {
-    background-color: #007bff;
+    background-color: #28a745;
     color: white;
     border: none;
-    padding: 5px 10px;
+    padding: 8px 15px;
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    font-size: 0.9rem;
 }
 
 .btn-mark-read:hover {
-    background-color: #0056b3;
+    background-color: #218838;
 }
 
 .notification-panel ul {
