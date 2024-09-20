@@ -1,79 +1,12 @@
-// Khai báo các hàm ở phạm vi toàn cục
 let batchInfo;
 let html5QrCode;
 
-// Thêm các hàm này vào đầu file, sau các khai báo biến toàn cục
-function translateAction(action) {
-    const actions = {
-        '0': 'Bắt đầu vận chuyển',
-        '1': 'Tạm dừng vận chuyển',
-        '2': 'Tiếp tục vận chuyển',
-        '3': 'Hoàn thành vận chuyển'
-    };
-    return actions[action] || action;
-}
-
-function translateParticipantType(type) {
-    const types = {
-        '0': 'Người vận chuyển',
-        '1': 'Kho'
-    };
-    return types[type] || type;
-}
-async function displayTransportHistory(sscc) {
-    try {
-        const response = await fetch(`/api/batch-transport-history/${sscc}`);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const history = await response.json();
-        
-        console.log('Transport History:', history);
-        
-        if (!Array.isArray(history)) {
-            throw new Error('Lịch sử vận chuyển không phải là một mảng');
-        }
-        
-        let historyHTML = '<h3>Lịch sử vận chuyển</h3><ul class="transport-history">';
-        history.forEach(event => {
-            // Xử lý địa chỉ để loại bỏ phần trùng lặp
-            const addressParts = event.transporterAddress.split(', ');
-            const uniqueAddressParts = [...new Set(addressParts)];
-            const formattedAddress = uniqueAddressParts.join(', ');
-
-            historyHTML += `
-                <li class="transport-event">
-                    <div class="event-details">
-                        <strong>Hành động:</strong> ${event.action}<br>
-                        <strong>Thời gian:</strong> ${event.timestamp}<br>
-                        <strong>Loại người tham gia:</strong> ${event.participantType}<br>
-                    </div>
-                    <div class="transporter-info">
-                        <strong>Người vận chuyển:</strong> ${event.transporterName || 'Không có thông tin'}<br>
-                        <strong>Số điện thoại:</strong> ${event.transporterPhone || 'Không có thông tin'}<br>
-                        <strong>Địa chỉ:</strong> ${formattedAddress || 'Không có thông tin'}
-                    </div>
-                </li>
-            `;
-        });
-        historyHTML += '</ul>';
-        
-        const transportHistoryElement = document.getElementById('transportHistory');
-        if (transportHistoryElement) {
-            transportHistoryElement.innerHTML = historyHTML;
-        } else {
-            console.error('Element with id "transportHistory" not found');
-        }
-    } catch (error) {
-        console.error('Error displaying transport history:', error);
-        alert('Không thể lấy lịch sử vận chuyển. Vui lòng thử lại.');
-    }
-}
 
 function displayBatchInfo(info) {
     console.log('Displaying batch info:', info);
     const batchInfoDiv = document.getElementById('batchInfo');
     const batchDetailsDiv = document.getElementById('batchDetails');
+    const warehouseActionsDiv = document.getElementById('warehouseActions');
     
     let tableHTML = '<table class="batch-info-table">';
     
@@ -109,27 +42,18 @@ function displayBatchInfo(info) {
 
     tableHTML += '</table>';
 
-    // Thêm nút cập nhật trạng thái vận chuyển
-    let transportButton = '';
-    if (info.detailedTransportStatus === 'Chưa bắt đầu' || info.detailedTransportStatus === 'Tạm dừng') {
-        transportButton = `<button onclick="updateTransportStatus('${info.sscc}', 'Bat dau van chuyen')" class="btn btn-success mt-3">Bắt đầu vận chuyển</button>`;
-    } else if (info.detailedTransportStatus === 'Đang vận chuyển') {
-        transportButton = `
-            <button onclick="updateTransportStatus('${info.sscc}', 'Tam dung van chuyen')" class="btn btn-warning mt-3">Tạm dừng vận chuyển</button>
-            <button onclick="updateTransportStatus('${info.sscc}', 'Hoan thanh van chuyen')" class="btn btn-success mt-3">Hoàn thành vận chuyển</button>
-        `;
-    } else if (info.detailedTransportStatus === 'Đã giao') {
-        //khi đã giao thì không thể bắt đầu vận chuyển mới
-        transportButton = `<button onclick="updateTransportStatus('${info.sscc}', 'Bat dau van chuyen')" class="btn btn-success mt-3">Bắt đầu vận chuyển mới</button>`;
-    }
-
-    tableHTML += transportButton;
     batchDetailsDiv.innerHTML = tableHTML;
     batchInfoDiv.style.display = 'block';
+    warehouseActionsDiv.style.display = 'block';
 
-    displayTransportHistory(info.sscc);
-
+    // Thêm nút xác nhận nhận hàng
+      // Thêm nút xác nhận nhận hàng nếu trạng thái vận chuyển là "Đang vận chuyển"
+      if (info.transportStatus === 'InTransit') {
+        const confirmButton = `<button onclick="confirmReceipt('${info.sscc}')" class="btn btn-primary mt-3">Xác nhận nhận hàng</button>`;
+        tableHTML += confirmButton;
+    }
 }
+
 
 async function fetchBatchInfoBySSCC(sscc) {
     try {
@@ -145,82 +69,37 @@ async function fetchBatchInfoBySSCC(sscc) {
     }
 }
 
-function showCompletionModal() {
-    const modal = document.getElementById('completionModal');
-    modal.style.display = 'block';
-}
-
-// Thêm hàm để đóng modal và làm mới trang
-function closeCompletionModalAndRefresh() {
-    const modal = document.getElementById('completionModal');
-    modal.style.display = 'none';
-    location.reload(); // Làm mới trang
-}
-
-async function updateTransportStatus(sscc, action) {
-    console.log('Updating transport status:', { sscc, action });
+async function confirmReceipt(sscc) {
     try {
-
-        console.log('Current roleId:', sessionStorage.getItem('roleId'));
-
+        console.log('Confirming receipt for SSCC:', sscc);
         const response = await fetch('/api/accept-transport', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ sscc, action })
+            body: JSON.stringify({ sscc: sscc, action: 'Xac nhan nhan hang' })
         });
 
-        const data = await response.json();
-
         if (!response.ok) {
-            throw new Error(data.error || 'Không thể cập nhật trạng thái vận chuyển');
+            throw new Error('Network response was not ok');
         }
 
-        if (action === 'Hoan thanh van chuyen') {
-            showTransportCompletionMessage();
-        } else {
-            alert(data.message);
+        const data = await response.json();
+        console.log('Response data:', data);
+
+        if (data.success) {
+            alert('Đã xác nhận nhận hàng thành công');
+            // Cập nhật lại thông tin lô hàng sau khi xác nhận
             await fetchBatchInfoBySSCC(sscc);
+        } else {
+            alert(data.error || 'Có lỗi xảy ra khi xác nhận nhận hàng');
         }
-
-        // Lấy thông tin lô hàng mới sau khi cập nhật trạng thái
-        await fetchBatchInfoBySSCC(sscc);
     } catch (error) {
         console.error('Error:', error);
-        alert('Có lỗi xảy ra khi cập nhật trạng thái vận chuyển: ' + error.message);
+        alert('Có lỗi xảy ra khi xác nhận nhận hàng: ' + error.message);
     }
 }
 
-// Cập nhật hàm showTransportCompletionMessage
-function showTransportCompletionMessage() {
-    const successMessage = document.createElement('div');
-    successMessage.className = 'alert alert-success mt-3';
-    successMessage.innerHTML = `
-        <h4 class="alert-heading">Vận chuyển thành công!</h4>
-        <p>Bạn đã hoàn thành vận chuyển lô hàng này.</p>
-        <hr>
-        <p class="mb-0">Trang sẽ tự động tải lại sau 5 giây.</p>
-    `;
-    
-    // Ẩn thông tin lô hàng và các nút hành động nếu có
-    const batchInfoDiv = document.getElementById('batchInfo');
-    const transportActionsDiv = document.getElementById('transportActions');
-    if (batchInfoDiv) batchInfoDiv.style.display = 'none';
-    if (transportActionsDiv) transportActionsDiv.style.display = 'none';
-    
-    // Chèn thông báo vào đầu trang
-    const container = document.querySelector('.container');
-    container.insertBefore(successMessage, container.firstChild);
-    
-    // Cuộn trang đến thông báo
-    successMessage.scrollIntoView({ behavior: 'smooth' });
-
-    // Đợi 2 giây và sau đó tải lại trang
-    setTimeout(() => {
-        window.location.reload();
-    }, 5000);
-}
 
 function openImageModal(src) {
     console.log('Opening modal for:', src);
