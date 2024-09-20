@@ -6,7 +6,7 @@ const bodyParser = require('body-parser');
 const multer = require('multer');
 const bcrypt = require('bcrypt');
 const axios = require('axios');
-const { storage, ref, uploadBytes, getDownloadURL, authenticateAnonymously } = require('./firebase');
+const { auth, storage, ref, uploadBytes, getDownloadURL } = require('./firebase');
 
 const router = express.Router(); // Sử dụng Router
 router.use(cors()); // Cho phép CORS để client có thể gọi API
@@ -15,73 +15,51 @@ router.use(express.urlencoded({ extended: true })); // Thêm middleware để x�
 
 // Cấu hình multer để sử dụng bộ nhớ tạm thời
 const upload = multer({ storage: multer.memoryStorage() });
+const db = require('./config/db.js');
 
-// Tạo pool kết nối
-const pool = mysql.createPool({
-    connectionLimit: 10,
-    host: 'database-1.cv20qo0q8bre.ap-southeast-2.rds.amazonaws.com',
-    user: 'admin',
-    password: '9W8RQuAdnZylXZAmb68P',
-    database: 'blockchain'
-});
 
 // Hàm để thực hiện truy vấn
-function queryDatabase(query, params, callback) {
-    pool.getConnection((err, connection) => {
-        if (err) {
-            console.error('Lỗi khi lấy kết nối từ pool:', err);
-            callback(err, null);
-            return;
-        }
-
-        connection.query(query, params, (error, results) => {
-            connection.release(); // Trả lại kết nối vào pool
-
-            if (error) {
-                console.error('Lỗi khi truy vấn dữ liệu:', error);
-                callback(error, null);
-                return;
-            }
-
-            callback(null, results);
-        });
-    });
+async function queryDatabase(query, params) {
+  const connection = await db.getConnection();
+  try {
+    const [results] = await connection.query(query, params);
+    return results;
+  } catch (error) {
+    console.error('Lỗi khi truy vấn dữ liệu:', error);
+    throw error;
+  } finally {
+    connection.release();
+  }
 }
 
 // Endpoint để lấy thông tin người dùng
-router.get('/api/users', (req, res) => {
+router.get('/api/users', async (req, res) => {
+  try {
     const query = 'SELECT * FROM users';
-    queryDatabase(query, [], (error, results) => {
-        if (error) {
-            console.error('Lỗi khi truy vấn dữ liệu: ' + error.stack);
-            res.status(500).send('Lỗi khi truy vấn dữ liệu');
-            return;
-        }
-        res.json(results);
-    });
+    const results = await queryDatabase(query, []);
+    res.json(results);
+  } catch (error) {
+    console.error('Lỗi khi truy vấn dữ liệu:', error);
+    res.status(500).send('Lỗi khi truy vấn dữ liệu');
+  }
 });
 
-router.get('/api/theproducts', (req, res) => {
-    const query = 'SELECT * FROM products';
-    queryDatabase(query, [], (error, results) => {
-        if (error) {
-            console.error('Lỗi khi truy vấn dữ liệu: ' + error.stack);
-            res.status(500).send('Lỗi khi truy vấn dữ liệu');
-            return;
-        }
-        // Đảm bảo rằng trường img chứa URL đầy đủ của ảnh
-        const productsWithFullImageUrl = results.map(product => ({
-            ...product,
-            img: product.img ? product.img : 'path/to/default-product-image.png'
-        }));
-        res.json(productsWithFullImageUrl);
-    });
-});
+// Endpoint để lấy thông tin sản phẩm
+router.get('/api/theproducts', async (req, res) => {
+    try {
+      const query = 'SELECT * FROM products';
+      const results = await queryDatabase(query, []);
+      res.json(results);
+    } catch (error) {
+      console.error('Lỗi khi truy vấn dữ liệu:', error);
+      res.status(500).send('Lỗi khi truy vấn dữ liệu');
+    }
+  });
 
 // Thêm endpoint mới để xử lý việc thêm sản phẩm
 router.post('/api/products', upload.single('img'), async (req, res) => {
     try {
-        await authenticateAnonymously();
+        await auth.signInAnonymously(); // Sử dụng auth từ cấu hình Firebase
 
         const { product_name, price, description, uses, process } = req.body;
         const img = req.file;
@@ -127,16 +105,38 @@ router.delete('/api/products/:id', (req, res) => {
 });
 
 // Endpoint để xóa người dùng
-router.delete('/api/users/:id', (req, res) => {
-    const { id } = req.params;
-    const query = 'DELETE FROM users WHERE uid = ?';
-    queryDatabase(query, [id], (error, results) => {
-        if (error) {
-            console.error('Lỗi khi xóa người dùng: ' + error.stack);
-            return res.status(500).json({ error: 'Lỗi khi xóa người dùng' });
-        }
-        res.status(200).json({ message: 'Người dùng đã được xóa thành công' });
-    });
+router.delete('/api/users/:id', async (req, res) => {
+  const userId = req.params.id;
+  let connection;
+  try {
+    connection = await db.getConnection();
+    await connection.beginTransaction();
+
+    // Xóa các hàng liên quan trong bảng register
+    await connection.query('DELETE FROM register WHERE actor_id = ?', [userId]);
+
+    // Xóa các hàng liên quan trong bảng notification_change
+    await connection.query('DELETE FROM notification_change WHERE actor_id = ?', [userId]);
+
+    // Xóa các hàng liên quan trong bảng notification
+    await connection.query('DELETE FROM notification WHERE notifier_id = ?', [userId]);
+
+    // Xóa người dùng
+    await connection.query('DELETE FROM users WHERE uid = ?', [userId]);
+
+    await connection.commit();
+    res.status(200).json({ message: 'Người dùng đã được xóa thành công' });
+  } catch (error) {
+    if (connection) {
+      await connection.rollback();
+    }
+    console.error('Lỗi khi xóa người dùng:', error);
+    res.status(500).json({ message: 'Lỗi khi xóa người dùng', error: error.message });
+  } finally {
+    if (connection) {
+      connection.release();
+    }
+  }
 });
 
 // Cấu hình để phục vụ các tệp tĩnh
@@ -162,7 +162,7 @@ router.get('/caidat', (req, res) => {
 // Endpoint để cập nhật sản phẩm
 router.post('/api/products/update', upload.single('img'), async (req, res) => {
     try {
-        await authenticateAnonymously();
+        await auth.signInAnonymously(); // Sử dụng auth từ cấu hình Firebase
 
         console.log('Dữ liệu nhận được:', req.body, req.file);
 

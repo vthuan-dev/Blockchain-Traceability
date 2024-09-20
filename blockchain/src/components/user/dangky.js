@@ -8,6 +8,7 @@
     const { sendEmail } = require('./sendmail');
     const axios = require('axios');
     const { storage, ref, uploadBytes, getDownloadURL, authenticateAnonymously } = require('../../firebase');
+    const { saveNotification } = require('../../notification');
 
     const router = express.Router();
     
@@ -115,7 +116,7 @@
         });
         router.post('/register', upload.single('avatar'), async function(req, res) {
             try {
-                await authenticateAnonymously(); // Thêm dòng này
+                await authenticateAnonymously();
 
                 const { name, email, password, phone, dob, gender, role_id, region_id, province_id, district_id, ward_id, specific_address } = req.body;
                 const missingFields = validateInput(req.body);
@@ -189,7 +190,8 @@
                 const sql = 'INSERT INTO users (name, email, passwd, phone, address, dob, gender, role_id, region_id, province_id, district_id, ward_id, avatar, verificationToken) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
                 const values = [name, email, hashedPassword, phone, fullAddress, dob, gender, role_id, finalRegionId, province_id, district_id, ward_id, avatarUrl, verificationToken];
 
-                await db.query(sql, values);
+                const [result] = await db.query(sql, values);
+                const userId = result.insertId;
 
                 // Gửi email xác thực
                 const verificationLink = `http://localhost:3000/api/verify/${verificationToken}`;
@@ -198,7 +200,7 @@
 
                 // Lưu thông báo vào CSDL
                 const notificationMessage = `Người dùng mới đã đăng ký: ${name} (${email})`;
-                await saveNotification(db, email, notificationMessage, 3);
+                await saveNotification(db, userId, notificationMessage, 1); // 1 là ID của loại thông báo 'register'
 
                 res.status(201).json({ 
                     message: 'Đã đăng ký tài khoản người dùng thành công. Vui lòng kiểm tra email của bạn để xác thực tài khoản.',
@@ -233,13 +235,3 @@
 
         return router;
     };
-
-    async function saveNotification(db, email, message, role_id) {
-        const sql = 'INSERT INTO notifications (email, message, role_id) VALUES (?, ?, ?)';
-        const values = [email, message, role_id];
-        try {
-            await db.query(sql, values);
-        } catch (error) {
-            console.error('Lỗi khi lưu thông báo:', error);
-        }
-    }
