@@ -4,6 +4,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const notificationPanel = document.querySelector('.notification-panel');
     const sidebar = document.querySelector('.sidebar');
     const sidebarToggle = document.querySelector('.sidebar-toggle');
+    const notificationList = document.getElementById('notificationList');
+    const confirmReadButton = document.getElementById('confirmRead');   
+    const notificationIcon = document.getElementById('notificationIcon');
 
     // Toggle dropdown menu
     if (profileIcon && dropdownMenu) {
@@ -12,10 +15,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Toggle notification panel
-    document.getElementById('notificationIcon').addEventListener('click', () => {
-        notificationPanel.classList.toggle('show');
-    });
+    // Toggle notification panel và fetch notifications khi click vào icon
+    if (notificationIcon && notificationPanel) {
+        notificationIcon.addEventListener('click', () => {
+            notificationPanel.classList.toggle('show');
+            if (notificationPanel.classList.contains('show')) {
+                fetchNotifications();
+            }
+        });
+    }
 
     // Close dropdown or notification panel when clicking outside
     window.addEventListener('click', (e) => {
@@ -43,7 +51,134 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Fetch admin info and update section title
     fetchAdminInfo();
+
+    // Fetch notifications ban đầu
+    fetchNotifications();
+
+    // Initialize WebSocket connection
+    const socket = new WebSocket('ws://localhost:8080');
+
+    socket.addEventListener('open', () => {
+        console.log('WebSocket connection established');
+    });
+
+    socket.addEventListener('message', (event) => {
+        try {
+            const notification = JSON.parse(event.data);
+            console.log('Đã nhận thông báo qua WebSocket:', notification);  // Log thông báo để kiểm tra
+            addNotificationToList(notification);
+            updateNotificationCount();
+        } catch (error) {
+            console.error('Lỗi khi xử lý thông báo từ WebSocket:', error);
+        }
+    });
+
+    socket.addEventListener('close', () => {
+        console.log('WebSocket connection closed');
+    });
+
+    socket.addEventListener('error', (error) => {
+        console.error('WebSocket error:', error);
+    });
+
+    // Xử lý nút đánh dấu đã đọc tất cả
+    confirmReadButton.addEventListener('click', async () => {
+        try {
+            const response = await fetch('/api/notifications/mark-all-read', { method: 'POST' });
+            if (response.ok) {
+                const notificationList = document.getElementById('notificationList');
+                notificationList.innerHTML = ''; // Xóa tất cả thông báo khỏi giao diện
+                updateNotificationCount(0);
+            }
+        } catch (error) {
+            console.error('Lỗi khi xóa tất cả thông báo:', error);
+        }
+    });
+
 });
+
+// Hàm đánh dấu một thông báo đã đọc
+async function markNotificationAsRead(notificationId) {
+    try {
+        const response = await fetch(`/api/notifications/${notificationId}/read`, { 
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        if (response.ok) {
+            console.log('Đã xóa thông báo:', notificationId);
+            return true;
+        }
+        console.error('Lỗi khi xóa thông báo:', await response.text());
+        return false;
+    } catch (error) {
+        console.error('Lỗi khi xóa thông báo:', error);
+        return false;
+    }
+}
+
+// Function to fetch notifications
+async function fetchNotifications() {
+    try {
+        const response = await fetch('/api/notifications');
+        if (response.ok) {
+            const notifications = await response.json();
+                console.log('Thông báo nhận được từ API:', notifications);  // Thêm log để kiểm tra
+            const notificationList = document.getElementById('notificationList');
+            notificationList.innerHTML = '';  
+            notifications.forEach(addNotificationToList);  
+            updateNotificationCount(notifications.filter(n => !n.read).length);
+        } else {
+            console.error('Không thể lấy thông báo:', response.status);
+        }
+    } catch (error) {
+        console.error('Lỗi khi lấy thông báo:', error);
+    }
+}
+
+// Function to add a notification to the list
+function addNotificationToList(notification) {
+    const notificationList = document.getElementById('notificationList');
+    const li = document.createElement('li');
+    li.dataset.id = notification.notification_id;
+    li.classList.add('notification-item');
+    li.innerHTML = `
+        <div class="notification-content">
+            <p>${notification.message}</p>
+            <small>${new Date(notification.created_on).toLocaleString('vi-VN')}</small>
+        </div>
+        <button class="mark-read-btn">
+            <i class="fas fa-check"></i>
+        </button>
+    `;
+    notificationList.prepend(li);
+
+    // Thêm sự kiện click cho nút đánh dấu đã đọc
+    const markReadBtn = li.querySelector('.mark-read-btn');
+    markReadBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        if (await markNotificationAsRead(notification.notification_id)) {
+            li.remove(); // Xóa thông báo khỏi giao diện
+            updateNotificationCount(document.querySelectorAll('#notificationList .notification-item').length);
+        }
+    });
+
+    console.log('Đã thêm thông báo:', notification.message); // Thêm log để kiểm tra
+}
+
+// Function to update notification count
+function updateNotificationCount(count) {
+    const badge = document.querySelector('.noti_count');
+    if (badge) {
+        if (count > 0) {
+            badge.textContent = count > 99 ? '99+' : count;
+            badge.style.display = 'inline';
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+}
 
 // Function to toggle sidebar and manage toggle button position
 function toggleSidebar() {
