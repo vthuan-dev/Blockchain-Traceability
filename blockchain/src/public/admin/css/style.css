@@ -31,6 +31,7 @@ header {
     display: flex;
     justify-content: flex-end;
     align-items: center;
+    position: relative; /* Thêm thuộc tính này */
 }
 
 .header-icons i {
@@ -52,6 +53,97 @@ header {
     justify-content: center;
     align-items: center;
     font-size: 12px;
+}
+
+.notification-panel {
+    display: none;
+    position: fixed;
+    top: var(--header-height); /* Đặt bên dưới chuông thông báo */
+    right: 20px;
+    width: 350px;
+    max-height: 80vh;
+    overflow-y: auto;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    z-index: 2000;
+    padding: 15px;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.notification-panel.show {
+    display: block;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.notification-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    position: sticky;
+    top: 0;
+    background-color: #fff;
+    z-index: 1;
+    padding: 15px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.notification-header h5 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #333;
+}
+
+.btn-mark-read {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.btn-mark-read:hover {
+    background-color: #218838;
+}
+
+.notification-panel ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.notification-panel ul li {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    align-items: center;
+}
+
+.notification-panel ul li:last-child {
+    border-bottom: none;
+}
+
+.notification-panel ul li .notification-icon {
+    margin-right: 10px;
+    font-size: 1.5rem;
+    color: #007bff;
+}
+
+.notification-panel ul li .notification-content {
+    flex: 1;
+}
+
+.notification-panel ul li .notification-time {
+    font-size: 0.8rem;
+    color: #999;
+    text-align: right;
 }
 
 /* Sidebar styles */

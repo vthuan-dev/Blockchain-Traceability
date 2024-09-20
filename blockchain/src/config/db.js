@@ -1,11 +1,16 @@
-// src/config/db.js
-import mysql from 'mysql2/promise';
+const mysql = require('mysql2/promise');
+const dotenv = require('dotenv');
+
+// Load biến môi trường từ tệp .env
+dotenv.config();
 
 const db = mysql.createPool({
-  host: 'database-1.cv20qo0q8bre.ap-southeast-2.rds.amazonaws.com',
-  user: 'admin',
-  password: '9W8RQuAdnZylXZAmb68P',
-  database: 'blockchain'
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_DATABASE,
+  port: process.env.DB_PORT,
+  connectTimeout: 10000
 });
 
-export default db;
+module.exports = db;

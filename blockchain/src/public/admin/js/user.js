@@ -25,7 +25,7 @@ window.UserManager = {
 
     getAvatarPath: function(avatarPath) {
         if (!avatarPath) return 'uploads/avatars/default-avatar.png'; // Đường dẫn mặc định nếu không có avatar
-        return '../uploads/avatars' + avatarPath.split('avatars').pop();
+        return avatarPath; // Trả về trực tiếp URL từ Firebase
     },
 
     renderTable: function() {

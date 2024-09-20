@@ -3,94 +3,92 @@ const mysql = require('mysql');
 const cors = require('cors');
 const path = require('path');
 const bodyParser = require('body-parser');
-const fileUpload = require('express-fileupload'); // Thêm middleware để xử lý file upload
 const multer = require('multer');
 const bcrypt = require('bcrypt');
 const axios = require('axios');
+const { auth, storage, ref, uploadBytes, getDownloadURL } = require('./firebase');
 
 const router = express.Router(); // Sử dụng Router
 router.use(cors()); // Cho phép CORS để client có thể gọi API
 router.use(bodyParser.json());
 router.use(express.urlencoded({ extended: true })); // Thêm middleware để xử lý dữ liệu URL-encoded
-router.use(fileUpload()); // Thêm middleware để xử lý file upload
 
-// Tạo pool kết nối
-const pool = mysql.createPool({
-    connectionLimit: 10,
-    host: 'database-1.cv20qo0q8bre.ap-southeast-2.rds.amazonaws.com',
-    user: 'admin',
-    password: '9W8RQuAdnZylXZAmb68P',
-    database: 'blockchain'
-});
+// Cấu hình multer để sử dụng bộ nhớ tạm thời
+const upload = multer({ storage: multer.memoryStorage() });
+const db = require('./config/db.js');
+
 
 // Hàm để thực hiện truy vấn
-function queryDatabase(query, params, callback) {
-    pool.getConnection((err, connection) => {
-        if (err) {
-            console.error('Lỗi khi lấy kết nối từ pool:', err);
-            callback(err, null);
-            return;
-        }
-
-        connection.query(query, params, (error, results) => {
-            connection.release(); // Trả lại kết nối vào pool
-
-            if (error) {
-                console.error('Lỗi khi truy vấn dữ liệu:', error);
-                callback(error, null);
-                return;
-            }
-
-            callback(null, results);
-        });
-    });
+async function queryDatabase(query, params) {
+  const connection = await db.getConnection();
+  try {
+    const [results] = await connection.query(query, params);
+    return results;
+  } catch (error) {
+    console.error('Lỗi khi truy vấn dữ liệu:', error);
+    throw error;
+  } finally {
+    connection.release();
+  }
 }
 
 // Endpoint để lấy thông tin người dùng
-router.get('/api/users', (req, res) => {
+router.get('/api/users', async (req, res) => {
+  try {
     const query = 'SELECT * FROM users';
-    queryDatabase(query, [], (error, results) => {
-        if (error) {
-            console.error('Lỗi khi truy vấn dữ liệu: ' + error.stack);
-            res.status(500).send('Lỗi khi truy vấn dữ liệu');
-            return;
-        }
-        res.json(results);
-    });
+    const results = await queryDatabase(query, []);
+    res.json(results);
+  } catch (error) {
+    console.error('Lỗi khi truy vấn dữ liệu:', error);
+    res.status(500).send('Lỗi khi truy vấn dữ liệu');
+  }
 });
 
-router.get('/api/theproducts', (req, res) => {
-    const query = 'SELECT * FROM products';
-    queryDatabase(query, [], (error, results) => {
-        if (error) {
-            console.error('Lỗi khi truy vấn dữ liệu: ' + error.stack);
-            res.status(500).send('Lỗi khi truy vấn dữ liệu');
-            return;
-        }
-        res.json(results);
-    });
-});
+// Endpoint để lấy thông tin sản phẩm
+router.get('/api/theproducts', async (req, res) => {
+    try {
+      const query = 'SELECT * FROM products';
+      const results = await queryDatabase(query, []);
+      res.json(results);
+    } catch (error) {
+      console.error('Lỗi khi truy vấn dữ liệu:', error);
+      res.status(500).send('Lỗi khi truy vấn dữ liệu');
+    }
+  });
 
 // Thêm endpoint mới để xử lý việc thêm sản phẩm
-router.post('/api/products', (req, res) => {
-    const { product_name, price, description, uses, process } = req.body;
-    const img = req.files ? req.files.img : null;
+router.post('/api/products', upload.single('img'), async (req, res) => {
+    try {
+        await auth.signInAnonymously(); // Sử dụng auth từ cấu hình Firebase
 
-    // Kiểm tra dữ liệu nhận được từ client
-    console.log('Dữ liệu nhận được từ client:', req.body, req.files);
+        const { product_name, price, description, uses, process } = req.body;
+        const img = req.file;
 
-    if (!product_name || !price || !description || !img || !uses || !process) {
-        return res.status(400).json({ error: 'Thiếu thông tin sản phẩm' }); // Trả về JSON
-    }
+        console.log('Dữ liệu nhận được từ client:', req.body, req.file);
 
-    const query = 'INSERT INTO products (product_name, price, description, img, uses, process) VALUES (?, ?, ?, ?, ?, ?)';
-    queryDatabase(query, [product_name, price, description, img.name, uses, process], (error, results) => {
-        if (error) {
-            console.error('Lỗi khi thêm sản phẩm: ' + error.stack);
-            return res.status(500).json({ error: 'Lỗi khi thêm sản phẩm' }); // Trả về JSON
+        if (!product_name || !price || !description || !img || !uses || !process) {
+            return res.status(400).json({ error: 'Thiếu thông tin sản phẩm' });
         }
-        res.status(201).json({ message: 'Sản phẩm đã được thêm thành công', id: results.insertId });
-    });
+
+        let imgUrl = null;
+        if (img) {
+            const imgRef = ref(storage, `products/${Date.now()}_${img.originalname}`);
+            const snapshot = await uploadBytes(imgRef, img.buffer);
+            imgUrl = await getDownloadURL(snapshot.ref);
+        }
+
+        const query = 'INSERT INTO products (product_name, price, description, img, uses, process) VALUES (?, ?, ?, ?, ?, ?)';
+        queryDatabase(query, [product_name, price, description, imgUrl, uses, process], (error, results) => {
+            if (error) {
+                console.error('Lỗi khi thêm sản phẩm: ' + error.stack);
+                return res.status(500).json({ error: 'Lỗi khi thêm sản phẩm' });
+            }
+            res.status(201).json({ message: 'Sản phẩm đã được thêm thành công', id: results.insertId });
+        });
+    } catch (error) {
+        console.error('Lỗi khi thêm sản phẩm:', error);
+        res.status(500).json({ error: 'Lỗi khi thêm sản phẩm' });
+    }
 });
 
 // Endpoint để xóa sản phẩm
@@ -107,16 +105,38 @@ router.delete('/api/products/:id', (req, res) => {
 });
 
 // Endpoint để xóa người dùng
-router.delete('/api/users/:id', (req, res) => {
-    const { id } = req.params;
-    const query = 'DELETE FROM users WHERE uid = ?';
-    queryDatabase(query, [id], (error, results) => {
-        if (error) {
-            console.error('Lỗi khi xóa người dùng: ' + error.stack);
-            return res.status(500).json({ error: 'Lỗi khi xóa người dùng' });
-        }
-        res.status(200).json({ message: 'Người dùng đã được xóa thành công' });
-    });
+router.delete('/api/users/:id', async (req, res) => {
+  const userId = req.params.id;
+  let connection;
+  try {
+    connection = await db.getConnection();
+    await connection.beginTransaction();
+
+    // Xóa các hàng liên quan trong bảng register
+    await connection.query('DELETE FROM register WHERE actor_id = ?', [userId]);
+
+    // Xóa các hàng liên quan trong bảng notification_change
+    await connection.query('DELETE FROM notification_change WHERE actor_id = ?', [userId]);
+
+    // Xóa các hàng liên quan trong bảng notification
+    await connection.query('DELETE FROM notification WHERE notifier_id = ?', [userId]);
+
+    // Xóa người dùng
+    await connection.query('DELETE FROM users WHERE uid = ?', [userId]);
+
+    await connection.commit();
+    res.status(200).json({ message: 'Người dùng đã được xóa thành công' });
+  } catch (error) {
+    if (connection) {
+      await connection.rollback();
+    }
+    console.error('Lỗi khi xóa người dùng:', error);
+    res.status(500).json({ message: 'Lỗi khi xóa người dùng', error: error.message });
+  } finally {
+    if (connection) {
+      connection.release();
+    }
+  }
 });
 
 // Cấu hình để phục vụ các tệp tĩnh
@@ -140,60 +160,67 @@ router.get('/caidat', (req, res) => {
 })
 
 // Endpoint để cập nhật sản phẩm
-router.post('/api/products/update', (req, res) => {
-    console.log('Dữ liệu nhận được:', req.body, req.files);
+router.post('/api/products/update', upload.single('img'), async (req, res) => {
+    try {
+        await auth.signInAnonymously(); // Sử dụng auth từ cấu hình Firebase
 
-    const { product_id, product_name, price, description, uses, process, original_product_name, original_price, original_description, original_uses, original_process } = req.body;
-    
-    console.log('So sánh giá trị:');
-    console.log('product_name:', product_name, 'original_product_name:', original_product_name);
-    console.log('price:', price, 'original_price:', original_price);
-    console.log('description:', description, 'original_description:', original_description);
-    console.log('uses:', uses, 'original_uses:', original_uses);
-    console.log('process:', process, 'original_process:', original_process);
+        console.log('Dữ liệu nhận được:', req.body, req.file);
 
-    let img = null;
+        const { product_id, product_name, price, description, uses, process } = req.body;
+        
+        let updateFields = [];
+        let updateValues = [];
 
-    if (req.files && req.files.img) {
-        img = req.files.img.name;
-        req.files.img.mv(`./uploads/${img}`);
-    }
+        if (product_name) {
+            updateFields.push('product_name = ?');
+            updateValues.push(product_name);
+        }
+        if (price) {
+            updateFields.push('price = ?');
+            updateValues.push(price);
+        }
+        if (description) {
+            updateFields.push('description = ?');
+            updateValues.push(description);
+        }
+        if (uses) {
+            updateFields.push('uses = ?');
+            updateValues.push(uses);
+        }
+        if (process) {
+            updateFields.push('process = ?');
+            updateValues.push(process);
+        }
 
-    let updateFields = [];
-    if (product_name !== original_product_name) updateFields.push(`product_name = ?`);
-    if (price.toString() !== original_price) updateFields.push(`price = ?`);
-    if (description !== original_description) updateFields.push(`description = ?`);
-    if (uses !== original_uses) updateFields.push(`uses = ?`);
-    if (process !== original_process) updateFields.push(`process = ?`);
-    if (img) updateFields.push(`img = ?`);
+        if (req.file) {
+            const imgRef = ref(storage, `products/${Date.now()}_${req.file.originalname}`);
+            const snapshot = await uploadBytes(imgRef, req.file.buffer);
+            const imgUrl = await getDownloadURL(snapshot.ref);
+            updateFields.push('img = ?');
+            updateValues.push(imgUrl);
+        }
 
-    console.log('Số trường cần cập nhật:', updateFields.length);
+        if (updateFields.length > 0) {
+            const updateQuery = `UPDATE products SET ${updateFields.join(', ')} WHERE product_id = ?`;
+            updateValues.push(product_id);
 
-    if (updateFields.length > 0) {
-        const updateQuery = `UPDATE products SET ${updateFields.join(', ')} WHERE product_id = ?`;
-        const updateValues = [
-            ...(product_name !== original_product_name ? [product_name] : []),
-            ...(price.toString() !== original_price ? [price] : []),
-            ...(description !== original_description ? [description] : []),
-            ...(uses !== original_uses ? [uses] : []),
-            ...(process !== original_process ? [process] : []),
-            ...(img ? [img] : []),
-            product_id
-        ];
+            console.log('Query cập nhật:', updateQuery);
+            console.log('Giá trị cập nhật:', updateValues);
 
-        console.log('Query cập nhật:', updateQuery);
-        console.log('Giá trị cập nhật:', updateValues);
-
-        queryDatabase(updateQuery, updateValues, (error, results) => {
-            if (error) {
-                console.error('Lỗi khi cập nhật sản phẩm:', error);
-                return res.status(500).json({ error: 'Lỗi khi cập nhật sản phẩm' });
-            }
-            res.json({ message: 'Sản phẩm đã được cập nhật thành công', updated: true });
-        });
-    } else {
-        console.log('Không có thay đổi nào được cập nhật');
-        res.json({ message: 'Không có thay đổi nào cần được nhật', updated: false });
+            queryDatabase(updateQuery, updateValues, (error, results) => {
+                if (error) {
+                    console.error('Lỗi khi cập nhật sản phẩm:', error);
+                    return res.status(500).json({ error: 'Lỗi khi cập nhật sản phẩm' });
+                }
+                res.json({ message: 'Sản phẩm đã được cập nhật thành công', updated: true });
+            });
+        } else {
+            console.log('Không có thay đổi nào được cập nhật');
+            res.json({ message: 'Không có thay đổi nào cần được cập nhật', updated: false });
+        }
+    } catch (error) {
+        console.error('Lỗi khi cập nhật sản phẩm:', error);
+        res.status(500).json({ error: 'Lỗi khi cập nhật sản phẩm' });
     }
 });
 

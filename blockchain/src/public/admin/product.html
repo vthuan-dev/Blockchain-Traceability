@@ -25,7 +25,7 @@
                 <div class="col-3 col-md-3 text-right header-icons">
                     <div class="d-inline-block position-relative mr-3">
                         <i class="fas fa-bell" id="notificationIcon"></i>
-                        <span class="badge badge-danger noti_count">12</span>
+                        <span class="badge badge-danger noti_count"></span>
                     </div>
                     <div class="d-inline-block position-relative ml-auto text-right">
                         <i class="fas fa-user profile-pic" id="profileIcon"></i>
@@ -134,6 +134,18 @@
           <button class="btn btn-save" id="accept-remove">Đồng ý</button>
         </div>
     </section>        
+
+    <div class="notification-panel" id="notificationPanel">
+        <div class="notification-header">
+            <h5>Thông báo</h5>
+            <button id="confirmRead" class="btn-mark-read">
+                <i class="fas fa-check-double"></i> Đánh dấu tất cả đã đọc
+            </button>
+        </div>
+        <ul id="notificationList">
+            <!-- Thông báo sẽ được thêm vào đây -->
+        </ul>
+    </div>
 
     <div id="overlay"></div>
     

@@ -38,6 +38,7 @@ module.exports = function(db) {
    
 
                 // Tạo session cho admin
+                req.session.adminId = admin.id;
                 req.session.adminEmail = admin.admin_email;
                 req.session.adminName = admin.admin_name; 
                 req.session.province_id = admin.province_id; // Lưu province_id vào session
@@ -47,6 +48,7 @@ module.exports = function(db) {
                 res.status(200).json({ 
                     message: 'Đăng nhập thành công', 
                     admin: {
+                        adminId: admin.id,
                         adminEmail: admin.admin_email,
                         adminName: admin.admin_name,
                         province_id: admin.province_id,

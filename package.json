@@ -27,6 +27,8 @@
     "express": "^4.19.2",
     "express-fileupload": "^1.5.1",
     "express-session": "^1.18.0",
+    "firebase": "^10.13.2",
+    "firebase-admin": "^12.5.0",
     "form-data": "^4.0.0",
     "ipfs": "^0.66.1",
     "ipfs-cli": "^0.16.1",
