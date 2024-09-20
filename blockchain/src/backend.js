@@ -59,7 +59,7 @@ web3.eth.net.isListening()
   .catch(e => console.log('Lỗi rồi', e));
 
 const contractABI = require('../build/contracts/TraceabilityContract.json').abi;
-const contractAddress = '0x869846D71f6c3b67d4112B48Dd723d2f6cbb071b';
+const contractAddress = '0x18A585c26484D47A7e0Cfc1f7E4C0464509F4B9f';
 const contract = new web3.eth.Contract(contractABI, contractAddress);
 
 // tạo biến lưu trữ file, giới hạn số lượng file và tên file, maxCount: số lượng file, name: tên file
@@ -407,7 +407,7 @@ app.post('/createbatch', (req, res, next) => {
       cleanProductId,
       cleanStartDate,
       cleanEndDate
-    ).send({ from: account.address, gas: 3000000 });
+    ).send({ from: account.address, gas: 5000000 });
 
     console.log('Transaction result:', JSON.stringify(convertBigIntToString(result), null, 2));
 
@@ -431,6 +431,7 @@ app.post('/createbatch', (req, res, next) => {
     res.status(500).json({ error: 'Lỗi khi tạo lô hàng: ' + err.message });
   }
 });
+
   app.get('/create-activity', (req, res) => {
     res.sendFile(path.join(__dirname, 'public',  'san-xuat','them-nkhd.html'));
   });
@@ -1501,38 +1502,44 @@ function translateParticipantType(type) {
   };
   return types[type] || type;
 }
-
 app.post('/api/warehouse-confirm', async (req, res) => {
   try {
-      const { sscc } = req.body;
-      const userId = req.session.userId;
+    if (!req.session.userId) {
+      return res.status(401).json({ error: 'Người dùng chưa đăng nhập' });
+    }
 
-      // Kiểm tra xem người dùng có phải là nhà kho không
-      const userRole = await getUserRole(userId);
-      if (userRole !== 8) { // Giả sử 8 là role_id của nhà kho
-          return res.status(403).json({ error: 'Không có quyền thực hiện hành động này' });
-      }
+    const { sscc } = req.body;
+    if (!sscc) {
+      return res.status(400).json({ error: 'Thiếu thông tin SSCC' });
+    }
 
-      const batchId = await contract.methods.getBatchIdBySSCC(sscc).call();
-      
-      // Kiểm tra trạng thái vận chuyển trước khi xác nhận
-      const transportStatus = await contract.methods.getBatchTransportStatus(batchId).call();
-      const detailedTransportStatus = await contract.methods.getDetailedTransportStatus(batchId).call();
-      
-      if (transportStatus !== '2' || detailedTransportStatus !== '3') { // Assuming 2 is Delivered for TransportStatus and 3 is Delivered for DetailedTransportStatus
-          return res.status(400).json({ error: 'Lô hàng chưa được hoàn thành vận chuyển' });
-      }
+    const userId = req.session.userId;
+    const userRole = await getUserRole(userId);
 
-      // Gọi hàm warehouseConfirmation trên smart contract
-      await contract.methods.warehouseConfirmation(batchId, userId).send({ from: account.address });
+    if (userRole !== 8) { // Giả sử 8 là role ID của nhà kho
+      return res.status(403).json({ error: 'Không có quyền xác nhận nhận hàng' });
+    }
 
-      res.json({ success: true, message: 'Đã xác nhận nhận hàng thành công' });
+    const batchId = await contract.methods.getBatchIdBySSCC(sscc).call();
+    if (batchId === '0') {
+      return res.status(404).json({ error: 'Không tìm thấy lô hàng với SSCC này' });
+    }
+
+    const transportStatus = await contract.methods.getBatchTransportStatus(batchId).call();
+    const detailedTransportStatus = await contract.methods.getDetailedTransportStatus(batchId).call();
+
+    if (transportStatus !== '2' || detailedTransportStatus !== '3') { // Kiểm tra xem lô hàng đã được giao chưa
+      return res.status(400).json({ error: 'Lô hàng chưa được giao, không thể xác nhận nhận hàng' });
+    }
+
+    await contract.methods.warehouseConfirmation(batchId, userId).send({ from: adminAddress, gas: 500000 });
+
+    res.status(200).json({ message: 'Đã xác nhận nhận hàng thành công' });
   } catch (error) {
-      console.error('Lỗi khi xác nhận nhận hàng:', error);
-      res.status(500).json({ error: 'Có lỗi xảy ra khi xác nhận nhận hàng: ' + error.message });
+    console.error('Lỗi khi xác nhận nhận hàng:', error);
+    res.status(500).json({ error: 'Có lỗi xảy ra khi xác nhận nhận hàng: ' + error.message });
   }
 });
-
 // Hàm hỗ trợ để lấy role của người dùng
 async function getUserRole(userId) {
   return new Promise((resolve, reject) => {

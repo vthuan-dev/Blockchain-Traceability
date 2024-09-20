@@ -1,8 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
-
+import "./ActivityLog.sol";
 contract TraceabilityContract {
+    ActivityLog private activityLogContract;   
+
+  constructor(address _activityLogAddress) {
+    require(_activityLogAddress != address(0), "Invalid ActivityLog address");
+    activityLogContract = ActivityLog(_activityLogAddress);
+}
+
     uint256 private _batchIdCounter;
+    uint256 private _warehouseIdCounter;
 
 enum BatchStatus { PendingApproval, Approved, Rejected }
 enum TransportStatus { NotTransported, InTransit, Delivered }
@@ -50,15 +58,7 @@ enum DetailedTransportStatus { NotStarted, InTransit, Paused, Delivered }
         uint256 timestamp;
         string action;
     }
-      struct ActivityLog {
-        uint256 timestamp;
-        uint256 uid;
-        string activityName;
-        string description;
-        bool isSystemGenerated;
-        string[] imageUrls;
-        uint256[] relatedProductIds;
-    }
+
     struct TransportEvent {
     uint256 participantId;
     uint256 timestamp;
@@ -71,7 +71,7 @@ mapping(uint256 => TransportEvent[]) private _batchTransportEvents;
 
     mapping(uint256 => Batch) private _batches;
     mapping(string => uint256) private _ssccToBatchId;
-    mapping(uint256 => ActivityLog[]) private _producerActivityLogs;
+   
     mapping(uint256 => bool) private _approvedBatches;
     mapping(uint256 => Participation[]) private _batchParticipations;
     
@@ -95,7 +95,25 @@ event TransportStatusUpdated(
     string participantType
 );
 
-event WarehouseConfirmed(uint256 indexed batchId, uint256 warehouseId);
+
+
+
+    function addSystemActivityLog(
+        uint256 _uid,
+        string memory _activityName,
+        string memory _description,
+        uint256[] memory _relatedProductIds
+    ) internal {
+        activityLogContract.addActivityLog(
+            _uid,
+            _activityName,
+            _description,
+            true,
+            new string[](0),
+            _relatedProductIds
+        );
+    }
+
 
     function createBatch(
         string memory _name,  // Thêm tham số tên lô hàng
@@ -228,53 +246,8 @@ event WarehouseConfirmed(uint256 indexed batchId, uint256 warehouseId);
     }
     
 
-    function addActivityLog(
-        uint256 _uid,
-        string memory _activityName,
-        string memory _description,
-        string[] memory _imageUrls,
-        uint256[] memory _relatedProductIds
-    ) public {
-        ActivityLog memory newLog = ActivityLog({
-            timestamp: block.timestamp,
-            uid: _uid,
-            activityName: _activityName,
-            description: _description,
-            isSystemGenerated: false,
-            imageUrls: _imageUrls,
-            relatedProductIds: _relatedProductIds
-        });
-
-        _producerActivityLogs[_uid].push(newLog);
-        emit ActivityLogAdded(_uid, _activityName, _description, false, _imageUrls, _relatedProductIds);
-    }
  // Hàm để lấy nhật ký hoạt động của một nhà sản xuất
-    function getProducerActivityLogs(uint256 _uid) public view returns (ActivityLog[] memory) {
-        return _producerActivityLogs[_uid];
-    }
 
-    
-    // Hàm nội bộ để hệ thống tự động thêm nhật ký
-    function _addSystemActivityLog(
-        uint256 _uid,
-        string memory _activityName,
-        string memory _description,
-        uint256[] memory _relatedProductIds
-    ) internal {
-        string[] memory emptyImageUrls = new string[](0);
-        ActivityLog memory newLog = ActivityLog({
-            timestamp: block.timestamp,
-            uid: _uid,
-            activityName: _activityName,
-            description: _description,
-            isSystemGenerated: true,
-            imageUrls: emptyImageUrls,
-            relatedProductIds: _relatedProductIds
-        });
-
-        _producerActivityLogs[_uid].push(newLog);
-        emit ActivityLogAdded(_uid, _activityName, _description, true, emptyImageUrls, _relatedProductIds);
-    }
     
     function _calculateDataHash(
         string memory _sscc,
@@ -396,18 +369,13 @@ function isProducerOfBatch(uint256 _batchId, uint256 _producerId) public view re
 }
 
 // Thêm hàm này vào smart contract
-function getActivityLogs(uint256 _uid) public view returns (ActivityLog[] memory) {
-    return _producerActivityLogs[_uid];
-}
-function getActivityLogCount(uint256 _uid) public view returns (uint256) {
-    return _producerActivityLogs[_uid].length;
-}
+
+
 
 modifier onlyApprover() {
     // Implement logic to check if msg.sender is an approver
     _;
 }
-
 function approveBatch(uint256 _batchId) public onlyApprover {
     require(_batches[_batchId].batchId != 0, "Batch does not exist");
     require(_batches[_batchId].status == BatchStatus.PendingApproval, "Batch is not pending approval");
@@ -421,7 +389,15 @@ function approveBatch(uint256 _batchId) public onlyApprover {
     // Add system activity log
     uint256[] memory relatedProductIds = new uint256[](1);
     relatedProductIds[0] = _batches[_batchId].productId;
-    _addSystemActivityLog(_batches[_batchId].producerId, "Batch Approved", "Batch has been approved by the approver", relatedProductIds);
+    string[] memory imageUrls = new string[](0); // Empty array for imageUrls
+    activityLogContract.addActivityLog(
+        _batchId,
+        "Batch Approved",
+        "Batch has been approved by the approver",
+        true, // isSystemGenerated
+        imageUrls,
+        relatedProductIds
+    );
 }
 
 function rejectBatch(uint256 _batchId) public onlyApprover {
@@ -435,10 +411,22 @@ function rejectBatch(uint256 _batchId) public onlyApprover {
     // Add system activity log
     uint256[] memory relatedProductIds = new uint256[](1);
     relatedProductIds[0] = _batches[_batchId].productId;
-    _addSystemActivityLog(_batches[_batchId].producerId, "Batch Rejected", "Batch has been rejected by the approver", relatedProductIds);
+    string[] memory imageUrls = new string[](0); // Empty array for imageUrls
+    activityLogContract.addActivityLog(
+        _batchId,
+        "Batch Rejected",
+        "Batch has been rejected by the approver",
+        true, // isSystemGenerated
+        imageUrls,
+        relatedProductIds
+    );
+}
+function getActivityLogs(uint256 _uid) public view returns (ActivityLog.ActivityLogEntry[] memory) {
+    return activityLogContract.getActivityLogs(_uid);
 }
 
 event BatchRejected(uint256 indexed batchId, uint256 producerId, string sscc);
+
 
 function getApprovedBatchesByProducer(uint256 _producerId) public view returns (Batch[] memory) {
     uint256 approvedCount = 0;
@@ -532,13 +520,19 @@ function updateTransportStatusBySSCC(
 }
 
 // Đổi tên sự kiện
+// Thêm mapping để theo dõi xác nhận của các nhà kho
+mapping(uint256 => mapping(uint256 => bool)) private _warehouseConfirmations;
 
+// Thêm sự kiện để theo dõi xác nhận của các nhà kho
+event WarehouseConfirmed(uint256 indexed batchId, uint256 indexed warehouseId);
 function warehouseConfirmation(uint256 _batchId, uint256 _warehouseId) public {
+    require(_batches[_batchId].batchId != 0, "Batch does not exist");
     require(_batches[_batchId].transportStatus == TransportStatus.Delivered, "Batch must be delivered before warehouse confirmation");
     require(_batches[_batchId].detailedTransportStatus == DetailedTransportStatus.Delivered, "Batch must be in Delivered status");
+    require(!_warehouseConfirmations[_batchId][_warehouseId], "This warehouse has already confirmed this batch");
     
-    // Thêm logic xác nhận của nhà kho ở đây
-    _batches[_batchId].warehouseConfirmed = true;
+    // Đánh dấu nhà kho này đã xác nhận
+    _warehouseConfirmations[_batchId][_warehouseId] = true;
     
     // Ghi nhận sự tham gia của nhà kho
     Participation memory newParticipation = Participation({
@@ -549,8 +543,34 @@ function warehouseConfirmation(uint256 _batchId, uint256 _warehouseId) public {
     });
     _batchParticipations[_batchId].push(newParticipation);
     
-    // Phát ra sự kiện với tên mới
+    // Phát ra sự kiện
     emit WarehouseConfirmed(_batchId, _warehouseId);
+}
+
+// Hàm để kiểm tra xem một nhà kho cụ thể đã xác nhận lô hàng chưa
+function isWarehouseConfirmed(uint256 _batchId, uint256 _warehouseId) public view returns (bool) {
+    return _warehouseConfirmations[_batchId][_warehouseId];
+}
+
+// Hàm để lấy danh sách các nhà kho đã xác nhận một lô hàng
+function getConfirmedWarehouses(uint256 _batchId) public view returns (uint256[] memory) {
+    uint256 confirmedCount = 0;
+    for (uint256 i = 1; i <= _warehouseIdCounter; i++) {
+        if (_warehouseConfirmations[_batchId][i]) {
+            confirmedCount++;
+        }
+    }
+    
+    uint256[] memory confirmedWarehouses = new uint256[](confirmedCount);
+    uint256 index = 0;
+    for (uint256 i = 1; i <= _warehouseIdCounter; i++) {
+        if (_warehouseConfirmations[_batchId][i]) {
+            confirmedWarehouses[index] = i;
+            index++;
+        }
+    }
+    
+    return confirmedWarehouses;
 }
 function getBatchIdBySSCC(string memory _sscc) public view returns (uint256) {
     return _ssccToBatchId[_sscc];
@@ -560,6 +580,7 @@ function getDetailedTransportStatus(uint256 _batchId) public view returns (Detai
     require(_batches[_batchId].batchId != 0, "Batch does not exist");
     return _batches[_batchId].detailedTransportStatus;
 }
+// hàm kiểm tra trạng thái vận chuyển
 function canStartTransport(uint256 _batchId, uint256 _transporterId) public view returns (bool) {
     return _batches[_batchId].detailedTransportStatus == DetailedTransportStatus.NotStarted ||
            (_batches[_batchId].detailedTransportStatus == DetailedTransportStatus.Delivered && _batches[_batchId].lastTransporterId != _transporterId);

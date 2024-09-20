@@ -42,15 +42,36 @@ function displayBatchInfo(info) {
 
     tableHTML += '</table>';
 
-    batchDetailsDiv.innerHTML = tableHTML;
-    batchInfoDiv.style.display = 'block';
-    warehouseActionsDiv.style.display = 'block';
+    if (batchDetailsDiv) {
+        batchDetailsDiv.innerHTML = tableHTML;
+        batchInfoDiv.style.display = 'block';
+        warehouseActionsDiv.style.display = 'block';
 
-    // Thêm nút xác nhận nhận hàng
-      // Thêm nút xác nhận nhận hàng nếu trạng thái vận chuyển là "Đang vận chuyển"
-      if (info.transportStatus === 'InTransit') {
-        const confirmButton = `<button onclick="confirmReceipt('${info.sscc}')" class="btn btn-primary mt-3">Xác nhận nhận hàng</button>`;
-        tableHTML += confirmButton;
+        // Xóa nút xác nhận cũ nếu có
+        const existingConfirmButton = warehouseActionsDiv.querySelector('button');
+        if (existingConfirmButton) {
+            existingConfirmButton.remove();
+        }
+
+        // Thêm nút xác nhận nhận hàng mới
+        if (info.transportStatus === 'Đã vận chuyển' && info.detailedTransportStatus === 'Đã giao') {
+            console.log('Conditions met for showing confirm button');
+            const confirmButton = document.createElement('button');
+            confirmButton.textContent = 'Xác nhận nhận hàng';
+            confirmButton.className = 'btn btn-primary mt-3';
+            confirmButton.addEventListener('click', () => {
+                console.log('Confirm button clicked');
+                confirmReceipt(info.sscc);
+            });
+            warehouseActionsDiv.appendChild(confirmButton);
+            console.log('Confirm button added');
+        } else {
+            console.log('Conditions not met for showing confirm button');
+            console.log('Transport status:', info.transportStatus);
+            console.log('Detailed transport status:', info.detailedTransportStatus);
+        }
+    } else {
+        console.error('batchDetailsDiv not found');
     }
 }
 
@@ -68,28 +89,23 @@ async function fetchBatchInfoBySSCC(sscc) {
         alert('Có lỗi xảy ra khi lấy thông tin lô hàng. Vui lòng thử lại.');
     }
 }
-
 async function confirmReceipt(sscc) {
+    console.log('Confirming receipt for SSCC:', sscc);
     try {
-        console.log('Confirming receipt for SSCC:', sscc);
-        const response = await fetch('/api/accept-transport', {
+        const response = await fetch('/api/warehouse-confirm', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ sscc: sscc, action: 'Xac nhan nhan hang' })
+            body: JSON.stringify({ sscc: sscc })
         });
 
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-
+        console.log('Response status:', response.status);
         const data = await response.json();
         console.log('Response data:', data);
 
-        if (data.success) {
+        if (response.ok) {
             alert('Đã xác nhận nhận hàng thành công');
-            // Cập nhật lại thông tin lô hàng sau khi xác nhận
             await fetchBatchInfoBySSCC(sscc);
         } else {
             alert(data.error || 'Có lỗi xảy ra khi xác nhận nhận hàng');
@@ -99,7 +115,6 @@ async function confirmReceipt(sscc) {
         alert('Có lỗi xảy ra khi xác nhận nhận hàng: ' + error.message);
     }
 }
-
 
 function openImageModal(src) {
     console.log('Opening modal for:', src);
@@ -295,5 +310,7 @@ window.fetchBatchInfoBySSCC = fetchBatchInfoBySSCC;
 window.updateTransportStatus = updateTransportStatus;
 window.openImageModal = openImageModal;
 window.openImageGallery = openImageGallery;
+
 window.expandImage = expandImage;
 window.closeModal = closeModal;
+window.confirmReceipt = confirmReceipt;
