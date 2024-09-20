@@ -174,7 +174,20 @@ app.get('/san-xuat/sanxuat.html', requireAuth, (req, res) => {
   if (req.session.roleId === 1) {
     res.sendFile(path.join(__dirname, 'public', 'san-xuat', 'sanxuat.html'));
   } else {
+    res.status(403).send('Forbidden');
+  }
+});
+
+app.get('/nhakiemduyet.html', requireAuth, (req, res) => {
+  if (req.session.roleId === 2) {
+    res.sendFile(path.join(__dirname, 'public', 'kiem-duyet', 'nhakiemduyet.html'));
+  } else {
+    res.status(403).send('Forbidden');
+  }
+});
+
   app.use(express.static(path.join(__dirname, 'public')));
+
 
 
 
@@ -334,6 +347,7 @@ app.get('/san-xuat/sanxuat.html', requireAuth, (req, res) => {
       res.status(500).json({ error: 'Lỗi server khi lấy thông báo' });
     }
   });
+  // ... (phần code trước đó)
 
   app.post('/api/notifications/mark-all-read', async (req, res) => {
     try {
@@ -348,3 +362,5 @@ app.get('/san-xuat/sanxuat.html', requireAuth, (req, res) => {
   app.listen(3000, () => {
     console.log('Server đang chạy trên cổng 3000');
   });
+
+
