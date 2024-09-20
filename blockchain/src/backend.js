@@ -986,25 +986,45 @@ app.get('/api/rejected-batches', async (req, res) => {
 
 // Thêm route để cập nhật trạng thái vận chuyển
 // ... (các import và cấu hình khác)
-app.post('/api/update-transport-status', async (req, res) => {
+app.post('/api/accept-transport', async (req, res) => {
   try {
     const { sscc, action } = req.body;
     const userId = req.session.userId;
+    const roleId = req.session.roleId;
+
+    console.log('Received request:', { sscc, action, userId, roleId });
 
     if (!userId) {
       return res.status(401).json({ error: 'Người dùng chưa đăng nhập' });
     }
 
-    // Kiểm tra quyền của người dùng (phải là người vận chuyển hoặc nhà kho)
+    // Kiểm tra quyền của người dùng
     const [participant] = await db.query('SELECT * FROM users WHERE uid = ? AND role_id IN (6, 8)', [userId]);
     if (!participant) {
-      return res.status(403).json({ error: 'Người dùng không có quyền cập nhật trạng thái vận chuyển' });
+      return res.status(403).json({ error: 'Người dùng không có quyền vận chuyển hoặc nhận hàng' });
     }
 
-    const participantType = participant.role_id === 6 ? "Transporter" : "Warehouse";
-    // Cập nhật trạng thái vận chuyển
-    await contract.methods.updateTransportStatus(sscc, userId, action, participantType)
+    let participantType;
+    if (roleId === 6) {
+      participantType = "Transporter";
+    } else if (roleId === 8) {
+      participantType = "Warehouse";
+    } else {
+      return res.status(403).json({ error: 'Người dùng không có quyền vận chuyển hoặc nhận hàng' });
+    }
+
+    console.log('Determined participantType:', participantType);
+
+    const batchId = await contract.methods.getBatchIdBySSCC(sscc).call();
+    if (!batchId) {
+      return res.status(404).json({ error: 'Không tìm thấy lô hàng với SSCC này' });
+    }
+
+    console.log('Before calling updateTransportStatus:', { batchId, userId, action, participantType });
+    await contract.methods.updateTransportStatus(batchId, userId, action, participantType)
       .send({ from: account.address, gas: 500000 });
+
+    console.log('After calling updateTransportStatus');
 
     res.json({ success: true, message: 'Đã cập nhật trạng thái vận chuyển thành công' });
   } catch (error) {
@@ -1329,10 +1349,10 @@ function safeToString(value) {
       let participantType;
       if (roleId === 6) {
         console.log('roleId của người vận chuyển :', roleId);
-        participantType = 0; // Transporter
+        participantType = "Transporter"; // Thay đổi từ 0 thành "Transporter"
       } else if (roleId === 8) {
         console.log('roleId của nhà kho:', roleId);
-        participantType = 1; // Warehouse
+        participantType = "Warehouse"; // Thay đổi từ 1 thành "Warehouse"
       } else {
         return res.status(403).json({ error: 'Người dùng không có quyền vận chuyển hoặc nhận hàng' });
       }
@@ -1422,43 +1442,45 @@ function translateStatus(status) {
 
 app.get('/api/batch-transport-history/:sscc', async (req, res) => {
   try {
-      const sscc = req.params.sscc;
+    const sscc = req.params.sscc;
+    
+    const transportHistory = await contract.methods.getTransportHistoryBySSCC(sscc).call();
+    console.log('Transport History from blockchain:', transportHistory);
+    
+    const enrichedHistory = await Promise.all(transportHistory.map(async (event) => {
+      console.log('Querying for participantId:', event.participantId);
+      const [transporter] = await db.query(`
+        SELECT u.name, u.phone, u.address, 
+               p.province_name, d.district_name, w.ward_name
+        FROM users u
+        LEFT JOIN provinces p ON u.province_id = p.province_id
+        LEFT JOIN districts d ON u.district_id = d.district_id
+        LEFT JOIN wards w ON u.ward_id = w.ward_id
+        WHERE u.uid = ?
+      `, [event.participantId]);
       
-      // Lấy lịch sử vận chuyển từ blockchain bằng SSCC
-      const transportHistory = await contract.methods.getTransportHistoryBySSCC(sscc).call();
-      console.log('Transport History from blockchain:', transportHistory);
+      console.log('SQL query result:', transporter);
       
-      // Hàm để chuyển đổi BigInt thành string
-      const convertBigIntToString = (obj) => {
-          return Object.keys(obj).reduce((acc, key) => {
-              acc[key] = typeof obj[key] === 'bigint' ? obj[key].toString() : obj[key];
-              return acc;
-          }, {});
+      return {
+        action: event.action.toString(),
+        timestamp: event.timestamp.toString(),
+        participantType: event.participantType.toString(),
+        transporterName: transporter ? transporter.name : 'Không có thông tin',
+        transporterPhone: transporter ? transporter.phone : 'Không có thông tin',
+        transporterAddress: transporter ? 
+          `${transporter.address || ''}${transporter.ward_name ? ', ' + transporter.ward_name : ''}${transporter.district_name ? ', ' + transporter.district_name : ''}${transporter.province_name ? ', ' + transporter.province_name : ''}`.trim() : 
+          'Không có thông tin'
       };
-
-      // Lấy thông tin chi tiết về người vận chuyển từ cơ sở dữ liệu MySQL và chuyển đổi BigInt
-      const enrichedHistory = await Promise.all(transportHistory.map(async (event) => {
-          const [transporter] = await db.query('SELECT name, phone, address FROM users WHERE uid = ?', [event.participantId]);
-          const convertedEvent = convertBigIntToString(event);
-          return {
-              ...convertedEvent,
-              transporterName: transporter ? transporter.name : 'Unknown',
-              transporterPhone: transporter ? transporter.phone : 'N/A',
-              transporterAddress: transporter ? transporter.address : 'N/A'
-          };
-      }));
-      
-      console.log('Enriched Transport History:', enrichedHistory);
-      res.json(enrichedHistory);
+    }));
+    
+    console.log('Enriched Transport History:', enrichedHistory);
+    res.json(enrichedHistory);
   } catch (error) {
-      console.error('Error fetching transport history:', error);
-      res.status(500).json({ error: 'Internal server error' });
+    console.error('Error fetching transport history:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
-
 }
-
-
 
 module.exports = {
   s3Client,

@@ -1,9 +1,32 @@
 // Khai báo các hàm ở phạm vi toàn cục
 let batchInfo;
 let html5QrCode;
+
+// Thêm các hàm này vào đầu file, sau các khai báo biến toàn cục
+function translateAction(action) {
+    const actions = {
+        '0': 'Bắt đầu vận chuyển',
+        '1': 'Tạm dừng vận chuyển',
+        '2': 'Tiếp tục vận chuyển',
+        '3': 'Hoàn thành vận chuyển'
+    };
+    return actions[action] || action;
+}
+
+function translateParticipantType(type) {
+    const types = {
+        '0': 'Người vận chuyển',
+        '1': 'Kho'
+    };
+    return types[type] || type;
+}
+
 async function displayTransportHistory(sscc) {
     try {
         const response = await fetch(`/api/batch-transport-history/${sscc}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const history = await response.json();
         
         console.log('Transport History:', history);
@@ -12,28 +35,36 @@ async function displayTransportHistory(sscc) {
             throw new Error('Lịch sử vận chuyển không phải là một mảng');
         }
         
-        let historyHTML = '<h3>Lịch sử vận chuyển</h3><ul>';
+        let historyHTML = '<h3>Lịch sử vận chuyển</h3><ul class="transport-history">';
         history.forEach(event => {
             historyHTML += `
-                <li>
-                    <strong>Hành động:</strong> ${event.action}<br>
-                    <strong>Thời gian:</strong> ${new Date(parseInt(event.timestamp) * 1000).toLocaleString()}<br>
-                    <strong>Loại người tham gia:</strong> ${event.participantType}<br>
-                    <strong>Người vận chuyển:</strong> ${event.transporterName || 'N/A'}<br>
-                    <strong>Số điện thoại:</strong> ${event.transporterPhone || 'N/A'}<br>
-                    <strong>Địa chỉ:</strong> ${event.transporterAddress || 'N/A'}
+                <li class="transport-event">
+                    <div class="event-details">
+                        <strong>Hành động:</strong> ${translateAction(event.action)}<br>
+                        <strong>Thời gian:</strong> ${new Date(parseInt(event.timestamp) * 1000).toLocaleString()}<br>
+                        <strong>Loại người tham gia:</strong> ${translateParticipantType(event.participantType)}<br>
+                    </div>
+                    <div class="transporter-info">
+                        <strong>Người vận chuyển:</strong> ${event.transporterName || 'Không có thông tin'}<br>
+                        <strong>Số điện thoại:</strong> ${event.transporterPhone || 'Không có thông tin'}<br>
+                        <strong>Địa chỉ:</strong> ${event.transporterAddress || 'Không có thông tin'}
+                    </div>
                 </li>
             `;
         });
         historyHTML += '</ul>';
         
-        document.getElementById('transportHistory').innerHTML = historyHTML;
+        const transportHistoryElement = document.getElementById('transportHistory');
+        if (transportHistoryElement) {
+            transportHistoryElement.innerHTML = historyHTML;
+        } else {
+            console.error('Element with id "transportHistory" not found');
+        }
     } catch (error) {
         console.error('Error displaying transport history:', error);
         alert('Không thể lấy lịch sử vận chuyển. Vui lòng thử lại.');
     }
 }
-
 
 function displayBatchInfo(info) {
     console.log('Displaying batch info:', info);
@@ -84,6 +115,7 @@ function displayBatchInfo(info) {
             <button onclick="updateTransportStatus('${info.sscc}', 'Hoan thanh van chuyen')" class="btn btn-success mt-3">Hoàn thành vận chuyển</button>
         `;
     } else if (info.detailedTransportStatus === 'Đã giao') {
+        //khi đã giao thì không thể bắt đầu vận chuyển mới
         transportButton = `<button onclick="updateTransportStatus('${info.sscc}', 'Bat dau van chuyen')" class="btn btn-success mt-3">Bắt đầu vận chuyển mới</button>`;
     }
 
@@ -124,6 +156,9 @@ function closeCompletionModalAndRefresh() {
 async function updateTransportStatus(sscc, action) {
     console.log('Updating transport status:', { sscc, action });
     try {
+
+        console.log('Current roleId:', sessionStorage.getItem('roleId'));
+
         const response = await fetch('/api/accept-transport', {
             method: 'POST',
             headers: {
