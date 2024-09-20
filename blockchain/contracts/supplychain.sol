@@ -575,6 +575,4 @@ function getBatchTransportStatus(uint256 _batchId) public view returns (Transpor
     return _batches[_batchId].transportStatus;
 }
 
-
-
 }

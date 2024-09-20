@@ -59,7 +59,7 @@ web3.eth.net.isListening()
   .catch(e => console.log('Lỗi rồi', e));
 
 const contractABI = require('../build/contracts/TraceabilityContract.json').abi;
-const contractAddress = '0xE8d82F4dDA42235a553E8f08DBEFBFAa5e72cBCc';
+const contractAddress = '0x869846D71f6c3b67d4112B48Dd723d2f6cbb071b';
 const contract = new web3.eth.Contract(contractABI, contractAddress);
 
 // tạo biến lưu trữ file, giới hạn số lượng file và tên file, maxCount: số lượng file, name: tên file
