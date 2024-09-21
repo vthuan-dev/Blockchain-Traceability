@@ -54,11 +54,16 @@ const account = web3.eth.accounts.privateKeyToAccount('0xe9437cabf0c3b29aac95c03
 web3.eth.accounts.wallet.add(account);
 web3.eth.defaultAccount = account.address
 
+const adminAddress = account.address;
+
 web3.eth.net.isListening()
   .then(() => console.log('Đã kết nối với ETH node'))
   .catch(e => console.log('Lỗi rồi', e));
 
+console.log('Admin address:', adminAddress);
+  
 const contractABI = require('../build/contracts/TraceabilityContract.json').abi;
+
 const contractAddress = '0x18A585c26484D47A7e0Cfc1f7E4C0464509F4B9f';
 const contract = new web3.eth.Contract(contractABI, contractAddress);
 
@@ -1024,20 +1029,37 @@ app.post('/api/accept-transport', async (req, res) => {
   }
 });
 // Cập nhật route để lấy thông tin lô hàng
+
 app.get('/api/batch-info-by-sscc/:sscc', async (req, res) => {
   try {
     const sscc = req.params.sscc;
+    const userId = req.session.userId;
+
     const batchInfo = await contract.methods.getBatchBySSCC(sscc).call();
     const transportStatus = await contract.methods.getBatchTransportStatus(batchInfo.batchId).call();
     const detailedTransportStatus = await contract.methods.getDetailedTransportStatus(batchInfo.batchId).call();
     
-    // Lấy thông tin người sản xuất
     const producerInfo = await getProducerById(batchInfo.producerId);
 
-    // Hàm để chuyển đổi an toàn các giá trị
+    const warehouseConfirmed = await contract.methods.isWarehouseConfirmed(batchInfo.batchId, userId).call();
+
+    const confirmedWarehouseIds = await contract.methods.getConfirmedWarehouses(batchInfo.batchId).call();
+    
+    // Lấy thông tin chi tiết của các nhà kho đã xác nhận
+    const confirmedWarehouses = await Promise.all(confirmedWarehouseIds.map(async (warehouseId) => {
+      const warehouseInfo = await getWarehouseInfo(warehouseId);
+      return {
+        id: warehouseId.toString(),
+        name: warehouseInfo.name
+      };
+    }));
+
     const safeConvert = (value) => {
       if (typeof value === 'bigint') {
         return value.toString();
+      }
+      if (Array.isArray(value)) {
+        return value.map(safeConvert);
       }
       if (typeof value === 'object' && value !== null) {
         return Object.fromEntries(
@@ -1065,8 +1087,9 @@ app.get('/api/batch-info-by-sscc/:sscc', async (req, res) => {
         name: producerInfo.name,
         address: producerInfo.address,
         phone: producerInfo.phone
-        // Thêm các thông tin khác của người sản xuất nếu cần
-      }
+      },
+      warehouseConfirmed: warehouseConfirmed,
+      confirmedWarehouses: confirmedWarehouses
     });
 
     console.log('Serialized Batch Info:', JSON.stringify(serializedBatchInfo, null, 2));
@@ -1078,12 +1101,29 @@ app.get('/api/batch-info-by-sscc/:sscc', async (req, res) => {
   }
 });
 
+async function getWarehouseInfo(warehouseId) {
+  return new Promise((resolve, reject) => {
+    db.query('SELECT name FROM users WHERE uid = ? AND role_id = 6', [warehouseId], (err, results) => {
+      if (err) {
+        reject(err);
+      } else if (results.length > 0) {
+        resolve(results[0]);
+      } else {
+        resolve({ name: 'Unknown Warehouse' });
+      }
+    });
+  });
+}
+
 app.get('/api/batch-info/:batchId', async (req, res) => {
   try {
       const batchId = req.params.batchId;
       const batchInfo = await contract.methods.getBatchDetails(batchId).call();
       const transportStatus = await contract.methods.getBatchTransportStatus(batchId).call();
       const detailedTransportStatus = await contract.methods.getDetailedTransportStatus(batchId).call();
+
+      const warehouseConfirmed = await contract.methods.isWarehouseConfirmed(batchId, req.session.userId).call();
+
       
       // Lấy thông tin người sản xuất
       const producerInfo = await getProducerById(batchInfo.producerId);
@@ -1504,40 +1544,35 @@ function translateParticipantType(type) {
 }
 app.post('/api/warehouse-confirm', async (req, res) => {
   try {
-    if (!req.session.userId) {
-      return res.status(401).json({ error: 'Người dùng chưa đăng nhập' });
-    }
-
     const { sscc } = req.body;
-    if (!sscc) {
-      return res.status(400).json({ error: 'Thiếu thông tin SSCC' });
-    }
-
-    const userId = req.session.userId;
-    const userRole = await getUserRole(userId);
-
-    if (userRole !== 8) { // Giả sử 8 là role ID của nhà kho
-      return res.status(403).json({ error: 'Không có quyền xác nhận nhận hàng' });
-    }
+    console.log('Received warehouse confirmation request for SSCC:', sscc);
 
     const batchId = await contract.methods.getBatchIdBySSCC(sscc).call();
-    if (batchId === '0') {
-      return res.status(404).json({ error: 'Không tìm thấy lô hàng với SSCC này' });
-    }
+    console.log('Batch ID:', batchId);
 
-    const transportStatus = await contract.methods.getBatchTransportStatus(batchId).call();
-    const detailedTransportStatus = await contract.methods.getDetailedTransportStatus(batchId).call();
+    const userId = req.session.userId;
+    console.log('User ID:', userId);
 
-    if (transportStatus !== '2' || detailedTransportStatus !== '3') { // Kiểm tra xem lô hàng đã được giao chưa
-      return res.status(400).json({ error: 'Lô hàng chưa được giao, không thể xác nhận nhận hàng' });
-    }
+    console.log('Using admin address:', adminAddress);
 
-    await contract.methods.warehouseConfirmation(batchId, userId).send({ from: adminAddress, gas: 500000 });
+    const result = await contract.methods.warehouseConfirmation(batchId, userId).send({ 
+      from: adminAddress, 
+      gas: 500000 // Điều chỉnh gas nếu cần
+    });
+    console.log('Transaction result:', result);
 
-    res.status(200).json({ message: 'Đã xác nhận nhận hàng thành công' });
+    res.status(200).json({ message: 'Xác nhận nhận hàng thành công', transactionHash: result.transactionHash });
   } catch (error) {
-    console.error('Lỗi khi xác nhận nhận hàng:', error);
+    console.error('Error in warehouse confirmation:', error);
     res.status(500).json({ error: 'Có lỗi xảy ra khi xác nhận nhận hàng: ' + error.message });
+  }
+});
+// Thêm event listener bên ngoài route handler
+contract.events.WarehouseConfirmed({}, (error, event) => {
+  if (error) {
+    console.error('Error on WarehouseConfirmed event:', error);
+  } else {
+    console.log('WarehouseConfirmed event:', event.returnValues);
   }
 });
 // Hàm hỗ trợ để lấy role của người dùng

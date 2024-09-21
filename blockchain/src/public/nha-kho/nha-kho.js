@@ -1,5 +1,6 @@
 let batchInfo;
 let html5QrCode;
+let isConfirming = false;
 
 
 function displayBatchInfo(info) {
@@ -40,40 +41,30 @@ function displayBatchInfo(info) {
         addRow('Giấy chứng nhận', `<button class="btn btn-primary" onclick="openImageModal('${info.certificateImageUrl}')">Xem giấy chứng nhận</button>`);
     }
 
+    console.log("Transport Status:", info.transportStatus);
+    console.log("Detailed Transport Status:", info.detailedTransportStatus);
+    console.log("Warehouse Confirmed:", info.warehouseConfirmed);
+
+    // Điều chỉnh logic hiển thị nút xác nhận
+    if (info.transportStatus === 'Đã vận chuyển' && info.detailedTransportStatus === 'Đã giao' && info.warehouseConfirmed === false) {
+        const confirmButton = `<button onclick="confirmReceipt('${info.sscc}')" class="btn btn-primary mt-3">Xác nhận nhận hàng</button>`;
+        tableHTML += `<tr><td colspan="2">${confirmButton}</td></tr>`;
+    } else if (info.warehouseConfirmed === true) {
+        tableHTML += '<tr><td colspan="2"><p class="mt-3">Lô hàng đã được xác nhận</p></td></tr>';
+    } else {
+        tableHTML += '<tr><td colspan="2"><p class="mt-3">Lô hàng chưa sẵn sàng để xác nhận</p></td></tr>';
+    }
+
     tableHTML += '</table>';
 
     if (batchDetailsDiv) {
         batchDetailsDiv.innerHTML = tableHTML;
         batchInfoDiv.style.display = 'block';
-        warehouseActionsDiv.style.display = 'block';
-
-        // Xóa nút xác nhận cũ nếu có
-        const existingConfirmButton = warehouseActionsDiv.querySelector('button');
-        if (existingConfirmButton) {
-            existingConfirmButton.remove();
-        }
-
-        // Thêm nút xác nhận nhận hàng mới
-        if (info.transportStatus === 'Đã vận chuyển' && info.detailedTransportStatus === 'Đã giao') {
-            console.log('Conditions met for showing confirm button');
-            const confirmButton = document.createElement('button');
-            confirmButton.textContent = 'Xác nhận nhận hàng';
-            confirmButton.className = 'btn btn-primary mt-3';
-            confirmButton.addEventListener('click', () => {
-                console.log('Confirm button clicked');
-                confirmReceipt(info.sscc);
-            });
-            warehouseActionsDiv.appendChild(confirmButton);
-            console.log('Confirm button added');
-        } else {
-            console.log('Conditions not met for showing confirm button');
-            console.log('Transport status:', info.transportStatus);
-            console.log('Detailed transport status:', info.detailedTransportStatus);
-        }
     } else {
         console.error('batchDetailsDiv not found');
     }
 }
+
 
 
 async function fetchBatchInfoBySSCC(sscc) {
@@ -83,36 +74,35 @@ async function fetchBatchInfoBySSCC(sscc) {
             throw new Error('Không thể lấy thông tin lô hàng');
         }
         batchInfo = await response.json();
+        console.log('Received batch info:', batchInfo); // Log toàn bộ thông tin nhận được
         displayBatchInfo(batchInfo);
     } catch (error) {
         console.error('Lỗi khi lấy thông tin lô hàng:', error);
         alert('Có lỗi xảy ra khi lấy thông tin lô hàng. Vui lòng thử lại.');
     }
 }
+
 async function confirmReceipt(sscc) {
     console.log('Confirming receipt for SSCC:', sscc);
     try {
         const response = await fetch('/api/warehouse-confirm', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ sscc: sscc })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sscc })
         });
-
-        console.log('Response status:', response.status);
+        console.log('Full response:', response);
         const data = await response.json();
         console.log('Response data:', data);
 
         if (response.ok) {
-            alert('Đã xác nhận nhận hàng thành công');
-            await fetchBatchInfoBySSCC(sscc);
+            alert('Xác nhận nhận hàng thành công');
+            // Cập nhật UI nếu cần
         } else {
-            alert(data.error || 'Có lỗi xảy ra khi xác nhận nhận hàng');
+            alert('Lỗi: ' + data.error);
         }
     } catch (error) {
-        console.error('Error:', error);
-        alert('Có lỗi xảy ra khi xác nhận nhận hàng: ' + error.message);
+        console.error('Error confirming receipt:', error);
+        alert('Có lỗi xảy ra khi xác nhận nhận hàng');
     }
 }
 
