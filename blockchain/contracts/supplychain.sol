@@ -521,6 +521,7 @@ function updateTransportStatusBySSCC(
 
 // Đổi tên sự kiện
 // Thêm mapping để theo dõi xác nhận của các nhà kho
+
 mapping(uint256 => mapping(uint256 => bool)) private _warehouseConfirmations;
 
 // Thêm sự kiện để theo dõi xác nhận của các nhà kho
@@ -529,6 +530,7 @@ function warehouseConfirmation(uint256 _batchId, uint256 _warehouseId) public {
     require(_batches[_batchId].batchId != 0, "Batch does not exist");
     require(_batches[_batchId].transportStatus == TransportStatus.Delivered, "Batch must be delivered before warehouse confirmation");
     require(_batches[_batchId].detailedTransportStatus == DetailedTransportStatus.Delivered, "Batch must be in Delivered status");
+    //Nếu nhà kho đã xác nhận lô hàng thì không thể xác nhận lại
     require(!_warehouseConfirmations[_batchId][_warehouseId], "This warehouse has already confirmed this batch");
     
     // Đánh dấu nhà kho này đã xác nhận
