@@ -12,7 +12,8 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.3.1/dist/jsQR.min.js"></script>
-    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
     <!-- Thanh điều hướng -->
@@ -53,41 +54,44 @@
     
     <!-- Thêm div overlay ngay sau nav -->
     <div class="menu-overlay"></div>
-
     <main>
         <div class="container mt-4">
             <div class="qr-scanner-container">
-                <h5>Quét mã QR</h5>
+                <h5><i class="fas fa-qrcode"></i> Quét mã QR</h5>
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <button id="start-camera" class="btn btn-primary btn-block">Quét QR bằng camera</button>
+                        <button id="start-camera" class="btn btn-primary btn-block">
+                            <i class="fas fa-camera"></i> Sử dụng camera
+                        </button>
                     </div>
+
                     <div class="col-md-6 mb-3">
                         <label for="qr-input" class="custom-file-upload btn btn-secondary btn-block">
-                            <i class="fas fa-upload"></i> Chọn ảnh QR
+                            <i class="fas fa-upload"></i> Chọn ảnh từ thiết bị
                         </label>
                         <input type="file" id="qr-input" accept="image/*" style="display: none;">
+
                     </div>
                 </div>
                 <div id="qr-reader" style="width: 100%; display: none;"></div>
-                <div id="file-selected" class="mt-2 mb-2" style="display: none;">Đã chọn 1 hình ảnh</div>
-                <button id="scan-button" class="btn btn-success btn-block mt-3" disabled>Quét mã QR</button>
+                <div id="file-selected" class="mt-2 mb-2" style="display: none;">
+                    <i class="fas fa-check-circle"></i> Đã chọn hình ảnh có chứa QR
+                </div>
+                <button id="scan-button" class="btn btn-success btn-block mt-3" disabled>
+                    <i class="fas fa-search"></i> Quét 
             </div>
 
             <div id="batchInfo" style="display: none;">
-                <h5>Thông tin lô hàng</h5>
+                <h5><i class="fas fa-info-circle"></i> Thông tin lô hàng</h5>
                 <div id="batchDetails"></div>
                 <div id="transportHistory"></div>
             </div>
             
-            <!-- Thêm nút xác nhận nhận hàng cho nhà kho -->
             <div id="warehouseActions" style="display: none;">
-                <!-- Xóa hoặc comment out dòng dưới đây -->
-                <!-- <button id="confirm-receipt" class="btn btn-primary">Xác nhận nhận hàng</button> -->
+                <!-- Các nút hành động sẽ được thêm động bằng JavaScript -->
             </div>
         </div>
     </main>
-
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
@@ -150,5 +154,16 @@
         </script>
 
     <script type="text/javascript" src="nha-kho.js"></script>
+    <!-- Thêm dòng này vào cuối body, trước </body> -->
+    <script src="../js_giaodien/nav-bar.js"></script>
+    <!-- Thêm đoạn mã này ngay trước thẻ đóng </body> -->
+    <div id="imageModal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="modalContent"></div>
+            <img id="modalImage" src="" alt="Modal Image">
+        </div>
+    </div>
 </body>
 </html>

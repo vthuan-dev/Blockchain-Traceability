@@ -81,40 +81,73 @@ async function fetchBatchInfoBySSCC(sscc) {
         alert('Có lỗi xảy ra khi lấy thông tin lô hàng. Vui lòng thử lại.');
     }
 }
-
 async function confirmReceipt(sscc) {
-    console.log('Confirming receipt for SSCC:', sscc);
+    console.log('Xác nhận nhận hàng cho SSCC:', sscc);
     try {
         const response = await fetch('/api/warehouse-confirm', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ sscc })
         });
-        console.log('Full response:', response);
+        console.log('Phản hồi đầy đủ:', response);
         const data = await response.json();
-        console.log('Response data:', data);
+        console.log('Dữ liệu phản hồi:', data);
 
         if (response.ok) {
-            alert('Xác nhận nhận hàng thành công');
-            // Cập nhật UI nếu cần
+            // Cập nhật UI để hiển thị xác nhận thành công và ẩn nút xác nhận
+            const batchDetailsDiv = document.getElementById('batchDetails');
+            const confirmButton = batchDetailsDiv.querySelector('button[onclick^="confirmReceipt"]');
+            if (confirmButton) {
+                confirmButton.remove(); // Xóa nút xác nhận
+            }
+            // Thêm thông báo thành công
+            const successMessage = document.createElement('p');
+            successMessage.className = 'text-success mt-3';
+            successMessage.innerHTML = '<i class="fas fa-check-circle"></i> Xác nhận nhận hàng thành công';
+            batchDetailsDiv.appendChild(successMessage);
+
+            // Cập nhật đối tượng batchInfo cục bộ
+            batchInfo.warehouseConfirmed = true;
         } else {
-            alert('Lỗi: ' + data.error);
+            console.error('Lỗi khi xác nhận nhận hàng:', data.error);
+            // Hiển thị thông báo lỗi trong UI
+            const errorMessage = document.createElement('p');
+            errorMessage.className = 'text-danger mt-3';
+            errorMessage.textContent = 'Lỗi: ' + data.error;
+            document.getElementById('batchDetails').appendChild(errorMessage);
         }
     } catch (error) {
-        console.error('Error confirming receipt:', error);
-        alert('Có lỗi xảy ra khi xác nhận nhận hàng');
+        console.error('Lỗi khi xác nhận nhận hàng:', error);
+        // Hiển thị thông báo lỗi trong UI
+        const errorMessage = document.createElement('p');
+        errorMessage.className = 'text-danger mt-3';
+        errorMessage.textContent = 'Có lỗi xảy ra khi xác nhận nhận hàng';
+        document.getElementById('batchDetails').appendChild(errorMessage);
     }
 }
 
 function openImageModal(src) {
-    console.log('Opening modal for:', src);
     const modal = document.getElementById('imageModal');
     const modalImg = document.getElementById('modalImage');
+    const modalContent = document.getElementById('modalContent');
+    const modalOverlay = modal.querySelector('.modal-overlay');
+    
     modal.style.display = "block";
     modalImg.src = src;
+    modalImg.style.display = 'block';
+    modalContent.style.display = 'none';
 
-    // Thêm event listener để đóng modal khi nhấn vào overlay
-    modal.querySelector('.modal-overlay').addEventListener('click', closeModal);
+    // Đóng modal khi nhấp vào bất kỳ đâu trên modal
+    modal.onclick = function(event) {
+        if (event.target === modal || event.target.className === 'modal-overlay') {
+            closeModal();
+        }
+    };
+    
+    // Ngăn chặn sự kiện click từ việc lan truyền đến overlay khi nhấp vào ảnh
+    modalImg.onclick = function(event) {
+        event.stopPropagation();
+    };
 }
 
 function openImageGallery(type) {
@@ -122,6 +155,13 @@ function openImageGallery(type) {
     console.log('Batch Info:', batchInfo);
     const modal = document.getElementById('imageModal');
     const modalContent = document.getElementById('modalContent');
+    
+    if (!modal || !modalContent) {
+        console.error('Modal elements not found');
+        alert('Không thể hiển thị hình ảnh. Vui lòng thử lại sau.');
+        return;
+    }
+    
     modal.style.display = "block";
     
     let galleryHTML = '<div class="image-gallery">';
@@ -140,21 +180,63 @@ function openImageGallery(type) {
     
     galleryHTML += '</div>';
     modalContent.innerHTML = galleryHTML;
+    modalContent.style.display = 'block';
 
-    // Thêm event listener để đóng modal khi nhấn vào overlay
-    modal.querySelector('.modal-overlay').addEventListener('click', closeModal);
+    // Đóng modal khi nhấp vào bất kỳ đâu trên modal
+    modal.onclick = function(event) {
+        if (event.target === modal || event.target.className === 'modal-overlay') {
+            closeModal();
+        }
+    };
 }
 
 function expandImage(src) {
+    const modal = document.getElementById('imageModal');
     const modalImg = document.getElementById('modalImage');
+    const modalContent = document.getElementById('modalContent');
+    
+    modal.style.display = "block";
     modalImg.src = src;
     modalImg.style.display = 'block';
+    modalContent.style.display = 'none';
+
+    // Đóng modal khi nhấp vào bất kỳ đâu trên modal
+    modal.onclick = function(event) {
+        if (event.target === modal || event.target.className === 'modal-overlay') {
+            closeModal();
+        }
+    };
 }
 
 function closeModal() {
     const modal = document.getElementById('imageModal');
     modal.style.display = "none";
 }
+
+// Thêm event listener cho nút đóng và overlay
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('imageModal');
+    const closeButton = modal.querySelector('.close');
+
+    if (closeButton) {
+        closeButton.addEventListener('click', closeModal);
+    }
+
+    // Đóng modal khi nhấp vào bất kỳ đâu trên modal
+    modal.addEventListener('click', function(event) {
+        if (event.target === modal || event.target.className === 'modal-overlay') {
+            closeModal();
+        }
+    });
+
+    // Ngăn chặn sự kiện click từ việc lan truyền khi nhấp vào nội dung modal
+    const modalContent = modal.querySelector('.modal-content');
+    if (modalContent) {
+        modalContent.addEventListener('click', function(event) {
+            event.stopPropagation();
+        });
+    }
+});
 
 // Event listener cho DOMContentLoaded
 document.addEventListener('DOMContentLoaded', function() {
