@@ -1,13 +1,111 @@
+/* Thêm các font chữ Google */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f8f9fa;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.qr-scanner-container {
+    background-color: #ffffff;
+    border-radius: 15px;
+    margin-bottom: 30px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.qr-scanner-container h5 {
+    color: #333;
+    font-weight: 700;
+    margin-bottom: 25px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-align: center;
+}
+
+.btn {
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    border-radius: 30px;
+    padding: 12px 25px;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px #44bd32;
+}
+
+.btn-primary {
+    background-color: #4cd137;
+    border-color: #20a161;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.btn-success {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+#file-selected {
+    color: #28a745;
+    font-style: italic;
+    margin-top: 15px;
+    text-align: center;
+}
+
+#qr-reader {
+    border: 2px solid #007bff;
+    border-radius: 15px;
+    overflow: hidden;
+    margin-top: 25px;
+}
+
+.custom-file-upload {
+    display: inline-block;
+    cursor: pointer;
+    width: 100%;
+}
+
+#scan-button:disabled {
+    background-color: #cccccc;
+    border-color: #cccccc;
+    cursor: not-allowed;
+}
+
+/* Batch Info Styles */
+#batchInfo {
+    background-color: #ffffff;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+#batchInfo h5 {
+    color: #333;
+    font-weight: 700;
+    margin-bottom: 25px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-align: center;
+}
+
 .batch-info-table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: none;
     margin-bottom: 20px;
-    background-color: #ffffff;
 }
 
 .batch-info-table th, .batch-info-table td {
@@ -17,7 +115,7 @@
 }
 
 .batch-info-table th {
-    background-color: #f5f5f5;
+    background-color: #f8f9fa;
     font-weight: 600;
     color: #333;
     text-transform: uppercase;
@@ -30,10 +128,6 @@
     border-bottom: none;
 }
 
-.batch-info-table td {
-    color: #555;
-}
-
 .status-approved {
     color: #28a745;
     font-weight: 600;
@@ -43,48 +137,94 @@
     margin-right: 5px;
 }
 
-.product-image,
-.batch-image,
-.certificate-image {
-    border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.8);
+}
+
+.modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.modal-content {
+    position: relative;
+    background-color: #fefefe;
+    margin: auto;
+    padding: 0;
+    width: 80%;
+    max-width: 700px;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+}
+
+#modalImage {
+    max-width: 90%;
+    max-height: 90vh;
+    object-fit: contain;
+    border-radius: 5px;
+    box-shadow: 0 0 20px rgba(255,255,255,0.2);
+}
+
+.close {
+    position: absolute;
+    top: 15px;
+    right: 35px;
+    color: #f1f1f1;
+    font-size: 40px;
+    font-weight: bold;
+    transition: 0.3s;
+    z-index: 1002;
     cursor: pointer;
 }
 
-.product-image:hover,
-.batch-image:hover,
-.certificate-image:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+.close:hover,
+.close:focus {
+    color: #bbb;
+    text-decoration: none;
+    cursor: pointer;
 }
 
-#acceptTransportBtn {
-    display: block;
+.image-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+    padding: 20px;
+}
+
+.gallery-image {
     width: 100%;
-    padding: 12px;
-    background-color: #4cd137;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-size: 1em;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    transition: background-color 0.3s ease;
+    height: 150px;
+    object-fit: cover;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: transform 0.3s ease;
 }
 
-#acceptTransportBtn:hover {
-    background-color: #0056b3;
+.gallery-image:hover {
+    transform: scale(1.05);
 }
 
-#acceptTransportBtn:disabled {
-    background-color: #cccccc;
-    cursor: not-allowed;
-}
-
-/* Responsive design */
+/* Responsive Design */
 @media (max-width: 768px) {
+    .qr-scanner-container, #batchInfo {
+        padding: 20px;
+    }
+
+    .btn {
+        padding: 10px 20px;
+    }
+
     .batch-info-table th,
     .batch-info-table td {
         padding: 10px;
@@ -95,158 +235,27 @@
     }
 }
 
-/* Modal styles */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0,0,0,0.4);
-}
-
-.modal-content {
-    background-color: #fefefe;
-    margin: 15% auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%;
-    max-width: 500px;
-    border-radius: 5px;
-    text-align: center;
-}
-
-.modal-content h2 {
-    margin-top: 0;
-}
-
-.modal-content .btn {
-    margin-top: 20px;
-}
-
-.image-gallery {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-}
-
-.gallery-image {
-    width: 100px;
-    height: 100px;
-    object-fit: cover;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: transform 0.3s ease;
-}
-
-.gallery-image:hover {
-    transform: scale(1.05);
-}
-
-.modal-content {
-    margin: auto;
-    display: block;
-    width: 80%;
-    max-width: 700px;
-    max-height: 80vh;
-    object-fit: contain;
-}
-
-.btn {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.3s ease;
-}
-
-.btn-primary {
-    background-color: #158852;
-    color: white;
-}
-
-.btn-primary:hover {
-    background-color: #0056b3;
-}
-
-/* Các styles khác giữ nguyên */
-
-.qr-scanner-container {
-    background-color: #ffffff;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    padding: 20px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.qr-scanner-container h5 {
-    color: #333;
-    font-weight: 600;
-    margin-bottom: 20px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.qr-scanner-container .btn {
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    transition: all 0.3s ease;
-}
-
-.qr-scanner-container .btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.qr-scanner-container .btn-primary {
-    background-color: #007bff;
-    border-color: #007bff;
-}
-
-.qr-scanner-container .btn-secondary {
-    background-color: #6c757d;
-    border-color: #6c757d;
-}
-
-.qr-scanner-container .btn-success {
-    background-color: #28a745;
-    border-color: #28a745;
-}
-
-#file-selected {
-    color: #28a745;
-    font-style: italic;
-    margin-top: 10px;
-}
-
-#qr-reader {
-    border: 2px solid #007bff;
-    border-radius: 5px;
-    overflow: hidden;
-    margin-top: 20px;
-}
-
-.custom-file-upload {
-    display: inline-block;
-    cursor: pointer;
-}
-
-#scan-button:disabled {
-    background-color: #cccccc;
-    border-color: #cccccc;
-    cursor: not-allowed;
-}
-#transportActions {
-    margin-top: 20px;
-}
-
-#transportActions button {
+/* Thêm style cho icons */
+.qr-scanner-container h5 i,
+#batchInfo h5 i {
     margin-right: 10px;
-    margin-bottom: 10px;
+    color: #010305;
 }
+
+.btn i {
+    margin-right: 8px;
+}
+
+#file-selected i {
+    color: #28a745;
+    margin-right: 5px;
+}
+
+/* Cải thiện style cho các nút */
+.btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ... CSS hiện tại tiếp theo ... */

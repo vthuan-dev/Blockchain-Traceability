@@ -1,92 +1,42 @@
 /* CSS cho navbar */
 .navbar {
-    z-index: 4; /* Đảm bảo navbar nằm trên lớp phủ */
+    z-index: 1030;
     color: black;
-    background-color: #4cd137 !important; /* Màu xanh dương */
-    border-bottom-left-radius: 5px;
-    border-bottom-right-radius: 5px;
+    background-color: #4cd137 !important;
+    border-bottom-left-radius: 5px;  /* Thêm border radius cho góc dưới bên trái */
+    border-bottom-right-radius: 5px; /* Thêm border radius cho góc dưới bên phải */
     border-top-left-radius: 0;
     border-top-right-radius: 0;
+
     position: sticky;
     top: 0;
     transition: all 0.1s ease;
-  }
-  .navbar-item :hover{
+}
+
+.navbar-item:hover {
     color: #fff;
-  }
-  
-  .navbar-brand {
+}
+
+.navbar-brand {
     display: flex;
     align-items: center;
-  }
-  
-  .logo-image {
-    width: 67px;  /* Điều chỉnh kích thước logo */
+}
+
+.logo-image {
+    width: 67px;
     height: 67px;
-    margin-right: 10px;  /* Khoảng cách giữa logo và tên */
-    object-fit: contain;  /* Đảm bảo logo không bị méo */
-  }
-  
-  .navbar-brand span {
-    font-size: 1.2rem;  /* Kích thước chữ cho tên */
+    margin-right: 10px;
+    object-fit: contain;
+}
+
+.navbar-brand span {
+    font-size: 1.2rem;
     font-weight: bold;
-  }
-  
-  /* Đảm bảo menu dropdown nằm trên cùng bên phải */
-  .dropdown-menu {
-    right: 0;
-    left: auto;
-    z-index: 2000;
-  }
-  
-  /* CSS cho lớp phủ */
-  .menu-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 2;
-  }
-  
-  .menu-overlay.show {
-    display: block;
-    z-index: 1;
-  }
-  
-  body.menu-open {
-    overflow: hidden;
-  }
-  
-  @media (max-width: 991px) {
-    .navbar-collapse {
-      position: fixed;
-      top: 75px;
-      left: 0;
-      right: 0;
-      max-height: calc(100vh - 75px);
-      background-color: white;
-      z-index: 1;
-      overflow-y: auto;
-      transition: transform 0.3s ease-in-out;
-      transform: translateX(-100%);
-      padding: 15px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      border-bottom-left-radius: 20px;
-      border-bottom-right-radius: 20px;
-    }
-  
-    .navbar-collapse.show {
-      transform: translateX(0);
-    }
-  }
-  
+}
+
 /* Dropdown styles */
 .dropdown-menu {
-    right: 0;
-    left: auto;
+    background-color: #4cd137; /* Giữ màu nền giống navbar */
     border: none;
     box-shadow: 0 8px 16px rgba(0,0,0,.1);
     border-radius: 8px;
@@ -94,26 +44,27 @@
 }
 
 .dropdown-item {
+    color: white !important; /* Đặt màu chữ thành trắng */
     padding: 0.5rem 1.5rem;
-    color: #333;
     transition: background-color 0.2s ease;
 }
 
 .dropdown-item:hover {
-    background-color: #f8f9fa;
+    background-color: rgba(255, 255, 255, 0.1); /* Màu nền khi hover */
+    color: white !important;
 }
 
 .dropdown-divider {
-    margin: 0.5rem 0;
+    border-top-color: rgba(255, 255, 255, 0.2); /* Màu của đường phân cách */
 }
 
 #logoutButton {
-    color: #dc3545;
+    color: white !important;
 }
 
 #logoutButton:hover {
-    background-color: #dc3545;
-    color: #fff;
+    background-color: rgba(255, 0, 0, 0.1); /* Màu nền đỏ nhạt khi hover */
+    color: white !important;
 }
 
 /* User info in dropdown */
@@ -121,7 +72,11 @@
     font-weight: bold;
 }
 
-#userRole, #userRegion {
+#userRole {
+    color: rgba(255, 255, 255, 0.8) !important; /* Màu chữ cho vai trò */
+}
+
+#userRegion {
     font-size: 0.9rem;
     color: #6c757d;
 }
@@ -130,36 +85,57 @@
 @media (max-width: 991px) {
     .navbar-collapse {
         position: fixed;
-        top: 56px;
+        top: -100%;
         left: 0;
         right: 0;
         background-color: #4cd137;
         padding: 1rem;
         max-height: calc(100vh - 56px);
         overflow-y: auto;
-        transition: transform 0.3s ease-in-out;
-        transform: translateX(-100%);
+        transition: top 0.3s ease-in-out;
+        z-index: 1025;
+        height: auto;
+        border-bottom-left-radius: 15px;
+        border-bottom-right-radius: 15px;
     }
 
     .navbar-collapse.show {
-        transform: translateX(0);
+        top: 56px;
+    }
+
+    .menu-overlay {
+        display: none;
+        position: fixed;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1020;
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+    }
+
+    .menu-overlay.show {
+        display: block;
+        opacity: 1;
     }
 
     .dropdown-menu {
-        background-color: rgba(255,255,255,0.1);
-        border-radius: 4px;
+        background-color: transparent;
     }
 
-    .dropdown-item {
-        color: #fff;
+    .dropdown-item, #userRole, #logoutButton {
+        color: white !important;
     }
 
-    .dropdown-item:hover {
-        background-color: rgba(255,255,255,0.2);
+    .dropdown-item:hover, #logoutButton:hover {
+        background-color: rgba(255, 255, 255, 0.1);
     }
 
-    .dropdown-divider {
-        border-top-color: rgba(255,255,255,0.2);
+    .navbar-nav .dropdown-menu {
+        position: static;
+        float: none;
     }
 }
 
@@ -173,17 +149,20 @@
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 1020;
+    opacity: 0;
+    transition: opacity 0.1s ease-out;
 }
 
 .menu-overlay.show {
     display: block;
-    top: 56px; 
+    opacity: 1;
+    transition: opacity 0.1s ease-in;
 }
 
 body.menu-open {
     overflow: hidden;
 }
 
-.nav-item{
-  align-items: center;
+.nav-item {
+    align-items: center;
 }

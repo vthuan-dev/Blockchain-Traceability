@@ -64,7 +64,7 @@ console.log('Admin address:', adminAddress);
   
 const contractABI = require('../build/contracts/TraceabilityContract.json').abi;
 
-const contractAddress = '0x18A585c26484D47A7e0Cfc1f7E4C0464509F4B9f';
+const contractAddress = '0x2A43131cb14536Aa9F2bF717c9e363D460830914';
 const contract = new web3.eth.Contract(contractABI, contractAddress);
 
 // tạo biến lưu trữ file, giới hạn số lượng file và tên file, maxCount: số lượng file, name: tên file
