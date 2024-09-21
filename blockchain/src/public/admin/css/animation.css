@@ -16,3 +16,37 @@
     from { opacity: 1; transform: translateY(0); }
     to { opacity: 0; transform: translateY(-10px); }
 }
+
+@keyframes fadeInDropdown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dropdown-menu.fade-in {
+    animation: fadeInDropdown 0.3s ease-out;
+}
+
+@keyframes fadeInNotification {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -10px);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+
+.notification-panel {
+    animation: fadeInNotification 0.3s ease-out;
+}
+
+.notification-panel.show {
+    display: block;
+}

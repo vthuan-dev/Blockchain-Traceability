@@ -58,8 +58,8 @@ header {
 .notification-panel {
     display: none;
     position: fixed;
-    top: var(--header-height); /* Đặt bên dưới chuông thông báo */
-    right: 20px;
+    top: var(--header-height);
+    /* left: 58%; */
     width: 350px;
     max-height: 80vh;
     overflow-y: auto;
@@ -96,6 +96,15 @@ header {
     margin: 0;
     font-size: 1.2rem;
     color: #333;
+}
+
+.notification-title {
+    margin-bottom: 10px;
+}
+
+.btn-mark-read.btn-sm {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
 }
 
 .btn-mark-read {
@@ -145,6 +154,59 @@ header {
     color: #999;
     text-align: right;
 }
+
+/* Chỉnh dropdown */
+.dropdown-menu {
+    background-color: #fff;
+    border: none;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 0;
+    min-width: 180px;
+    font-size: 0.9rem;
+}
+
+.dropdown-header {
+    background-color: #f8f9fa;
+    padding: 8px 12px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    display: flex;
+    align-items: center;
+}
+
+.dropdown-header i {
+    font-size: 1.2rem;
+    margin-right: 8px;
+    color: #007bff;
+}
+
+.dropdown-divider {
+    margin: 0;
+    border-top: 1px solid #e9ecef;
+}
+
+.dropdown-item {
+    padding: 8px 12px;
+    color: #333;
+    transition: background-color 0.2s ease;
+}
+
+.dropdown-item:hover {
+    background-color: #f8f9fa;
+}
+
+.dropdown-item i {
+    margin-right: 8px;
+    font-size: 0.9rem;
+}
+
+#section-title-red {
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #dc3545;
+}
+
 
 /* Sidebar styles */
 .sidebar {
@@ -450,7 +512,7 @@ main {
 }
 
 .form-field {
-    flex: 1 1 300px;
+    /* flex: 1 1 300px; */
     margin-right: 15px;
     margin-bottom: 15px;
 }

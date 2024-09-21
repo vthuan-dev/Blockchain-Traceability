@@ -47,9 +47,18 @@
                     </div>
                     <div class="d-inline-block position-relative ml-auto text-right">
                         <i class="fas fa-user profile-pic" id="profileIcon"></i>
-                        <div class="dropdown-menu dropdown-menu-right" style="display: none;">
-                            <a class="dropdown-item" href="./caidat.html">Cài đặt</a>
-                            <a class="dropdown-item" href="../account/dangnhap.html">Đăng xuất</a>
+                        <div class="dropdown-menu dropdown-menu-right fade-in" style="display: none;">
+                            <div class="dropdown-header">
+                                <i class="fas fa-user-circle"></i>
+                                <span class="section-title" id="section-title-red">XIN CHÀO</span>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="./caidat.html">
+                                <i class="fas fa-cog"></i> Cài đặt
+                            </a>
+                            <a class="dropdown-item" href="../account/dangnhap.html">
+                                <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -62,7 +71,7 @@
     <div class="container-fluid">
         <div class="row">
             <nav class="col-md-2 sidebar">
-                <div class="section-title" id="section-title-red"">XIN CHÀO</div>
+                
                 <a href="admintest.html" class="menu-item rounded"><i class="fas fa-home"></i> Trang chủ</a>
                 <div class="divider"></div>
                 <div class="section-title">CHỨC NĂNG</div>
@@ -140,10 +149,11 @@
         </div>
     </div>
 
-    <div class="notification-panel" id="notificationPanel">
+    <div class="notification-panel col-10 col-md-3 col-sm-10 offset-md-7 offset-1 offset-sm-1" id="notificationPanel">
         <div class="notification-header">
-            <h5>Thông báo</h5>
-            <button id="confirmRead" class="btn-mark-read">
+            <h5 class="notification-title">Thông báo</h5>
+
+            <button id="confirmRead" class="btn-mark-read btn-sm">
                 <i class="fas fa-check-double"></i> Đánh dấu tất cả đã đọc
             </button>
         </div>
