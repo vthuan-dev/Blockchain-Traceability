@@ -259,3 +259,19 @@ body {
 }
 
 /* ... CSS hiện tại tiếp theo ... */
+
+    #logoutMessage {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        padding: 15px;
+        text-align: center;
+        font-size: 18px;
+        font-weight: bold;
+        z-index: 1000;
+        transition: opacity 0.5s ease-in-out;
+        background-color: #28a745;
+        color: #ffffff;
+}

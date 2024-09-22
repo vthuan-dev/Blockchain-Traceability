@@ -31,9 +31,50 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             border: 1px solid #ccc; /* Thêm khung cho form */
         }
+        
+        #messageContainer {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 15px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            z-index: 1000;
+            transition: opacity 0.5s ease-in-out;
+        }
+        
+        .success {
+            background-color: #28a745;
+            color: #ffffff;
+            border-radius: 10px;
+        }
+        
+        .error {
+            background-color: #dc3545;
+            color: #ffffff;
+        }
+        
+        @media (max-width: 576px) {
+            .container {
+                margin-top: 20px;
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .btn {
+                padding: 8px 16px;
+            }
+        }
     </style>
 </head>
 <body>
+    <div id="messageContainer"></div>
     <div class="container">
         <h1 class="text-center">Đăng Nhập</h1>
         <form id="loginForm" class="mt-4">
@@ -49,6 +90,7 @@
                 <input type="checkbox" class="form-check-input" id="adminCheck">
                 <label class="form-check-label" for="adminCheck">Đăng nhập với tư cách Admin</label>
             </div>
+            <div id="messageContainer" class="text-center"></div>
             <button type="submit" class="btn btn-primary btn-block">Đăng Nhập</button>
         </form>
         <br>
@@ -71,6 +113,7 @@
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const isAdmin = document.getElementById('adminCheck').checked;
+            const messageContainer = document.getElementById('messageContainer');
 
             try {
                 const response = await fetch('/api/dangnhap', {
@@ -84,31 +127,58 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    alert(data.message);
-                    // Chuyển hướng dựa trên role_id
-                    if (data.admin) {
-                        window.location.href = '../admin/admintest.html';
-                    }else if(data.user) {
-                        if (data.user.roleId === 1) {
-                        window.location.href = '../san-xuat/sanxuat.html';
-                        } else if (data.user.roleId === 2) {
-                            window.location.href = '../kiem-duyet/nhakiemduyet.html';
-                        } else if (data.user.roleId === 6) {
-                            window.location.href = '../van-chuyen/van-chuyen.html';
-                        } else if (data.user.roleId === 8) {
-                            window.location.href = '../nha-kho/nha-kho.html';
+                    messageContainer.innerHTML = data.message;
+                    messageContainer.className = 'success';
+                    messageContainer.style.display = 'block';
+                    messageContainer.style.opacity = '1';
+
+                    // Scroll to top to ensure message is visible
+                    window.scrollTo(0, 0);
+
+                    // Fade out the message after 1.5 seconds
+                    setTimeout(() => {
+                        messageContainer.style.opacity = '0';
+                    }, 1500);
+
+                    // Redirect after message has faded out
+                    setTimeout(() => {
+                        if (data.admin) {
+                            window.location.href = '../admin/admintest.html';
+                        } else if (data.user) {
+                            switch (data.user.roleId) {
+                                case 1:
+                                    window.location.href = '../san-xuat/sanxuat.html';
+                                    break;
+                                case 2:
+                                    window.location.href = '../kiem-duyet/nhakiemduyet.html';
+                                    break;
+                                case 6:
+                                    window.location.href = '../van-chuyen/van-chuyen.html';
+                                    break;
+                                case 8:
+                                    window.location.href = '../nha-kho/nha-kho.html';
+                                    break;
+                                default:
+                                    messageContainer.innerHTML = 'Không có trang phù hợp cho vai trò của bạn';
+                                    messageContainer.className = 'error';
+                                    messageContainer.style.opacity = '1';
+                            }
                         }
-                        else {
-                            alert('Không có trang phù hợp cho vai trò của bạn');
-                        }
-                    }
-                    
+                    }, 2000);
                 } else {
-                    alert(data.message);
+                    messageContainer.innerHTML = data.message;
+                    messageContainer.className = 'error';
+                    messageContainer.style.display = 'block';
+                    messageContainer.style.opacity = '1';
+                    window.scrollTo(0, 0);
                 }
             } catch (error) {
                 console.error('Lỗi:', error);
-                alert('Đã xảy ra lỗi khi đăng nhập');
+                messageContainer.innerHTML = 'Đã xảy ra lỗi khi đăng nhập';
+                messageContainer.className = 'error';
+                messageContainer.style.display = 'block';
+                messageContainer.style.opacity = '1';
+                window.scrollTo(0, 0);
             }
         });
     </script>

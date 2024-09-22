@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
+    <div id="logoutMessage"></div>
     <!-- Thanh điều hướng -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light custom-navbar-height">
         <div class="logo">
@@ -129,7 +130,27 @@
                     credentials: 'same-origin'
                 });
                 if (response.ok) {
-                    window.location.href = '../account/dangnhap.html';
+                    const logoutMessage = document.getElementById('logoutMessage');
+                    logoutMessage.textContent = 'Đăng xuất thành công';
+                    logoutMessage.style.display = 'block';
+                    
+                    // Force a reflow to ensure the transition works
+                    void logoutMessage.offsetWidth;
+                    
+                    logoutMessage.style.opacity = '1';
+
+                    // Scroll to top to ensure message is visible
+                    window.scrollTo(0, 0);
+
+                    // Fade out the message after 1.5 seconds
+                    setTimeout(() => {
+                        logoutMessage.style.opacity = '0';
+                    }, 1500);
+
+                    // Redirect after message has faded out
+                    setTimeout(() => {
+                        window.location.href = '../account/dangnhap.html';
+                    }, 2000);
                 } else {
                     console.error('Không thể đăng xuất');
                     alert('Đăng xuất không thành công. Vui lòng thử lại.');
@@ -176,6 +197,10 @@
         </div>
     </div>
 </body>
+
+
+
+<div id="logoutMessage"></div>
 
 <script src="../js_giaodien/nav-bar.js"></script>
 </html>
