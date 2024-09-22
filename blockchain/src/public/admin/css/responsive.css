@@ -93,5 +93,15 @@
         width: 100%;
         margin-bottom: 10px;
     }
+
+    .dropdown-menu {
+        position: fixed;
+        top: var(--header-height);
+        right: 10px;
+        left: 10px;
+        width: auto;
+    }
+
+
 }
 
