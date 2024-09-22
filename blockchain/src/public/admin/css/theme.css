@@ -1,106 +1,103 @@
-/* Màu nền */
-.bg-soft-blue {
-    background-color: #d0e7f9;   /* Xanh nhạt dịu hơn */
+/* Theme sáng (hiện đại hóa) */
+body.light-theme {
+    background-color: #f5f7fa;
+    color: #333333;
 }
 
-.bg-soft-green {
-    background-color: #d7ebd7; /* Xanh lá nhạt hơn */
-}
-
-.bg-soft-orange {
-    background-color: #f9e9d1;/* Màu cam nhạt hơn */
-}
-
-.bg-soft-purple {
-    background-color: #ede1f2; /* Tím nhạt hơn */
-}
-
-/* Styles mặc định cho màu nền trắng */
-body.bg-light { background-color: #ffffff; }
-header.bg-light-header { 
-    background-color: #28a745; /* Màu success của Bootstrap */
-    color: #ffffff; 
-}
-nav { background-color: #e9ecef; color: #212529; }
-main { color: #212529; }
-
-/* Màu nền cho body */
-body.bg-soft-blue { background-color: #e3f2fd; }
-body.bg-soft-green { background-color: #e8f5e9; }
-body.bg-soft-orange { background-color: #f9e9d1; }
-body.bg-soft-purple { background-color: #ede1f2; }
-
-/* Màu header */
-header.bg-soft-blue { background-color: #1565c0; color: #ffffff; }
-header.bg-soft-green { background-color: #2e7d32; color: #ffffff; }
-header.bg-soft-orange { background-color: #ff8f00; color: #ffffff; }
-header.bg-soft-purple { background-color: #8e24aa; color: #ffffff; }
-
-/* Màu sidebar */
-nav.bg-soft-blue { background-color: #0d47a1; color: #ffffff; }
-nav.bg-soft-green { background-color: #1b5e20; color: #ffffff; }
-nav.bg-soft-orange { background-color: #5d4037; color: #ffffff; }
-nav.bg-soft-purple { background-color: #6a1b9a; color: #ffffff; }
-
-/* Màu chữ main */
-main.bg-soft-blue { color: #013a73; }
-main.bg-soft-green { color: #144a1b; }
-main.bg-soft-orange { color: #6d4c41; }
-main.bg-soft-purple { color: #4a148c; }
-
-/* Màu hover cho menu item trong sidebar */
-body.bg-soft-blue .sidebar .menu-item:hover {
-    background-color: #1976d2; /* Màu hover xanh dương sáng hơn */
-}
-
-body.bg-soft-green .sidebar .menu-item:hover {
-    background-color: #388e3c; /* Màu hover xanh lá sáng hơn */
-}
-
-body.bg-soft-orange .sidebar .menu-item:hover {
-    background-color: #6d4c41; /* Màu hover nâu mềm */
-}
-
-body.bg-soft-purple .sidebar .menu-item:hover {
-    background-color: #9c27b0; /* Màu hover tím mềm */
-}
-
-/* Màu chữ sidebar */
-body.bg-soft-blue .sidebar,
-body.bg-soft-green .sidebar,
-body.bg-soft-orange .sidebar,
-body.bg-soft-purple .sidebar {
-    color: #f5f5f5; /* Màu chữ xám nhạt hơn để tương phản */
-}
-
-/* Màu chữ header */
-header.bg-soft-blue,
-header.bg-soft-green,
-header.bg-soft-orange,
-header.bg-soft-purple {
+body.light-theme header {
+    background-color: #74c365;
     color: #ffffff;
 }
 
-/* Màu chữ main */
-main.bg-soft-blue {
-    color: #013a73; /* Xanh đậm hơn cho chữ */
+body.light-theme nav {
+    background-color: #ffffff;
+    color: #333333;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-main.bg-soft-green {
-    color: #144a1b; /* Xanh lá đậm hơn cho chữ */
+body.light-theme .sidebar {
+    background-color: #ffffff;
+    box-shadow: 2px 0 4px rgba(0,0,0,0.1);
 }
 
-main.bg-soft-orange {
-    color: #6d4c41; /* Nâu đậm hơn cho chữ */
+body.light-theme .sidebar .menu-item {
+    color: #333333;
 }
 
-main.bg-soft-purple {
-    color: #4a148c; /* Tím đậm hơn cho chữ */
+body.light-theme .sidebar .menu-item:hover,
+body.light-theme .sidebar .menu-item.active {
+    background-color: #e8f5e9;
+    color: #4caf50;
 }
 
-/* Màu chữ và icon trong sidebar */
+body.light-theme .btn-primary {
+    background-color: #4caf50;
+    border-color: #4caf50;
+    color: #ffffff;
+}
+
+body.light-theme .btn-primary:hover {
+    background-color: #45a049;
+    border-color: #45a049;
+}
+
+body.light-theme .card {
+    background-color: #ffffff;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+body.light-theme .form-input {
+    background-color: #ffffff;
+    color: #333333;
+    border: 1px solid #e0e0e0;
+}
+
+body.light-theme .form-label {
+    color: #666666;
+}
+
+/* Theme tối */
+body.dark-theme {
+    background-color: #121212;
+    color: #e0e0e0;
+}
+
+body.dark-theme header {
+    background-color: #1f1f1f;
+    color: #ffffff;
+}
+
+body.dark-theme nav {
+    background-color: #1f1f1f;
+    color: #e0e0e0;
+}
+
+body.dark-theme .sidebar .menu-item {
+    color: #e0e0e0;
+}
+
+body.dark-theme .sidebar .menu-item:hover {
+    background-color: #2c2c2c;
+}
 
 
-body.bg-soft-blue .sidebar .menu-item i {
-    color: #64b5f6; /* Màu icon sáng hơn trong sidebar */
+body.dark-theme .btn-primary:hover {
+    background-color: #2e7d32;
+    border-color: #2e7d32;
+}
+
+body.dark-theme .card {
+    background-color: #1f1f1f;
+    border-color: #2c2c2c;
+}
+
+body.dark-theme .form-input {
+    background-color: #2c2c2c;
+    color: #e0e0e0;
+    border-color: #3f3f3f;
+}
+
+body.dark-theme .form-label {
+    color: #b0b0b0;
 }

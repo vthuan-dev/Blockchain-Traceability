@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     const form = document.querySelector('.add-region-form');
-    form.addEventListener('submit', function(event) {
+    form.addEventListener('submit', async function(event) {
         event.preventDefault();
 
         const provinceId = provinceInput.dataset.provinceId; // Lấy province_id từ dataset
@@ -56,31 +56,30 @@ document.addEventListener('DOMContentLoaded', function() {
         const districtName = districtSelect.options[districtSelect.selectedIndex].text;
         const regionName = document.getElementById('region-name').value;
 
-        fetch('/api/regions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                province_id: provinceId,
-                district_id: districtId,
-                region_name: regionName,
-                ward_name: wardName,
-                district_name: districtName
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
+        try {
+            const response = await fetch('/api/regions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    province_id: provinceId,
+                    district_id: districtId,
+                    region_name: regionName,
+                    ward_name: wardName,
+                    district_name: districtName
+                })
+            });
+            const data = await response.json();
             if (data.success) {
                 alert('Vùng sản xuất đã được thêm thành công');
                 window.location.href = 'region.html';
             } else {
                 alert('Lỗi khi thêm vùng sản xuất: ' + data.error);
             }
-        })
-        .catch(error => {
+        } catch (error) {
             console.error('Lỗi khi gửi yêu cầu:', error);
             alert('Lỗi khi gửi yêu cầu');
-        });
+        }
     });
 });

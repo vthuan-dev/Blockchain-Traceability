@@ -80,15 +80,13 @@ window.UserManager = {
         updatePagination(this.currentPage, this.rowsPerPage, this.filteredData); // Sử dụng hàm từ feature.js
     },
 
-    fetchUserData: function() {
-        fetch('http://localhost:3000/api/users')
-        .then(response => {
+    fetchUserData: async function() {
+        try {
+            const response = await fetch('http://localhost:3000/api/users');
             if (!response.ok) {
                 throw new Error('Lỗi khi tải dữ liệu');
             }
-            return response.json();
-        })
-        .then(data => {
+            const data = await response.json();
             if (!Array.isArray(data)) {
                 throw new Error('Dữ liệu không đúng định dạng');
             }
@@ -96,14 +94,32 @@ window.UserManager = {
             this.filteredData = [...this.userData];
             console.log('Dữ liệu người dùng:', this.userData);
             this.renderTable();
-        })
-        .catch(error => console.error('Lỗi khi lấy dữ liệu người dùng:', error));
+        } catch (error) {
+            console.error('Lỗi khi lấy dữ liệu người dùng:', error);
+        }
     },
 
     initializeRowsPerPage: function() {
         const entriesSelect = document.querySelector('.entries-select');
         if (entriesSelect) {
             this.rowsPerPage = parseInt(entriesSelect.value);
+        }
+    },
+
+    deleteUser: async function(userId) {
+        try {
+            const response = await fetch(`http://localhost:3000/api/users/${userId}`, {
+                method: 'DELETE'
+            });
+            if (!response.ok) {
+                throw new Error('Lỗi khi xóa người dùng');
+            }
+            await response.json();
+            alert('Người dùng đã được xóa thành công');
+            this.fetchUserData();
+        } catch (error) {
+            console.error('Lỗi khi xóa người dùng:', error);
+            alert('Có lỗi xảy ra khi xóa người dùng: ' + error.message);
         }
     }
 };

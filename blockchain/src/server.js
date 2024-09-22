@@ -75,12 +75,13 @@ app.use((req, res, next) => {
   }
   next();
 });
-app.use((req, res, next) => {
-  if (!req.session.userId) {
-    console.log('No userId in session');
-  }
-  next();
-});
+
+// app.use((req, res, next) => {
+//   if (!req.session.userId) {
+//     console.log('No userId in session');
+//   }
+//   next();
+// });
 
   setupRoutes(app, db);
 
