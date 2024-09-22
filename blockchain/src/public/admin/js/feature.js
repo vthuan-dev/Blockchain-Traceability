@@ -289,7 +289,20 @@ async function deleteItem(url, id) {
 }
 
 function deleteProduct(productId) {
-    deleteItem('http://localhost:3000/api/products', productId);
+    fetch(`http://localhost:3000/api/products/${productId}`, { method: 'DELETE' })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Xóa thất bại');
+            }
+            return response.json();
+        })
+        .then(data => {
+            alert('Sản phẩm đã được xóa thành công!');
+            window.ProductManager.fetchProductData();
+        })
+        .catch(error => {
+            alert('Có lỗi xảy ra khi xóa: ' + error.message);
+        });
 }
 
 function deleteUser(userId) {

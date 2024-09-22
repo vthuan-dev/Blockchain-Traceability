@@ -64,27 +64,45 @@ document.addEventListener('DOMContentLoaded', function() {
             updatePagination(this.currentPage, this.rowsPerPage, this.filteredData); // Sử dụng hàm từ feature.js
         },
 
-        fetchRegionData: function() {
-            fetch('/api/session')
-            .then(response => response.json())
-            .then(sessionData => {
+        fetchRegionData: async function() {
+            try {
+                // Lấy province_id từ session
+                const sessionResponse = await fetch('/api/session');
+                if (!sessionResponse.ok) {
+                    throw new Error(`HTTP error! status: ${sessionResponse.status}`);
+                }
+                const sessionData = await sessionResponse.json();
                 if (!sessionData.province_id) {
                     throw new Error('Không tìm thấy province_id trong session');
                 }
                 const adminProvinceId = sessionData.province_id;
                 console.log('Admin Province ID:', adminProvinceId);
 
-                return fetch(`/api/regions?province_id=${adminProvinceId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log('Dữ liệu regions nhận được:', data);
-                        this.regionData = data.filter(region => region.region_id.startsWith(adminProvinceId));
-                        this.filteredData = [...this.regionData];
-                        this.renderTable();
-                    });
-            })
-            .catch(error => console.error('Lỗi khi lấy dữ liệu vùng sản xuất:', error));
-
+                // Lấy dữ liệu regions
+                // Đảm bảo đường dẫn API này chính xác
+                const regionsResponse = await fetch(`http://localhost:3000/api/regions?province_id=${adminProvinceId}`);
+                if (!regionsResponse.ok) {
+                    throw new Error(`HTTP error! status: ${regionsResponse.status}`);
+                }
+                const contentType = regionsResponse.headers.get("content-type");
+                if (!contentType || !contentType.includes("application/json")) {
+                    throw new Error("Oops, we haven't got JSON!");
+                }
+                const data = await regionsResponse.json();
+                console.log('Dữ liệu regions nhận được:', data);
+                
+                if (!Array.isArray(data)) {
+                    throw new Error('Dữ liệu không đúng định dạng');
+                }
+                
+                this.regionData = data.filter(region => region.region_id.startsWith(adminProvinceId));
+                this.filteredData = [...this.regionData];
+                this.renderTable();
+            } catch (error) {
+                console.error('Lỗi khi lấy dữ liệu vùng sản xuất:', error);
+                // Hiển thị thông báo lỗi cho người dùng
+                alert('Có lỗi xảy ra khi tải dữ liệu vùng sản xuất. Vui lòng thử lại sau.');
+            }
         },
 
         initializeRowsPerPage: function() {
@@ -94,24 +112,21 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         },
 
-        deleteRegion: function(regionId) {
-            fetch(`/api/regions/${regionId}`, {
-                method: 'DELETE'
-            })
-            .then(response => {
+        deleteRegion: async function(regionId) {
+            try {
+                const response = await fetch(`/api/regions/${regionId}`, {
+                    method: 'DELETE'
+                });
                 if (!response.ok) {
                     throw new Error('Lỗi khi xóa vùng sản xuất');
                 }
-                return response.json();
-            })
-            .then(data => {
+                await response.json();
                 alert('Vùng sản xuất đã được xóa thành công');
                 this.fetchRegionData();
-            })
-            .catch(error => {
+            } catch (error) {
                 console.error('Lỗi khi xóa vùng sản xuất:', error);
                 alert('Có lỗi xảy ra khi xóa vùng sản xuất: ' + error.message);
-            });
+            }
         }
     };
 
