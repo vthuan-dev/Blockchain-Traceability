@@ -64,7 +64,8 @@ console.log('Admin address:', adminAddress);
   
 const contractABI = require('../build/contracts/TraceabilityContract.json').abi;
 
-const contractAddress = '0x2A43131cb14536Aa9F2bF717c9e363D460830914';
+
+const contractAddress = '0x6C9158819e2658B30f9A8cA2C1A0d0B510204E3D';
 const contract = new web3.eth.Contract(contractABI, contractAddress);
 
 // tạo biến lưu trữ file, giới hạn số lượng file và tên file, maxCount: số lượng file, name: tên file
@@ -440,158 +441,159 @@ app.post('/createbatch', (req, res, next) => {
   app.get('/create-activity', (req, res) => {
     res.sendFile(path.join(__dirname, 'public',  'san-xuat','them-nkhd.html'));
   });
-  
   app.post('/createactivity', (req, res, next) => {
     activityUpload(req, res, function (err) {
-      if (err instanceof multer.MulterError) {
-        // Lỗi Multer
-        return res.status(400).json({ error: 'Lỗi upload file: ' + err.message });
-      } else if (err) {
-        // Lỗi không xác định
-        return res.status(500).json({ error: 'Lỗi server: ' + err.message });
-      }
-      // Nếu không có lỗi, tiếp tục xử lý
-      next();
+        if (err instanceof multer.MulterError) {
+            // Lỗi Multer
+            return res.status(400).json({ error: 'Lỗi upload file: ' + err.message });
+        } else if (err) {
+            // Lỗi không xác định
+            return res.status(500).json({ error: 'Lỗi server: ' + err.message });
+        }
+        // Nếu không có lỗi, tiếp tục xử lý
+        next();
     });
-  }, async (req, res) => {
+}, async (req, res) => {
     try {
-      console.log('Received body:', req.body);
-      console.log('Received files:', req.files);
-  
-      // Làm sạch các key trong req.body
-      const cleanBody = Object.keys(req.body).reduce((acc, key) => {
-        acc[key.trim()] = req.body[key];
-        return acc;
-      }, {});
-  
-      const { uid, activityName, description, relatedProductIds } = cleanBody;
-  
-      // Validate input
-      if (!uid || !activityName || !description) {
-        return res.status(400).json({ error: 'Thiếu thông tin bắt buộc' });
-      }
-  
-      // Kiểm tra xem người dùng có tồn tại trong cơ sở dữ liệu không
-      const userExists = await checkUserExists(uid);
-      if (!userExists) {
-        return res.status(400).json({ error: 'Người dùng không tồn tại' });
-      }
-  
-      // Chuyển đổi relatedProductIds thành mảng số nguyên
-      const productIds = Array.isArray(relatedProductIds) 
-        ? relatedProductIds.map(id => parseInt(id, 10))
-        : relatedProductIds ? [parseInt(relatedProductIds, 10)] : [];
-  
-      // Kiểm tra xem tất cả các sản phẩm liên quan có tồn tại trong cơ sở dữ liệu không
-      if (productIds.length > 0) {
-        for (const productId of productIds) {
-          const productExists = await checkProductExists(productId);
-          if (!productExists) {
-            return res.status(400).json({ error: `Sản phẩm với ID ${productId} không tồn tại` });
-          }
+        console.log('Received body:', req.body);
+        console.log('Received files:', req.files);
+
+        // Làm sạch các key trong req.body
+        const cleanBody = Object.keys(req.body).reduce((acc, key) => {
+            acc[key.trim()] = req.body[key];
+            return acc;
+        }, {});
+
+        const { uid, activityName, description, relatedProductIds, isSystemGenerated } = cleanBody;
+
+        // Validate input
+        if (!uid || !activityName || !description) {
+            return res.status(400).json({ error: 'Thiếu thông tin bắt buộc' });
         }
-      }
-  
-      let imageUrls = [];
-  
-      // Process activity images
-      if (req.files && req.files.length > 0) {
-        console.log(`Số ảnh nhận được: ${req.files.length}`);
-        
-        for (const file of req.files) {
-          try {
-            const result = await uploadFile(file.buffer, file.originalname);
-            imageUrls.push(result.ipfsUrl);
-            console.log(`Đã thêm URL ảnh hoạt động: ${result.ipfsUrl}`);
-          } catch (uploadError) {
-            console.error(`Lỗi khi tải lên ảnh ${file.originalname}:`, uploadError);
-          }
+
+        // Kiểm tra xem người dùng có tồn tại trong cơ sở dữ liệu không
+        const userExists = await checkUserExists(uid);
+        if (!userExists) {
+            return res.status(400).json({ error: 'Người dùng không tồn tại' });
         }
-        
-        console.log(`Tổng số URL ảnh hoạt động sau khi xử lý: ${imageUrls.length}`);
-      } else {
-        console.log('Không có ảnh hoạt động được tải lên');
-      }
-  
-      // Kiểm tra phiên bản của smart contract
-      const networkId = await web3.eth.net.getId();
-      console.log('Network ID:', networkId);
-  
-      // Kiểm tra số dư của tài khoản
-      const balance = await web3.eth.getBalance(account.address);
-      console.log('Account balance:', web3.utils.fromWei(balance, 'ether'), 'ETH');
-  
-      // Kiểm tra số lượng nhật ký hoạt động hiện tại
-      const currentLogCount = await contract.methods.getActivityLogCount(parseInt(uid, 10)).call();
-      console.log('Current activity log count:', currentLogCount);
-  
-      // Thử gọi một hàm đơn giản
-      try {
-        const totalBatches = await contract.methods.getTotalBatches().call();
-        console.log('Total batches:', totalBatches);
-      } catch (error) {
-        console.error('Error calling getTotalBatches:', error);
-      }
-  
-      // Sau đó mới gọi addActivityLog
-      try {
-        console.log('Bắt đầu gọi hàm addActivityLog');
-        const gasEstimate = await contract.methods.addActivityLog(
-          parseInt(uid, 10),
-          activityName,
-          description,
-          imageUrls,
-          productIds
-        ).estimateGas({ from: account.address });
-        
-        console.log('Ước tính gas:', gasEstimate);
-  
-        const result = await contract.methods.addActivityLog(
-          parseInt(uid, 10),
-          activityName,
-          description,
-          imageUrls,
-          productIds
-        ).send({ 
-          from: account.address, 
-          gas: Math.floor(Number(gasEstimate) * 1.5).toString()
-        });
-        console.log('Kết quả giao dịch:', result);
-        if (result.events && result.events.ActivityLogAdded) {
-          console.log('Event ActivityLogAdded:', result.events.ActivityLogAdded.returnValues);
+
+        // Chuyển đổi relatedProductIds thành mảng số nguyên
+        const productIds = Array.isArray(relatedProductIds) 
+            ? relatedProductIds.map(id => parseInt(id, 10))
+            : relatedProductIds ? [parseInt(relatedProductIds, 10)] : [];
+
+        // Kiểm tra xem tất cả các sản phẩm liên quan có tồn tại trong cơ sở dữ liệu không
+        if (productIds.length > 0) {
+            for (const productId of productIds) {
+                const productExists = await checkProductExists(productId);
+                if (!productExists) {
+                    return res.status(400).json({ error: `Sản phẩm với ID ${productId} không tồn tại` });
+                }
+            }
+        }
+
+        let imageUrls = [];
+
+        // Process activity images
+        if (req.files && req.files.length > 0) {
+            console.log(`Số ảnh nhận được: ${req.files.length}`);
+            
+            for (const file of req.files) {
+                try {
+                    const result = await uploadFile(file.buffer, file.originalname);
+                    imageUrls.push(result.ipfsUrl);
+                    console.log(`Đã thêm URL ảnh hoạt động: ${result.ipfsUrl}`);
+                } catch (uploadError) {
+                    console.error(`Lỗi khi tải lên ảnh ${file.originalname}:`, uploadError);
+                }
+            }
+            
+            console.log(`Tổng số URL ảnh hoạt động sau khi xử lý: ${imageUrls.length}`);
         } else {
-          console.log('Không tìm thấy event ActivityLogAdded');
+            console.log('Không có ảnh hoạt động được tải lên');
         }
-        
-        // Kiểm tra lại số lượng nhật ký sau khi thêm
-        const newLogCount = await contract.methods.getActivityLogCount(parseInt(uid, 10)).call();
-        console.log('New activity log count:', newLogCount);
-        
-        res.status(200).json({
-          message: 'Nhật ký hoạt động đã được thêm thành công',
-          transactionHash: result.transactionHash,
-          imageUrls: imageUrls
-        });
-      } catch (error) {
-        console.error('Chi tiết lỗi:', error);
-        if (error.message.includes('revert')) {
-          console.error('Lỗi revert:', error.message);
-          // Thử lấy thông tin lỗi chi tiết từ smart contract
-          try {
-            const revertReason = await web3.eth.call(error.receipt);
-            console.error('Lý do revert:', revertReason);
-          } catch (callError) {
-            console.error('Không thể lấy lý do revert:', callError);
-          }
+
+        // Kiểm tra phiên bản của smart contract
+        const networkId = await web3.eth.net.getId();
+        console.log('Network ID:', networkId);
+
+        // Kiểm tra số dư của tài khoản
+        const balance = await web3.eth.getBalance(account.address);
+        console.log('Account balance:', web3.utils.fromWei(balance, 'ether'), 'ETH');
+
+        // Kiểm tra số lượng nhật ký hoạt động hiện tại
+        const currentLogCount = await contract.methods.getActivityLogCount(parseInt(uid, 10)).call();
+        console.log('Current activity log count:', currentLogCount);
+
+        // Thử gọi một hàm đơn giản
+        try {
+            const totalBatches = await contract.methods.getTotalBatches().call();
+            console.log('Total batches:', totalBatches);
+        } catch (error) {
+            console.error('Error calling getTotalBatches:', error);
         }
-        res.status(500).json({ error: 'Lỗi thêm nhật ký hoạt động: ' + error.message });
-      }
-  
+
+        // Sau đó mới gọi addActivityLog
+        try {
+            console.log('Bắt đầu gọi hàm addActivityLog');
+            const gasEstimate = await contract.methods.addActivityLog(
+                parseInt(uid, 10),
+                activityName,
+                description,
+                isSystemGenerated === 'true', // Chuyển đổi isSystemGenerated thành boolean
+                imageUrls,
+                productIds
+            ).estimateGas({ from: account.address });
+            
+            console.log('Ước tính gas:', gasEstimate);
+
+            const result = await contract.methods.addActivityLog(
+                parseInt(uid, 10),
+                activityName,
+                description,
+                isSystemGenerated === 'true', // Chuyển đổi isSystemGenerated thành boolean
+                imageUrls,
+                productIds
+            ).send({ 
+                from: account.address, 
+                gas: Math.floor(Number(gasEstimate) * 1.5).toString()
+            });
+            console.log('Kết quả giao dịch:', result);
+            if (result.events && result.events.ActivityLogAdded) {
+                console.log('Event ActivityLogAdded:', result.events.ActivityLogAdded.returnValues);
+            } else {
+                console.log('Không tìm thấy event ActivityLogAdded');
+            }
+            
+            // Kiểm tra lại số lượng nhật ký sau khi thêm
+            const newLogCount = await contract.methods.getActivityLogCount(parseInt(uid, 10)).call();
+            console.log('New activity log count:', newLogCount);
+            
+            res.status(200).json({
+                message: 'Nhật ký hoạt động đã được thêm thành công',
+                transactionHash: result.transactionHash,
+                imageUrls: imageUrls
+            });
+        } catch (error) {
+            console.error('Chi tiết lỗi:', error);
+            if (error.message.includes('revert')) {
+                console.error('Lỗi revert:', error.message);
+                // Thử lấy thông tin lỗi chi tiết từ smart contract
+                try {
+                    const revertReason = await web3.eth.call(error.receipt);
+                    console.error('Lý do revert:', revertReason);
+                } catch (callError) {
+                    console.error('Không thể lấy lý do revert:', callError);
+                }
+            }
+            res.status(500).json({ error: 'Lỗi thêm nhật ký hoạt động: ' + error.message });
+        }
+
     } catch (error) {
-      console.error('Lỗi thêm nhật ký hoạt động:', error);
-      res.status(500).json({ error: 'Lỗi thêm nhật ký hoạt động: ' + error.message });
+        console.error('Lỗi thêm nhật ký hoạt động:', error);
+        res.status(500).json({ error: 'Lỗi thêm nhật ký hoạt động: ' + error.message });
     }
-  });
+});
 
 
   app.get('/api/pending-batches', async (req, res) => {
@@ -1589,6 +1591,19 @@ async function getUserRole(userId) {
       });
   });
 }
+
+app.get('/api/batch-activity-logs/:sscc', async (req, res) => {
+  try {
+      const sscc = req.params.sscc;
+      const activityLogs = await contract.methods.getBatchActivityLogsBySSCC(sscc).call();
+      res.json(activityLogs);
+  } catch (error) {
+      console.error('Lỗi khi lấy nhật ký hoạt động của lô hàng:', error);
+      res.status(500).json({ error: 'Không thể lấy nhật ký hoạt động của lô hàng: ' + error.message });
+  }
+})
+
+
 
 
 }
