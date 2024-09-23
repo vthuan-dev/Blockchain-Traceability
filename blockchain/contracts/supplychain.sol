@@ -139,8 +139,15 @@ event TransportStatusUpdated(
             startDate: _startDate,
             endDate: _endDate
         });
+        uint256 newBatchId = _createBatch(params);
 
-        return _createBatch(params);
+        //Ghi lại thông tin lô hàng vào nhật ký hoạt động
+    uint256[] memory relatedProductIds = new uint256[](1);
+        relatedProductIds[0] = _productId;
+        addSystemActivityLog(_producerId, "Batch Created", "A new batch has been created", relatedProductIds);
+
+
+        return newBatchId;
     }
 
     function generateSSCC(uint256 _producerId) private view returns (string memory) {
@@ -292,6 +299,12 @@ function updateBatchStatus(uint256 _batchId, BatchStatus _newStatus) public {
     // Thêm kiểm tra quyền nếu cần
     _batches[_batchId].status = _newStatus;
     emit BatchStatusUpdated(_batchId, _newStatus);
+
+    // Ghi lại nhật ký hoạt động khi cập nhật trạng thái lô hàng
+    uint256[] memory relatedProductIds = new uint256[](1);
+    relatedProductIds[0] = _batches[_batchId].productId;
+    addSystemActivityLog(_batchId, "Batch Status Updated", "The batch status has been updated", relatedProductIds);
+
 }
 function getPendingBatchesByProducer(uint256 _producerId) public view returns (Batch[] memory) {
     uint256 pendingCount = 0;
@@ -388,17 +401,9 @@ function approveBatch(uint256 _batchId) public onlyApprover {
     
     // Add system activity log
     uint256[] memory relatedProductIds = new uint256[](1);
-    relatedProductIds[0] = _batches[_batchId].productId;
-    string[] memory imageUrls = new string[](0); // Empty array for imageUrls
-    activityLogContract.addActivityLog(
-        _batchId,
-        "Batch Approved",
-        "Batch has been approved by the approver",
-        true, // isSystemGenerated
-        imageUrls,
-        relatedProductIds
-    );
-}
+        relatedProductIds[0] = _batches[_batchId].productId;
+        addSystemActivityLog(_batchId, "Batch Approved", "Batch has been approved by the approver", relatedProductIds);
+    }
 
 function rejectBatch(uint256 _batchId) public onlyApprover {
     require(_batches[_batchId].batchId != 0, "Batch does not exist");
@@ -409,17 +414,9 @@ function rejectBatch(uint256 _batchId) public onlyApprover {
     emit BatchRejected(_batchId, _batches[_batchId].producerId, _batches[_batchId].sscc);
     
     // Add system activity log
-    uint256[] memory relatedProductIds = new uint256[](1);
-    relatedProductIds[0] = _batches[_batchId].productId;
-    string[] memory imageUrls = new string[](0); // Empty array for imageUrls
-    activityLogContract.addActivityLog(
-        _batchId,
-        "Batch Rejected",
-        "Batch has been rejected by the approver",
-        true, // isSystemGenerated
-        imageUrls,
-        relatedProductIds
-    );
+  uint256[] memory relatedProductIds = new uint256[](1);
+        relatedProductIds[0] = _batches[_batchId].productId;
+        addSystemActivityLog(_batchId, "Batch Rejected", "Batch has been rejected by the approver", relatedProductIds);
 }
 function getActivityLogs(uint256 _uid) public view returns (ActivityLog.ActivityLogEntry[] memory) {
     return activityLogContract.getActivityLogs(_uid);
@@ -469,6 +466,7 @@ function recordParticipation(uint256 _batchId, uint256 _participantId, string me
     emit ParticipationRecorded(_batchId, _participantId, _participantType, _action);
 }
 event LogParticipantType(uint256 indexed batchId, string participantType);
+
 function updateTransportStatus(
     uint256 _batchId, 
     uint256 _participantId, 
@@ -507,6 +505,11 @@ function updateTransportStatus(
     }
     
     emit TransportStatusUpdated(_batchId, _batches[_batchId].detailedTransportStatus, _action, _participantId, _participantType);
+    uint256[] memory relatedProductIds = new uint256[](1);
+    relatedProductIds[0] = _batches[_batchId].productId;
+    addSystemActivityLog(_batchId, "Transport Status Updated", _action, relatedProductIds);
+
+
 }
 function updateTransportStatusBySSCC(
     string memory _sscc, 
@@ -547,7 +550,13 @@ function warehouseConfirmation(uint256 _batchId, uint256 _warehouseId) public {
     
     // Phát ra sự kiện
     emit WarehouseConfirmed(_batchId, _warehouseId);
-}
+   uint256[] memory relatedProductIds = new uint256[](1);
+        relatedProductIds[0] = _batches[_batchId].productId;
+        addSystemActivityLog(_batchId, "Warehouse Confirmation", "Warehouse has confirmed receipt of the batch", relatedProductIds);
+    }
+
+
+
 
 // Hàm để kiểm tra xem một nhà kho cụ thể đã xác nhận lô hàng chưa
 function isWarehouseConfirmed(uint256 _batchId, uint256 _warehouseId) public view returns (bool) {
@@ -597,5 +606,16 @@ function getBatchTransportStatus(uint256 _batchId) public view returns (Transpor
     require(_batches[_batchId].batchId != 0, "Batch does not exist");
     return _batches[_batchId].transportStatus;
 }
+
+
+  function getBatchActivityLogs(uint256 _batchId) public view returns (ActivityLog.ActivityLogEntry[] memory) {
+        return activityLogContract.getActivityLogs(_batchId);
+    }
+    
+    function getBatchActivityLogsBySSCC(string memory _sscc) public view returns (ActivityLog.ActivityLogEntry[] memory) {
+        uint256 batchId = _ssccToBatchId[_sscc];
+        require(batchId != 0, "Batch does not exist with this SSCC");
+        return getBatchActivityLogs(batchId);
+    }
 
 }

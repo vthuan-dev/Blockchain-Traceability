@@ -55,8 +55,8 @@ contract ActivityLog {
         return _activityLogs[_uid].length;
     }
  
-function getProducerActivityLogs(uint256 _uid) public view returns (ActivityLogEntry[] memory) {
-    return _activityLogs[_uid];
-}
+    function getProducerActivityLogs(uint256 _uid) public view returns (ActivityLogEntry[] memory) {
+        return _activityLogs[_uid];
+    }
 
 }
