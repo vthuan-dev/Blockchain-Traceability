@@ -583,9 +583,7 @@ function getConfirmedWarehouses(uint256 _batchId) public view returns (uint256[]
     
     return confirmedWarehouses;
 }
-function getBatchIdBySSCC(string memory _sscc) public view returns (uint256) {
-    return _ssccToBatchId[_sscc];
-}
+
 
 function getDetailedTransportStatus(uint256 _batchId) public view returns (DetailedTransportStatus) {
     require(_batches[_batchId].batchId != 0, "Batch does not exist");
@@ -608,14 +606,19 @@ function getBatchTransportStatus(uint256 _batchId) public view returns (Transpor
 }
 
 
-  function getBatchActivityLogs(uint256 _batchId) public view returns (ActivityLog.ActivityLogEntry[] memory) {
+    function getBatchActivityLogs(uint256 _batchId) public view returns (ActivityLog.ActivityLogEntry[] memory) {
         return activityLogContract.getActivityLogs(_batchId);
     }
-    
-    function getBatchActivityLogsBySSCC(string memory _sscc) public view returns (ActivityLog.ActivityLogEntry[] memory) {
-        uint256 batchId = _ssccToBatchId[_sscc];
-        require(batchId != 0, "Batch does not exist with this SSCC");
-        return getBatchActivityLogs(batchId);
+
+    function getSystemActivityLogsBySSCC(string memory _sscc) public view returns (ActivityLog.ActivityLogEntry[] memory) {
+        uint256 batchId = uint256(keccak256(abi.encodePacked(_sscc)));
+        return activityLogContract.getSystemActivityLogs(batchId);
+    }
+    function getBatchIdBySSCC(string memory _sscc) public view returns (uint256) {
+        return _ssccToBatchId[_sscc];
+    }
+      function getProducerActivityLogsByProducerId(uint256 _producerId) public view returns (ActivityLog.ActivityLogEntry[] memory) {
+        return activityLogContract.getProducerActivityLogs(_producerId);
     }
 
 }

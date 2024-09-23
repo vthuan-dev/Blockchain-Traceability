@@ -55,7 +55,8 @@ app.use(session({
   const { 
     s3Client, 
     web3, 
-    contract, 
+    traceabilityContract, 
+    activityLogContract, 
     uploadFile, 
     checkFileStatusWithRetry, 
     setupRoutes,
