@@ -191,7 +191,7 @@ module.exports = function(db) {
     });
 
     router.get('/user-info', async (req, res) => {
-        console.log('Session trong /api/user-info:', req.session);
+      //  console.log('Session trong /api/user-info:', req.session);
         if (req.session.userId && req.session.userId !== 0) {
             try {
                 let region = null;

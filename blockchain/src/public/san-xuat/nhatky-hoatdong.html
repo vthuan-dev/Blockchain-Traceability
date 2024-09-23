@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang chủ - Người sản xuất</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/san-xuat.css">
+    <link rel="stylesheet" href="../css/nav-bar.css">
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light custom-navbar-height">
+        <div class="logo">
+            <img src="..\hinhanh\Bitcoin-Blockchain-Network-icon-on-transparent-background-PNG.png" alt="Logo" class="logo-image">
+        </div>
+        <a class="navbar-brand" href="sanxuat.html">Sản xuất</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav"> <!-- Các mục điều hướng bên trái -->
+                <li class="nav-item">
+                    <a class="nav-link" href="sanxuat.html"> Quản lí lô hàng</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="nhatky-hoatdong.html">Quản lí hoạt động</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Thông báo</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <span id="userName">Tên người dùng</span>
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="#" id="userRole">Vai trò</a>
+                        <a class="dropdown-item" href="#" id="userRegion">Khu vực</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="#" id="logoutButton">Đăng xuất</a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    
+    <!-- Thêm div overlay ngay sau nav -->
+    <div class="menu-overlay"></div>
+
+    <main>
+        <div class="container mt-4">
+            <div class="table-title">
+                <h5><b>Quản lí nhật kí hoạt động</b></h5>
+            </div>
+            <br>
+            <div class="container-fluid mt-3">
+                <div class="row justify-content-center">
+                    <div class="col-12">
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" placeholder="Tìm kiếm hoạt động..." aria-label="Tìm kiếm hoạt động">
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" type="button">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <p></p>
+            <div class="dashboard-table">
+                <button class="check-button" data-toggle="modal" data-target="#addActivityLogModal"><b>Thêm nhật ký hoạt động</b></button>
+            </div>
+            <!-- Thêm spinner loading -->
+            <div id="loadingSpinner" class="text-center mt-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="sr-only">Đang tải...</span>
+                </div>
+                <p class="mt-2">Đang tải hoạt động...</p>
+            </div>
+            <div class="mt-4">
+                <label for="statusFilter">Lọc theo trạng thái:</label>
+                <select id="statusFilter" class="form-control">
+                    <option value="Hoạt động hiện tại">Hoạt động hiện tại</option>
+                    <option value="Hoạt động đã hoàn thành">Hoạt động đã hoàn thành</option>
+                </select>
+            </div>
+            <!-- Container của bảng hoạt động -->
+            <h5><i>Danh sách hoạt động :</i></h5>
+            
+            <div id="activityLogsList"></div>
+
+            <div class="table-responsive">
+                <div id="currentActivitiesList" style="display: none;"></div>
+                <div id="completedActivitiesList" style="display: none;"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal thêm nhật ký hoạt động -->
+    <div class="modal fade" id="addActivityLogModal" tabindex="-1" role="dialog" aria-labelledby="addActivityLogModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addActivityLogModalLabel">Thêm nhật ký hoạt động</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="addActivityLogForm">
+                        <div class="form-group">
+                            <label for="activityName">Tên hoạt động</label>
+                            <input type="text" class="form-control" id="activityName" name="activityName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="description">Mô tả</label>
+                            <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="relatedProductIds">ID sản phẩm liên quan</label>
+                            <input type="text" class="form-control" id="relatedProductIds" name="relatedProductIds">
+                        </div>
+                        <div class="form-group">
+                            <label for="isSystemGenerated">Hệ thống tạo</label>
+                            <select class="form-control" id="isSystemGenerated" name="isSystemGenerated">
+                                <option value="true">Có</option>
+                                <option value="false">Không</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="activityImages">Ảnh hoạt động</label>
+                            <input type="file" class="form-control-file" id="activityImages" name="activityImages" multiple>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Thêm</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery và Bootstrap JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <script>AOS.init();</script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="../js_giaodien/sanpham.js"></script>
+   
+    <script>
+    document.addEventListener('DOMContentLoaded', async function() {
+        try {
+            const response = await fetch('/api/user-info');
+            if (response.ok) {
+                const data = await response.json();
+                document.getElementById('userName').textContent = data.name;
+                document.getElementById('userRole').textContent = `Vai trò: ${getRoleName(data.roleId)}`;
+                document.getElementById('userRegion').textContent = `Khu vực: ${data.region}`;
+            } else {
+                console.error('Không thể lấy thông tin người dùng');
+                alert('Phiên đăng nhập đã hết hạn hoặc không hợp lệ. Vui lòng đăng nhập lại.');
+                window.location.href = '../account/dangnhap.html';
+            }
+        } catch (error) {
+            console.error('Lỗi:', error);
+            alert('Có lỗi xảy ra khi kiểm tra thông tin đăng nhập. Vui lòng thử lại sau.');
+        }
+
+        // Xử lý đăng xuất
+        document.getElementById('logoutButton').addEventListener('click', async function(e) {
+            e.preventDefault();
+            try {
+                const response = await fetch('/api/dangxuat', { 
+                    method: 'POST',
+                    credentials: 'same-origin'
+                });
+                if (response.ok) {
+                    window.location.href = '../account/dangnhap.html';
+                } else {
+                    console.error('Không thể đăng xuất');
+                    alert('Đăng xuất không thành công. Vui lòng thử lại.');
+                }
+            } catch (error) {
+                console.error('Lỗi khi đăng xuất:', error);
+                alert('Có lỗi xảy ra khi đăng xuất. Vui lòng thử lại sau.');
+            }
+        });
+
+        // Gọi hàm mặc định khi trang được tải
+        fetchAndDisplayCurrentActivities();
+    });
+
+    function fetchAndDisplayCurrentActivities() {
+        // Gọi API để lấy danh sách hoạt động hiện tại và hiển thị
+        fetch('/api/producer-activity-logs')
+            .then(response => response.json())
+            .then(data => {
+                const activityLogsList = document.getElementById('activityLogsList');
+                activityLogsList.innerHTML = '';
+                data.activityLogs.forEach(log => {
+                    const logItem = document.createElement('div');
+                    logItem.className = 'activity-log-item';
+                    logItem.innerHTML = `
+                        <h5>${log.activityName}</h5>
+                        <p>${log.description}</p>
+                        <p><b>Ngày:</b> ${new Date(log.timestamp).toLocaleString()}</p>
+                        <p><b>ID sản phẩm liên quan:</b> ${log.relatedProductIds.join(', ')}</p>
+                        <p><b>Hệ thống tạo:</b> ${log.isSystemGenerated ? 'Có' : 'Không'}</p>
+                        <div class="activity-images">
+                            ${log.imageUrls.map(url => `<img src="${url}" alt="Activity Image" class="activity-image">`).join('')}
+                        </div>
+                    `;
+                    activityLogsList.appendChild(logItem);
+                });
+            })
+            .catch(error => {
+                console.error('Lỗi khi lấy danh sách hoạt động:', error);
+                alert('Có lỗi xảy ra khi lấy danh sách hoạt động. Vui lòng thử lại sau.');
+            });
+    }
+
+    function fetchAndDisplayCompletedActivities() {
+        // Gọi API để lấy danh sách hoạt động đã hoàn thành và hiển thị
+        // Ví dụ:
+        // fetch('/api/completed-activities')
+        //     .then(response => response.json())
+        //     .then(data => {
+        //         // Hiển thị dữ liệu trong #completedActivitiesList
+        //     });
+    }
+    </script>
+
+    <script>
+    function getRoleName(roleId) {
+      switch (roleId) {
+          case 1: return 'Người sản xuất';
+          case 2: return 'Người kiểm duyệt';
+          case 6: return 'Người vận chuyển';
+          case 8: return 'Nhà kho';
+          case 3: return 'Admin';
+          default: return 'Không xác định';
+      }
+  }
+    </script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const statusFilter = document.getElementById('statusFilter');
+        statusFilter.addEventListener('change', function() {
+            const selectedStatus = this.value;
+            document.getElementById('currentActivitiesList').style.display = 'none';
+            document.getElementById('completedActivitiesList').style.display = 'none';
+
+            switch(selectedStatus) {
+                case 'Hoạt động hiện tại':
+                    fetchAndDisplayCurrentActivities();
+                    break;
+                case 'Hoạt động đã hoàn thành':
+                    fetchAndDisplayCompletedActivities();
+                    break;
+            }
+        });
+
+        // Xử lý sự kiện submit form thêm nhật ký hoạt động
+        document.getElementById('addActivityLogForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            try {
+                const response = await fetch('/createactivity', {
+                    method: 'POST',
+                    body: formData
+                });
+                if (response.ok) {
+                    alert('Nhật ký hoạt động đã được thêm thành công');
+                    $('#addActivityLogModal').modal('hide');
+                    fetchAndDisplayCurrentActivities();
+                } else {
+                    const errorData = await response.json();
+                    alert('Lỗi: ' + errorData.error);
+                }
+            } catch (error) {
+                console.error('Lỗi khi thêm nhật ký hoạt động:', error);
+                alert('Có lỗi xảy ra khi thêm nhật ký hoạt động. Vui lòng thử lại sau.');
+            }
+        });
+    });
+    </script>
+</body>
+</html>
