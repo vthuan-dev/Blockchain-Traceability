@@ -279,39 +279,39 @@ function setupRoutes(app, db){
     }
   });
   
-  app.get('/activity-logs/:uid', async (req, res) => {
-    try {
-      const uid = req.params.uid;
+  // app.get('/activity-logs/:uid', async (req, res) => {
+  //   try {
+  //     const uid = req.params.uid;
       
-      console.log('Đang truy xuất nhật ký hoạt động cho UID:', uid);
+  //     console.log('Đang truy xuất nhật ký hoạt động cho UID:', uid);
   
-      const activityLogs = await activityLogContract.methods.getActivityLogs(uid).call();
+  //     const activityLogs = await activityLogContract.methods.getActivityLogs(uid).call();
       
-      console.log('Số lượng nhật ký hoạt động:', activityLogs.length);
+  //     console.log('Số lượng nhật ký hoạt động:', activityLogs.length);
   
-      // Chuyển đổi tất cả giá trị BigInt thành chuỗi
-      const convertedLogs = convertBigIntToString(activityLogs);
+  //     // Chuyển đổi tất cả giá trị BigInt thành chuỗi
+  //     const convertedLogs = convertBigIntToString(activityLogs);
   
-      // Chuyển đổi dữ liệu để dễ đọc hơn
-      const formattedLogs = convertedLogs.map(log => ({
-        timestamp: new Date(Number(log.timestamp) * 1000).toISOString(),
-        uid: log.uid,
-        activityName: log.activityName,
-        description: log.description,
-        isSystemGenerated: log.isSystemGenerated,
-        imageUrls: log.imageUrls,
-        relatedProductIds: log.relatedProductIds
-      }));
+  //     // Chuyển đổi dữ liệu để dễ đọc hơn
+  //     const formattedLogs = convertedLogs.map(log => ({
+  //       timestamp: new Date(Number(log.timestamp) * 1000).toISOString(),
+  //       uid: log.uid,
+  //       activityName: log.activityName,
+  //       description: log.description,
+  //       isSystemGenerated: log.isSystemGenerated,
+  //       imageUrls: log.imageUrls,
+  //       relatedProductIds: log.relatedProductIds
+  //     }));
   
-      res.status(200).json({
-        message: 'Truy xuất nhật ký hoạt động thành công',
-        activityLogs: formattedLogs
-      });
-    } catch (error) {
-      console.error('Lỗi khi truy xuất nhật ký hoạt động:', error);
-      res.status(500).json({ error: 'Lỗi khi truy xuất nhật ký hoạt động: ' + error.message });
-    }
-  });
+  //     res.status(200).json({
+  //       message: 'Truy xuất nhật ký hoạt động thành công',
+  //       activityLogs: formattedLogs
+  //     });
+  //   } catch (error) {
+  //     console.error('Lỗi khi truy xuất nhật ký hoạt động:', error);
+  //     res.status(500).json({ error: 'Lỗi khi truy xuất nhật ký hoạt động: ' + error.message });
+  //   }
+  // });
   
   app.get('/create-batch', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'san-xuat', 'them-lo-hang.html'));
@@ -459,14 +459,20 @@ app.post('/createbatch', (req, res, next) => {
         console.log('Received body:', req.body);
         console.log('Received files:', req.files);
 
+        // Lấy uid từ session
+        const uid = req.session.userId;
+        if (!uid) {
+            return res.status(401).json({ error: 'Người dùng chưa đăng nhập' });
+        }
+
         const cleanBody = Object.keys(req.body).reduce((acc, key) => {
             acc[key.trim()] = req.body[key];
             return acc;
         }, {});
 
-        const { uid, activityName, description, relatedProductIds, isSystemGenerated } = cleanBody;
+        const { activityName, description, relatedProductIds, isSystemGenerated } = cleanBody;
 
-        if (!uid || !activityName || !description) {
+        if (!activityName || !description) {
             return res.status(400).json({ error: 'Thiếu thông tin bắt buộc' });
         }
 
@@ -1484,7 +1490,6 @@ app.get('/api/batch-transport-history/:sscc', async (req, res) => {
         `, [event.participantId.toString()]);
         
         transporter = results[0];
-        console.log('SQL query result:', transporter);
       } catch (dbError) {
         console.error('Database query error:', dbError);
         transporter = null;
@@ -1625,10 +1630,13 @@ app.get('/api/system-activity-logs/:sscc', async (req, res) => {
       res.status(500).json({ error: 'Lỗi khi truy xuất nhật ký hoạt động của hệ thống: ' + error.message });
   }
 });
-
-app.get('/api/producer-activity-logs/:producerId', async (req, res) => {
+app.get('/api/producer-activity-logs', async (req, res) => {
   try {
-      const producerId = req.params.producerId;
+      if (!req.session.userId) {
+          return res.status(401).json({ error: 'Người dùng chưa đăng nhập' });
+      }
+
+      const producerId = req.session.userId;
       console.log('Đang truy xuất nhật ký hoạt động của người sản xuất cho producerId:', producerId);
 
       const producerActivityLogs = await traceabilityContract.methods.getProducerActivityLogsByProducerId(producerId).call();
