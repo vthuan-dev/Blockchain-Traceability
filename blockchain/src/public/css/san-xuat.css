@@ -274,3 +274,80 @@ body {
     font-weight: bold;
     color: #000; /* Màu chữ in đậm */
 }
+
+.activity-log-item {
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.activity-log-item h5 {
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.activity-log-item p {
+    margin-bottom: 10px;
+}
+
+.activity-images {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.activity-image {
+    width: 100px;  /* Điều chỉnh kích thước này theo nhu cầu */
+    height: 100px; /* Điều chỉnh kích thước này theo nhu cầu */
+    object-fit: cover;
+    border-radius: 5px;
+}
+
+.add-activity-btn {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    font-weight: bold;
+    border-radius: 30px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.add-activity-btn:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.add-activity-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.add-activity-btn i {
+    margin-right: 8px;
+}
+
+.dashboard-table {
+    margin-bottom: 20px;
+    text-align: right;
+}
+
+#relatedProductIds {
+    width: 100%;
+}
+
+.select2-container--default .select2-selection--multiple {
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background-color: #007bff;
+    border: 1px solid #007bff;
+    color: #fff;
+}
