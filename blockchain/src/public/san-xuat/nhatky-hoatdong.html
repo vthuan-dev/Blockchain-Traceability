@@ -13,6 +13,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet">
 </head>
 <body>
 
@@ -76,9 +78,15 @@
                 </div>
             </div>
             
+        
+            
+                <div id="messageContainer" class="alert" style="display: none;"></div>
+            
             <p></p>
             <div class="dashboard-table">
-                <button class="check-button" data-toggle="modal" data-target="#addActivityLogModal"><b>Thêm nhật ký hoạt động</b></button>
+                <button class="btn btn-primary add-activity-btn" data-toggle="modal" data-target="#addActivityLogModal">
+                    <i class="fas fa-plus-circle mr-2"></i>Thêm nhật ký hoạt động
+                </button>
             </div>
             <!-- Thêm spinner loading -->
             <div id="loadingSpinner" class="text-center mt-4">
@@ -97,7 +105,7 @@
             <!-- Container của bảng hoạt động -->
             <h5><i>Danh sách hoạt động :</i></h5>
             
-            <div id="activityLogsList"></div>
+            <div id="activityLogsList" style="max-height: none; overflow: visible;"></div>
 
             <div class="table-responsive">
                 <div id="currentActivitiesList" style="display: none;"></div>
@@ -105,8 +113,6 @@
             </div>
         </div>
     </main>
-
-    <!-- Modal thêm nhật ký hoạt động -->
     <div class="modal fade" id="addActivityLogModal" tabindex="-1" role="dialog" aria-labelledby="addActivityLogModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -117,7 +123,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form id="addActivityLogForm">
+                    <form id="addActivityLogForm" enctype="multipart/form-data">
                         <div class="form-group">
                             <label for="activityName">Tên hoạt động</label>
                             <input type="text" class="form-control" id="activityName" name="activityName" required>
@@ -127,27 +133,23 @@
                             <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
                         </div>
                         <div class="form-group">
-                            <label for="relatedProductIds">ID sản phẩm liên quan</label>
-                            <input type="text" class="form-control" id="relatedProductIds" name="relatedProductIds">
-                        </div>
-                        <div class="form-group">
-                            <label for="isSystemGenerated">Hệ thống tạo</label>
-                            <select class="form-control" id="isSystemGenerated" name="isSystemGenerated">
-                                <option value="true">Có</option>
-                                <option value="false">Không</option>
+                            <label for="relatedProductId">Sản phẩm liên quan</label>
+                            <select class="form-control" id="relatedProductId" name="relatedProductId">
+                                <option value="">Chọn sản phẩm</option>
+                                <!-- Options will be populated dynamically -->
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="activityImages">Ảnh hoạt động</label>
-                            <input type="file" class="form-control-file" id="activityImages" name="activityImages" multiple>
+                            <label for="imageUrls">Ảnh hoạt động</label>
+                            <input type="file" class="form-control-file" id="imageUrls" name="imageUrls" multiple>
                         </div>
+                        <input type="hidden" name="isSystemGenerated" value="false">
                         <button type="submit" class="btn btn-primary">Thêm</button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
-
     <!-- jQuery và Bootstrap JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
     <script>AOS.init();</script>
@@ -175,9 +177,11 @@
             console.error('Lỗi:', error);
             alert('Có lỗi xảy ra khi kiểm tra thông tin đăng nhập. Vui lòng thử lại sau.');
         }
-
-        // Xử lý đăng xuất
-        document.getElementById('logoutButton').addEventListener('click', async function(e) {
+    });
+    </script>
+<script>
+       // Xử lý đăng xuất
+       document.getElementById('logoutButton').addEventListener('click', async function(e) {
             e.preventDefault();
             try {
                 const response = await fetch('/api/dangxuat', { 
@@ -197,49 +201,49 @@
         });
 
         // Gọi hàm mặc định khi trang được tải
-        fetchAndDisplayCurrentActivities();
-    });
+        fetchAndDisplayAllActivities();
 
-    function fetchAndDisplayCurrentActivities() {
-        // Gọi API để lấy danh sách hoạt động hiện tại và hiển thị
-        fetch('/api/producer-activity-logs')
-            .then(response => response.json())
-            .then(data => {
-                const activityLogsList = document.getElementById('activityLogsList');
-                activityLogsList.innerHTML = '';
-                data.activityLogs.forEach(log => {
-                    const logItem = document.createElement('div');
-                    logItem.className = 'activity-log-item';
-                    logItem.innerHTML = `
-                        <h5>${log.activityName}</h5>
-                        <p>${log.description}</p>
-                        <p><b>Ngày:</b> ${new Date(log.timestamp).toLocaleString()}</p>
-                        <p><b>ID sản phẩm liên quan:</b> ${log.relatedProductIds.join(', ')}</p>
-                        <p><b>Hệ thống tạo:</b> ${log.isSystemGenerated ? 'Có' : 'Không'}</p>
-                        <div class="activity-images">
-                            ${log.imageUrls.map(url => `<img src="${url}" alt="Activity Image" class="activity-image">`).join('')}
-                        </div>
-                    `;
-                    activityLogsList.appendChild(logItem);
-                });
-            })
-            .catch(error => {
-                console.error('Lỗi khi lấy danh sách hoạt động:', error);
-                alert('Có lỗi xảy ra khi lấy danh sách hoạt động. Vui lòng thử lại sau.');
+        function fetchAndDisplayAllActivities() {
+        // Hiển thị spinner loading
+        document.getElementById('loadingSpinner').style.display = 'block';
+    }
+    // Gọi API để lấy tất cả hoạt động và hiển thị
+    fetch('/api/producer-activity-logs')
+        .then(response => response.json())
+        .then(data => {
+            console.log('Dữ liệu nhận được từ API:', data);
+            const activityLogsList = document.getElementById('activityLogsList');
+            activityLogsList.innerHTML = ''; // Xóa nội dung cũ
+            
+            data.activityLogs.forEach((log, index) => {
+                console.log(`Đang xử lý log thứ ${index + 1}:`, log);
+                const logItem = document.createElement('div');
+                logItem.className = 'activity-log-item';
+                logItem.innerHTML = `
+                    <h5>${index + 1}. ${log.activityName}</h5>
+                    <p><strong>Chi tiết:</strong> ${log.description}</p>
+                    <div class="activity-images">
+                        ${log.imageUrls.map(url => `<img src="${url}" alt="Activity Image" class="activity-image">`).join('')}
+                    </div>
+                `;
+                activityLogsList.appendChild(logItem);
             });
-    }
+            
+            console.log('Số lượng phần tử hoạt động được tạo:', activityLogsList.children.length);
+            
+            // Ẩn spinner loading
+            document.getElementById('loadingSpinner').style.display = 'none';
+        })
+        .catch(error => {
+            console.error('Lỗi khi lấy danh sách hoạt động:', error);
+            alert('Có lỗi xảy ra khi lấy danh sách hoạt động. Vui lòng thử lại sau.');
+            // Ẩn spinner loading trong trường hợp lỗi
+            document.getElementById('loadingSpinner').style.display = 'none';
+        });
 
-    function fetchAndDisplayCompletedActivities() {
-        // Gọi API để lấy danh sách hoạt động đã hoàn thành và hiển thị
-        // Ví dụ:
-        // fetch('/api/completed-activities')
-        //     .then(response => response.json())
-        //     .then(data => {
-        //         // Hiển thị dữ liệu trong #completedActivitiesList
-        //     });
-    }
-    </script>
 
+</script>
+     
     <script>
     function getRoleName(roleId) {
       switch (roleId) {
@@ -252,8 +256,7 @@
       }
   }
     </script>
-
-    <script>
+ <script>
     document.addEventListener('DOMContentLoaded', function() {
         const statusFilter = document.getElementById('statusFilter');
         statusFilter.addEventListener('change', function() {
@@ -270,30 +273,87 @@
                     break;
             }
         });
+    });
 
-        // Xử lý sự kiện submit form thêm nhật ký hoạt động
-        document.getElementById('addActivityLogForm').addEventListener('submit', async function(e) {
+    // Lấy danh sách sản phẩm khi modal được mở
+    $('#addActivityLogModal').on('show.bs.modal', function (e) {
+        fetchProducts();
+    });
+
+    // Hàm để lấy danh sách sản phẩm
+    function fetchProducts() {
+        fetch('/api/products')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Products data:', data); // Log dữ liệu sản phẩm
+                const select = document.getElementById('relatedProductId');
+                select.innerHTML = '<option value="">Chọn sản phẩm</option>'; // Reset và thêm option mặc định
+                data.forEach(product => {
+                    const option = document.createElement('option');
+                    option.value = product.product_id;
+                    option.textContent = product.product_name;
+                    select.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error('Lỗi khi lấy danh sách sản phẩm:', error);
+                alert('Có lỗi xảy ra khi tải danh sách sản phẩm. Vui lòng thử lại sau.');
+            });
+    }
+
+    // Gọi hàm này khi trang được tải hoặc khi modal được mở
+        document.addEventListener('DOMContentLoaded', fetchProducts);
+        $('#addActivityLogModal').on('show.bs.modal', fetchProducts);
+
+        // Gọi hàm này khi modal được mở
+        $('#addActivityLogModal').on('show.bs.modal', function (e) {
+            fetchProducts();
+        });
+        document.getElementById('addActivityLogForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const formData = new FormData(this);
-            try {
-                const response = await fetch('/createactivity', {
-                    method: 'POST',
-                    body: formData
-                });
-                if (response.ok) {
-                    alert('Nhật ký hoạt động đã được thêm thành công');
-                    $('#addActivityLogModal').modal('hide');
-                    fetchAndDisplayCurrentActivities();
-                } else {
-                    const errorData = await response.json();
-                    alert('Lỗi: ' + errorData.error);
-                }
-            } catch (error) {
-                console.error('Lỗi khi thêm nhật ký hoạt động:', error);
-                alert('Có lỗi xảy ra khi thêm nhật ký hoạt động. Vui lòng thử lại sau.');
+
+            // Log dữ liệu trước khi gửi
+            for (let [key, value] of formData.entries()) {
+                console.log(key, value);
             }
+
+            fetch('/createactivity', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => { throw new Error(text) });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Response data:', data); // Log the response data
+                if (data.success) {
+                    // Display success message
+                    const messageContainer = document.getElementById('messageContainer');
+                    messageContainer.textContent = 'Thêm nhật ký hoạt động thành công';
+                    messageContainer.className = 'alert alert-success';
+                    messageContainer.style.display = 'block';
+
+                    $('#addActivityLogModal').modal('hide');
+                    fetchAndDisplayAllActivities(); // Cập nhật danh sách hoạt động
+                } else {
+                    throw new Error(data.error || data.message || 'Lỗi không xác định');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                const messageContainer = document.getElementById('messageContainer');
+                messageContainer.textContent = 'Có lỗi xảy ra khi thêm nhật ký hoạt động: ' + error.message;
+                messageContainer.className = 'alert alert-danger';
+                messageContainer.style.display = 'block';
+            });
         });
-    });
     </script>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

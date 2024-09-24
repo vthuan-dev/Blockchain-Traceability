@@ -279,40 +279,7 @@ function setupRoutes(app, db){
     }
   });
   
-  // app.get('/activity-logs/:uid', async (req, res) => {
-  //   try {
-  //     const uid = req.params.uid;
-      
-  //     console.log('Đang truy xuất nhật ký hoạt động cho UID:', uid);
-  
-  //     const activityLogs = await activityLogContract.methods.getActivityLogs(uid).call();
-      
-  //     console.log('Số lượng nhật ký hoạt động:', activityLogs.length);
-  
-  //     // Chuyển đổi tất cả giá trị BigInt thành chuỗi
-  //     const convertedLogs = convertBigIntToString(activityLogs);
-  
-  //     // Chuyển đổi dữ liệu để dễ đọc hơn
-  //     const formattedLogs = convertedLogs.map(log => ({
-  //       timestamp: new Date(Number(log.timestamp) * 1000).toISOString(),
-  //       uid: log.uid,
-  //       activityName: log.activityName,
-  //       description: log.description,
-  //       isSystemGenerated: log.isSystemGenerated,
-  //       imageUrls: log.imageUrls,
-  //       relatedProductIds: log.relatedProductIds
-  //     }));
-  
-  //     res.status(200).json({
-  //       message: 'Truy xuất nhật ký hoạt động thành công',
-  //       activityLogs: formattedLogs
-  //     });
-  //   } catch (error) {
-  //     console.error('Lỗi khi truy xuất nhật ký hoạt động:', error);
-  //     res.status(500).json({ error: 'Lỗi khi truy xuất nhật ký hoạt động: ' + error.message });
-  //   }
-  // });
-  
+
   app.get('/create-batch', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'san-xuat', 'them-lo-hang.html'));
   });
@@ -444,6 +411,7 @@ app.post('/createbatch', (req, res, next) => {
   app.get('/create-activity', (req, res) => {
     res.sendFile(path.join(__dirname, 'public',  'san-xuat','them-nkhd.html'));
   });
+
 
   app.post('/createactivity', (req, res, next) => {
     activityUpload(req, res, function (err) {
@@ -588,6 +556,35 @@ app.post('/createbatch', (req, res, next) => {
         res.status(500).json({ error: 'Lỗi thêm nhật ký hoạt động: ' + error.message });
     }
 });
+
+
+
+  app.get('/api/pending-batches', async (req, res) => {
+    try {
+      
+      if (!req.session.userId) {
+        return res.status(401).json({ error: 'Người dùng chưa đăng nhập' });
+      }
+  
+      const producerId = req.session.userId;
+      const pendingBatches = await traceabilityContract.methods.getPendingBatchesByProducer(producerId).call();
+      
+      // Chuyển đổi trạng thái từ số sang chuỗi và dịch sang tiếng Việt
+      const statusMap = ['PendingApproval', 'Approved', 'Rejected'];
+      
+      const serializedBatches = pendingBatches.map(batch => ({
+        ...convertBigIntToString(batch),
+        status: translateStatus(statusMap[batch.status] || 'Unknown'),
+        productImageUrls: batch.productImageUrls,
+        certificateImageUrl: batch.certificateImageUrl
+      }));
+  
+      res.status(200).json(serializedBatches);
+    } catch (err) {
+      console.error('Error fetching pending batches for producer:', err);
+      res.status(500).json({ error: 'Lỗi khi lấy danh sách lô hàng đang chờ kiểm duyệt: ' + err.message });
+    }
+  });
 
 
   app.get('/api/pending-batches', async (req, res) => {
@@ -1630,6 +1627,18 @@ app.get('/api/system-activity-logs/:sscc', async (req, res) => {
       res.status(500).json({ error: 'Lỗi khi truy xuất nhật ký hoạt động của hệ thống: ' + error.message });
   }
 });
+
+app.get('/api/products', async (req, res) => {
+  try {
+    const [results] = await db.query('SELECT product_id, product_name FROM products');
+    console.log('Products:', results); // Log dữ liệu sản phẩm
+    res.json(results);
+  } catch (error) {
+    console.error('Lỗi khi truy vấn sản phẩm:', error);
+    res.status(500).json({ error: 'Lỗi server nội bộ' });
+  }
+});
+
 app.get('/api/producer-activity-logs', async (req, res) => {
   try {
       if (!req.session.userId) {
@@ -1652,6 +1661,12 @@ app.get('/api/producer-activity-logs', async (req, res) => {
           imageUrls: log.imageUrls,
           relatedProductIds: log.relatedProductIds
       }));
+
+      
+    console.log('Raw producer activity logs:', producerActivityLogs);
+    console.log('Converted logs:', convertedLogs);
+    console.log('Formatted logs:', formattedLogs);
+
 
       res.status(200).json({
           message: 'Truy xuất nhật ký hoạt động của người sản xuất thành công',
