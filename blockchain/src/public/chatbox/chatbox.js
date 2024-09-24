@@ -38,15 +38,23 @@ fetch('/user-info')
         return response.json();
     })
     .then(data => {
-        userName = data.name || "Người dùng ẩn danh";
-        userRoleId = data.roleId;
+        if (data.userId) {
+            userName = data.name;
+            userRoleId = data.roleId;
+        } else {
+            // Tạo một ID ngẫu nhiên cho người dùng ẩn danh
+            const anonymousId = 'anonymous_' + Math.random().toString(36).substr(2, 9);
+            userName = anonymousId;
+            userRoleId = 0;
+        }
         console.log("Thông tin người dùng:", { userName, userRoleId });
         initializeSocket();
     })
     .catch(error => {
         console.error('Lỗi khi lấy thông tin người dùng:', error);
-        userName = "Người dùng ẩn danh";
-        userRoleId = 0; // Giả sử 0 là roleId cho khách
+        const anonymousId = 'anonymous_' + Math.random().toString(36).substr(2, 9);
+        userName = anonymousId;
+        userRoleId = 0;
         initializeSocket();
     });
 

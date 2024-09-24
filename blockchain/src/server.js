@@ -57,7 +57,10 @@
       port: process.env.DB_PORT,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      connectTimeout: 10000
+      connectTimeout: 10000,
+      waitForConnections: true,
+      connectionLimit: 10,
+      queueLimit: 0
     });
     const upload = multer({ storage: multer.memoryStorage() });
     const dangkyRoutes = require('./components/user/dangky')(db, upload);
@@ -270,10 +273,15 @@
     });
 
     app.get('/user-info', (req, res) => {
-      if (req.session && req.session.user) {
+      if (req.session && req.session.userId) {
           res.json({
-              name: req.session.user.name,
-              roleId: req.session.user.roleId
+            userId: req.session.userId,
+            name: req.session.name,
+            email: req.session.email,
+            roleId: req.session.roleId,
+            province_id: req.session.province_id,
+            region_id: req.session.region_id,
+            region: req.session.region
           });
       } else {
           res.json({
@@ -397,20 +405,23 @@ io.on('connection', (socket) => {
   });
 
   socket.on('onLogin', (user) => {
-    const updatedUser = {
-      ...user,
-      online: true,
-      socketId: socket.id,
-      messages: [],
-      unread: false,
-    };
-
-    const existingUserIndex = users.findIndex((x) => x.name === updatedUser.name);
-    if (existingUserIndex !== -1) {
-      users[existingUserIndex] = {...users[existingUserIndex], ...updatedUser};
+    const existingUser = users.find((x) => x.name === user.name);
+    if (existingUser) {
+      existingUser.online = true;
+      existingUser.socketId = socket.id;
     } else {
-      users.push(updatedUser);
+      users.push({
+        ...user,
+        online: true,
+        socketId: socket.id,
+        messages: [],
+        unread: false,
+      });
     }
+    const admins = users.filter((x) => x.roleId === 3 && x.online);
+    admins.forEach((admin) => {
+      io.to(admin.socketId).emit("updateUserList", users.filter(u => u.roleId !== 3 && u.messages.length > 0));
+    });
   });
 
   socket.on('onMessage', (message) => {

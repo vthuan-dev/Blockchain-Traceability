@@ -108,7 +108,7 @@ function renderUserList() {
         if (selectedUser.name === user.name) {
             userItem.classList.add('active');
         }
-        userItem.textContent = `Người dùng ẩn danh (${user.name})`;
+        userItem.textContent = user.name;
 
         const statusBadge = document.createElement('span');
         statusBadge.classList.add('badge');
@@ -154,7 +154,7 @@ function renderMessages() {
             const messageItem = document.createElement('li');
             messageItem.classList.add('list-group-item');
             // Hiển thị "Người dùng ẩn danh" cho tin nhắn từ người dùng
-            const displayName = msg.from === selectedUser.name ? "Người dùng ẩn danh" : msg.from;
+            const displayName = msg.from === selectedUser.name ? selectedUser.name : msg.from;
             messageItem.innerHTML = `<strong>${displayName}:</strong> ${msg.body}`;
             messageListElement.appendChild(messageItem);
         });
