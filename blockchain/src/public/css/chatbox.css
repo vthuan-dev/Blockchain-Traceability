@@ -1,0 +1,105 @@
+.chat-icon {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    font-size: 30px;
+    color: white;
+    background-color: #007bff;
+    border-radius: 50%;
+    padding: 10px;
+    cursor: pointer;
+    z-index: 1000;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s;
+}
+
+.chat-icon:hover {
+    transform: scale(1.1);
+}
+
+.chat-icon:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+.tooltip {
+    visibility: hidden;
+    width: 160px;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: absolute;
+    z-index: 1001;
+    bottom: 100%; /* Position the tooltip above the icon */
+    left: -140px; /* Align tooltip to the left */
+    margin-left: 0; /* Remove centering */
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.tooltip::after {
+    content: "";
+    position: absolute;
+    top: 100%; /* At the bottom of the tooltip */
+    left: 150px; /* Position the arrow to point to the center of the chat icon */
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #555 transparent transparent transparent;
+}
+
+.chatbox {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    width: 300px;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    display: none;
+    z-index: 1000;
+}
+
+.chatbox-header {
+    background-color: #007bff;
+    color: white;
+    padding: 10px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chatbox-body {
+    padding: 10px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.chatbox-footer {
+    display: flex;
+    padding: 10px;
+    border-top: 1px solid #ccc;
+}
+
+.chatbox-footer input {
+    flex: 1;
+    margin-right: 10px;
+}
+
+.chatbox-footer button {
+    flex-shrink: 0;
+}
+
+.message {
+    margin-bottom: 10px;
+}
+
+.system-message {
+    color: gray;
+    font-style: italic;
+}
