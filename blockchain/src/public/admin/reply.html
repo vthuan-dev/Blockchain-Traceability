@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reply</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="./css/responsive.css">
+    <link rel="stylesheet" href="./css/animation.css">
+    <link rel="stylesheet" href="./css/theme.css">
+    <!-- Thêm thư viện ReactJS -->
+    <script src="https://unpkg.com/react@17/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        function Header() {
+            return (
+                <header className="text-white py-2">
+                    <div className="container-fluid">
+                        <div className="row align-items-center">
+                            <div className="col-3 col-md-3 header-logo">
+                                <a href="#"><img src="..\hinhanh\Bitcoin-Blockchain-Network-icon-on-transparent-background-PNG.png" alt="Logo" className="img-fluid" style={{ maxHeight: '50px' }} /></a>
+                            </div>
+                            <div className="col-6 col-md-5 text-center header-title">
+                                <h2 className="mb-0 h4">TRANG QUẢN LÝ</h2>
+                            </div>
+                            <div className="col-3 col-md-3 text-right header-icons">
+                                <div className="d-inline-block position-relative mr-3">
+                                    <i className="fas fa-bell" id="notificationIcon"></i>
+                                    <span className="badge badge-danger noti_count"></span>
+                                </div>
+                                <div className="d-inline-block position-relative ml-auto text-right">
+                                    <i className="fas fa-user profile-pic" id="profileIcon"></i>
+                                    <div className="dropdown-menu dropdown-menu-right fade-in" style={{ display: 'none' }}>
+                                        <div className="dropdown-header">
+                                            <i className="fas fa-user-circle"></i>
+                                            <span className="section-title" id="section-title-red">XIN CHÀO</span>
+                                        </div>
+                                        <div className="dropdown-divider"></div>
+                                        <a className="dropdown-item" href="./caidat.html">
+                                            <i className="fas fa-cog"></i> Cài đặt
+                                        </a>
+                                        <a className="dropdown-item" href="../account/dangnhap.html">
+                                            <i className="fas fa-sign-out-alt"></i> Đăng xuất
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+            );
+        }
+
+        function Sidebar() {
+            return (
+                <nav className="col-md-2 sidebar">
+                    <a href="admintest.html" className="menu-item rounded"><i className="fas fa-home"></i> Trang chủ</a>
+                    <div className="divider"></div>
+                    <div className="section-title">CHỨC NĂNG</div>
+                    <a href="user.html" className="menu-item rounded"><i className="fas fa-users"></i> Quản lý người dùng</a>
+                    <a href="product.html" className="menu-item rounded"><i className="fas fa-box"></i> Sản phẩm</a>
+                    <a href="region.html" className="menu-item rounded"><i className="fas fa-map-marker-alt"></i> Vùng sản xuất</a>
+                    <div className="divider"></div>
+                    <div className="section-title">TIỆN ÍCH</div>
+                    <a href="#" className="menu-item rounded"><i className="fas fa-chart-bar"></i> Báo cáo và thống kê</a>
+                    <a href="#" className="menu-item rounded"><i className="fas fa-comments"></i> Phản hồi</a>
+                </nav>
+            );
+        }
+
+        function MainContent() {
+            return (
+                <main className="col-md-10 offset-md-2 pt-5">
+                    {/* Nội dung chính sẽ được thêm vào đây */}
+                </main>
+            );
+        }
+
+        function NotificationPanel() {
+            return (
+                <div className="notification-panel col-10 col-md-3 col-sm-10 offset-md-7 offset-1 offset-sm-1" id="notificationPanel">
+                    <div className="notification-header">
+                        <h5 className="notification-title">Thông báo</h5>
+                        <button id="confirmRead" className="btn-mark-read btn-sm">
+                            <i className="fas fa-check-double"></i> Đánh dấu tất cả đã đọc
+                        </button>
+                    </div>
+                    <ul id="notificationList">
+                        {/* Thông báo sẽ được thêm vào đây */}
+                    </ul>
+                </div>
+            );
+        }
+
+        function App() {
+            return (
+                <div>
+                    <Header />
+                    <button className="sidebar-toggle">☰</button>
+                    <div className="container-fluid">
+                        <div className="row">
+                            <Sidebar />
+                            <MainContent />
+                        </div>
+                    </div>
+                    <NotificationPanel />
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

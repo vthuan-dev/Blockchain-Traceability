@@ -7,6 +7,8 @@
     <!-- Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/trangchu.css">
+    <link rel="stylesheet" href="css/chatbox.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
 </head>
 <body>
@@ -244,8 +246,39 @@
     </div>
 
 
+    <!-- Biểu tượng chat -->
+    <div class="chat-icon" onclick="toggleChat()">
+        <i class="fas fa-comments"></i>
+        <div class="tooltip">Đặt câu hỏi cho chúng tôi</div>
+    </div>
+
+    <!-- Khung chat -->
+    <div id="chatbox" class="chatbox" style="display: none;">
+        <div class="chatbox-header">
+            <span>Hỗ trợ</span>
+            <button type="button" class="close" onclick="toggleChat()">&times;</button>
+        </div>
+        <div class="chatbox-body" id="chatbox-messages">
+            <!-- Tin nhắn sẽ được thêm vào đây -->
+        </div>
+        <div class="chatbox-footer">
+            <input type="text" id="chat-input" class="form-control" placeholder="Nội dung..." onkeypress="handleKeyPress(event)">
+            <button class="btn btn-primary" onclick="sendMessage()">Gửi</button>
+        </div>
+    </div>
+
+    <!-- Thêm các script cần thiết -->
+    <script type="text/babel">
+        ReactDOM.render(<Chatbox />, document.getElementById('chatbox-root'));
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
+    <script src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
+    <!-- <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script> -->
+    <!-- <script src="../components/chatbox/Chatbox.js" type="text/babel"></script>
+    <script src="../components/index.js" type="text/babel"></script> -->
+
     <!-- jQuery và Bootstrap JavaScript -->
-     <!-- AOS JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
     <script>
     AOS.init();
@@ -253,5 +286,19 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react/umd/react.production.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom/umd/react-dom.production.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/babel-standalone/babel.min.js"></script>
+    <!-- <script src="components/chatbox/index.js" type="text/babel"></script> -->
+    <script>
+        function toggleChat() {
+            var chatbox = document.getElementById("chatbox-root");
+            if (chatbox.style.display === "none" || chatbox.style.display === "") {
+                chatbox.style.display = "block";
+            } else {
+                chatbox.style.display = "none";
+            }
+        }
+    </script>
 </body>
 </html>
