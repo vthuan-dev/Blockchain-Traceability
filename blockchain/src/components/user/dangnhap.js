@@ -36,6 +36,8 @@ module.exports = function(db) {
                 req.session.adminEmail = admin.admin_email;
                 req.session.adminName = admin.admin_name; 
                 req.session.province_id = admin.province_id;
+                req.session.roleId = 3;
+                req.session.role = 'Admin';
 
                 res.status(200).json({ 
                     message: 'Đăng nhập thành công', 
@@ -172,20 +174,20 @@ module.exports = function(db) {
 
     router.get('/user-info', async (req, res) => {
         console.log('Session trong /api/user-info:', req.session);
-        if (req.session.userId && req.session.userId !== 0) {
+        if (req.session.adminId || (req.session.userId && req.session.userId !== 0)) {
             try {
                 let region = null;
                 if (req.session.region_id) {
                     const [regions] = await db.query('SELECT region_name FROM regions WHERE region_id = ?', [req.session.region_id]);
                     region = regions[0] ? regions[0].region_name : null;
                 }
-        
+    
                 res.json({
-                    userId: req.session.userId,
-                    name: req.session.name,
-                    email: req.session.email,
+                    userId: req.session.userId || req.session.adminId,
+                    name: req.session.name || req.session.adminName,
+                    email: req.session.email || req.session.adminEmail,
                     roleId: req.session.roleId,
-                    isAdmin: req.session.isAdmin,
+                    isAdmin: req.session.role === 'Admin',
                     province_id: req.session.province_id,
                     region_id: req.session.region_id,
                     region: region
@@ -195,7 +197,7 @@ module.exports = function(db) {
                 res.status(500).json({ message: 'Lỗi server' });
             }
         } else {
-            console.log('No valid userId in session');
+            console.log('No valid userId or adminId in session');
             res.status(401).json({ message: 'Chưa đăng nhập hoặc session không hợp lệ' });
         }
     });
