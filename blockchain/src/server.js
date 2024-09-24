@@ -348,7 +348,6 @@ app.get('/nhakiemduyet.html', requireAuth, (req, res) => {
       res.status(500).json({ error: 'Lỗi server khi lấy thông báo' });
     }
   });
-  // ... (phần code trước đó)
 
   app.post('/api/notifications/mark-all-read', async (req, res) => {
     try {

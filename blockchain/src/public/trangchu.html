@@ -253,17 +253,17 @@
     </div>
 
     <!-- Khung chat -->
-    <div id="chatbox" class="chatbox" style="display: none;">
+    <div id="chatbox" class="chatbox">
         <div class="chatbox-header">
             <span>Hỗ trợ</span>
             <button type="button" class="close" onclick="toggleChat()">&times;</button>
         </div>
-        <div class="chatbox-body" id="chatbox-messages">
-            <!-- Tin nhắn sẽ được thêm vào đây -->
-        </div>
+        <!-- <div class="chatbox-body" id="chatbox-messages">
+            <div class="message system-message">System: Hello there, Please ask your question.</div>
+        </div> -->
         <div class="chatbox-footer">
-            <input type="text" id="chat-input" class="form-control" placeholder="Nội dung..." onkeypress="handleKeyPress(event)">
-            <button class="btn btn-primary" onclick="sendMessage()">Gửi</button>
+            <input type="text" id="chat-input" class="form-control" placeholder="type message" onkeypress="handleKeyPress(event)">
+            <button class="btn btn-primary" onclick="sendMessage()">Send</button>
         </div>
     </div>
 
@@ -292,7 +292,7 @@
     <!-- <script src="components/chatbox/index.js" type="text/babel"></script> -->
     <script>
         function toggleChat() {
-            var chatbox = document.getElementById("chatbox-root");
+            var chatbox = document.getElementById("chatbox");
             if (chatbox.style.display === "none" || chatbox.style.display === "") {
                 chatbox.style.display = "block";
             } else {

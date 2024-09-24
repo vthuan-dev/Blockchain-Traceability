@@ -1,0 +1,93 @@
+const express = require('express');
+const http = require('http');
+const socketIo = require('socket.io');
+
+const app = express();
+const server = http.createServer(app);
+const io = socketIo(server);
+
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/trangchu.html');
+});
+
+
+io.on('connection', (socket) => {   
+    socket.on('onLogin', (user) => {
+        const updatedUser = {
+            ...user,
+            online: true,
+            socketId: socket.id,
+            messages: [],
+        };
+
+        const existUser = users.find((x) => x.name === updatedUser.name);
+        if (existUser) {
+            existUser.socketId = socket.id;
+            existUser.online = true;
+        } else {
+            users.push(updatedUser);
+        }
+        const admin = users.find((x) => x.name === "Admin" && x.online);
+        if (admin) {
+            io.to(admin.socketId).emit("updateUser", updatedUser);
+        }
+        if (updatedUser.name === "Admin") {
+            io.to(updatedUser.socketId).emit("listUsers", users);
+        }
+    });
+    
+    socket.on('disconnect', () => {
+        console.log('user disconnected');
+        const user = users.find((x) => x.socketId === socket.id);
+        if (user) {
+            user.online = false;
+            const admin = users.find((x) => x.name === "Admin" && x.online);
+            if (admin) {
+                io.to(admin.socketId).emit("updateUser", user);
+            }
+        }
+    });
+
+    socket.on("onUserSelected", (user) => {
+        const admin = users.find((x) => x.name === "Admin" && x.online);
+        if (admin) {
+            const existUser = users.find((x) => x.name === user.name);
+            io.to(admin.socketId).emit("selectUser", existUser);
+        }
+    });
+
+    socket.on("onMessage", (message) => {
+        if (message.from === "Admin") {
+            const user = users.find((x) => x.name === message.to && x.online);
+            if (user) {
+                io.to(user.socketId).emit("message", message);
+                user.messages.push(message);
+            } else {
+                io.to(socket.id).emit("message", {
+                    from: "System",
+                    to: "Admin",
+                    body: "User Is Not Online",
+                });
+            }
+        } else {
+            const admin = users.find((x) => x.name === "Admin" && x.online);
+            if (admin) {
+                io.to(admin.socketId).emit("message", message);
+                const user = users.find((x) => x.name === message.from && x.online);
+                if (user) {
+                    user.messages.push(message);
+                }
+            } else {
+                io.to(socket.id).emit("message", {
+                    from: "Hệ thống",
+                    to: message.from,
+                    body: "Xin lỗi. Không có admin nào đang online",
+                });
+            }
+        }
+    });
+});
+
+server.listen(4000, () => {
+    console.log('listening on *:4000');
+});
