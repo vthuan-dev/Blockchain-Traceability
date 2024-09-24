@@ -306,8 +306,8 @@ body {
 }
 
 .add-activity-btn {
-    background-color: #007bff;
-    border-color: #007bff;
+    background-color: rgba(76, 209, 55,1.0);
+    border-color: rgba(68, 189, 50,1.0);
     color: white;
     padding: 10px 20px;
     font-weight: bold;
@@ -350,4 +350,9 @@ body {
     background-color: #007bff;
     border: 1px solid #007bff;
     color: #fff;
+}
+
+#messageContainer {
+    opacity: 1 !important;
+    visibility: visible !important;
 }

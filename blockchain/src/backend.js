@@ -412,7 +412,6 @@ app.post('/createbatch', (req, res, next) => {
     res.sendFile(path.join(__dirname, 'public',  'san-xuat','them-nkhd.html'));
   });
 
-
   app.post('/createactivity', (req, res, next) => {
     activityUpload(req, res, function (err) {
         if (err instanceof multer.MulterError) {
@@ -556,7 +555,6 @@ app.post('/createbatch', (req, res, next) => {
         res.status(500).json({ error: 'Lỗi thêm nhật ký hoạt động: ' + error.message });
     }
 });
-
 
 
   app.get('/api/pending-batches', async (req, res) => {
@@ -1638,7 +1636,6 @@ app.get('/api/products', async (req, res) => {
     res.status(500).json({ error: 'Lỗi server nội bộ' });
   }
 });
-
 app.get('/api/producer-activity-logs', async (req, res) => {
   try {
       if (!req.session.userId) {
@@ -1652,21 +1649,22 @@ app.get('/api/producer-activity-logs', async (req, res) => {
       console.log('Số lượng nhật ký hoạt động của người sản xuất:', producerActivityLogs.length);
 
       const convertedLogs = convertBigIntToString(producerActivityLogs);
-      const formattedLogs = convertedLogs.map(log => ({
-          timestamp: new Date(Number(log.timestamp) * 1000).toISOString(),
-          uid: log.uid,
-          activityName: log.activityName,
-          description: log.description,
-          isSystemGenerated: log.isSystemGenerated,
-          imageUrls: log.imageUrls,
-          relatedProductIds: log.relatedProductIds
+      const formattedLogs = await Promise.all(convertedLogs.map(async log => {
+          const relatedProducts = await getRelatedProducts(log.relatedProductIds);
+          return {
+              timestamp: new Date(Number(log.timestamp) * 1000).toISOString(),
+              uid: log.uid,
+              activityName: log.activityName,
+              description: log.description,
+              isSystemGenerated: log.isSystemGenerated,
+              imageUrls: log.imageUrls,
+              relatedProducts: relatedProducts
+          };
       }));
 
-      
-    console.log('Raw producer activity logs:', producerActivityLogs);
-    console.log('Converted logs:', convertedLogs);
-    console.log('Formatted logs:', formattedLogs);
-
+      console.log('Raw producer activity logs:', producerActivityLogs);
+      console.log('Converted logs:', convertedLogs);
+      console.log('Formatted logs:', formattedLogs);
 
       res.status(200).json({
           message: 'Truy xuất nhật ký hoạt động của người sản xuất thành công',
@@ -1677,6 +1675,29 @@ app.get('/api/producer-activity-logs', async (req, res) => {
       res.status(500).json({ error: 'Lỗi khi truy xuất nhật ký hoạt động của người sản xuất: ' + error.message });
   }
 });
+
+async function getRelatedProducts(productIds) {
+  if (!productIds || productIds.length === 0) {
+      return [];
+  }
+
+  const products = await Promise.all(productIds.map(async productId => {
+      const product = await getProductById(productId);
+      return product;
+  }));
+
+  return products;
+}
+
+async function getProductById(productId) {
+  try {
+      const [results] = await db.query('SELECT product_id, product_name FROM products WHERE product_id = ?', [productId]);
+      return results[0];
+  } catch (error) {
+      console.error('Lỗi khi truy vấn sản phẩm:', error);
+      return null;
+  }
+}
 
 }
 
