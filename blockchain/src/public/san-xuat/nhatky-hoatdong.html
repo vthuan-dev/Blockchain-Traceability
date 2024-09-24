@@ -6,7 +6,8 @@
     <title>Trang chủ - Người sản xuất</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../css/san-xuat.css">
-    <link rel="stylesheet" href="../css/nav-bar.css">
+    <link rel="stylesheet" href="../css/nav-bar2.css">
+
     <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
@@ -14,11 +15,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet">
+
+
+
 </head>
 <body>
-
-    <nav class="navbar navbar-expand-lg navbar-light bg-light custom-navbar-height">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light custom-navbar-height" color="#4cd137">
         <div class="logo">
             <img src="..\hinhanh\Bitcoin-Blockchain-Network-icon-on-transparent-background-PNG.png" alt="Logo" class="logo-image">
         </div>
@@ -31,6 +34,7 @@
                 <li class="nav-item">
                     <a class="nav-link" href="sanxuat.html"> Quản lí lô hàng</a>
                 </li>
+              
                 <li class="nav-item">
                     <a class="nav-link" href="nhatky-hoatdong.html">Quản lí hoạt động</a>
                 </li>
@@ -55,8 +59,8 @@
     </nav>
     
     <!-- Thêm div overlay ngay sau nav -->
-    <div class="menu-overlay"></div>
-
+    <div class="menu-overlay"></div>    
+   
     <main>
         <div class="container mt-4">
             <div class="table-title">
@@ -89,12 +93,7 @@
                 </button>
             </div>
             <!-- Thêm spinner loading -->
-            <div id="loadingSpinner" class="text-center mt-4">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="sr-only">Đang tải...</span>
-                </div>
-                <p class="mt-2">Đang tải hoạt động...</p>
-            </div>
+        
             <div class="mt-4">
                 <label for="statusFilter">Lọc theo trạng thái:</label>
                 <select id="statusFilter" class="form-control">
@@ -104,7 +103,12 @@
             </div>
             <!-- Container của bảng hoạt động -->
             <h5><i>Danh sách hoạt động :</i></h5>
-            
+            <div id="loadingSpinner" class="text-center mt-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="sr-only">Đang tải...</span>
+                </div>
+                <p class="mt-2">Đang tải hoạt động...</p>
+            </div>
             <div id="activityLogsList" style="max-height: none; overflow: visible;"></div>
 
             <div class="table-responsive">
@@ -134,9 +138,8 @@
                         </div>
                         <div class="form-group">
                             <label for="relatedProductId">Sản phẩm liên quan</label>
-                            <select class="form-control" id="relatedProductId" name="relatedProductId">
+                            <select class="form-control" id="relatedProductId" name="relatedProductIds" multiple>
                                 <option value="">Chọn sản phẩm</option>
-                                <!-- Options will be populated dynamically -->
                             </select>
                         </div>
                         <div class="form-group">
@@ -150,16 +153,18 @@
             </div>
         </div>
     </div>
-    <!-- jQuery và Bootstrap JavaScript -->
-    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
-    <script>AOS.init();</script>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script src="../js_giaodien/sanpham.js"></script>
-   
-    <script>
+   <!-- jQuery và Bootstrap JavaScript -->
+   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+   <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+   <script>AOS.init();</script>
+   <script src="../js_giaodien/sanpham.js"></script>
+   <script src="../js_giaodien/san-xuat.js"></script>
+
+   <script>
     document.addEventListener('DOMContentLoaded', async function() {
         try {
             const response = await fetch('/api/user-info');
@@ -177,11 +182,9 @@
             console.error('Lỗi:', error);
             alert('Có lỗi xảy ra khi kiểm tra thông tin đăng nhập. Vui lòng thử lại sau.');
         }
-    });
-    </script>
-<script>
-       // Xử lý đăng xuất
-       document.getElementById('logoutButton').addEventListener('click', async function(e) {
+
+        // Xử lý đăng xuất
+        document.getElementById('logoutButton').addEventListener('click', async function(e) {
             e.preventDefault();
             try {
                 const response = await fetch('/api/dangxuat', { 
@@ -201,13 +204,120 @@
         });
 
         // Gọi hàm mặc định khi trang được tải
+    });
+    </script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var navbarToggler = document.querySelector('.navbar-toggler');
+        var navbarCollapse = document.querySelector('.navbar-collapse');
+        var menuOverlay = document.querySelector('.menu-overlay');
+    
+        function toggleMenu() {
+            navbarCollapse.classList.toggle('show');
+            document.body.classList.toggle('menu-open');
+            if (menuOverlay) {
+                menuOverlay.classList.toggle('show');
+            }
+        }
+    
+        function closeMenu() {
+            navbarCollapse.classList.remove('show');
+            document.body.classList.remove('menu-open');
+            if (menuOverlay) {
+                menuOverlay.classList.remove('show');
+            }
+        }
+    
+        navbarToggler.addEventListener('click', function(e) {
+            e.stopPropagation();
+            toggleMenu();
+        });
+    
+        if (menuOverlay) {
+            menuOverlay.addEventListener('click', function(e) {
+                e.stopPropagation();
+                closeMenu();
+            });
+        }
+    
+        document.addEventListener('click', function(e) {
+            if (!navbarCollapse.contains(e.target) && !navbarToggler.contains(e.target)) {
+                closeMenu();
+            }
+        });
+    
+        // Ngăn sự kiện click trên menu lan ra ngoài
+        navbarCollapse.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    
+        // Xử lý cho dropdown trong menu
+        var dropdowns = document.querySelectorAll('.navbar-nav .dropdown');
+        dropdowns.forEach(function(dropdown) {
+            dropdown.addEventListener('click', function(e) {
+                e.stopPropagation();
+                this.classList.toggle('show');
+            });
+        });
+    
+        var userDropdown = document.querySelector('.navbar-nav .dropdown');
+        var userDropdownMenu = userDropdown.querySelector('.dropdown-menu');
+    
+        userDropdown.addEventListener('click', function(e) {
+            e.stopPropagation();
+            userDropdownMenu.classList.toggle('show');
+        });
+    
+        document.addEventListener('click', function(e) {
+            if (!userDropdown.contains(e.target)) {
+                userDropdownMenu.classList.remove('show');
+            }
+        });
+    });
+    </script>
+
+
+
+<script>
+      function getRoleName(roleId) {
+        switch (roleId) {
+            case 1: return 'Người sản xuất';
+            case 2: return 'Người kiểm duyệt';
+            case 6: return 'Người vận chuyển';
+            case 8: return 'Nhà kho';
+            case 3: return 'Admin';
+            default: return 'Không xác định';
+        }
+    }
+</script>
+
+
+
+<script>
+
+    async function checkSession() {
+    try {
+        const response = await fetch('/api/check-session');
+        const data = await response.json();
+        if (!data.loggedIn) {
+        throw new Error('Phiên đăng nhập không hợp lệ');
+        }
+        return data.userId;
+    } catch (error) {
+        console.error('Lỗi kiểm tra phiên đăng nhập:', error);
+        throw error;
+    }
+    }
+</script>
+        <script>
+        // Gọi hàm mặc định khi trang được tải
         fetchAndDisplayAllActivities();
 
         function fetchAndDisplayAllActivities() {
-        // Hiển thị spinner loading
-        document.getElementById('loadingSpinner').style.display = 'block';
-    }
-    // Gọi API để lấy tất cả hoạt động và hiển thị
+    // Show loading spinner
+    document.getElementById('loadingSpinner').style.display = 'block';
+
     fetch('/api/producer-activity-logs')
         .then(response => response.json())
         .then(data => {
@@ -225,23 +335,28 @@
                     <div class="activity-images">
                         ${log.imageUrls.map(url => `<img src="${url}" alt="Activity Image" class="activity-image">`).join('')}
                     </div>
+                    <div class="related-products">
+                        <h6>Sản phẩm liên quan:</h6>
+                        <ul>
+                            ${log.relatedProducts.map(product => `<li>${product.product_name}</li>`).join('')}
+                        </ul>
+                    </div>
                 `;
                 activityLogsList.appendChild(logItem);
             });
             
             console.log('Số lượng phần tử hoạt động được tạo:', activityLogsList.children.length);
             
-            // Ẩn spinner loading
+            // Hide loading spinner
             document.getElementById('loadingSpinner').style.display = 'none';
         })
         .catch(error => {
             console.error('Lỗi khi lấy danh sách hoạt động:', error);
             alert('Có lỗi xảy ra khi lấy danh sách hoạt động. Vui lòng thử lại sau.');
-            // Ẩn spinner loading trong trường hợp lỗi
+            // Hide loading spinner in case of error
             document.getElementById('loadingSpinner').style.display = 'none';
         });
-
-
+}
 </script>
      
     <script>
@@ -275,40 +390,44 @@
         });
     });
 
-    // Lấy danh sách sản phẩm khi modal được mở
-    $('#addActivityLogModal').on('show.bs.modal', function (e) {
-        fetchProducts();
-    });
-
-    // Hàm để lấy danh sách sản phẩm
-    function fetchProducts() {
-        fetch('/api/products')
-            .then(response => response.json())
-            .then(data => {
-                console.log('Products data:', data); // Log dữ liệu sản phẩm
-                const select = document.getElementById('relatedProductId');
-                select.innerHTML = '<option value="">Chọn sản phẩm</option>'; // Reset và thêm option mặc định
-                data.forEach(product => {
-                    const option = document.createElement('option');
-                    option.value = product.product_id;
-                    option.textContent = product.product_name;
-                    select.appendChild(option);
-                });
-            })
-            .catch(error => {
-                console.error('Lỗi khi lấy danh sách sản phẩm:', error);
-                alert('Có lỗi xảy ra khi tải danh sách sản phẩm. Vui lòng thử lại sau.');
+        $(document).ready(function() {
+            $('#relatedProductId').select2({
+                placeholder: "Chọn sản phẩm",
+                allowClear: true,
+                tags: true
             });
-    }
+        });
 
-    // Gọi hàm này khi trang được tải hoặc khi modal được mở
-        document.addEventListener('DOMContentLoaded', fetchProducts);
-        $('#addActivityLogModal').on('show.bs.modal', fetchProducts);
-
-        // Gọi hàm này khi modal được mở
+        // Lấy danh sách sản phẩm khi modal được mở
         $('#addActivityLogModal').on('show.bs.modal', function (e) {
             fetchProducts();
         });
+
+        // Hàm để lấy danh sách sản phẩm
+        function fetchProducts() {
+            fetch('/api/products')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Products data:', data); // Log dữ liệu sản phẩm
+                    const select = document.getElementById('relatedProductId');
+                    select.innerHTML = ''; // Reset và thêm option mặc định
+                    data.forEach(product => {
+                        const option = document.createElement('option');
+                        option.value = product.product_id;
+                        option.textContent = product.product_name;
+                        select.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Lỗi khi lấy danh sách sản phẩm:', error);
+                    alert('Có lỗi xảy ra khi tải danh sách sản phẩm. Vui lòng thử lại sau.');
+                });
+        }
+
+        // Gọi hàm này khi trang được tải hoặc khi modal được mở
+        document.addEventListener('DOMContentLoaded', fetchProducts);
+        $('#addActivityLogModal').on('show.bs.modal', fetchProducts);
+
         document.getElementById('addActivityLogForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const formData = new FormData(this);
@@ -330,14 +449,17 @@
             })
             .then(data => {
                 console.log('Response data:', data); // Log the response data
-                if (data.success) {
+                if (data.message === 'Nhật ký hoạt động đã được thêm thành công') {
                     // Display success message
                     const messageContainer = document.getElementById('messageContainer');
-                    messageContainer.textContent = 'Thêm nhật ký hoạt động thành công';
+                    messageContainer.textContent = data.message;
                     messageContainer.className = 'alert alert-success';
                     messageContainer.style.display = 'block';
+                    messageContainer.style.opacity = '1';
+                    messageContainer.style.visibility = 'visible';
 
                     $('#addActivityLogModal').modal('hide');
+                    $('.modal-backdrop').remove(); // Remove the modal backdrop
                     fetchAndDisplayAllActivities(); // Cập nhật danh sách hoạt động
                 } else {
                     throw new Error(data.error || data.message || 'Lỗi không xác định');
@@ -349,9 +471,13 @@
                 messageContainer.textContent = 'Có lỗi xảy ra khi thêm nhật ký hoạt động: ' + error.message;
                 messageContainer.className = 'alert alert-danger';
                 messageContainer.style.display = 'block';
+                messageContainer.style.opacity = '1';
+                messageContainer.style.visibility = 'visible';
             });
         });
     </script>
+
+
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
