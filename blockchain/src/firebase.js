@@ -26,4 +26,4 @@ async function authenticateAnonymously() {
   }
 }
 
-module.exports = { storage, ref, uploadBytes, getDownloadURL, authenticateAnonymously };
+module.exports = { auth, storage, ref, uploadBytes, getDownloadURL, authenticateAnonymously };

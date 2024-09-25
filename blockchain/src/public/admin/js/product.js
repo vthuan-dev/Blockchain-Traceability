@@ -240,7 +240,9 @@ document.addEventListener('DOMContentLoaded', function() {
             if (e.target.closest('.fa-trash-alt')) {
                 const row = e.target.closest('tr');
                 const productId = row.cells[0].textContent;
-                showDeleteConfirmation(productId, 'product');
+                if (confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) {
+                    deleteProduct(productId);
+                }
             }
         });
     }
@@ -253,15 +255,39 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Thêm đoạn mã này để xử lý hiển thị tên file ảnh
+    const fileInputs = document.querySelectorAll('input[type="file"]');
+    fileInputs.forEach(input => {
+        input.addEventListener('change', function(e) {
+            const fileName = e.target.files[0].name;
+            const label = e.target.nextElementSibling;
+            if (label && label.classList.contains('custom-file-label')) {
+                // Giới hạn độ dài tên file và thêm dấu ba chấm nếu cần
+                const maxLength = 20; // Bạn có thể điều chỉnh số này
+                if (fileName.length > maxLength) {
+                    label.textContent = fileName.substring(0, maxLength - 3) + '...';
+                } else {
+                    label.textContent = fileName;
+                }
+                
+                // Thêm title để hiển thị tên đầy đủ khi hover
+                label.title = fileName;
+            }
+        });
+    });
+
     // Thêm hàm mới để xử lý việc thêm sản phẩm
     function addProduct(event) {
         event.preventDefault();
         
-        const formData = new FormData(event.target); // Sử dụng event.target để lấy form data
+        const formData = new FormData(event.target);
 
         // Kiểm tra dữ liệu trước khi gửi
         for (let [key, value] of formData.entries()) {
-            console.log(key, value);
+            if (!value) {
+                alert(`Vui lòng điền đầy đủ thông tin: ${key}`);
+                return;
+            }
         }
 
         fetch('http://localhost:3000/api/products', {
@@ -270,14 +296,14 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => {
             if (!response.ok) {
-                return response.json().then(error => { throw new Error(error.error); });
+                return response.json().then(err => { throw new Error(err.error || 'Lỗi không xác định'); });
             }
             return response.json();
         })
         .then(data => {
             console.log('Sản phẩm đã được thêm:', data);
             alert('Sản phẩm đã được thêm thành công!');
-            window.location.href = 'product.html'; // Chuyển hướng về trang danh sách sản phẩm
+            window.location.href = 'product.html';
         })
         .catch((error) => {
             console.error('Lỗi:', error);

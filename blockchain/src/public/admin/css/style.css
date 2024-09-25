@@ -12,6 +12,7 @@ body {
 }
 
 header {
+    /* background-color: #218838; */
     position: fixed;
     top: 0;
     width: 100%;
@@ -474,7 +475,7 @@ main {
 }
 
 .btn:hover {
-    opacity: 0.8;
+    opacity: 0.9;
 }
 
 #overlay {
@@ -503,18 +504,23 @@ main {
 .add-product-form {
     max-width: 800px;
     margin: 20px auto;
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 
 .form-row {
     display: flex;
     flex-wrap: wrap;
-    margin-bottom: 15px;
+    margin: -10px;
 }
 
 .form-field {
-    /* flex: 1 1 300px; */
-    margin-right: 15px;
-    margin-bottom: 15px;
+    flex: 1 1 calc(50% - 20px);  /* 50% width với khoảng cách giữa các trường */
+    margin: 10px;
+    min-width: 200px;  /* Đảm bảo các trường không quá nhỏ trên màn hình nhỏ */
+
 }
 
 .form-field:last-child {
@@ -522,21 +528,32 @@ main {
 }
 
 .form-label {
-    margin-bottom: 5px;
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
 }
 
 .form-input {
     width: 100%;
-    padding: 8px;
+    padding: 10px;
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 14px;
+    transition: border-color 0.3s ease;
+
+}
+
+.form-input:focus {
+    border-color: #007bff;
+    outline: none;
 }
 
 textarea.form-input {
     resize: vertical;
     min-height: 100px;
 }
+
 
 .form-actions.btn-center {
     margin-top: 20px;

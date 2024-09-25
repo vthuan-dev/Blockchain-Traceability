@@ -7,6 +7,7 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../css/san-xuat.css">
     <link rel="stylesheet" href="../css/nav-bar.css">
+    <link rel="stylesheet" href="../css/chatbox.css">
     <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
@@ -113,6 +114,29 @@
     </main>
 
     <!-- Modal -->
+    <div class="chat-icon" id="openChat" onclick="toggleChat()">
+        <i class="fas fa-comments"></i>
+        <div class="tooltip">Đặt câu hỏi cho chúng tôi</div>
+    </div>
+
+    <!-- Khung chat -->
+    <div id="chatbox" class="chatbox">
+        <div class="chatbox-header">
+            <strong>Hỗ trợ</strong>
+            <button id="closeChat" class="btn-close" onclick="toggleChat()">x</button>
+        </div>
+        <div class="chatbox-body">
+            <ul id="messages" class="list-group">
+                <li class="list-group-item system-message"><strong>Hệ thống: </strong> Chào bạn, hãy đặt câu hỏi của bạn.</li>
+            </ul>
+        </div>
+        <div class="chatbox-footer">
+            <form id="messageForm" class="d-flex">
+                <input id="messageInput" type="text" class="form-control" placeholder="type message">
+                <button type="submit" class="btn btn-primary">Send</button>
+            </form>
+        </div>
+    </div>
     
 
     <!-- jQuery và Bootstrap JavaScript -->
@@ -124,6 +148,19 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="../js_giaodien/sanpham.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
+    <script src="../chatbox/chatbox.js"></script>
+    <script>
+        function toggleChat() {
+            var chatbox = document.getElementById("chatbox");
+            if (chatbox.style.display === "none" || chatbox.style.display === "") {
+                chatbox.style.display = "block";
+            } else {
+                chatbox.style.display = "none";
+            }
+        }
+    </script>
+    
    
    <script>
     document.addEventListener('DOMContentLoaded', async function() {

@@ -6,7 +6,7 @@ const bodyParser = require('body-parser');
 const multer = require('multer');
 const bcrypt = require('bcrypt');
 const axios = require('axios');
-const { auth, storage, ref, uploadBytes, getDownloadURL } = require('./firebase');
+const { storage, ref, uploadBytes, getDownloadURL, authenticateAnonymously } = require('./firebase');
 
 const router = express.Router(); // Sử dụng Router
 router.use(cors()); // Cho phép CORS để client có thể gọi API
@@ -17,49 +17,58 @@ router.use(express.urlencoded({ extended: true })); // Thêm middleware để x�
 const upload = multer({ storage: multer.memoryStorage() });
 const db = require('./config/db.js');
 
+// Utility function để chuyển đổi callback thành Promise
+const promisify = (fn) => (...args) => {
+    return new Promise((resolve, reject) => {
+        fn(...args, (err, result) => {
+            if (err) reject(err);
+            else resolve(result);
+        });
+    });
+};
 
 // Hàm để thực hiện truy vấn
 async function queryDatabase(query, params) {
-  const connection = await db.getConnection();
-  try {
-    const [results] = await connection.query(query, params);
-    return results;
-  } catch (error) {
-    console.error('Lỗi khi truy vấn dữ liệu:', error);
-    throw error;
-  } finally {
-    connection.release();
-  }
+    const connection = await db.getConnection();
+    try {
+        const [results] = await connection.query(query, params);
+        return results;
+    } catch (error) {
+        console.error('Lỗi khi truy vấn dữ liệu:', error);
+        throw error;
+    } finally {
+        connection.release();
+    }
 }
 
 // Endpoint để lấy thông tin người dùng
 router.get('/api/users', async (req, res) => {
-  try {
-    const query = 'SELECT * FROM users';
-    const results = await queryDatabase(query, []);
-    res.json(results);
-  } catch (error) {
-    console.error('Lỗi khi truy vấn dữ liệu:', error);
-    res.status(500).send('Lỗi khi truy vấn dữ liệu');
-  }
+    try {
+        const query = 'SELECT * FROM users';
+        const results = await queryDatabase(query, []);
+        res.json(results);
+    } catch (error) {
+        console.error('Lỗi khi truy vấn dữ liệu:', error);
+        res.status(500).send('Lỗi khi truy vấn dữ liệu');
+    }
 });
 
 // Endpoint để lấy thông tin sản phẩm
 router.get('/api/theproducts', async (req, res) => {
     try {
-      const query = 'SELECT * FROM products';
-      const results = await queryDatabase(query, []);
-      res.json(results);
+        const query = 'SELECT * FROM products';
+        const results = await queryDatabase(query, []);
+        res.json(results);
     } catch (error) {
-      console.error('Lỗi khi truy vấn dữ liệu:', error);
-      res.status(500).send('Lỗi khi truy vấn dữ liệu');
+        console.error('Lỗi khi truy vấn dữ liệu:', error);
+        res.status(500).send('Lỗi khi truy vấn dữ liệu');
     }
-  });
+});
 
 // Thêm endpoint mới để xử lý việc thêm sản phẩm
 router.post('/api/products', upload.single('img'), async (req, res) => {
     try {
-        await auth.signInAnonymously(); // Sử dụng auth từ cấu hình Firebase
+        await authenticateAnonymously();
 
         const { product_name, price, description, uses, process } = req.body;
         const img = req.file;
@@ -78,65 +87,68 @@ router.post('/api/products', upload.single('img'), async (req, res) => {
         }
 
         const query = 'INSERT INTO products (product_name, price, description, img, uses, process) VALUES (?, ?, ?, ?, ?, ?)';
-        queryDatabase(query, [product_name, price, description, imgUrl, uses, process], (error, results) => {
-            if (error) {
-                console.error('Lỗi khi thêm sản phẩm: ' + error.stack);
-                return res.status(500).json({ error: 'Lỗi khi thêm sản phẩm' });
-            }
+        try {
+            const results = await queryDatabase(query, [product_name, price, description, imgUrl, uses, process]);
             res.status(201).json({ message: 'Sản phẩm đã được thêm thành công', id: results.insertId });
-        });
+        } catch (error) {
+            console.error('Lỗi khi thêm sản phẩm:', error);
+            res.status(500).json({ error: 'Lỗi khi thêm sản phẩm vào cơ sở dữ liệu' });
+        }
     } catch (error) {
-        console.error('Lỗi khi thêm sản phẩm:', error);
-        res.status(500).json({ error: 'Lỗi khi thêm sản phẩm' });
+        console.error('Lỗi khi xử lý yêu cầu thêm sản phẩm:', error);
+        res.status(500).json({ error: 'Lỗi khi xử lý yêu cầu thêm sản phẩm' });
     }
 });
 
 // Endpoint để xóa sản phẩm
-router.delete('/api/products/:id', (req, res) => {
+router.delete('/api/products/:id', async (req, res) => {
     const { id } = req.params;
-    const query = 'DELETE FROM products WHERE product_id = ?';
-    queryDatabase(query, [id], (error, results) => {
-        if (error) {
-            console.error('Lỗi khi xóa sản phẩm: ' + error.stack);
-            return res.status(500).json({ error: 'Lỗi khi xóa sản phẩm' });
+    try {
+        const query = 'DELETE FROM products WHERE product_id = ?';
+        const results = await queryDatabase(query, [id]);
+        if (results.affectedRows === 0) {
+            return res.status(404).json({ error: 'Không tìm thấy sản phẩm' });
         }
         res.status(200).json({ message: 'Sản phẩm đã được xóa thành công' });
-    });
+    } catch (error) {
+        console.error('Lỗi khi xóa sản phẩm:', error);
+        res.status(500).json({ error: 'Lỗi khi xóa sản phẩm' });
+    }
 });
 
 // Endpoint để xóa người dùng
 router.delete('/api/users/:id', async (req, res) => {
-  const userId = req.params.id;
-  let connection;
-  try {
-    connection = await db.getConnection();
-    await connection.beginTransaction();
+    const userId = req.params.id;
+    let connection;
+    try {
+        connection = await db.getConnection();
+        await connection.beginTransaction();
 
-    // Xóa các hàng liên quan trong bảng register
-    await connection.query('DELETE FROM register WHERE actor_id = ?', [userId]);
+        // Xóa các hàng liên quan trong bảng register
+        await connection.query('DELETE FROM register WHERE actor_id = ?', [userId]);
 
-    // Xóa các hàng liên quan trong bảng notification_change
-    await connection.query('DELETE FROM notification_change WHERE actor_id = ?', [userId]);
+        // Xóa các hàng liên quan trong bảng notification_change
+        await connection.query('DELETE FROM notification_change WHERE actor_id = ?', [userId]);
 
-    // Xóa các hàng liên quan trong bảng notification
-    await connection.query('DELETE FROM notification WHERE notifier_id = ?', [userId]);
+        // Xóa các hàng liên quan trong bảng notification
+        await connection.query('DELETE FROM notification WHERE notifier_id = ?', [userId]);
 
-    // Xóa người dùng
-    await connection.query('DELETE FROM users WHERE uid = ?', [userId]);
+        // Xóa người dùng
+        await connection.query('DELETE FROM users WHERE uid = ?', [userId]);
 
-    await connection.commit();
-    res.status(200).json({ message: 'Người dùng đã được xóa thành công' });
-  } catch (error) {
-    if (connection) {
-      await connection.rollback();
+        await connection.commit();
+        res.status(200).json({ message: 'Người dùng đã được xóa thành công' });
+    } catch (error) {
+        if (connection) {
+            await connection.rollback();
+        }
+        console.error('Lỗi khi xóa người dùng:', error);
+        res.status(500).json({ message: 'Lỗi khi xóa người dùng', error: error.message });
+    } finally {
+        if (connection) {
+            connection.release();
+        }
     }
-    console.error('Lỗi khi xóa người dùng:', error);
-    res.status(500).json({ message: 'Lỗi khi xóa người dùng', error: error.message });
-  } finally {
-    if (connection) {
-      connection.release();
-    }
-  }
 });
 
 // Cấu hình để phục vụ các tệp tĩnh
@@ -162,7 +174,7 @@ router.get('/caidat', (req, res) => {
 // Endpoint để cập nhật sản phẩm
 router.post('/api/products/update', upload.single('img'), async (req, res) => {
     try {
-        await auth.signInAnonymously(); // Sử dụng auth từ cấu hình Firebase
+        await authenticateAnonymously(); // Sử dụng auth từ cấu hình Firebase
 
         console.log('Dữ liệu nhận được:', req.body, req.file);
 
@@ -224,48 +236,42 @@ router.post('/api/products/update', upload.single('img'), async (req, res) => {
     }
 });
 
-// Thêm endpoint để tạo admin mới
-router.post('/api/admin', (req, res) => {
+// Cập nhật endpoint tạo admin mới
+router.post('/api/admin', async (req, res) => {
     const { email, name, password } = req.body;
 
     if (!email || !name || !password) {
         return res.status(400).json({ error: 'Thiếu thông tin admin' });
     }
 
-    // Mã hóa mật khẩu
-    bcrypt.hash(password, 10, (err, hashedPassword) => {
-        if (err) {
-            console.error('Lỗi khi mã hóa mật khẩu:', err);
-            return res.status(500).json({ error: 'Lỗi khi tạo admin' });
-        }
-
+    try {
+        const hashedPassword = await promisify(bcrypt.hash)(password, 10);
         const query = 'INSERT INTO admin (admin_email, admin_name, admin_pass, role_id) VALUES (?, ?, ?, ?)';
-        queryDatabase(query, [email, name, hashedPassword, 3], (error, results) => {
-            if (error) {
-                console.error('Lỗi khi thêm admin:', error);
-                return res.status(500).json({ error: 'Lỗi khi thêm admin' });
-            }
-            res.status(201).json({ message: 'Admin đã được thêm thành công', id: results.insertId });
-        });
-    });
+        const results = await queryDatabase(query, [email, name, hashedPassword, 3]);
+        res.status(201).json({ message: 'Admin đã được thêm thành công', id: results.insertId });
+    } catch (error) {
+        console.error('Lỗi khi thêm admin:', error);
+        res.status(500).json({ error: 'Lỗi khi thêm admin' });
+    }
 });
 
-// Endpoint để lấy thông tin tỉnh dựa trên province_id
-router.get('/api/province/:id', (req, res) => {
+// Cập nhật endpoint lấy thông tin tỉnh
+router.get('/api/province/:id', async (req, res) => {
     const { id } = req.params;
     const query = 'SELECT province_name FROM provinces WHERE province_id = ?';
-    queryDatabase(query, [id], (error, results) => {
-        if (error) {
-            console.error('Lỗi khi truy vấn dữ liệu: ' + error.stack);
-            return res.status(500).json({ error: 'Lỗi khi truy vấn dữ liệu' });
-        }
+    try {
+        const results = await queryDatabase(query, [id]);
         if (results.length > 0) {
             res.json(results[0]);
         } else {
             res.status(404).json({ error: 'Không tìm thấy tỉnh' });
         }
-    });
+    } catch (error) {
+        console.error('Lỗi khi truy vấn dữ liệu:', error);
+        res.status(500).json({ error: 'Lỗi khi truy vấn dữ liệu' });
+    }
 });
+
 
 // Endpoint để lấy thông tin session
 router.get('/api/session', (req, res) => {
@@ -276,7 +282,6 @@ router.get('/api/session', (req, res) => {
     res.json({ province_id: provinceId });
 });
 
-// Endpoint để lấy danh sách quận/huyện từ API
 router.get('/api/districts/:provinceCode', async (req, res) => {
     try {
         console.log('Đang gọi API districts cho tỉnh:', req.params.provinceCode);
@@ -290,7 +295,6 @@ router.get('/api/districts/:provinceCode', async (req, res) => {
     }
 });
 
-// Endpoint để lấy danh sách xã/phường từ API
 router.get('/api/wards/:districtCode', async (req, res) => {
     try {
         console.log('Đang xử lý yêu cầu wards cho quận/huyện:', req.params.districtCode);
@@ -304,23 +308,18 @@ router.get('/api/wards/:districtCode', async (req, res) => {
     }
 });
 
-// Endpoint để thêm vùng sản xuất mới
-router.post('/api/regions', (req, res) => {
+// Cập nhật endpoint thêm vùng sản xuất mới
+router.post('/api/regions', async (req, res) => {
     const { province_id, district_id, region_name, ward_name, district_name } = req.body;
 
     if (!province_id || !district_id || !region_name || !ward_name) {
         return res.status(400).json({ error: 'Thiếu thông tin vùng sản xuất' });
     }
 
-    // Tạo region_id
-    const queryMaxId = 'SELECT MAX(region_id) AS max_id FROM regions WHERE region_id LIKE ?';
-    const regionPrefix = `${province_id}${district_id}%`;
-
-    queryDatabase(queryMaxId, [regionPrefix], (error, results) => {
-        if (error) {
-            console.error('Lỗi khi tìm mã vùng lớn nhất:', error);
-            return res.status(500).json({ error: 'Lỗi khi tìm mã vùng lớn nhất' });
-        }
+    try {
+        const queryMaxId = 'SELECT MAX(region_id) AS max_id FROM regions WHERE region_id LIKE ?';
+        const regionPrefix = `${province_id}${district_id}%`;
+        const results = await queryDatabase(queryMaxId, [regionPrefix]);
 
         let newRegionId;
         if (results[0].max_id) {
@@ -332,47 +331,44 @@ router.post('/api/regions', (req, res) => {
         }
 
         const queryInsert = 'INSERT INTO regions (region_id, region_name, ward_name, district_name) VALUES (?, ?, ?, ?)';
-        queryDatabase(queryInsert, [newRegionId, region_name, ward_name, district_name], (error, results) => {
-            if (error) {
-                console.error('Lỗi khi thêm vùng sản xuất:', error);
-                return res.status(500).json({ error: 'Lỗi khi thêm vùng sản xuất' });
-            }
-            res.status(201).json({ success: true, message: 'Vùng sản xuất đã được thêm thành công' });
-        });
-    });
+        await queryDatabase(queryInsert, [newRegionId, region_name, ward_name, district_name]);
+        res.status(201).json({ success: true, message: 'Vùng sản xuất đã được thêm thành công' });
+    } catch (error) {
+        console.error('Lỗi khi thêm vùng sản xuất:', error);
+        res.status(500).json({ error: 'Lỗi khi thêm vùng sản xuất' });
+    }
 });
 
-// Endpoint để lấy danh sách vùng sản xuất
-router.get('/api/regions', (req, res) => {
+// Cập nhật endpoint lấy danh sách vùng sản xuất
+router.get('/api/regions', async (req, res) => {
     const adminProvinceId = req.query.province_id;
 
     if (!adminProvinceId) {
         return res.status(400).json({ error: 'Thiếu mã tỉnh của admin' });
     }
 
-    // Sửa đổi câu truy vấn để chỉ lấy các vùng có 2 chữ số đầu của region_id trùng với adminProvinceId
     const query = 'SELECT * FROM regions WHERE LEFT(region_id, 2) = ?';
     
-    queryDatabase(query, [adminProvinceId], (error, results) => {
-        if (error) {
-            console.error('Lỗi khi truy vấn dữ liệu: ' + error.stack);
-            return res.status(500).json({ error: 'Lỗi khi truy vấn dữ liệu' });
-        }
+    try {
+        const results = await queryDatabase(query, [adminProvinceId]);
         res.json(results);
-    });
+    } catch (error) {
+        console.error('Lỗi khi truy vấn dữ liệu:', error);
+        res.status(500).json({ error: 'Lỗi khi truy vấn dữ liệu' });
+    }
 });
 
-// Endpoint để xóa vùng sản xuất
-router.delete('/api/regions/:id', (req, res) => {
+// Cập nhật endpoint xóa vùng sản xuất
+router.delete('/api/regions/:id', async (req, res) => {
     const { id } = req.params;
     const query = 'DELETE FROM regions WHERE region_id = ?';
-    queryDatabase(query, [id], (error, results) => {
-        if (error) {
-            console.error('Lỗi khi xóa vùng sản xuất: ' + error.stack);
-            return res.status(500).json({ error: 'Lỗi khi xóa vùng sản xuất' });
-        }
+    try {
+        await queryDatabase(query, [id]);
         res.status(200).json({ message: 'Vùng sản xuất đã được xóa thành công' });
-    });
+    } catch (error) {
+        console.error('Lỗi khi xóa vùng sản xuất:', error);
+        res.status(500).json({ error: 'Lỗi khi xóa vùng sản xuất' });
+    }
 });
 
 module.exports = router; // Xuất router
