@@ -65,6 +65,7 @@
             <div class="row">
                 <!-- Các thành viên sẽ được thêm vào đây bởi JavaScript -->
             </div>
+        </div>
               
         <div class="vungsanxuat" data-aos="fade-up">
             <h2 class="highlighted-heading" data-aos="fade-up">
@@ -225,34 +226,68 @@ document.addEventListener('DOMContentLoaded', async () => {
     </script>
 
     <script>
-        // lấy danh sách người dùng để hiển thị trên trang chủ
-// lấy danh sách người dùng để hiển thị trên trang chủ
-
+       // lấy danh sách người dùng để hiển thị trên trang chủ
 document.addEventListener('DOMContentLoaded', async () => {
-    try {
-        const response = await fetch('/api/users-home');
-        const users = await response.json();    
+try {
+    const response = await fetch('/api/users-home');
+    const users = await response.json();
 
-        const userContainer = document.querySelector('.thanhvien .row');
-        users.forEach(user => {
-            const userCard = `
-                <div class="col-md-3 col-6 mb-4" data-aos="fade-up">
-                    <div class="card">
-                        <img src="${user.avatar}" class="card-img-top" alt="${user.name}">
-                        <div class="card-body">
-                            <h5 class="card-title">${user.name}</h5>
-                            <div class="chucdanh">${user.role_name}</div>
-                            <div class="vung">${user.region_name || 'Không xác định'}</div>
-                        </div>
+    const userContainer = document.querySelector('.thanhvien .row');
+    users.forEach(user => {
+        const userCard = `
+            <div class="col-md-3 col-6 mb-4" data-aos="fade-up">
+                <div class="card user-card" data-uid="${user.uid}">
+                    <img src="${user.avatar}" class="card-img-top" alt="${user.name}">
+                    <div class="card-body">
+                        <h5 class="card-title">${user.name}</h5>
+                        <div class="chucdanh">${user.role_name}</div>
+                        <div class="vung">${user.region_name || 'Không xác định'}</div>
                     </div>
                 </div>
-            `;
-            userContainer.innerHTML += userCard;
+            </div>
+        `;
+        userContainer.innerHTML += userCard;
+    });
+
+    // Thêm sự kiện click vào mỗi thẻ người dùng
+    document.querySelectorAll('.user-card').forEach(card => {
+        card.addEventListener('click', () => {
+            const userId = card.getAttribute('data-uid');
+            window.location.href = `trangcanhan.html?uid=${userId}`;
         });
+    });
+} catch (error) {
+    console.error('Lỗi khi lấy danh sách người dùng:', error);
+}
+});
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const userId = getUserIdFromURL(); // Hàm để lấy userId từ URL hoặc session
+
+    try {
+        const response = await fetch(`/api/user/${userId}`);
+        const user = await response.json();
+
+        if (response.status !== 200) {
+            throw new Error(user.error || 'Lỗi không xác định');
+        }
+
+        document.querySelector('.profile-img').src = user.avatar;
+        document.querySelector('.profile-name').textContent = user.name;
+        document.querySelector('.profile-phone').textContent = user.phone;
+        document.querySelector('.profile-address').textContent = user.address;
+        document.querySelector('.profile-region').textContent = user.region_name || 'Không xác định';
     } catch (error) {
-        console.error('Lỗi khi lấy danh sách người dùng:', error);
+        console.error('Lỗi khi lấy thông tin chi tiết người dùng:', error);
     }
 });
+
+function getUserIdFromURL() {
+    // Hàm để lấy userId từ URL hoặc session
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('uid') || sessionStorage.getItem('userId');
+}
+
     </script>
 </body>
 </html>

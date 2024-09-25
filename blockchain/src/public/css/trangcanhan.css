@@ -1,4 +1,3 @@
-
 .phone a{
     text-decoration: none;
     transform: translateY(50%) !important;
@@ -9,7 +8,10 @@
     height: 150px;
     border-radius: 50%;
     object-fit: cover;
+    border: 3px solid #f8f9fa;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
+
 .qr-code {
     width: 100px;
     height: 100px;
@@ -62,5 +64,90 @@
 
 #loadMore {
     margin-top: 15px;
+}
+
+.profile-name {
+    color: #007bff;
+    font-weight: bold;
+}
+
+.list-unstyled li {
+    padding: 5px 0;
+    border-bottom: 1px solid #f1f1f1;
+}
+
+.list-unstyled li:last-child {
+    border-bottom: none;
+}
+
+.list-unstyled strong {
+    color: #6c757d;
+    min-width: 120px;
+    display: inline-block;
+}
+
+.address-container {
+    margin-bottom: 15px;
+}
+
+.address-container strong {
+    display: block;
+    margin-bottom: 5px;
+    color: #555;
+    font-size: 0.9em;
+}
+
+.profile-address {
+    font-style: normal;
+    line-height: 1.4;
+    color: #333;
+    background-color: #f8f9fa;
+    padding: 10px;
+    border-radius: 5px;
+    border-left: 3px solid #007bff;
+}
+
+.contact-options {
+    margin-top: 5px;
+}
+
+.contact-options a {
+    text-decoration: none;
+    font-size: 0.9em;
+}
+
+.contact-options i {
+    margin-right: 3px;
+}
+
+.profile-phone {
+    cursor: pointer;
+    color: #007bff;
+    text-decoration: underline;
+}
+
+.contact-options-dropdown {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    border-radius: 4px;
+}
+
+.contact-options-dropdown a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.contact-options-dropdown a:hover {
+    background-color: #f1f1f1;
+}
+
+.show {
+    display: block;
 }
 
