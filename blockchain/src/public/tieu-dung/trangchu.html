@@ -230,8 +230,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 document.addEventListener('DOMContentLoaded', async () => {
     try {
-        const response = await fetch('/api/users');
-        const users = await response.json();
+        const response = await fetch('/api/users-home');
+        const users = await response.json();    
 
         const userContainer = document.querySelector('.thanhvien .row');
         users.forEach(user => {

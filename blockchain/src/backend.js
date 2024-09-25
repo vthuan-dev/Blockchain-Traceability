@@ -62,14 +62,10 @@ web3.eth.net.isListening()
 
 console.log('Admin address:', adminAddress);
   
-const traceabilityContractABI = require('../build/contracts/TraceabilityContract.json').abi;
-const traceabilityContractAddress = '0x7B19e949f5103774a646Bf928484c8985A4FddA0';
-const traceabilityContract = new web3.eth.Contract(traceabilityContractABI, traceabilityContractAddress);
+const contractABI = require('../build/contracts/TraceabilityContract.json').abi;
 
-// ABI và địa chỉ của contract ActivityLog
-const activityLogABI = require('../build/contracts/ActivityLog.json').abi;
-const activityLogAddress = '0x84079264Ba28A4F383AE8406449C9c9a880a07fA';
-const activityLogContract = new web3.eth.Contract(activityLogABI, activityLogAddress);
+const contractAddress = '0x2A43131cb14536Aa9F2bF717c9e363D460830914';
+const contract = new web3.eth.Contract(contractABI, contractAddress);
 
 // tạo biến lưu trữ file, giới hạn số lượng file và tên file, maxCount: số lượng file, name: tên file
 const upload = multer({
@@ -270,7 +266,7 @@ function setupRoutes(app, db){
         return res.status(400).send('Producer ID không hợp lệ');
       }
   
-      const batches = await traceabilityContract.methods.getBatchesByProducer(producerId).call();
+      const batches = await contract.methods.getBatchesByProducer(producerId).call();
       const serializedBatches = convertBigIntToString(batches);
       res.status(200).json(serializedBatches);
     } catch (err) {
@@ -279,7 +275,40 @@ function setupRoutes(app, db){
     }
   });
   
-
+  app.get('/activity-logs/:uid', async (req, res) => {
+    try {
+      const uid = req.params.uid;
+      
+      console.log('Đang truy xuất nhật ký hoạt động cho UID:', uid);
+  
+      const activityLogs = await contract.methods.getActivityLogs(uid).call();
+      
+      console.log('Số lượng nhật ký hoạt động:', activityLogs.length);
+  
+      // Chuyển đổi tất cả giá trị BigInt thành chuỗi
+      const convertedLogs = convertBigIntToString(activityLogs);
+  
+      // Chuyển đổi dữ liệu để dễ đọc hơn
+      const formattedLogs = convertedLogs.map(log => ({
+        timestamp: new Date(Number(log.timestamp) * 1000).toISOString(),
+        uid: log.uid,
+        activityName: log.activityName,
+        description: log.description,
+        isSystemGenerated: log.isSystemGenerated,
+        imageUrls: log.imageUrls,
+        relatedProductIds: log.relatedProductIds
+      }));
+  
+      res.status(200).json({
+        message: 'Truy xuất nhật ký hoạt động thành công',
+        activityLogs: formattedLogs
+      });
+    } catch (error) {
+      console.error('Lỗi khi truy xuất nhật ký hoạt động:', error);
+      res.status(500).json({ error: 'Lỗi khi truy xuất nhật ký hoạt động: ' + error.message });
+    }
+  });
+  
   app.get('/create-batch', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'san-xuat', 'them-lo-hang.html'));
   });
@@ -373,7 +402,7 @@ app.post('/createbatch', (req, res, next) => {
       farmPlotNumber, cleanProductId, cleanStartDate, cleanEndDate
     });
 
-    const result = await traceabilityContract.methods.createBatch(
+    const result = await contract.methods.createBatch(
       name,
       cleanProducerId,
       quantity,
@@ -411,176 +440,156 @@ app.post('/createbatch', (req, res, next) => {
   app.get('/create-activity', (req, res) => {
     res.sendFile(path.join(__dirname, 'public',  'san-xuat','them-nkhd.html'));
   });
-
+  
   app.post('/createactivity', (req, res, next) => {
     activityUpload(req, res, function (err) {
-        if (err instanceof multer.MulterError) {
-            return res.status(400).json({ error: 'Lỗi upload file: ' + err.message });
-        } else if (err) {
-            return res.status(500).json({ error: 'Lỗi server: ' + err.message });
-        }
-        next();
+      if (err instanceof multer.MulterError) {
+        // Lỗi Multer
+        return res.status(400).json({ error: 'Lỗi upload file: ' + err.message });
+      } else if (err) {
+        // Lỗi không xác định
+        return res.status(500).json({ error: 'Lỗi server: ' + err.message });
+      }
+      // Nếu không có lỗi, tiếp tục xử lý
+      next();
     });
-}, async (req, res) => {
+  }, async (req, res) => {
     try {
-        console.log('Received body:', req.body);
-        console.log('Received files:', req.files);
-
-        // Lấy uid từ session
-        const uid = req.session.userId;
-        if (!uid) {
-            return res.status(401).json({ error: 'Người dùng chưa đăng nhập' });
-        }
-
-        const cleanBody = Object.keys(req.body).reduce((acc, key) => {
-            acc[key.trim()] = req.body[key];
-            return acc;
-        }, {});
-
-        const { activityName, description, relatedProductIds, isSystemGenerated } = cleanBody;
-
-        if (!activityName || !description) {
-            return res.status(400).json({ error: 'Thiếu thông tin bắt buộc' });
-        }
-
-        const userExists = await checkUserExists(uid);
-        if (!userExists) {
-            return res.status(400).json({ error: 'Người dùng không tồn tại' });
-        }
-
-        const productIds = Array.isArray(relatedProductIds) 
-            ? relatedProductIds.map(id => parseInt(id, 10))
-            : relatedProductIds ? [parseInt(relatedProductIds, 10)] : [];
-
-        if (productIds.length > 0) {
-            for (const productId of productIds) {
-                const productExists = await checkProductExists(productId);
-                if (!productExists) {
-                    return res.status(400).json({ error: `Sản phẩm với ID ${productId} không tồn tại` });
-                }
-            }
-        }
-
-        let imageUrls = [];
-
-        if (req.files && req.files.length > 0) {
-            console.log(`Số ảnh nhận được: ${req.files.length}`);
-            
-            for (const file of req.files) {
-                try {
-                    const result = await uploadFile(file.buffer, file.originalname);
-                    imageUrls.push(result.ipfsUrl);
-                    console.log(`Đã thêm URL ảnh hoạt động: ${result.ipfsUrl}`);
-                } catch (uploadError) {
-                    console.error(`Lỗi khi tải lên ảnh ${file.originalname}:`, uploadError);
-                }
-            }
-            
-            console.log(`Tổng số URL ảnh hoạt động sau khi xử lý: ${imageUrls.length}`);
-        } else {
-            console.log('Không có ảnh hoạt động được tải lên');
-        }
-
-        const networkId = await web3.eth.net.getId();
-        console.log('Network ID:', networkId);
-
-        const balance = await web3.eth.getBalance(account.address);
-        console.log('Account balance:', web3.utils.fromWei(balance, 'ether'), 'ETH');
-
-        const currentLogCount = await activityLogContract.methods.getActivityLogCount(parseInt(uid, 10)).call();
-        console.log('Current activity log count:', currentLogCount);
-
-        try {
-            const totalBatches = await traceabilityContract.methods.getTotalBatches().call();
-            console.log('Total batches:', totalBatches);
-        } catch (error) {
-            console.error('Error calling getTotalBatches:', error);
-        }
-
-        try {
-            console.log('Bắt đầu gọi hàm addActivityLog');
-            const gasEstimate = await activityLogContract.methods.addActivityLog(
-                parseInt(uid, 10),
-                activityName,
-                description,
-                isSystemGenerated === 'true',
-                imageUrls,
-                productIds
-            ).estimateGas({ from: account.address });
-            
-            console.log('Ước tính gas:', gasEstimate);
-
-            const result = await activityLogContract.methods.addActivityLog(
-                parseInt(uid, 10),
-                activityName,
-                description,
-                isSystemGenerated === 'true',
-                imageUrls,
-                productIds
-            ).send({ 
-                from: account.address, 
-                gas: Math.floor(Number(gasEstimate) * 1.5).toString()
-            });
-            console.log('Kết quả giao dịch:', result);
-            if (result.events && result.events.ActivityLogAdded) {
-                console.log('Event ActivityLogAdded:', result.events.ActivityLogAdded.returnValues);
-            } else {
-                console.log('Không tìm thấy event ActivityLogAdded');
-            }
-            
-            const newLogCount = await activityLogContract.methods.getActivityLogCount(parseInt(uid, 10)).call();
-            console.log('New activity log count:', newLogCount);
-            
-            res.status(200).json({
-                message: 'Nhật ký hoạt động đã được thêm thành công',
-                transactionHash: result.transactionHash,
-                imageUrls: imageUrls
-            });
-        } catch (error) {
-            console.error('Chi tiết lỗi:', error);
-            if (error.message.includes('revert')) {
-                console.error('Lỗi revert:', error.message);
-                try {
-                    const revertReason = await web3.eth.call(error.receipt);
-                    console.error('Lý do revert:', revertReason);
-                } catch (callError) {
-                    console.error('Không thể lấy lý do revert:', callError);
-                }
-            }
-            res.status(500).json({ error: 'Lỗi thêm nhật ký hoạt động: ' + error.message });
-        }
-
-    } catch (error) {
-        console.error('Lỗi thêm nhật ký hoạt động:', error);
-        res.status(500).json({ error: 'Lỗi thêm nhật ký hoạt động: ' + error.message });
-    }
-});
-
-
-  app.get('/api/pending-batches', async (req, res) => {
-    try {
-      
-      if (!req.session.userId) {
-        return res.status(401).json({ error: 'Người dùng chưa đăng nhập' });
+      console.log('Received body:', req.body);
+      console.log('Received files:', req.files);
+  
+      // Làm sạch các key trong req.body
+      const cleanBody = Object.keys(req.body).reduce((acc, key) => {
+        acc[key.trim()] = req.body[key];
+        return acc;
+      }, {});
+  
+      const { uid, activityName, description, relatedProductIds } = cleanBody;
+  
+      // Validate input
+      if (!uid || !activityName || !description) {
+        return res.status(400).json({ error: 'Thiếu thông tin bắt buộc' });
       }
   
-      const producerId = req.session.userId;
-      const pendingBatches = await traceabilityContract.methods.getPendingBatchesByProducer(producerId).call();
-      
-      // Chuyển đổi trạng thái từ số sang chuỗi và dịch sang tiếng Việt
-      const statusMap = ['PendingApproval', 'Approved', 'Rejected'];
-      
-      const serializedBatches = pendingBatches.map(batch => ({
-        ...convertBigIntToString(batch),
-        status: translateStatus(statusMap[batch.status] || 'Unknown'),
-        productImageUrls: batch.productImageUrls,
-        certificateImageUrl: batch.certificateImageUrl
-      }));
+      // Kiểm tra xem người dùng có tồn tại trong cơ sở dữ liệu không
+      const userExists = await checkUserExists(uid);
+      if (!userExists) {
+        return res.status(400).json({ error: 'Người dùng không tồn tại' });
+      }
   
-      res.status(200).json(serializedBatches);
-    } catch (err) {
-      console.error('Error fetching pending batches for producer:', err);
-      res.status(500).json({ error: 'Lỗi khi lấy danh sách lô hàng đang chờ kiểm duyệt: ' + err.message });
+      // Chuyển đổi relatedProductIds thành mảng số nguyên
+      const productIds = Array.isArray(relatedProductIds) 
+        ? relatedProductIds.map(id => parseInt(id, 10))
+        : relatedProductIds ? [parseInt(relatedProductIds, 10)] : [];
+  
+      // Kiểm tra xem tất cả các sản phẩm liên quan có tồn tại trong cơ sở dữ liệu không
+      if (productIds.length > 0) {
+        for (const productId of productIds) {
+          const productExists = await checkProductExists(productId);
+          if (!productExists) {
+            return res.status(400).json({ error: `Sản phẩm với ID ${productId} không tồn tại` });
+          }
+        }
+      }
+  
+      let imageUrls = [];
+  
+      // Process activity images
+      if (req.files && req.files.length > 0) {
+        console.log(`Số ảnh nhận được: ${req.files.length}`);
+        
+        for (const file of req.files) {
+          try {
+            const result = await uploadFile(file.buffer, file.originalname);
+            imageUrls.push(result.ipfsUrl);
+            console.log(`Đã thêm URL ảnh hoạt động: ${result.ipfsUrl}`);
+          } catch (uploadError) {
+            console.error(`Lỗi khi tải lên ảnh ${file.originalname}:`, uploadError);
+          }
+        }
+        
+        console.log(`Tổng số URL ảnh hoạt động sau khi xử lý: ${imageUrls.length}`);
+      } else {
+        console.log('Không có ảnh hoạt động được tải lên');
+      }
+  
+      // Kiểm tra phiên bản của smart contract
+      const networkId = await web3.eth.net.getId();
+      console.log('Network ID:', networkId);
+  
+      // Kiểm tra số dư của tài khoản
+      const balance = await web3.eth.getBalance(account.address);
+      console.log('Account balance:', web3.utils.fromWei(balance, 'ether'), 'ETH');
+  
+      // Kiểm tra số lượng nhật ký hoạt động hiện tại
+      const currentLogCount = await contract.methods.getActivityLogCount(parseInt(uid, 10)).call();
+      console.log('Current activity log count:', currentLogCount);
+  
+      // Thử gọi một hàm đơn giản
+      try {
+        const totalBatches = await contract.methods.getTotalBatches().call();
+        console.log('Total batches:', totalBatches);
+      } catch (error) {
+        console.error('Error calling getTotalBatches:', error);
+      }
+  
+      // Sau đó mới gọi addActivityLog
+      try {
+        console.log('Bắt đầu gọi hàm addActivityLog');
+        const gasEstimate = await contract.methods.addActivityLog(
+          parseInt(uid, 10),
+          activityName,
+          description,
+          imageUrls,
+          productIds
+        ).estimateGas({ from: account.address });
+        
+        console.log('Ước tính gas:', gasEstimate);
+  
+        const result = await contract.methods.addActivityLog(
+          parseInt(uid, 10),
+          activityName,
+          description,
+          imageUrls,
+          productIds
+        ).send({ 
+          from: account.address, 
+          gas: Math.floor(Number(gasEstimate) * 1.5).toString()
+        });
+        console.log('Kết quả giao dịch:', result);
+        if (result.events && result.events.ActivityLogAdded) {
+          console.log('Event ActivityLogAdded:', result.events.ActivityLogAdded.returnValues);
+        } else {
+          console.log('Không tìm thấy event ActivityLogAdded');
+        }
+        
+        // Kiểm tra lại số lượng nhật ký sau khi thêm
+        const newLogCount = await contract.methods.getActivityLogCount(parseInt(uid, 10)).call();
+        console.log('New activity log count:', newLogCount);
+        
+        res.status(200).json({
+          message: 'Nhật ký hoạt động đã được thêm thành công',
+          transactionHash: result.transactionHash,
+          imageUrls: imageUrls
+        });
+      } catch (error) {
+        console.error('Chi tiết lỗi:', error);
+        if (error.message.includes('revert')) {
+          console.error('Lỗi revert:', error.message);
+          // Thử lấy thông tin lỗi chi tiết từ smart contract
+          try {
+            const revertReason = await web3.eth.call(error.receipt);
+            console.error('Lý do revert:', revertReason);
+          } catch (callError) {
+            console.error('Không thể lấy lý do revert:', callError);
+          }
+        }
+        res.status(500).json({ error: 'Lỗi thêm nhật ký hoạt động: ' + error.message });
+      }
+  
+    } catch (error) {
+      console.error('Lỗi thêm nhật ký hoạt động:', error);
+      res.status(500).json({ error: 'Lỗi thêm nhật ký hoạt động: ' + error.message });
     }
   });
 
@@ -593,7 +602,7 @@ app.post('/createbatch', (req, res, next) => {
       }
   
       const producerId = req.session.userId;
-      const pendingBatches = await traceabilityContract.methods.getPendingBatchesByProducer(producerId).call();
+      const pendingBatches = await contract.methods.getPendingBatchesByProducer(producerId).call();
       
       // Chuyển đổi trạng thái từ số sang chuỗi và dịch sang tiếng Việt
       const statusMap = ['PendingApproval', 'Approved', 'Rejected'];
@@ -639,7 +648,7 @@ app.post('/createbatch', (req, res, next) => {
       console.log('Số lượng người sản xuất cùng vùng:', producers.length);
   
       // 3. Lấy danh sách lô hàng chưa duyệt từ blockchain
-      const allPendingBatches = await traceabilityContract.methods.getAllPendingBatches().call();
+      const allPendingBatches = await contract.methods.getAllPendingBatches().call();
       console.log('Tổng số lô hàng chưa duyệt:', allPendingBatches.length);
   
       // 4. Lọc lô hàng của người sản xuất cùng vùng
@@ -680,7 +689,7 @@ app.post('/createbatch', (req, res, next) => {
   app.get('/api/approved-batch-sscc/:batchId', async (req, res) => {
     try {
       const batchId = req.params.batchId;
-      const batchDetails = await traceabilityContract.methods.getBatchDetails(batchId).call();
+      const batchDetails = await contract.methods.getBatchDetails(batchId).call();
       
       if (batchDetails.status.toString() !== '1') { // 1 tương ứng với BatchStatus.Approved
         return res.status(400).json({ error: 'Lô hàng chưa được phê duyệt' });
@@ -696,7 +705,7 @@ app.post('/createbatch', (req, res, next) => {
 app.get('/api/batch/:sscc', async (req, res) => {
   try {
     const sscc = req.params.sscc;
-    const batchDetails = await traceabilityContract.methods.getBatchBySSCC(sscc).call();
+    const batchDetails = await contract.methods.getBatchBySSCC(sscc).call();
     const serializedBatch = {
       batchId: batchDetails.batchId.toString(),
       name: batchDetails.name,
@@ -719,7 +728,7 @@ app.get('/api/batch/:sscc', async (req, res) => {
 app.post('/api/update-batch-status', async (req, res) => {
   try {
     const { batchId, newStatus } = req.body;
-    await traceabilityContract.methods.updateBatchStatus(batchId, newStatus).send({ from: account.address });
+    await contract.methods.updateBatchStatus(batchId, newStatus).send({ from: account.address });
     res.json({ message: 'Cập nhật trạng thái thành công' });
   } catch (error) {
     res.status(500).json({ error: 'Không thể cập nhật trạng thái: ' + error.message });
@@ -759,13 +768,13 @@ app.post('/approve-batch/:batchId', async (req, res) => {
     }
 
     // Kiểm tra trạng thái hiện tại của lô hàng
-    const batchDetails = await traceabilityContract.methods.getBatchDetails(batchId).call();
+    const batchDetails = await contract.methods.getBatchDetails(batchId).call();
     if (batchDetails.status != 0) { // 0 là trạng thái PendingApproval
       return res.status(400).json({ error: 'Lô hàng này đã được xử lý bởi người kiểm duyệt khác' });
     }
 
     // Gọi hàm updateBatchStatus từ smart contract để phê duyệt (status 1 = Approved)
-    const result = await traceabilityContract.methods.updateBatchStatus(batchId, 1).send({ from: account.address, gas: 3000000 });
+    const result = await contract.methods.updateBatchStatus(batchId, 1).send({ from: account.address, gas: 3000000 });
 
     res.status(200).json({
       message: 'Lô hàng đã được phê duyệt thành công',
@@ -793,13 +802,13 @@ app.post('/reject-batch/:batchId', async (req, res) => {
     }
 
     // Kiểm tra trạng thái hiện tại của lô hàng
-    const batchDetails = await traceabilityContract.methods.getBatchDetails(batchId).call();
+    const batchDetails = await contract.methods.getBatchDetails(batchId).call();
     if (batchDetails.status != 0) { // 0 là trạng thái PendingApproval
       return res.status(400).json({ error: 'Lô hàng này đã được xử lý bởi người kiểm duyệt khác' });
     }
 
     // Gọi hàm updateBatchStatus từ smart contract để từ chối (status 2 = Rejected)
-    const result = await traceabilityContract.methods.updateBatchStatus(batchId, 2).send({ from: account.address, gas: 3000000 });
+    const result = await contract.methods.updateBatchStatus(batchId, 2).send({ from: account.address, gas: 3000000 });
 
     res.status(200).json({
       message: 'Lô hàng đã bị từ chối thành công',
@@ -817,7 +826,7 @@ app.get('/batch-details/:batchId', async (req, res) => {
       console.log('Đang lấy chi tiết cho lô hàng:', batchId);
 
       // Gọi hàm getBatchDetails từ smart contract
-      const batchDetails = await traceabilityContract.methods.getBatchDetails(batchId).call();
+      const batchDetails = await contract.methods.getBatchDetails(batchId).call();
       console.log('Chi tiết lô hàng từ blockchain:', batchDetails);
 
       // Xử lý và định dạng dữ liệu
@@ -871,7 +880,7 @@ app.get('/api/batches', async (req, res) => {
     console.log('Trạng thái lọc:', status);
 
     // Lấy tất cả lô hàng của người sản xuất
-    const allBatches = await traceabilityContract.methods.getBatchesByProducer(userId).call();
+    const allBatches = await contract.methods.getBatchesByProducer(userId).call();
     console.log('Tổng số lô hàng:', allBatches.length);
 
     // Lọc lô hàng theo trạng thái nếu có
@@ -927,7 +936,7 @@ app.get('/api/approved-batches', async (req, res) => {
     const userId = req.session.userId;
     console.log('Gọi hàm getApprovedBatchesByProducer với userId:', userId);
 
-    const approvedBatches = await traceabilityContract.methods.getApprovedBatchesByProducer(userId).call({ from: account.address });
+    const approvedBatches = await contract.methods.getApprovedBatchesByProducer(userId).call({ from: account.address });
     console.log('Số lượng lô hàng đã duyệt:', approvedBatches.length);
 
     const serializedBatches = approvedBatches.map(batch => {
@@ -961,7 +970,7 @@ app.get('/api/rejected-batches', async (req, res) => {
     const userId = req.session.userId;
     console.log('Gọi hàm getRejectedBatchesByProducer với userId:', userId);
 
-    const rejectedBatches = await traceabilityContract.methods.getRejectedBatchesByProducer(userId).call({ from: account.address });
+    const rejectedBatches = await contract.methods.getRejectedBatchesByProducer(userId).call({ from: account.address });
     console.log('Số lượng lô hàng bị từ chối:', rejectedBatches.length);
 
     const serializedBatches = rejectedBatches.map(batch => ({
@@ -1004,13 +1013,13 @@ app.post('/api/accept-transport', async (req, res) => {
       let participantType = roleId === 8 ? "Warehouse" : "Transporter";
       console.log('Participant type:', participantType);
 
-      const batchId = await traceabilityContract.methods.getBatchIdBySSCC(sscc).call();
+      const batchId = await contract.methods.getBatchIdBySSCC(sscc).call();
       if (!batchId) {
           return res.status(404).json({ error: 'Không tìm thấy lô hàng với SSCC này' });
       }
 
       console.log('Updating transport status:', { batchId, userId, action, participantType });
-      await traceabilityContract.methods.updateTransportStatus(batchId, userId, action, participantType)
+      await contract.methods.updateTransportStatus(batchId, userId, action, participantType)
           .send({ from: account.address, gas: 500000 });
 
       res.json({ success: true, message: 'Đã cập nhật trạng thái vận chuyển thành công' });
@@ -1026,15 +1035,15 @@ app.get('/api/batch-info-by-sscc/:sscc', async (req, res) => {
     const sscc = req.params.sscc;
     const userId = req.session.userId;
 
-    const batchInfo = await traceabilityContract.methods.getBatchBySSCC(sscc).call();
-    const transportStatus = await traceabilityContract.methods.getBatchTransportStatus(batchInfo.batchId).call();
-    const detailedTransportStatus = await traceabilityContract.methods.getDetailedTransportStatus(batchInfo.batchId).call();
+    const batchInfo = await contract.methods.getBatchBySSCC(sscc).call();
+    const transportStatus = await contract.methods.getBatchTransportStatus(batchInfo.batchId).call();
+    const detailedTransportStatus = await contract.methods.getDetailedTransportStatus(batchInfo.batchId).call();
     
     const producerInfo = await getProducerById(batchInfo.producerId);
 
-    const warehouseConfirmed = await traceabilityContract.methods.isWarehouseConfirmed(batchInfo.batchId, userId).call();
+    const warehouseConfirmed = await contract.methods.isWarehouseConfirmed(batchInfo.batchId, userId).call();
 
-    const confirmedWarehouseIds = await traceabilityContract.methods.getConfirmedWarehouses(batchInfo.batchId).call();
+    const confirmedWarehouseIds = await contract.methods.getConfirmedWarehouses(batchInfo.batchId).call();
     
     // Lấy thông tin chi tiết của các nhà kho đã xác nhận
     const confirmedWarehouses = await Promise.all(confirmedWarehouseIds.map(async (warehouseId) => {
@@ -1109,11 +1118,11 @@ async function getWarehouseInfo(warehouseId) {
 app.get('/api/batch-info/:batchId', async (req, res) => {
   try {
       const batchId = req.params.batchId;
-      const batchInfo = await traceabilityContract.methods.getBatchDetails(batchId).call();
-      const transportStatus = await traceabilityContract.methods.getBatchTransportStatus(batchId).call();
-      const detailedTransportStatus = await traceabilityContract.methods.getDetailedTransportStatus(batchId).call();
+      const batchInfo = await contract.methods.getBatchDetails(batchId).call();
+      const transportStatus = await contract.methods.getBatchTransportStatus(batchId).call();
+      const detailedTransportStatus = await contract.methods.getDetailedTransportStatus(batchId).call();
 
-      const warehouseConfirmed = await traceabilityContract.methods.isWarehouseConfirmed(batchId, req.session.userId).call();
+      const warehouseConfirmed = await contract.methods.isWarehouseConfirmed(batchId, req.session.userId).call();
 
       
       // Lấy thông tin người sản xuất
@@ -1162,8 +1171,8 @@ function translateDetailedTransportStatus(status) {
 app.get('/api/transport-history/:sscc', async (req, res) => {
   try {
     const sscc = req.params.sscc;
-    const batchId = await traceabilityContract.methods.getBatchIdBySSCC(sscc).call();
-    const history = await traceabilityContract.methods.getTransportHistory(batchId).call();
+    const batchId = await contract.methods.getBatchIdBySSCC(sscc).call();
+    const history = await contract.methods.getTransportHistory(batchId).call();
     
     const formattedHistory = history.map(event => ({
       participantId: event.participantId.toString(),
@@ -1192,7 +1201,7 @@ app.post('/api/record-participation', async (req, res) => {
     // Chuyển đổi userId thành địa chỉ Ethereum
     const userAddress = await getUserEthereumAddress(userId);
 
-    await traceabilityContract.methods.recordParticipation(batchId, userAddress, participantType, action)
+    await contract.methods.recordParticipation(batchId, userAddress, participantType, action)
       .send({ from: account.address, gas: 500000 });
 
     res.json({ success: true, message: 'Đã ghi nhận sự tham gia thành công' });
@@ -1210,7 +1219,7 @@ app.get('/api/pending-transport-batches', async (req, res) => {
     }
 
     // Lấy danh sách lô hàng chờ vận chuyển từ smart contract
-    const pendingBatches = await traceabilityContract.methods.getPendingTransportBatches().call();
+    const pendingBatches = await contract.methods.getPendingTransportBatches().call();
 
     // Chuyển đổi dữ liệu và gửi về client
     const formattedBatches = pendingBatches.map(batch => ({
@@ -1248,17 +1257,17 @@ app.post('/api/accept-transport', async (req, res) => {
     }
 
     // Lấy batchId từ SSCC
-    const batchId = await traceabilityContract.methods.getBatchIdBySSCC(sscc).call();
+    const batchId = await contract.methods.getBatchIdBySSCC(sscc).call();
     if (!batchId) {
       return res.status(404).json({ error: 'Không tìm thấy lô hàng với SSCC này' });
     }
 
     // Cập nhật trạng thái vận chuyển
-    await traceabilityContract.methods.updateTransportStatus(batchId, userId, action, participant.role_id === 6 ? "Transporter" : "Warehouse")
+    await contract.methods.updateTransportStatus(batchId, userId, action, participant.role_id === 6 ? "Transporter" : "Warehouse")
       .send({ from: account.address, gas: 500000 });
 
     // Ghi nhận sự tham gia
-    await traceabilityContract.methods.recordParticipation(batchId, userId, participant.role_id === 6 ? "Transporter" : "Warehouse", action)
+    await contract.methods.recordParticipation(batchId, userId, participant.role_id === 6 ? "Transporter" : "Warehouse", action)
       .send({ from: account.address, gas: 500000 });
 
     res.json({ success: true, message: 'Đã cập nhật trạng thái vận chuyển và ghi nhận sự tham gia thành công' });
@@ -1317,13 +1326,13 @@ function safeToString(value) {
       const sscc = value.result.split(':')[1]; // lấy phần sau của :
       console.log('SSCC:', sscc);
       // kiểm tra sscc có hợp lệ không
-      const batchInfo = await traceabilityContract.methods.getBatchBySSCC(sscc).call();
+      const batchInfo = await contract.methods.getBatchBySSCC(sscc).call();
       const isValidSSCC = batchInfo !== null;
 
       if (!isValidSSCC) {
         return res.status(400).json({ error: 'SSCC không hợp lệ' });
       }
-      const transportStatus = await traceabilityContract.methods.getBatchTransportStatus(batchInfo.batchId).call();
+      const transportStatus = await contract.methods.getBatchTransportStatus(batchInfo.batchId).call();
 
       const serializedBatchInfo = safeConvert({
         batchId: batchInfo.batchId,
@@ -1381,14 +1390,14 @@ function safeToString(value) {
       console.log('participantType:', participantType);
       console.log('Session roleId:', req.session.roleId);
   
-      const batchId = await traceabilityContract.methods.getBatchIdBySSCC(sscc).call();
+      const batchId = await contract.methods.getBatchIdBySSCC(sscc).call();
 
       if (!batchId) {
         return res.status(404).json({ error: 'Không tìm thấy lô hàng với SSCC này' });
       }
   
       console.log('Before calling updateTransportStatus:', { batchId, userId, action, participantType });
-      await traceabilityContract.methods.updateTransportStatus(batchId, userId, action, participantType)
+      await contract.methods.updateTransportStatus(batchId, userId, action, participantType)
       .send({ from: account.address, gas: 500000 });
       console.log('After calling updateTransportStatus:', result);
       // Lấy batchId từ SSCC
@@ -1396,7 +1405,7 @@ function safeToString(value) {
       console.log('Updating transport status with:', { batchId, userId, action, participantType });
   
       // Cập nhật trạng thái vận chuyển
-      await traceabilityContract.methods.updateTransportStatus(batchId, userId, action, participantType)
+      await contract.methods.updateTransportStatus(batchId, userId, action, participantType)
         .send({ from: account.address, gas: 500000 });
   
       res.json({ success: true, message: 'Đã cập nhật trạng thái vận chuyển thành công' });
@@ -1467,7 +1476,7 @@ app.get('/api/batch-transport-history/:sscc', async (req, res) => {
   try {
     const sscc = req.params.sscc;
     
-    const transportHistory = await traceabilityContract.methods.getTransportHistoryBySSCC(sscc).call();
+    const transportHistory = await contract.methods.getTransportHistoryBySSCC(sscc).call();
     console.log('Transport History from blockchain:', transportHistory);
     
     const enrichedHistory = await Promise.all(transportHistory.map(async (event) => {
@@ -1485,6 +1494,7 @@ app.get('/api/batch-transport-history/:sscc', async (req, res) => {
         `, [event.participantId.toString()]);
         
         transporter = results[0];
+        console.log('SQL query result:', transporter);
       } catch (dbError) {
         console.error('Database query error:', dbError);
         transporter = null;
@@ -1537,7 +1547,7 @@ app.post('/api/warehouse-confirm', async (req, res) => {
     const { sscc } = req.body;
     console.log('Received warehouse confirmation request for SSCC:', sscc);
 
-    const batchId = await traceabilityContract.methods.getBatchIdBySSCC(sscc).call();
+    const batchId = await contract.methods.getBatchIdBySSCC(sscc).call();
     console.log('Batch ID:', batchId);
 
     const userId = req.session.userId;
@@ -1545,7 +1555,7 @@ app.post('/api/warehouse-confirm', async (req, res) => {
 
     console.log('Using admin address:', adminAddress);
 
-    const result = await traceabilityContract.methods.warehouseConfirmation(batchId, userId).send({ 
+    const result = await contract.methods.warehouseConfirmation(batchId, userId).send({ 
       from: adminAddress, 
       gas: 500000 // Điều chỉnh gas nếu cần
     });
@@ -1558,7 +1568,7 @@ app.post('/api/warehouse-confirm', async (req, res) => {
   }
 });
 // Thêm event listener bên ngoài route handler
-traceabilityContract.events.WarehouseConfirmed({}, (error, event) => {
+contract.events.WarehouseConfirmed({}, (error, event) => {
   if (error) {
     console.error('Error on WarehouseConfirmed event:', error);
   } else {
@@ -1580,159 +1590,37 @@ async function getUserRole(userId) {
   });
 }
 
-app.get('/api/batch-activity-logs/:sscc', async (req, res) => {
+app.get('/api/users-home', async (req, res) => {
   try {
-      const sscc = req.params.sscc;
-      const activityLogs = await activityLogContract.methods.getBatchActivityLogsBySSCC(sscc).call();
-      res.json(activityLogs);
+      const [users] = await db.query(`
+          SELECT u.uid, u.name, u.avatar, r.role_name, rg.region_name
+          FROM users u
+          JOIN roles r ON u.role_id = r.role_id
+          LEFT JOIN regions rg ON u.region_id = rg.region_id
+      `);
+      res.status(200).json(users);
   } catch (error) {
-      console.error('Lỗi khi lấy nhật ký hoạt động của lô hàng:', error);
-      res.status(500).json({ error: 'Không thể lấy nhật ký hoạt động của lô hàng: ' + error.message });
-  }
-})
-
-app.get('/api/system-activity-logs/:sscc', async (req, res) => {
-  try {
-      const sscc = req.params.sscc;
-      console.log('Đang truy xuất nhật ký hoạt động của hệ thống cho SSCC:', sscc);
-
-      // Lấy batchId từ SSCC
-      const batchId = await traceabilityContract.methods.getBatchIdBySSCC(sscc).call();
-      if (batchId == 0) {
-          return res.status(404).json({ error: 'Batch không tồn tại với SSCC này' });
-      }
-
-      const systemActivityLogs = await activityLogContract.methods.getSystemActivityLogs(batchId).call();
-      console.log('Số lượng nhật ký hoạt động của hệ thống:', systemActivityLogs.length);
-
-      const convertedLogs = convertBigIntToString(systemActivityLogs);
-      const formattedLogs = convertedLogs.map(log => ({
-          timestamp: new Date(Number(log.timestamp) * 1000).toISOString(),
-          uid: log.uid,
-          activityName: log.activityName,
-          description: log.description,
-          isSystemGenerated: log.isSystemGenerated,
-          imageUrls: log.imageUrls,
-          relatedProductIds: log.relatedProductIds
-      }));
-
-      res.status(200).json({
-          message: 'Truy xuất nhật ký hoạt động của hệ thống thành công',
-          activityLogs: formattedLogs
-      });
-  } catch (error) {
-      console.error('Lỗi khi truy xuất nhật ký hoạt động của hệ thống:', error);
-      res.status(500).json({ error: 'Lỗi khi truy xuất nhật ký hoạt động của hệ thống: ' + error.message });
+      console.error('Lỗi khi lấy danh sách người dùng:', error);
+      res.status(500).json({ error: 'Không thể lấy danh sách người dùng: ' + error.message });
   }
 });
 
 app.get('/api/products', async (req, res) => {
-  try {
-    const [results] = await db.query('SELECT product_id, product_name FROM products');
-    console.log('Products:', results); // Log dữ liệu sản phẩm
-    res.json(results);
-  } catch (error) {
-    console.error('Lỗi khi truy vấn sản phẩm:', error);
-    res.status(500).json({ error: 'Lỗi server nội bộ' });
-  }
-});
-app.get('/api/producer-activity-logs', async (req, res) => {
-  try {
-      if (!req.session.userId) {
-          return res.status(401).json({ error: 'Người dùng chưa đăng nhập' });
-      }
-
-      const producerId = req.session.userId;
-      console.log('Đang truy xuất nhật ký hoạt động của người sản xuất cho producerId:', producerId);
-
-      const producerActivityLogs = await traceabilityContract.methods.getProducerActivityLogsByProducerId(producerId).call();
-      console.log('Số lượng nhật ký hoạt động của người sản xuất:', producerActivityLogs.length);
-
-      const convertedLogs = convertBigIntToString(producerActivityLogs);
-      const formattedLogs = await Promise.all(convertedLogs.map(async log => {
-          const relatedProducts = await getRelatedProducts(log.relatedProductIds);
-          return {
-              timestamp: new Date(Number(log.timestamp) * 1000).toISOString(),
-              uid: log.uid,
-              activityName: log.activityName,
-              description: log.description,
-              isSystemGenerated: log.isSystemGenerated,
-              imageUrls: log.imageUrls,
-              relatedProducts: relatedProducts
-          };
-      }));
-
-      console.log('Raw producer activity logs:', producerActivityLogs);
-      console.log('Converted logs:', convertedLogs);
-      console.log('Formatted logs:', formattedLogs);
-
-      res.status(200).json({
-          message: 'Truy xuất nhật ký hoạt động của người sản xuất thành công',
-          activityLogs: formattedLogs
-      });
-  } catch (error) {
-      console.error('Lỗi khi truy xuất nhật ký hoạt động của người sản xuất:', error);
-      res.status(500).json({ error: 'Lỗi khi truy xuất nhật ký hoạt động của người sản xuất: ' + error.message });
-  }
-});
-
-async function getRelatedProducts(productIds) {
-  if (!productIds || productIds.length === 0) {
-      return [];
-  }
-
-  const products = await Promise.all(productIds.map(async productId => {
-      const product = await getProductById(productId);
-      return product;
-  }));
-
-  return products;
-}
-
-async function getProductById(productId) {
-  try {
-      const [results] = await db.query('SELECT product_id, product_name FROM products WHERE product_id = ?', [productId]);
-      return results[0];
-  } catch (error) {
-      console.error('Lỗi khi truy vấn sản phẩm:', error);
-      return null;
-  }
-}
-// lấy danh sách sản phẩm để hiển thị trên trang chủ
-app.get('/api/products-trangchu', async (req, res) => {
   try {
       const [products] = await db.query('SELECT product_id, product_name, img FROM products');
       res.status(200).json(products);
   } catch (error) {
       console.error('Lỗi khi lấy danh sách sản phẩm:', error);
       res.status(500).json({ error: 'Không thể lấy danh sách sản phẩm: ' + error.message });
-        }
-    });
-
-     app.get('/api/users', async (req, res) => {
-        try {
-            const [users] = await db.query(`
-                SELECT u.uid, u.name, u.avatar, r.role_name, rg.region_name
-                FROM users u
-                JOIN roles r ON u.role_id = r.role_id
-                LEFT JOIN regions rg ON u.region_id = rg.region_id
-            `);
-            res.status(200).json(users);
-        } catch (error) {
-            console.error('Lỗi khi lấy danh sách người dùng:', error);
-            res.status(500).json({ error: 'Không thể lấy danh sách người dùng: ' + error.message });
-        }
-    });
-
-
+  }
+});
 
 }
 
 module.exports = {
   s3Client,
   web3,
-  traceabilityContract,
-  activityLogContract,
+  contract,
   uploadFile,
   checkFileStatusWithRetry,
   setupRoutes,
