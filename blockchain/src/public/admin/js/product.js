@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', function() {
         window.ProductManager.currentPage = 1;
         window.ProductManager.renderTable();
     }
-
+    
     function renderTable() {
         const start = (currentPage - 1) * rowsPerPage;
         const end = start + rowsPerPage;
