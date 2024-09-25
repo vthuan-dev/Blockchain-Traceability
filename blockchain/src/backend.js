@@ -1590,30 +1590,7 @@ async function getUserRole(userId) {
   });
 }
 
-app.get('/api/users-home', async (req, res) => {
-  try {
-      const [users] = await db.query(`
-          SELECT u.uid, u.name, u.avatar, r.role_name, rg.region_name
-          FROM users u
-          JOIN roles r ON u.role_id = r.role_id
-          LEFT JOIN regions rg ON u.region_id = rg.region_id
-      `);
-      res.status(200).json(users);
-  } catch (error) {
-      console.error('Lỗi khi lấy danh sách người dùng:', error);
-      res.status(500).json({ error: 'Không thể lấy danh sách người dùng: ' + error.message });
-  }
-});
 
-app.get('/api/products', async (req, res) => {
-  try {
-      const [products] = await db.query('SELECT product_id, product_name, img FROM products');
-      res.status(200).json(products);
-  } catch (error) {
-      console.error('Lỗi khi lấy danh sách sản phẩm:', error);
-      res.status(500).json({ error: 'Không thể lấy danh sách sản phẩm: ' + error.message });
-  }
-});
 
 }
 
