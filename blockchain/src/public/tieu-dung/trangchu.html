@@ -51,52 +51,9 @@
                 <h2 class="highlighted-heading" data-aos="fade-up">
                     Sản phẩm nổi bật
                 </h2>
-            <div class="row">
-                <div class="col-md-3 col-6 mb-4" data-aos="fade-up">
-                    <div class="card">
-                        <img src="./hinhanh/5-hinh-anh-cay-buoi-nam-roi-inkythuatso-21-15-48-49.jpg" class="card-img-top" alt="...">
-                        <div class="card-body">
-                            <h5 class="card-title">Bưởi năm roi</h5>
-                            <div class="sanpham-id">
-                                NS123456
-                            </div>
-                        </div>
-                    </div>
+                <div class="row">
+                    <!-- Các sản phẩm sẽ được thêm vào đây bởi JavaScript -->
                 </div>
-                <div class="col-md-3 col-6 mb-4" data-aos="fade-up">
-                    <div class="card justify-content-center" >
-                        <img src="./hinhanh/5-hinh-anh-cay-buoi-nam-roi-inkythuatso-21-15-48-49.jpg" class="card-img-top" alt="...">
-                        <div class="card-body">
-                            <h5 class="card-title">Bưởi năm roi</h5>
-                            <div class="sanpham-id">
-                                NS123456
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3 col-6 mb-4" data-aos="fade-up">
-                    <div class="card">
-                        <img src="./hinhanh/5-hinh-anh-cay-buoi-nam-roi-inkythuatso-21-15-48-49.jpg" class="card-img-top" alt="...">
-                        <div class="card-body">
-                            <h5 class="card-title">Bưởi năm roi</h5>
-                            <div class="sanpham-id">
-                                NS123456
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3 col-6 mb-4" data-aos="fade-up">
-                    <div class="card">
-                        <img src="./hinhanh/5-hinh-anh-cay-buoi-nam-roi-inkythuatso-21-15-48-49.jpg" class="card-img-top" alt="...">
-                        <div class="card-body">
-                            <h5 class="card-title">Bưởi năm roi</h5>
-                            <div class="sanpham-id">
-                                NS123456
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
             
         
         </div>
@@ -106,66 +63,9 @@
                 Thành viên tiêu biểu
             </h2>
             <div class="row">
-                <div class="col-md-3 col-6 mb-4" data-aos="fade-up">
-                    <div class="card">
-                        <img src=".\hinhanh\image.png" class="card-img-top" alt="...">
-                        <div class="card-body">
-                            <h5 class="card-title">Nguyễn Tấn Lộc</h5>
-                            <div class="chucdanh">
-                                Người kiểm duyệt
-                            </div>
-                            <div class="thanhvien-id">
-                                KD123456
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3 col-6 mb-4" data-aos="fade-up">
-                    <div class="card">
-                        <img src=".\hinhanh\image.png" class="card-img-top" alt="...">
-                        <div class="card-body">
-                            <h5 class="card-title">Nguyễn Tấn Lộc</h5>
-                            <div class="chucdanh">
-                                Người kiểm duyệt
-                            </div>
-                            <div class="thanhvien-id">
-                                KD123456
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3 col-6 mb-4" data-aos="fade-up">
-                    <div class="card">
-                        <img src=".\hinhanh\image.png" class="card-img-top" alt="...">
-                        <div class="card-body">
-                            <h5 class="card-title">Nguyễn Tấn Lộc</h5>
-                            <div class="chucdanh">
-                                Người kiểm duyệt
-                            </div>
-                            <div class="thanhvien-id">
-                                KD123456
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3 col-6 mb-4" data-aos="fade-up">
-                    <div class="card">
-                        <img src=".\hinhanh\khanh.jpg" class="card-img-top" alt="...">
-                        <div class="card-body">
-                            <h5 class="card-title">Trần Nguyễn X Khánh</h5>
-                            <div class="chucdanh">
-                                Người sản xuất
-                            </div>
-                            <div class="thanhvien-id">
-                                XS123456
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
+                <!-- Các thành viên sẽ được thêm vào đây bởi JavaScript -->
             </div>
-        </div>
-
+              
         <div class="vungsanxuat" data-aos="fade-up">
             <h2 class="highlighted-heading" data-aos="fade-up">
             Vùng sản xuất
@@ -282,6 +182,8 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/babel-standalone/babel.min.js"></script>
     <script src="./chatbox/chatbox.js"></script>
+
+    <script src="../../components/tieu-dung/trang-chu.js"></script> 
     <script>
         function toggleChat() {
             var chatbox = document.getElementById("chatbox");
@@ -291,6 +193,66 @@
                 chatbox.style.display = "none";
             }
         }
+    </script>
+
+    <script>
+        // lấy danh sách sản phẩm để hiển thị trên trang chủ
+
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        const response = await fetch('/api/products-trangchu');
+        const products = await response.json();
+
+        const productContainer = document.querySelector('.sanpham .row');
+        products.forEach(product => {
+            const productCard = `
+                <div class="col-md-3 col-6 mb-4" data-aos="fade-up">
+                    <div class="card">
+                        <img src="${product.img}" class="card-img-top" alt="${product.product_name}">
+                        <div class="card-body">
+                            <h5 class="card-title">${product.product_name}</h5>
+                        </div>
+                    </div>
+                </div>
+            `;
+            productContainer.innerHTML += productCard;
+        });
+    } catch (error) {
+        console.error('Lỗi khi lấy danh sách sản phẩm:', error);
+    }
+});
+
+    </script>
+
+    <script>
+        // lấy danh sách người dùng để hiển thị trên trang chủ
+// lấy danh sách người dùng để hiển thị trên trang chủ
+
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        const response = await fetch('/api/users');
+        const users = await response.json();
+
+        const userContainer = document.querySelector('.thanhvien .row');
+        users.forEach(user => {
+            const userCard = `
+                <div class="col-md-3 col-6 mb-4" data-aos="fade-up">
+                    <div class="card">
+                        <img src="${user.avatar}" class="card-img-top" alt="${user.name}">
+                        <div class="card-body">
+                            <h5 class="card-title">${user.name}</h5>
+                            <div class="chucdanh">${user.role_name}</div>
+                            <div class="vung">${user.region_name || 'Không xác định'}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            userContainer.innerHTML += userCard;
+        });
+    } catch (error) {
+        console.error('Lỗi khi lấy danh sách người dùng:', error);
+    }
+});
     </script>
 </body>
 </html>

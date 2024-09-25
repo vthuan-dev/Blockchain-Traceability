@@ -104,9 +104,9 @@
 
   app.use(express.static(path.join(__dirname, 'public')));
 
-  // app.get('/', (req, res) => {
-  //   res.sendFile(path.join(__dirname, 'public', 'trangchu.html'));
-  // });
+  app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'tieu-dung', 'trangchu.html'));
+  });
 
   //app.post('/api/register', upload.single('avatar'), (req, res) => {
     // Xử lý logic đăng ký ở đây
