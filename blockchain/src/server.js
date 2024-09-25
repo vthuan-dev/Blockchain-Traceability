@@ -90,38 +90,7 @@
     }
     next();
   });
-  const upload = multer({ storage: multer.memoryStorage() });
-  const dangkyRoutes = require('./components/user/dangky')(db, upload);
-  const dangnhapRoutes = require('./components/user/dangnhap')(db);
-  app.use('/api', dangkyRoutes);
-  app.use('/api', dangnhapRoutes);
-  const { 
-    s3Client, 
-    web3, 
-    traceabilityContract, 
-    activityLogContract, 
-    uploadFile, 
-    checkFileStatusWithRetry, 
-    setupRoutes,
-    activityUpload,
-    processFiles,
-    checkUserExists,
-    checkProductExists,
-    getProducerById,
-    replacer,
-    cleanKeys,
-    BUCKET_NAME
-  } = require('./backend.js');
-
-  // app.use((req, res, next) => {
-  //   if (!req.session.userId) {
-  //     console.log('No userId in session');
-  //   }
-  //   next();
-  // });
-
-    setupRoutes(app, db);
-
+  
   // ... (phần code khác giữ nguyên)
 
   setupRoutes(app, db);
