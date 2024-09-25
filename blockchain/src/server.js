@@ -282,37 +282,37 @@
       }
   });
 
-    app.get('/api/user-info', async (req, res) => { 
-      if (req.session.userId) {
-        try {
-          const [users] = await db.query(`
-            SELECT u.uid, u.name, u.email, r.role_name, reg.region_name 
-            FROM users u 
-            JOIN roles r ON u.role_id = r.role_id 
-            JOIN regions reg ON u.region_id = reg.region_id 
-            WHERE u.uid = ?
-          `, [req.session.userId]);
+    // app.get('/api/user-info', async (req, res) => { 
+    //   if (req.session.userId) {
+    //     try {
+    //       const [users] = await db.query(`
+    //         SELECT u.uid, u.name, u.email, r.role_name, reg.region_name 
+    //         FROM users u 
+    //         JOIN roles r ON u.role_id = r.role_id 
+    //         JOIN regions reg ON u.region_id = reg.region_id 
+    //         WHERE u.uid = ?
+    //       `, [req.session.userId]);
           
-          const user = users[0];
-          if (user) {
-            res.json({
-              id: user.uid,  // Đảm bảo trả về ID người dùng
-              name: user.name,
-              email: user.email,
-              role: user.role_name,
-              region: user.region_name
-            });
-          } else {
-            res.status(404).json({ message: 'Không tìm thấy thông tin người dùng' });
-          }
-        } catch (error) {
-          console.error('Lỗi khi lấy thông tin người dùng:', error);
-          res.status(500).json({ message: 'Lỗi server' });
-        }
-      } else {
-        res.status(401).json({ message: 'Chưa đăng nhập' });
-      }
-    });
+    //       const user = users[0];
+    //       if (user) {
+    //         res.json({
+    //           id: user.uid,  // Đảm bảo trả về ID người dùng
+    //           name: user.name,
+    //           email: user.email,
+    //           role: user.role_name,
+    //           region: user.region_name
+    //         });
+    //       } else {
+    //         res.status(404).json({ message: 'Không tìm thấy thông tin người dùng' });
+    //       }
+    //     } catch (error) {
+    //       console.error('Lỗi khi lấy thông tin người dùng:', error);
+    //       res.status(500).json({ message: 'Lỗi server' });
+    //     }
+    //   } else {
+    //     res.status(401).json({ message: 'Chưa đăng nhập' });
+    //   }
+    // });
 
     app.post('/api/dangxuat', (req, res) => {
         req.session.destroy((err) => {
