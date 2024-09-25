@@ -157,13 +157,12 @@ function useColors (): boolean {
 /**
  * Adds ANSI color escape codes if enabled.
  */
-
 function formatArgs (this: any, args: any[]): void {
   const {
     namespace: name, useColors
   } = this
 
-  if (useColors != null) {
+  if (useColors === true) {
     const c = this.color
     const colorCode = '\u001B[3' + (c < 8 ? c : '8;5;' + c)
     const prefix = `  ${colorCode};1m${name} \u001B[0m`
