@@ -21,6 +21,7 @@
 .navbar-brand {
     display: flex;
     align-items: center;
+    text-decoration: none !important;
 }
 
 .logo-image {
@@ -168,4 +169,14 @@ body.menu-open {
 
 .nav-item {
     align-items: center;
+}
+
+.navbar-nav .nav-link,
+.navbar-nav .dropdown-toggle,
+.navbar-nav .dropdown-item {
+    text-decoration: none !important;
+}
+
+.navbar-brand {
+    text-decoration: none !important;
 }
