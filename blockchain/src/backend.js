@@ -1677,6 +1677,38 @@ app.get('/api/products', async (req, res) => {
     }
   });
 
+  app.get('/api/activity-logs/:uid', async (req, res) => {
+    try {
+        const producerId = req.params.uid;
+        console.log('Đang truy xuất nhật ký hoạt động của người sản xuất cho producerId:', producerId);
+
+        const producerActivityLogs = await traceabilityContract.methods.getProducerActivityLogsByProducerId(producerId).call();
+        console.log('Số lượng nhật ký hoạt động của người sản xuất:', producerActivityLogs.length);
+
+        const convertedLogs = convertBigIntToString(producerActivityLogs);
+        const formattedLogs = await Promise.all(convertedLogs.map(async log => {
+            const relatedProducts = await getRelatedProducts(log.relatedProductIds);
+            return {
+                timestamp: new Date(Number(log.timestamp) * 1000).toISOString(),
+                uid: log.uid,
+                activityName: log.activityName,
+                description: log.description,
+                isSystemGenerated: log.isSystemGenerated,
+                imageUrls: log.imageUrls,
+                relatedProducts: relatedProducts
+            };
+        }));
+
+        res.status(200).json({
+            message: 'Truy xuất nhật ký hoạt động của người sản xuất thành công',
+            activityLogs: formattedLogs
+        });
+    } catch (error) {
+        console.error('Lỗi khi truy xuất nhật ký hoạt động của người sản xuất:', error);
+        res.status(500).json({ error: 'Lỗi khi truy xuất nhật ký hoạt động của người sản xuất: ' + error.message });
+    }
+});
+
 async function getRelatedProducts(productIds) {
   if (!productIds || productIds.length === 0) {
       return [];
