@@ -1708,62 +1708,70 @@ app.get('/api/products', async (req, res) => {
       return null;
     }
   }
+
   app.get('/api/activity-logs/:uid', async (req, res) => {
     try {
-      const producerId = req.params.uid;
-      console.log('Đang truy xuất nhật ký hoạt động của người sản xuất cho producerId:', producerId);
-  
-      const producerActivityLogs = await traceabilityContract.methods.getProducerActivityLogsByProducerId(producerId).call();
-      console.log('Số lượng nhật ký hoạt động của người sản xuất:', producerActivityLogs.length);
-  
-      const convertedLogs = convertBigIntToString(producerActivityLogs);
-      const formattedLogs = await Promise.all(convertedLogs.map(async log => {
-        const relatedProducts = await getRelatedProducts(log.relatedProductIds);
-        return {
-          timestamp: new Date(Number(log.timestamp) * 1000).toISOString(),
-          uid: log.uid,
-          activityName: log.activityName,
-          description: log.description,
-          isSystemGenerated: log.isSystemGenerated,
-          imageUrls: log.imageUrls,
-          relatedProducts: relatedProducts.map(product => ({
-            product_id: product.product_id,
-            product_name: product.product_name,
-            image_url: product.image_url
-          }))
-        };
-      }));
-  
-      res.status(200).json({
-        message: 'Truy xuất nhật ký hoạt động của người sản xuất thành công',
-        activityLogs: formattedLogs
-      });
-    } catch (error) {
-      console.error('Lỗi khi truy xuất nhật ký hoạt động của người sản xuất:', error);
-      res.status(500).json({ error: 'Lỗi khi truy xuất nhật ký hoạt động của người sản xuất: ' + error.message });
-    }
-  });
+    const producerId = req.params.uid;
+    console.log('Đang truy xuất nhật ký hoạt động của người sản xuất cho producerId:', producerId);
 
-async function getRelatedProducts(productIds) {
-  if (!productIds || productIds.length === 0) {
-      return [];
+    const producerActivityLogs = await traceabilityContract.methods.getProducerActivityLogsByProducerId(producerId).call();
+    console.log('Số lượng nhật ký hoạt động của người sản xuất:', producerActivityLogs.length);
+
+    const convertedLogs = convertBigIntToString(producerActivityLogs);
+    const formattedLogs = await Promise.all(convertedLogs.map(async log => {
+      const relatedProducts = await getRelatedProducts(log.relatedProductIds);
+      return {
+        timestamp: new Date(Number(log.timestamp) * 1000).toISOString(),
+        uid: log.uid,
+        activityName: log.activityName,
+        description: log.description,
+        isSystemGenerated: log.isSystemGenerated,
+        imageUrls: log.imageUrls,
+        relatedProducts: relatedProducts.map(product => ({
+          product_id: product.product_id,
+          product_name: product.product_name,
+          image_url: product.image_url
+        }))
+      };
+    }));
+
+    res.status(200).json({
+      message: 'Truy xuất nhật ký hoạt động của người sản xuất thành công',
+      activityLogs: formattedLogs
+    });
+  } catch (error) {
+    console.error('Lỗi khi truy xuất nhật ký hoạt động của người sản xuất:', error);
+    res.status(500).json({ error: 'Lỗi khi truy xuất nhật ký hoạt động của người sản xuất: ' + error.message });
   }
+});
 
-  const products = await Promise.all(productIds.map(async productId => {
+  async function getRelatedProducts(productIds) {
+    if (!productIds || productIds.length === 0) {
+      return [];
+    }
+  
+    const products = await Promise.all(productIds.map(async productId => {
       const product = await getProductById(productId);
       return product;
-  }));
-
-  return products;
+    }));
+  
+  return products.filter(product => product !== null);
 }
 
 async function getProductById(productId) {
   try {
-      const [results] = await db.query('SELECT product_id, product_name FROM products WHERE product_id = ?', [productId]);
-      return results[0];
+    const [results] = await db.query('SELECT product_id, product_name, img FROM products WHERE product_id = ?', [productId]);
+    if (results.length > 0) {
+      return {
+        product_id: results[0].product_id,
+        product_name: results[0].product_name,
+        image_url: results[0].img
+      };
+    }
+    return null;
   } catch (error) {
-      console.error('Lỗi khi truy vấn sản phẩm:', error);
-      return null;
+    console.error('Lỗi khi truy vấn sản phẩm:', error);
+    return null;
   }
 }
 
@@ -1809,6 +1817,26 @@ app.get('/api/user/:uid', async (req, res) => {
   } catch (error) {
       console.error('Lỗi khi lấy thông tin chi tiết người dùng:', error);
       res.status(500).json({ error: 'Không thể lấy thông tin chi tiết người dùng: ' + error.message });
+  }
+});
+
+
+app.get('/api/product/:productId', async (req, res) => {
+  try {
+    const productId = req.params.productId;
+    const [results] = await db.query(
+      'SELECT product_id, product_name, description, price, img, uses, process FROM products WHERE product_id = ?', 
+      [productId]
+    );
+    
+    if (results.length > 0) {
+      res.status(200).json(results[0]);
+    } else {
+      res.status(404).json({ error: 'Không tìm thấy sản phẩm' });
+    }
+  } catch (error) {
+    console.error('Lỗi khi lấy thông tin sản phẩm:', error);
+    res.status(500).json({ error: 'Không thể lấy thông tin sản phẩm: ' + error.message });
   }
 });
 
