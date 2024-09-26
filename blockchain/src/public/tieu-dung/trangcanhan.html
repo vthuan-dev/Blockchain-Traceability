@@ -12,6 +12,7 @@
     <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
     <div class="container w-100">
@@ -93,9 +94,9 @@
                 <div id="activityLogs"></div>
             </div>
         
-            <div class="text-center my-2">
-                <button id="loadMore" class="btn btn-primary" style="display: none;">Xem thêm</button>
-            </div>
+            <button id="loadMore" class="load-more-btn" aria-label="Xem thêm">
+                <i class="fas fa-chevron-down"></i>
+            </button>
         </div>
        
     
@@ -195,137 +196,151 @@
     });
 });
 </script>
-
 <script>
-let currentPage = 1;
-const itemsPerPage = 5;
-
-document.addEventListener('DOMContentLoaded', async () => {
-    const userId = getUserIdFromURL();
-    await loadActivityLogs(userId);
-
-    document.getElementById('loadMore').addEventListener('click', async () => {
-        currentPage++;
-        await loadActivityLogs(userId);
-    });
-});
-async function loadActivityLogs(userId) {
-    try {
-        const response = await fetch(`/api/activity-logs/${userId}?page=${currentPage}&limit=${itemsPerPage}`);
-        const data = await response.json();
-
-        if (response.status !== 200) {
-            throw new Error(data.error || 'Lỗi không xác định');
-        }
-
-        const activityLogsContainer = document.getElementById('activityLogs');
-        
-        // Kiểm tra nếu không có hoạt động nào
-        if (data.activityLogs.length === 0 && currentPage === 1) {
-            activityLogsContainer.innerHTML = `
-                <div class="alert alert-info mt-4" role="alert">
-                     Chưa có hoạt động nào để hiển thị.
-                </div>
-            `;
-            document.getElementById('loadMore').style.display = 'none';
-            return;
-        }
-
-        // Sắp xếp hoạt động theo thời gian gần đây nhất
-        data.activityLogs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-        data.activityLogs.forEach((log, index) => {
-            const logElement = document.createElement('div');
-            logElement.className = 'activity-log container mt-4 border rounded';
-            logElement.innerHTML = `
-                <div class="activity-header row align-items-center my-3">
-                    <div class="col">
-                        <h5 class="activity-name mb-2">${log.activityName}</h5>
-                        <small class="activity-timestamp text-muted">Thời gian: ${new Date(log.timestamp).toLocaleString()}</small>
-                    </div>
-                </div>
-                <div class="activity-content card mb-3">
-                    <div class="card-body">
-                        <h6 class="card-subtitle mb-2 text-muted">Mô tả hoạt động:</h6>
-                        <p class="activity-description card-text">${log.description}</p>
-                        
-                        ${log.relatedProducts.length > 0 ? `
-                            <h6 class="card-subtitle mb-2 mt-4 text-muted">Liên kết liên quan:</h6>
-                            <div id="carouselLinks${index}" class="carousel slide container my-3" data-bs-ride="carousel">
-                                <div class="carousel-inner">
-                                    ${createCarouselItems(log.relatedProducts, 4)}
-                                </div>
-                                <button class="carousel-control-prev" type="button" data-bs-target="#carouselLinks${index}" data-bs-slide="prev">
-                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                    <span class="visually-hidden">Previous</span>
-                                </button>
-                                <button class="carousel-control-next" type="button" data-bs-target="#carouselLinks${index}" data-bs-slide="next">
-                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                    <span class="visually-hidden">Next</span>
-                                </button>
-                            </div>
-                        ` : ''}
-                        
-                        ${log.imageUrls.length > 0 ? `
-                            <h6 class="card-subtitle mb-2 mt-4 text-muted">Ảnh/video:</h6>
-                            <div id="carouselMedia${index}" class="carousel slide container my-3" data-bs-ride="carousel">
-                                <div class="carousel-inner">
-                                    ${createCarouselItems(log.imageUrls, 4)}
-                                </div>
-                                <button class="carousel-control-prev" type="button" data-bs-target="#carouselMedia${index}" data-bs-slide="prev">
-                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                    <span class="visually-hidden">Previous</span>
-                                </button>
-                                <button class="carousel-control-next" type="button" data-bs-target="#carouselMedia${index}" data-bs-slide="next">
-                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                    <span class="visually-hidden">Next</span>
-                                </button>
-                            </div>
-                        ` : ''}
-                    </div>
-                </div>
-            `;
-            activityLogsContainer.appendChild(logElement);
+    let currentPage = 1;
+    const itemsPerPage = 5;
+    let allActivities = [];
+    let displayedActivities = 0;
+    
+    document.addEventListener('DOMContentLoaded', async () => {
+        const userId = getUserIdFromURL();
+        await loadAllActivityLogs(userId);
+        displayActivities();
+    
+        document.getElementById('loadMore').addEventListener('click', () => {
+            displayActivities();
         });
-
-        // Ẩn nút "Xem thêm" nếu không còn dữ liệu
-        if (data.activityLogs.length < itemsPerPage) {
-            document.getElementById('loadMore').style.display = 'none';
+    });
+    
+    async function loadAllActivityLogs(userId) {
+        try {
+            const response = await fetch(`/api/activity-logs/${userId}`);
+            const data = await response.json();
+    
+            if (response.status !== 200) {
+                throw new Error(data.error || 'Lỗi không xác định');
+            }
+    
+            allActivities = data.activityLogs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            
+            if (allActivities.length === 0) {
+                const activityLogsContainer = document.getElementById('activityLogs');
+                activityLogsContainer.innerHTML = `
+                    <div class="alert alert-info mt-4" role="alert">
+                         Chưa có hoạt động nào để hiển thị.
+                    </div>
+                `;
+                document.getElementById('loadMore').style.display = 'none';
+            }
+        } catch (error) {
+            console.error('Lỗi khi lấy nhật ký hoạt động:', error);
+            const activityLogsContainer = document.getElementById('activityLogs');
+            activityLogsContainer.innerHTML = `<p class="text-danger">Lỗi khi tải nhật ký hoạt động: ${error.message}</p>`;
         }
-
-    } catch (error) {
-        console.error('Lỗi khi lấy nhật ký hoạt động:', error);
-        const activityLogsContainer = document.getElementById('activityLogs');
-        activityLogsContainer.innerHTML += `<p class="text-danger">Lỗi khi tải nhật ký hoạt động: ${error.message}</p>`;
     }
-}
-function createCarouselItems(items, itemsPerSlide) {
-    let carouselItems = '';
-    for (let i = 0; i < items.length; i += itemsPerSlide) {
-        const slideItems = items.slice(i, i + itemsPerSlide);
-        carouselItems += `
-            <div class="carousel-item ${i === 0 ? 'active' : ''}">
-                <div class="row">
-                    ${slideItems.map(item => `
-                        <div class="col-md-3">
-                            <div class="card card-body">
-                                <img class="img-fluid" src="${item.image || item}" alt="${item.product_name || 'Activity image'}">
+    
+    function displayActivities() {
+        const activityLogsContainer = document.getElementById('activityLogs');
+        const loadMoreButton = document.getElementById('loadMore');
+        const remainingActivities = allActivities.length - displayedActivities;
+        const activitiesToDisplay = Math.min(itemsPerPage, remainingActivities);
+    
+        for (let i = 0; i < activitiesToDisplay; i++) {
+            const log = allActivities[displayedActivities + i];
+            const logElement = createActivityLogElement(log, displayedActivities + i);
+            activityLogsContainer.appendChild(logElement);
+        }
+    
+        displayedActivities += activitiesToDisplay;
+    
+        if (displayedActivities >= allActivities.length) {
+            loadMoreButton.style.display = 'none';
+        } else {
+            loadMoreButton.style.display = 'flex';
+            loadMoreButton.innerHTML = '<i class="fas fa-chevron-down"></i>';
+        }
+    }
+    
+    function createActivityLogElement(log, index) {
+        const logElement = document.createElement('div');
+        logElement.className = 'activity-log container mt-4 border rounded';
+        logElement.innerHTML = `
+            <div class="activity-header row align-items-center my-3">
+                <div class="col">
+                    <h5 class="activity-name mb-2">${log.activityName}</h5>
+                    <small class="activity-timestamp text-muted">Thời gian: ${new Date(log.timestamp).toLocaleString()}</small>
+                </div>
+            </div>
+            <div class="activity-content card mb-3">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Mô tả hoạt động:</h6>
+                    <p class="activity-description card-text">${log.description}</p>
+                    
+                    ${log.relatedProducts.length > 0 ? `
+                        <h6 class="card-subtitle mb-2 mt-4 text-muted">Liên kết liên quan:</h6>
+                        <div id="carouselLinks${index}" class="carousel slide container my-3" data-bs-ride="carousel">
+                            <div class="carousel-inner">
+                                ${createCarouselItems(log.relatedProducts, 4)}
                             </div>
+                            <button class="carousel-control-prev" type="button" data-bs-target="#carouselLinks${index}" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Previous</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#carouselLinks${index}" data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Next</span>
+                            </button>
                         </div>
-                    `).join('')}
+                    ` : ''}
+                    
+                    ${log.imageUrls.length > 0 ? `
+                        <h6 class="card-subtitle mb-2 mt-4 text-muted">Ảnh/video:</h6>
+                        <div id="carouselMedia${index}" class="carousel slide container my-3" data-bs-ride="carousel">
+                            <div class="carousel-inner">
+                                ${createCarouselItems(log.imageUrls, 4)}
+                            </div>
+                            <button class="carousel-control-prev" type="button" data-bs-target="#carouselMedia${index}" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Previous</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#carouselMedia${index}" data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Next</span>
+                            </button>
+                        </div>
+                    ` : ''}
                 </div>
             </div>
         `;
+        return logElement;
     }
-    return carouselItems;
-}
-
-function getUserIdFromURL() {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('uid');
-}
+    
+    function createCarouselItems(items, itemsPerSlide) {
+        let carouselItems = '';
+        for (let i = 0; i < items.length; i += itemsPerSlide) {
+            const slideItems = items.slice(i, i + itemsPerSlide);
+            carouselItems += `
+                <div class="carousel-item ${i === 0 ? 'active' : ''}">
+                    <div class="row">
+                        ${slideItems.map(item => `
+                            <div class="col-md-3">
+                                <div class="card card-body">
+                                    <img class="img-fluid" src="${item.image || item}" alt="${item.product_name || 'Activity image'}">
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        return carouselItems;
+    }
+    
+    function getUserIdFromURL() {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get('uid');
+    }
 </script>
-
 <script>
     document.addEventListener('click', function(event) {
         var isClickInside = document.querySelector('.navbar').contains(event.target);
