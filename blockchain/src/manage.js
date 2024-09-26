@@ -81,7 +81,8 @@ router.post('/api/products', upload.single('img'), async (req, res) => {
 
         let imgUrl = null;
         if (img) {
-            const imgRef = ref(storage, `products/${Date.now()}_${img.originalname}`);
+            const sanitizedFileName = img.originalname.replace(/\s+/g, '_').toLowerCase();
+            const imgRef = ref(storage, `products/${Date.now()}_${sanitizedFileName}`);
             const snapshot = await uploadBytes(imgRef, img.buffer);
             imgUrl = await getDownloadURL(snapshot.ref);
         }
@@ -131,7 +132,7 @@ router.delete('/api/users/:id', async (req, res) => {
         await connection.query('DELETE FROM notification_change WHERE actor_id = ?', [userId]);
 
         // Xóa các hàng liên quan trong bảng notification
-        await connection.query('DELETE FROM notification WHERE notifier_id = ?', [userId]);
+        await connection.query('DELETE FROM notification WHERE user_id = ?', [userId]);
 
         // Xóa người dùng
         await connection.query('DELETE FROM users WHERE uid = ?', [userId]);
