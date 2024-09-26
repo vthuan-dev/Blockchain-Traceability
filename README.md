@@ -145,8 +145,8 @@ Nếu bạn muốn đóng góp vào dự án, vui lòng tạo pull request hoặ
 
 ## Giấy Phép
 
-[Thêm thông tin về giấy phép nếu có]
+
 
 ## Liên Hệ
 
-Để biết thêm thông tin, vui lòng liên hệ: [Thêm thông tin liên hệ]
+Để biết thêm thông tin, vui lòng liên hệ: [https://www.facebook.com/vthuan.dev]
