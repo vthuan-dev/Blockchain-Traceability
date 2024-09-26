@@ -57,7 +57,7 @@
       port: process.env.DB_PORT,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      connectTimeout: 10000,
+      connectTimeout: 60000,
       waitForConnections: true,
       connectionLimit: 10,
       queueLimit: 0
@@ -358,7 +358,7 @@
           JOIN notification_object no ON n.notification_object_id = no.id
           JOIN register r ON no.entity_id = r.id
           JOIN notification_type nt ON no.entity_type_id = nt.id
-          WHERE n.recipient_type = 'admin' AND n.notifier_id = ?
+          WHERE n.recipient_type = 'admin' AND n.admin_id = ?
           ORDER BY r.created_on DESC
         `, [req.session.adminId]);
     
@@ -371,7 +371,7 @@
 
     app.post('/api/notifications/mark-all-read', async (req, res) => {
       try {
-        await db.query('DELETE FROM notification WHERE recipient_type = "admin" AND notifier_id = ?', [req.session.adminId]);
+        await db.query('DELETE FROM notification WHERE recipient_type = "admin" AND admin_id = ?', [req.session.adminId]);
         res.status(200).json({ message: 'Tất cả thông báo đã được xóa' });
       } catch (error) {
         console.error('Lỗi khi xóa tất cả thông báo:', error);

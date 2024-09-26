@@ -171,7 +171,8 @@
                 const hashedPassword = await bcrypt.hash(password, 10);
                 let avatarUrl = null;
                 if (req.file) {
-                    const avatarRef = ref(storage, `avatars/${Date.now()}_${req.file.originalname}`);
+                    const sanitizedFileName = req.file.originalname.replace(/\s+/g, '_').toLowerCase();
+                    const avatarRef = ref(storage, `avatars/${Date.now()}_${sanitizedFileName}`);
                     const snapshot = await uploadBytes(avatarRef, req.file.buffer);
                     avatarUrl = await getDownloadURL(snapshot.ref);
                 }
