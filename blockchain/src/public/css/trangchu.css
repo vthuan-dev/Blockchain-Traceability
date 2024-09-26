@@ -97,7 +97,10 @@ body {
     color: #d0dceb; /* Màu chữ tối */
     padding: 40px 0;
     border-radius: 20px 20px 0 0; /* Bo tròn góc trên */
-    box-shadow: 0 -5px 15px rgba(0,0,0,0.1); /* Thêm bóng đổ nhẹ */
+    box-shadow: 0 -5px 15px rgba(99, 146, 97, 0.1); /* Thêm bóng đổ nhẹ */
+}
+.footer.bg-dark {
+    background-color: #78e08f !important;
 }
 
 .footer h3 {
@@ -137,6 +140,9 @@ body {
 
 .footer .social-links a:hover {
     color: #174ea6;
+}
+.text-danger.h2{
+    color: #18ad51 !important;
 }
 
 /* Custom styles for the image */
