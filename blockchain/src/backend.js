@@ -1782,7 +1782,7 @@ app.get('/api/users-home', async (req, res) => {
   }
 });
 
-app.get('/api/products', async (req, res) => {
+app.get('/api/products-home', async (req, res) => {
   try {
       const [products] = await db.query('SELECT product_id, product_name, img FROM products');
       res.status(200).json(products);
