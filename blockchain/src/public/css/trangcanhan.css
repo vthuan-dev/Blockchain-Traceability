@@ -235,6 +235,7 @@ body{
 .col-md-8 {
     border-left: 1px solid #e0e0e0;
     padding-left: 30px;
+    background-color: #dfe6e9;
 }
 
 .col-md-4 {
