@@ -104,11 +104,15 @@
 
   app.use(express.static(path.join(__dirname, 'public')));
 
-  app.get('/', (req, res) => {
+  app.get('/trangchu.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'tieu-dung', 'trangchu.html'));
   });
   app.get('/trangcanhan.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'tieu-dung', 'trangcanhan.html'));
+  });
+
+  app.get('/sanpham.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'tieu-dung', 'sanpham.html'));
   });
 
   //app.post('/api/register', upload.single('avatar'), (req, res) => {

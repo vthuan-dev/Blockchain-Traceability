@@ -77,7 +77,7 @@ body{
 }
 
 .profile-name {
-    color: #1a73e8;
+    color: #13cc5a;
     font-weight: 600;
     font-size: 1.8rem;
     margin-bottom: 15px;
@@ -116,7 +116,7 @@ body{
     border-radius: 10px;
     padding: 15px;
     margin-top: 20px;
-    border-left: 4px solid #1a73e8;
+    border-left: 4px solid #0bcf56;
     text-align: center;
     width: 100%;
 }
@@ -151,13 +151,13 @@ body{
 .profile-phone {
     position: relative;
     cursor: pointer;
-    color: #1a73e8;
+    color: #000000;
     text-decoration: none;
     transition: all 0.3s ease;
 }
 
 .profile-phone:hover {
-    color: #174ea6;
+    color: #19bd58;
 }
 
 .profile-phone::after {
@@ -202,7 +202,7 @@ body{
 
 .contact-options-dropdown a:hover {
     background-color: #f8f9fa;
-    color: #1a73e8;
+    color: #1ccc42;
 }
 
 .show {
@@ -211,7 +211,7 @@ body{
 
 
 .card-body{
-    background-color: #4cd137;
+    background-color: #ced6e0;
     }
 
 #activityLogs{
@@ -230,6 +230,7 @@ body{
 .profile-container:hover {
     transform: translateY(-5px);
     box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+    border-radius: 20px;
 }
 
 .col-md-8 {
@@ -240,4 +241,50 @@ body{
 
 .col-md-4 {
     padding-right: 30px;
+}
+
+.custom-navbar {
+    background-color: rgba(76, 209, 55,1.0);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 10px;
+    height: 80px;
+}
+
+.navbar.custom-navbar {
+    background-color: #4CAF50 !important;
+}
+
+h2.text-danger {
+    color: rgba(76, 209, 55, 1.0) !important; /* Sử dụng màu xanh lá cây thay vì đỏ */
+    font-size: 1.8rem !important;
+    font-weight: 600 !important;
+    text-align: center !important;
+    margin-top: 30px !important;
+    margin-bottom: 20px !important;
+    padding-bottom: 10px !important;
+    border-bottom: 2px solid #4cd137 !important; /* Đổi màu border thành xanh lá cây */
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    position: relative !important;
+}
+
+h2.text-danger::after {
+    content: '' !important;
+    display: block !important;
+    width: 50px !important;
+    height: 3px !important;
+    background-color: #4cd137 !important; /* Đổi màu thành xanh lá cây */
+    position: absolute !important;
+    bottom: -2px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+}
+
+h2.text-danger:hover {
+    color: #45a049 !important; /* Màu xanh lá cây đậm hơn khi hover */
+    transition: color 0.3s ease !important;
 }
