@@ -81,25 +81,38 @@ router.post('/api/products', upload.single('img'), async (req, res) => {
 
         let imgUrl = null;
         if (img) {
-            const imgRef = ref(storage, `products/${Date.now()}_${img.originalname}`);
-            const snapshot = await uploadBytes(imgRef, img.buffer);
-            imgUrl = await getDownloadURL(snapshot.ref);
-        }
-
-        const query = 'INSERT INTO products (product_name, price, description, img, uses, process) VALUES (?, ?, ?, ?, ?, ?)';
-        try {
-            const results = await queryDatabase(query, [product_name, price, description, imgUrl, uses, process]);
-            res.status(201).json({ message: 'Sản phẩm đã được thêm thành công', id: results.insertId });
-        } catch (error) {
-            console.error('Lỗi khi thêm sản phẩm:', error);
-            res.status(500).json({ error: 'Lỗi khi thêm sản phẩm vào cơ sở dữ liệu' });
+            try {
+                const sanitizedFileName = img.originalname.replace(/\s+/g, '_').toLowerCase();
+                const imgRef = ref(storage, `products/${Date.now()}_${sanitizedFileName}`);
+                console.log('Đang tải lên Firebase:', imgRef.fullPath);
+                const snapshot = await uploadBytes(imgRef, img.buffer);
+                imgUrl = await getDownloadURL(snapshot.ref);
+                console.log('URL hình ảnh sau khi tải lên:', imgUrl);
+                
+                // Thêm một khoảng thời gian chờ ngắn
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Lưu vào cơ sở dữ liệu
+                const query = 'INSERT INTO products (product_name, price, description, img, uses, process) VALUES (?, ?, ?, ?, ?, ?)';
+                const results = await queryDatabase(query, [product_name, price, description, imgUrl, uses, process]);
+                console.log('Kết quả sau khi thêm vào cơ sở dữ liệu:', results);
+                
+                // Kiểm tra URL đã lưu
+                const checkQuery = 'SELECT img FROM products WHERE product_id = ?';
+                const [savedProduct] = await queryDatabase(checkQuery, [results.insertId]);
+                console.log('URL đã lưu trong cơ sở dữ liệu:', savedProduct.img);
+                
+                res.status(201).json({ message: 'Sản phẩm đã được thêm thành công', id: results.insertId, imgUrl: imgUrl });
+            } catch (uploadError) {
+                console.error('Lỗi khi tải lên Firebase:', uploadError);
+                return res.status(500).json({ error: 'Lỗi khi tải lên hình ảnh' });
+            }
         }
     } catch (error) {
         console.error('Lỗi khi xử lý yêu cầu thêm sản phẩm:', error);
         res.status(500).json({ error: 'Lỗi khi xử lý yêu cầu thêm sản phẩm' });
     }
 });
-
 // Endpoint để xóa sản phẩm
 router.delete('/api/products/:id', async (req, res) => {
     const { id } = req.params;
@@ -131,7 +144,7 @@ router.delete('/api/users/:id', async (req, res) => {
         await connection.query('DELETE FROM notification_change WHERE actor_id = ?', [userId]);
 
         // Xóa các hàng liên quan trong bảng notification
-        await connection.query('DELETE FROM notification WHERE notifier_id = ?', [userId]);
+        await connection.query('DELETE FROM notification WHERE user_id = ?', [userId]);
 
         // Xóa người dùng
         await connection.query('DELETE FROM users WHERE uid = ?', [userId]);

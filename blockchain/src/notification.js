@@ -39,7 +39,9 @@ async function saveNotification(db, actorId, message, type) {
     // Lưu vào bảng notification cho từng admin
     for (const admin of admins) {
       await connection.query(
-        'INSERT INTO notification (notification_object_id, notifier_id, recipient_type) VALUES (?, ?, ?)',
+        `INSERT INTO notification (notification_object_id, admin_id, recipient_type) 
+         VALUES (?, ?, ?) 
+         ON DUPLICATE KEY UPDATE notification_object_id = VALUES(notification_object_id)`,
         [notificationObjectId, admin.id, 'admin']
       );
     }
