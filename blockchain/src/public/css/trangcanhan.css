@@ -2,14 +2,24 @@
     text-decoration: none;
     transform: translateY(50%) !important;
 }
-
+body{
+    background-color: #f0f2f5;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
 .profile-img {
     width: 150px;
     height: 150px;
     border-radius: 50%;
     object-fit: cover;
-    border: 3px solid #f8f9fa;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    border: 4px solid #ffffff;
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+
+    
+}
+
+.profile-img:hover {
+    transform: scale(1.05);
 }
 
 .qr-code {
@@ -67,44 +77,62 @@
 }
 
 .profile-name {
-    color: #007bff;
-    font-weight: bold;
+    color: #1a73e8;
+    font-weight: 600;
+    font-size: 1.8rem;
+    margin-bottom: 15px;
+    text-align: center; /* Căn giữa text */
+    width: 100%; /* Đảm bảo tên chiếm toàn bộ chiều rộng */
 }
 
 .list-unstyled li {
-    padding: 5px 0;
-    border-bottom: 1px solid #f1f1f1;
+    padding: 12px 0;
+    border-bottom: 1px solid #e0e0e0;
+    transition: all 0.3s ease;
 }
 
 .list-unstyled li:last-child {
     border-bottom: none;
 }
 
+.list-unstyled li:hover {
+    background-color: #f8f9fa;
+    padding-left: 10px;
+}
+
 .list-unstyled strong {
-    color: #6c757d;
-    min-width: 120px;
+    color: #5f6368;
+    min-width: 130px;
     display: inline-block;
+    font-weight: 600;
+}
+
+.profile-region, .profile-phone, .profile-address {
+    color: #202124;
 }
 
 .address-container {
-    margin-bottom: 15px;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 20px;
+    border-left: 4px solid #1a73e8;
+    text-align: center;
+    width: 100%;
 }
 
 .address-container strong {
     display: block;
     margin-bottom: 5px;
-    color: #555;
+    color: #5f6368;
     font-size: 0.9em;
+    font-weight: 600;
 }
 
 .profile-address {
     font-style: normal;
-    line-height: 1.4;
-    color: #333;
-    background-color: #f8f9fa;
-    padding: 10px;
-    border-radius: 5px;
-    border-left: 3px solid #007bff;
+    line-height: 1.5;
+    color: #202124;
 }
 
 .contact-options {
@@ -121,33 +149,94 @@
 }
 
 .profile-phone {
+    position: relative;
     cursor: pointer;
-    color: #007bff;
-    text-decoration: underline;
+    color: #1a73e8;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.profile-phone:hover {
+    color: #174ea6;
+}
+
+.profile-phone::after {
+    content: '\f0d7';
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    margin-left: 5px;
+    font-size: 0.8em;
 }
 
 .contact-options-dropdown {
-    display: none;
     position: absolute;
-    background-color: #f9f9f9;
-    min-width: 160px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    z-index: 1;
-    border-radius: 4px;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    display: none;
+    min-width: 120px;
+    padding: 5px 0;
+    margin: 2px 0 0;
+    background-color: #804040;
+    border: 1px solid rgba(0,0,0,.15);
+    border-radius: 8px;
+    box-shadow: 0 6px 12px rgba(0,0,0,.175);
 }
 
-.contact-options-dropdown a {
-    color: black;
-    padding: 12px 16px;
-    text-decoration: none;
+.contact-options-dropdown.show {
     display: block;
 }
 
+.contact-options-dropdown a {
+    display: block;
+    padding: 8px 15px;
+    clear: both;
+    font-weight: 400;
+    color: #212529;
+    text-align: inherit;
+    white-space: nowrap;
+    background-color: transparent;
+    border: 0;
+    transition: all 0.3s ease;
+}
+
 .contact-options-dropdown a:hover {
-    background-color: #f1f1f1;
+    background-color: #f8f9fa;
+    color: #1a73e8;
 }
 
 .show {
     display: block;
 }
 
+
+.card-body{
+    background-color: #4cd137;
+    }
+
+#activityLogs{
+    background-color: #dcdde1;
+}
+
+.profile-container {
+    background-color: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    margin-bottom: 30px;
+    transition: all 0.3s ease;
+}
+
+.profile-container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+}
+
+.col-md-8 {
+    border-left: 1px solid #e0e0e0;
+    padding-left: 30px;
+}
+
+.col-md-4 {
+    padding-right: 30px;
+}

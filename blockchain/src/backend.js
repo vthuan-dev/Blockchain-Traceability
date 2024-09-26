@@ -1677,37 +1677,72 @@ app.get('/api/products', async (req, res) => {
     }
   });
 
+  async function getRelatedProducts(productIds) {
+    if (!productIds || productIds.length === 0) {
+      return [];
+    }
+  
+    const products = await Promise.all(productIds.map(async productId => {
+      const product = await getProductById(productId);
+      return product;
+    }));
+  
+    return products.filter(product => product !== null);
+  }
+  
+  async function getProductById(productId) {
+    try {
+      const [results] = await db.query('SELECT product_id, product_name, image_url FROM products WHERE product_id = ?', [productId]);
+      if (results.length > 0) {
+        const product = results[0];
+        // Nếu không có image_url trong database, lấy từ blockchain
+        if (!product.image_url) {
+          const productFromBlockchain = await traceabilityContract.methods.getProductById(productId).call();
+          product.image_url = productFromBlockchain.imageUrl;
+        }
+        return product;
+      }
+      return null;
+    } catch (error) {
+      console.error('Lỗi khi truy vấn sản phẩm:', error);
+      return null;
+    }
+  }
   app.get('/api/activity-logs/:uid', async (req, res) => {
     try {
-        const producerId = req.params.uid;
-        console.log('Đang truy xuất nhật ký hoạt động của người sản xuất cho producerId:', producerId);
-
-        const producerActivityLogs = await traceabilityContract.methods.getProducerActivityLogsByProducerId(producerId).call();
-        console.log('Số lượng nhật ký hoạt động của người sản xuất:', producerActivityLogs.length);
-
-        const convertedLogs = convertBigIntToString(producerActivityLogs);
-        const formattedLogs = await Promise.all(convertedLogs.map(async log => {
-            const relatedProducts = await getRelatedProducts(log.relatedProductIds);
-            return {
-                timestamp: new Date(Number(log.timestamp) * 1000).toISOString(),
-                uid: log.uid,
-                activityName: log.activityName,
-                description: log.description,
-                isSystemGenerated: log.isSystemGenerated,
-                imageUrls: log.imageUrls,
-                relatedProducts: relatedProducts
-            };
-        }));
-
-        res.status(200).json({
-            message: 'Truy xuất nhật ký hoạt động của người sản xuất thành công',
-            activityLogs: formattedLogs
-        });
+      const producerId = req.params.uid;
+      console.log('Đang truy xuất nhật ký hoạt động của người sản xuất cho producerId:', producerId);
+  
+      const producerActivityLogs = await traceabilityContract.methods.getProducerActivityLogsByProducerId(producerId).call();
+      console.log('Số lượng nhật ký hoạt động của người sản xuất:', producerActivityLogs.length);
+  
+      const convertedLogs = convertBigIntToString(producerActivityLogs);
+      const formattedLogs = await Promise.all(convertedLogs.map(async log => {
+        const relatedProducts = await getRelatedProducts(log.relatedProductIds);
+        return {
+          timestamp: new Date(Number(log.timestamp) * 1000).toISOString(),
+          uid: log.uid,
+          activityName: log.activityName,
+          description: log.description,
+          isSystemGenerated: log.isSystemGenerated,
+          imageUrls: log.imageUrls,
+          relatedProducts: relatedProducts.map(product => ({
+            product_id: product.product_id,
+            product_name: product.product_name,
+            image_url: product.image_url
+          }))
+        };
+      }));
+  
+      res.status(200).json({
+        message: 'Truy xuất nhật ký hoạt động của người sản xuất thành công',
+        activityLogs: formattedLogs
+      });
     } catch (error) {
-        console.error('Lỗi khi truy xuất nhật ký hoạt động của người sản xuất:', error);
-        res.status(500).json({ error: 'Lỗi khi truy xuất nhật ký hoạt động của người sản xuất: ' + error.message });
+      console.error('Lỗi khi truy xuất nhật ký hoạt động của người sản xuất:', error);
+      res.status(500).json({ error: 'Lỗi khi truy xuất nhật ký hoạt động của người sản xuất: ' + error.message });
     }
-});
+  });
 
 async function getRelatedProducts(productIds) {
   if (!productIds || productIds.length === 0) {

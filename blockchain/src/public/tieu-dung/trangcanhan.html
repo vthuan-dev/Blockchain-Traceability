@@ -46,18 +46,18 @@
     
         <div class="container my-3">
             <div class="row justify-content-center">
-                <div class="col-md-8 border bg-white rounded p-4">
+                <div class="col-md-8 profile-container p-4">
                     <div class="row">
                         <div class="col-md-4 text-center">
                             <!-- Ảnh đại diện -->
-                            <img src="" alt="Avatar" class="profile-img img-fluid rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                            <img src="" alt="Avatar" class="profile-img">
                         </div>
                         <div class="col-md-8">
                             <!-- Thông tin cá nhân -->
-                            <h2 class="profile-name mb-3"></h2>
+                            <h2 class="profile-name"></h2>
                             <ul class="list-unstyled">
-                                <li class="mb-2"><strong>Vùng sản xuất:</strong> <span class="profile-region"></span></li>
-                                <li class="mb-2 position-relative">
+                                <li><strong>Vùng sản xuất:</strong> <span class="profile-region"></span></li>
+                                <li class="position-relative">
                                     <strong>Điện thoại:</strong> 
                                     <span class="profile-phone" id="phoneNumber"></span>
                                     <div class="contact-options-dropdown" id="contactOptions">
@@ -68,12 +68,12 @@
                                             <i class="fab fa-facebook-messenger"></i> Zalo
                                         </a>
                                     </div>
-                                </li>                      
-                                <div class="address-container">
-                                    <strong>Địa chỉ:</strong>
-                                    <address class="profile-address"></address>
-                                </div>
+                                </li>
                             </ul>
+                            <div class="address-container">
+                                <strong>Địa chỉ:</strong>
+                                <address class="profile-address"></address>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -87,7 +87,7 @@
             </div>
         
             <div class="text-center my-2">
-                <button id="loadMore" class="btn btn-primary">Xem thêm</button>
+                <button id="loadMore" class="btn btn-primary" style="display: none;">Xem thêm</button>
             </div>
         </div>
        
@@ -108,8 +108,8 @@
                     <div class="col-md-4 d-none d-md-block">
                         <h3>Theo dõi chúng tôi</h3>
                         <p>
+                            <a href="mailto:truxuat.blockchain@gmail.com" class="text-white">Email</a><br>
                             <a href="#" class="text-white">Facebook</a><br>
-                            <a href="#" class="text-white">Twitter</a><br>
                             <a href="#" class="text-white">Instagram</a>
                         </p>
                     </div>
@@ -202,7 +202,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         await loadActivityLogs(userId);
     });
 });
-
 async function loadActivityLogs(userId) {
     try {
         const response = await fetch(`/api/activity-logs/${userId}?page=${currentPage}&limit=${itemsPerPage}`);
@@ -214,31 +213,37 @@ async function loadActivityLogs(userId) {
 
         const activityLogsContainer = document.getElementById('activityLogs');
         
+        // Kiểm tra nếu không có hoạt động nào
+        if (data.activityLogs.length === 0 && currentPage === 1) {
+            activityLogsContainer.innerHTML = `
+                <div class="alert alert-info mt-4" role="alert">
+                     Chưa có hoạt động nào để hiển thị.
+                </div>
+            `;
+            document.getElementById('loadMore').style.display = 'none';
+            return;
+        }
+
+        // Sắp xếp hoạt động theo thời gian gần đây nhất
+        data.activityLogs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
         data.activityLogs.forEach((log, index) => {
             const logElement = document.createElement('div');
-            logElement.className = 'container mt-4 border rounded';
+            logElement.className = 'activity-log container mt-4 border rounded';
             logElement.innerHTML = `
-                <div class="row align-items-center my-3">
-                    <div class="col-auto">
-                        <img src="${log.avatar || './hinhanh/default-avatar.png'}" alt="User Avatar" class="avatar">
-                    </div>
+                <div class="activity-header row align-items-center my-3">
                     <div class="col">
-                        <h5 class="mb-1">${log.uid}</h5>
-                        <small class="text-muted">Ngày và Giờ Đăng: ${new Date(log.timestamp).toLocaleString()}</small>
-                    </div>
-                    <div class="col-auto">
-                        <button class="btn btn-outline-secondary btn-sm">
-                            <i class="bi bi-download"></i> Tải về
-                        </button>
+                        <h5 class="activity-name mb-2">${log.activityName}</h5>
+                        <small class="activity-timestamp text-muted">Thời gian: ${new Date(log.timestamp).toLocaleString()}</small>
                     </div>
                 </div>
-                <div class="card mb-3">
+                <div class="activity-content card mb-3">
                     <div class="card-body">
-                        <h4 class="card-title">${log.activityName}</h4>
-                        <p class="card-text">${log.description}</p>
+                        <h6 class="card-subtitle mb-2 text-muted">Mô tả hoạt động:</h6>
+                        <p class="activity-description card-text">${log.description}</p>
                         
                         ${log.relatedProducts.length > 0 ? `
-                            <p class="fw-medium">Liên kết liên quan: </p>
+                            <h6 class="card-subtitle mb-2 mt-4 text-muted">Liên kết liên quan:</h6>
                             <div id="carouselLinks${index}" class="carousel slide container my-3" data-bs-ride="carousel">
                                 <div class="carousel-inner">
                                     ${createCarouselItems(log.relatedProducts, 4)}
@@ -255,7 +260,7 @@ async function loadActivityLogs(userId) {
                         ` : ''}
                         
                         ${log.imageUrls.length > 0 ? `
-                            <p class="fw-medium">Ảnh/video: </p>
+                            <h6 class="card-subtitle mb-2 mt-4 text-muted">Ảnh/video:</h6>
                             <div id="carouselMedia${index}" class="carousel slide container my-3" data-bs-ride="carousel">
                                 <div class="carousel-inner">
                                     ${createCarouselItems(log.imageUrls, 4)}
@@ -287,7 +292,6 @@ async function loadActivityLogs(userId) {
         activityLogsContainer.innerHTML += `<p class="text-danger">Lỗi khi tải nhật ký hoạt động: ${error.message}</p>`;
     }
 }
-
 function createCarouselItems(items, itemsPerSlide) {
     let carouselItems = '';
     for (let i = 0; i < items.length; i += itemsPerSlide) {
