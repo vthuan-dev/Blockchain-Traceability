@@ -260,7 +260,6 @@
             loadMoreButton.innerHTML = '<i class="fas fa-chevron-down"></i>';
         }
     }
-    
     function createActivityLogElement(log, index) {
         const logElement = document.createElement('div');
         logElement.className = 'activity-log container mt-4 border rounded';
@@ -276,28 +275,30 @@
                     <h6 class="card-subtitle mb-2 text-muted">Mô tả hoạt động:</h6>
                     <p class="activity-description card-text">${log.description}</p>
                     
-                    ${log.relatedProducts.length > 0 ? `
-                        <h6 class="card-subtitle mb-2 mt-4 text-muted">Liên kết liên quan:</h6>
-                        <div id="carouselLinks${index}" class="carousel slide container my-3" data-bs-ride="carousel">
-                            <div class="carousel-inner">
-                                ${createCarouselItems(log.relatedProducts, 4)}
+                    ${log.relatedProducts && log.relatedProducts.length > 0 ? `
+                        <div class="carousel-container">
+                            <h6 class="card-subtitle mb-2 mt-4 text-muted">Sản phẩm liên quan:</h6>
+                            <div id="carouselProducts${index}" class="carousel slide" data-bs-ride="carousel">
+                                <div class="carousel-inner">
+                                    ${createCarouselItems(log.relatedProducts, 4, true)}
+                                </div>
+                                <button class="carousel-control-prev" type="button" data-bs-target="#carouselProducts${index}" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Previous</span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#carouselProducts${index}" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Next</span>
+                                </button>
                             </div>
-                            <button class="carousel-control-prev" type="button" data-bs-target="#carouselLinks${index}" data-bs-slide="prev">
-                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                <span class="visually-hidden">Previous</span>
-                            </button>
-                            <button class="carousel-control-next" type="button" data-bs-target="#carouselLinks${index}" data-bs-slide="next">
-                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                <span class="visually-hidden">Next</span>
-                            </button>
                         </div>
                     ` : ''}
                     
-                    ${log.imageUrls.length > 0 ? `
-                        <h6 class="card-subtitle mb-2 mt-4 text-muted">Ảnh/video:</h6>
+                    ${log.imageUrls && log.imageUrls.length > 0 ? `
+                        <h6 class="card-subtitle mb-2 mt-4 text-muted">Ảnh/video hoạt động:</h6>
                         <div id="carouselMedia${index}" class="carousel slide container my-3" data-bs-ride="carousel">
                             <div class="carousel-inner">
-                                ${createCarouselItems(log.imageUrls, 4)}
+                                ${createCarouselItems(log.imageUrls, 4, false)}
                             </div>
                             <button class="carousel-control-prev" type="button" data-bs-target="#carouselMedia${index}" data-bs-slide="prev">
                                 <span class="carousel-control-prev-icon" aria-hidden="true"></span>
@@ -314,28 +315,32 @@
         `;
         return logElement;
     }
-    
-    function createCarouselItems(items, itemsPerSlide) {
-        let carouselItems = '';
-        for (let i = 0; i < items.length; i += itemsPerSlide) {
-            const slideItems = items.slice(i, i + itemsPerSlide);
-            carouselItems += `
-                <div class="carousel-item ${i === 0 ? 'active' : ''}">
-                    <div class="row">
-                        ${slideItems.map(item => `
-                            <div class="col-md-3">
-                                <div class="card card-body">
-                                    <img class="img-fluid" src="${item.image || item}" alt="${item.product_name || 'Activity image'}">
-                                </div>
+
+    function createCarouselItems(items, itemsPerSlide, isProduct) {
+    let carouselItems = '';
+    for (let i = 0; i < items.length; i += itemsPerSlide) {
+        const slideItems = items.slice(i, i + itemsPerSlide);
+        carouselItems += `
+            <div class="carousel-item ${i === 0 ? 'active' : ''}">
+                <div class="row">
+                    ${slideItems.map(item => `
+                        <div class="col-md-6 col-lg-3"> <!-- Sử dụng col-md-6 cho tablet và col-lg-3 cho desktop -->
+                            <div class="product-card">
+                                ${isProduct ? `
+                                    <div class="product-name">${item.product_name}</div>
+                                    <img class="product-image" src="${item.image_url}" alt="${item.product_name}">
+                                ` : `
+                                    <img class="product-image" src="${item}" alt="Activity image">
+                                `}
                             </div>
-                        `).join('')}
-                    </div>
+                        </div>
+                    `).join('')}
                 </div>
-            `;
-        }
-        return carouselItems;
+            </div>
+        `;
     }
-    
+    return carouselItems;
+}
     function getUserIdFromURL() {
         const urlParams = new URLSearchParams(window.location.search);
         return urlParams.get('uid');

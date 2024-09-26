@@ -335,3 +335,59 @@ h2.text-danger:hover {
 .load-more-btn i {
     animation: bounce 2s infinite;
 }
+
+/* Thêm vào cuối file CSS của bạn */
+
+.product-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #ffffff;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    height: 100%;
+    width: 100%; /* Đảm bảo card chiếm toàn bộ chiều rộng của cột */
+}
+
+.product-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+    text-align: center;
+    margin-bottom: 15px;
+    height: auto; /* Cho phép tên sản phẩm xuống dòng nếu cần */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.product-image {
+    width: 100%;
+    height: 200px; /* Tăng chiều cao của ảnh */
+    object-fit: cover;
+    border-radius: 8px;
+    margin-top: 10px;
+}
+
+.carousel-item .col-md-3 {
+    padding: 15px; /* Tăng padding để tạo khoảng cách giữa các sản phẩm */
+}
+
+#carouselProducts .carousel-inner {
+    padding: 20px 0;
+}
+
+.card-subtitle.mb-2.mt-4.text-muted {
+    font-size: 1.2rem;
+    color: #4CAF50 !important;
+    margin-bottom: 15px !important;
+}
+
+/* Thêm style cho container của carousel */
+.carousel-container {
+    width: 100%;
+    max-width: 1200px; /* Hoặc chiều rộng mong muốn */
+    margin: 0 auto;
+}
