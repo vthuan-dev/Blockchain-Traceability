@@ -15,34 +15,41 @@
 </head>
 <body>
     <div class="container w-100">
-        <nav class="navbar navbar-expand-lg navbar-light bg-light custom-navbar-height">
-            <a class="navbar-brand" href="#">Trang chủ</a>
-            <button class="navbar-toggler ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ml-auto"> 
-                    <li class="nav-item">
-                        <a class="nav-link" href="allsanpham.html">Sản phẩm</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="allnongdan.html">Nhà sản xuất</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="allnhakiemduyet.html">Nhà kiểm duyệt</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Vùng sản xuất</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Tin tức</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="dangnhap.html">Đăng nhập</a>
-                    </li>
-                </ul>
-            </div>
-        </nav>
+      
+    <nav class="navbar custom-navbar navbar-expand-lg navbar-light bg-light custom-navbar-height">
+        <div class="logo-home">
+            <a href="trangchu.html">
+                <img src="\hinhanh\Bitcoin-Blockchain-Network-icon-on-transparent-background-PNG.png" alt="logo" class="logo">
+            </a>
+        </div>
+        <a class="navbar-brand" href="#">Trang cá nhân</a>
+        <button class="navbar-toggler ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto"> 
+                <li class="nav-item active">
+                    <a class="nav-link" href="allsanpham.html">Sản phẩm</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="allnongdan.html">Nhà sản xuất</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="allnhakiemduyet.html">Nhà kiểm duyệt</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Vùng sản xuất</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Tin tức</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="./account/dangnhap.html">Đăng nhập</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
     
         <div class="container my-3">
             <div class="row justify-content-center">
@@ -317,6 +324,19 @@ function getUserIdFromURL() {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get('uid');
 }
+</script>
+
+<script>
+    document.addEventListener('click', function(event) {
+        var isClickInside = document.querySelector('.navbar').contains(event.target);
+
+        if (!isClickInside) {
+            var navbarCollapse = document.querySelector('.navbar-collapse');
+            if (navbarCollapse.classList.contains('show')) {
+                navbarCollapse.classList.remove('show');
+            }
+        }
+    });
 </script>
 
     

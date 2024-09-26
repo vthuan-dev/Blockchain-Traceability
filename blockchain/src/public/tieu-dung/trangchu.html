@@ -8,19 +8,25 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/trangchu.css">
     <link rel="stylesheet" href="css/chatbox.css">
+    <link rel="stylesheet" href="css/trangcanhan.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
 </head>
 <body>
     <!-- Thanh điều hướng -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light custom-navbar-height">
-        <a class="navbar-brand" href="#">Trang chủ</a>
+    <nav class="navbar custom-navbar navbar-expand-lg navbar-light bg-light custom-navbar-height">
+        <div class="logo-home">
+            <a href="trangchu.html">
+                <img src="\hinhanh\Bitcoin-Blockchain-Network-icon-on-transparent-background-PNG.png" alt="logo" class="logo">
+            </a>
+        </div>
+        <a class="navbar-brand" href="#">Trang cá nhân</a>
         <button class="navbar-toggler ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto"> 
-                <li class="nav-item">
+                <li class="nav-item active">
                     <a class="nav-link" href="allsanpham.html">Sản phẩm</a>
                 </li>
                 <li class="nav-item">
@@ -41,7 +47,6 @@
             </ul>
         </div>
     </nav>
-
     <div class="container mt-4">
         <div class="banner d-flex justify-content-center">
             <img src=".\hinhanh\banner.jpg" class="img-fluid custom-img" alt="Responsive image">
@@ -286,5 +291,18 @@ function getUserIdFromURL() {
 }
 
     </script>
+
+<script>
+    document.addEventListener('click', function(event) {
+        var isClickInside = document.querySelector('.navbar').contains(event.target);
+
+        if (!isClickInside) {
+            var navbarCollapse = document.querySelector('.navbar-collapse');
+            if (navbarCollapse.classList.contains('show')) {
+                navbarCollapse.classList.remove('show');
+            }
+        }
+    });
+</script>
 </body>
 </html>

@@ -98,6 +98,7 @@ body {
     padding: 40px 0;
     border-radius: 20px 20px 0 0; /* Bo tròn góc trên */
     box-shadow: 0 -5px 15px rgba(99, 146, 97, 0.1); /* Thêm bóng đổ nhẹ */
+    height: 240px;
 }
 .footer.bg-dark {
     background-color: #78e08f !important;
@@ -288,4 +289,220 @@ body {
     .navbar-nav .nav-link:hover {
         background-color: #f8f9fa; /* Màu nền khi hover */
     }
+}
+
+/* CSS cho thanh điều hướng */
+.navbar {
+    background-color: #4CAF50 !important; /* Màu nền cho thanh điều hướng */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Thêm bóng đổ */
+    padding: 10px 20px; /* Thêm khoảng cách */
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Thêm dòng này */
+    min-height: 80px; /* Thay đổi từ height cố định sang min-height */
+    transition: all 0.3s ease;
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #fff; /* Màu chữ cho thương hiệu */
+    margin-left: 10px; /* Khoảng cách giữa logo và tên thương hiệu */
+    padding: 0; /* Thêm dòng này */
+}
+
+.navbar-nav .nav-link {
+    color: #fff; /* Màu chữ cho các liên kết */
+    font-size: 1rem;
+    padding: 10px 15px;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+}
+
+.navbar-nav .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.navbar-toggler {
+    border: none;
+    background-color: transparent;
+    padding: 0; /* Thêm dòng này */
+}
+
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba%28255, 255, 255, 1%29' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+}
+
+@media (max-width: 992px) { /* Chỉ áp dụng cho màn hình nhỏ hơn 992px */
+    .navbar-nav {
+        flex-direction: column;
+    }
+    
+    .nav-item {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .navbar-collapse {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        background-color: #4CAF50;
+        border-radius: 0 0 10px 10px;
+        padding: 10px;
+    }
+}
+
+/* Hiệu ứng active cho nav-link */
+.navbar-nav .nav-item.active .nav-link {
+    background-color: rgba(255, 255, 255, 0.3);
+    font-weight: bold;
+}
+
+/* Hiệu ứng hover cho dropdown */
+.navbar-nav .dropdown-menu {
+    border: none;
+    background-color: #45a049;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+}
+
+.navbar-nav .dropdown-item {
+    color: #fff;
+    transition: all 0.3s ease;
+}
+
+.navbar-nav .dropdown-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: translateX(5px);
+}
+
+/* CSS cho logo */
+.logo-home {
+    display: flex;
+    align-items: center;
+}
+
+.logo-home .logo {
+    height: 50px; /* Chiều cao của logo */
+    width: auto; /* Tự động điều chỉnh chiều rộng để giữ tỉ lệ */
+    margin-right: 10px; /* Khoảng cách giữa logo và tên thương hiệu */
+}
+
+/* CSS cho banner */
+.banner {
+    margin-bottom: 20px;
+}
+
+.banner img {
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* CSS cho các phần khác */
+.sanpham, .thanhvien, .vungsanxuat {
+    margin-bottom: 40px;
+}
+
+.highlighted-heading {
+    font-size: 2rem;
+    color: #333;
+    text-align: center;
+    margin: 20px 0;
+    position: relative;
+    animation: fadeIn 1s ease-out;
+}
+
+.highlighted-heading::after {
+    content: '';
+    display: block;
+    width: 50px;
+    height: 3px;
+    background: #ff6347;
+    margin: 10px auto 0;
+}
+
+.card {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+    animation: fadeInUp 0.5s ease-out;
+}
+
+.card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.card-img-top {
+    width: 100%;
+    height: 200px; /* Đặt chiều cao cố định */
+    object-fit: cover; /* Đảm bảo ảnh được cắt để vừa với khung */
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.card-title {
+    font-size: 1.25rem;
+    color: #333;
+    font-weight: bold;
+    text-align: center;
+}
+
+.vung-id {
+    font-size: 0.9rem;
+    color: #777;
+    margin-top: 10px;
+    text-align: center;
+}
+
+/* Footer styles */
+.footer {
+    background-color: #f0f2f5; /* Màu nền nhẹ nhàng */
+    color: #333; /* Màu chữ tối */
+    padding: 40px 0;
+    border-radius: 20px 20px 0 0; /* Bo tròn góc trên */
+    box-shadow: 0 -5px 15px rgba(99, 146, 97, 0.1); /* Thêm bóng đổ nhẹ */
+}
+
+.footer h3 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    color: #167e4d; /* Màu xanh của Google */
+    font-weight: 600;
+}
+
+.footer p {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #5f6368; /* Màu chữ nhạt hơn */
+}
+
+.footer a {
+    color: #338b67; /* Màu link */
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer a:hover {
+    color: #174ea6; /* Màu link khi hover */
+    text-decoration: underline;
+}
+
+.footer .col-md-4 {
+    margin-bottom: 20px;
+}
+
+.footer .social-links a {
+    display: inline-block;
+    margin-right: 15px;
+    font-size: 1.2rem;
+    color: #1a73e8;
+}
+
+.footer .social-links a:hover {
+    color: #174ea6;
 }
