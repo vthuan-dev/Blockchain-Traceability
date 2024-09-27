@@ -114,6 +114,7 @@
                 res.status(500).json({ error: 'Lỗi khi lấy danh sách tỉnh/thành phố' });
             }
         });
+        
         router.post('/register', upload.single('avatar'), async function(req, res) {
             try {
                 await authenticateAnonymously();
