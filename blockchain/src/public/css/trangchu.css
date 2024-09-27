@@ -294,6 +294,7 @@ body {
 /* CSS cho thanh điều hướng */
 .navbar {
     background-color: #4CAF50 !important; /* Màu nền cho thanh điều hướng */
+    z-index: 1000;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Thêm bóng đổ */
     padding: 10px 20px; /* Thêm khoảng cách */
     display: flex;

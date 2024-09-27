@@ -119,6 +119,7 @@ body{
     border-left: 4px solid #0bcf56;
     text-align: center;
     width: 100%;
+    
 }
 
 .address-container strong {
@@ -148,16 +149,28 @@ body{
     margin-right: 3px;
 }
 
-.profile-phone {
+.profile-phone-container {
     position: relative;
+    display: inline-block;
+}
+
+.profile-phone {
+    color: #4CAF50;
+    font-weight: 600;
     cursor: pointer;
-    color: #000000;
-    text-decoration: none;
+    padding: 5px 10px;
+    border-radius: 20px;
+    background-color: #e8f5e9;
     transition: all 0.3s ease;
 }
 
 .profile-phone:hover {
-    color: #19bd58;
+    background-color: #c8e6c9;
+}
+
+.profile-phone::before {
+    content: '0'; /* Add default "0" */
+    margin-right: 2px;
 }
 
 .profile-phone::after {
@@ -176,11 +189,11 @@ body{
     display: none;
     min-width: 120px;
     padding: 5px 0;
-    margin: 2px 0 0;
-    background-color: #804040;
-    border: 1px solid rgba(0,0,0,.15);
+    margin: 5px 0 0;
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
     border-radius: 8px;
-    box-shadow: 0 6px 12px rgba(0,0,0,.175);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
 }
 
 .contact-options-dropdown.show {
@@ -190,19 +203,20 @@ body{
 .contact-options-dropdown a {
     display: block;
     padding: 8px 15px;
-    clear: both;
-    font-weight: 400;
-    color: #212529;
-    text-align: inherit;
-    white-space: nowrap;
-    background-color: transparent;
-    border: 0;
+    color: #333;
+    text-decoration: none;
     transition: all 0.3s ease;
 }
 
 .contact-options-dropdown a:hover {
-    background-color: #f8f9fa;
-    color: #1ccc42;
+    background-color: #f1f8e9;
+    color: #4CAF50;
+}
+
+.contact-options-dropdown i {
+    margin-right: 8px;
+    width: 20px;
+    text-align: center;
 }
 
 .show {
@@ -245,6 +259,7 @@ body{
 
 .custom-navbar {
     background-color: rgba(76, 209, 55,1.0);
+    
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     padding: 10px 20px;
     display: flex;
