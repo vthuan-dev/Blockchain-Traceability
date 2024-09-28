@@ -6,13 +6,16 @@ Dự án này là một hệ thống truy xuất nguồn gốc bưởi sử dụ
 
 ## Công Nghệ Sử Dụng
 
-- **Frontend**: HTML, CSS, JavaScript
+- **Frontend**: HTML, CSS, JavaScript, Bootstrap
 - **Backend**: Node.js, Express.js
 - **Database**: MySQL
-- **Blockchain**: Ethereum (Solidity cho smart contracts)
-- **File Storage**: AWS S3 (hoặc Filebase)
+- **Blockchain**: Solidity (for smart contracts)
+- **Ethereum**: Ethereum (for blockchain network)
 - **Authentication**: JWT, Session-based (express-session)
+- **Chat & notification**: Socket.io
 - **Other**: Web3.js, Multer (file upload), Nodemailer (email verification)
+- **Tools**: Truffle, Ganache, MetaMask
+- **Storage**: Firebase, AWS S3, IPFS Filebase
 
 ## Chức Năng Chính
 
