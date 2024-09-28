@@ -395,6 +395,13 @@ io.on('connection', (socket) => {
     socket.emit('updateUserList', clientUsers);
   });
 
+  socket.on('updateNewCount', (count) => {
+    const admins = users.filter((x) => x.roleId === 3 && x.online);
+    admins.forEach((admin) => {
+        io.to(admin.socketId).emit("updateUnreadCount", count);
+    });
+});
+
   socket.on('onLogin', (user) => {
     const existingUser = users.find((x) => x.name === user.name);
     if (existingUser) {
