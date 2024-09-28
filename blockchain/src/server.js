@@ -20,7 +20,7 @@
     const server = http.createServer(app);
     const io = socketIo(server, {
       cors: {
-        origin: "http://localhost:3000",  // Thay đổi nếu bạn chạy ở một domain khác
+        origin: "http://localhost:3000", // Thay đổi nếu bạn chạy ở một domain khác
         methods: ["GET", "POST"],
         credentials: true
       }
