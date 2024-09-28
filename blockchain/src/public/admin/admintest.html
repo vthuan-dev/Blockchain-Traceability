@@ -150,6 +150,7 @@
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
         <script src="./js/admin-auth.js"></script>
+        <script src="./js/unread-count.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script src="./js/feature.js"></script>
         <script src="./js/admin.js"></script>
@@ -157,6 +158,11 @@
         
         <script>
             document.addEventListener('DOMContentLoaded', applySettings);
+        </script>
+        <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            initAdminSocket();
+        });
         </script>
     </body>
     </html>

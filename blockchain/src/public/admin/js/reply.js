@@ -106,9 +106,14 @@ function renderUserList() {
     });
 
     // Gửi số lượng tin nhắn mới đến server
-    window.socket.emit("updateNewCount", newCount);
+    if (window.socket) {
+        console.log("Emitting updateNewCount with count:", newCount); // Thêm log để kiểm tra
+        window.socket.emit("updateNewCount", newCount);
+    }
 }
 
+
+    
 // Hàm để chọn người dùng
 function selectUser(user) {
     selectedUser = user;

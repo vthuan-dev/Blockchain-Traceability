@@ -396,8 +396,10 @@ io.on('connection', (socket) => {
   });
 
   socket.on('updateNewCount', (count) => {
+    console.log("Received updateNewCount from client:", count); // Log nhận được từ client
     const admins = users.filter((x) => x.roleId === 3 && x.online);
     admins.forEach((admin) => {
+        console.log(`Sending updateUnreadCount (${count}) to admin: ${admin.name}`); // Log gửi đến admin
         io.to(admin.socketId).emit("updateUnreadCount", count);
     });
 });
