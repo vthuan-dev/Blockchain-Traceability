@@ -1,15 +1,15 @@
-let socket = null;
+// admin-auth.js
 
 function initAdminSocket() {
     const ENDPOINT = window.location.host.indexOf("localhost") >= 0 ? "http://127.0.0.1:3000" : window.location.host;
-    socket = io(ENDPOINT);
+    window.socket = io(ENDPOINT);
 
-    socket.on('connect', () => {
+    window.socket.on('connect', () => {
         console.log('Admin socket connected');
         checkAdminAuth();
     });
 
-    socket.on("updateUnreadCount", (count) => {
+    window.socket.on("updateUnreadCount", (count) => {
         updateUnreadCount(count);
     });
 }
@@ -18,7 +18,9 @@ function checkAdminAuth() {
     getUserInfo()
         .then(userInfo => {
             console.log('Admin đã đăng nhập:', userInfo);
-            socket.emit("onLogin", userInfo);
+            window.socket.emit("onLogin", userInfo);
+            // Đảm bảo rằng socket được truyền sang reply.js
+            document.dispatchEvent(new CustomEvent('socketInitialized', { detail: window.socket }));
         })
         .catch(error => {
             console.error('Lỗi khi lấy thông tin người dùng:', error);
@@ -52,3 +54,8 @@ function updateUnreadCount(count) {
 }
 
 document.addEventListener('DOMContentLoaded', initAdminSocket);
+
+// Bắt sự kiện từ reply.js để đảm bảo socket được truyền
+document.addEventListener('socketInitialized', (e) => {
+    window.socket = e.detail;
+});
