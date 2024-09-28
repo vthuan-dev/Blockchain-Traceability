@@ -1,5 +1,3 @@
-// admin-auth.js
-
 function initAdminSocket() {
     const ENDPOINT = window.location.host.indexOf("localhost") >= 0 ? "http://127.0.0.1:3000" : window.location.host;
     window.socket = io(ENDPOINT);
@@ -7,10 +5,7 @@ function initAdminSocket() {
     window.socket.on('connect', () => {
         console.log('Admin socket connected');
         checkAdminAuth();
-    });
-
-    window.socket.on("updateUnreadCount", (count) => {
-        updateUnreadCount(count);
+        initUnreadCount(); // Thêm dòng này
     });
 }
 
@@ -45,17 +40,22 @@ function getUserInfo() {
         });
 }
 
-function updateUnreadCount(count) {
-    const replyCount = document.querySelector('.reply-count');
-    if (replyCount) {
-        replyCount.textContent = count;
-        replyCount.style.display = count > 0 ? 'inline-block' : 'none';
-    }
-}
-
 document.addEventListener('DOMContentLoaded', initAdminSocket);
 
 // Bắt sự kiện từ reply.js để đảm bảo socket được truyền
 document.addEventListener('socketInitialized', (e) => {
     window.socket = e.detail;
+    // Đảm bảo rằng initUnreadCount được gọi sau khi socket được khởi tạo
+    initUnreadCount();
 });
+
+// Thêm hàm này
+function initUnreadCount() {
+    if (window.socket) {
+        window.socket.on("updateUnreadCount", (count) => {
+            updateUnreadCount(count);
+        });
+    } else {
+        console.error('Socket chưa được khởi tạo');
+    }
+}
