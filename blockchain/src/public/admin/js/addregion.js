@@ -72,14 +72,14 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             const data = await response.json();
             if (data.success) {
-                alert('Vùng sản xuất đã được thêm thành công');
+                showMessage('Vùng sản xuất đã được thêm thành công', 'success');
                 window.location.href = 'region.html';
             } else {
-                alert('Lỗi khi thêm vùng sản xuất: ' + data.error);
+                showMessage('Lỗi khi thêm vùng sản xuất: ' + data.error, 'error');
             }
         } catch (error) {
             console.error('Lỗi khi gửi yêu cầu:', error);
-            alert('Lỗi khi gửi yêu cầu');
+            showMessage('Lỗi khi gửi yêu cầu', 'error');
         }
     });
 });

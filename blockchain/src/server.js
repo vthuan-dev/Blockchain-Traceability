@@ -396,33 +396,37 @@ io.on('connection', (socket) => {
   });
 
   socket.on('updateNewCount', (count) => {
-    console.log("Received updateNewCount from client:", count); // Log nhận được từ client
+    console.log("Received updateNewCount from client:", count);  // Đảm bảo log này xuất hiện khi tin nhắn mới được gửi
     const admins = users.filter((x) => x.roleId === 3 && x.online);
     admins.forEach((admin) => {
-        console.log(`Sending updateUnreadCount (${count}) to admin: ${admin.name}`); // Log gửi đến admin
-        io.to(admin.socketId).emit("updateUnreadCount", count);
+        console.log(`Sending updateUnreadCount (${count}) to admin: ${admin.name}`);  // Log kiểm tra
+        io.to(admin.socketId).emit("updateUnreadCount", count);  // Đảm bảo sự kiện được gửi đến admin
     });
 });
 
-  socket.on('onLogin', (user) => {
-    const existingUser = users.find((x) => x.name === user.name);
-    if (existingUser) {
+
+
+socket.on('onLogin', (user) => {
+  const existingUser = users.find((x) => x.name === user.name);
+  if (existingUser) {
       existingUser.online = true;
-      existingUser.socketId = socket.id;
-    } else {
+      existingUser.socketId = socket.id;  // Cập nhật socketId mới khi người dùng chuyển trang
+  } else {
       users.push({
-        ...user,
-        online: true,
-        socketId: socket.id,
-        messages: [],
-        unread: false,
+          ...user,
+          online: true,
+          socketId: socket.id,
+          messages: [],
+          unread: false,
       });
-    }
-    const admins = users.filter((x) => x.roleId === 3 && x.online);
-    admins.forEach((admin) => {
+  }
+  
+  const admins = users.filter((x) => x.roleId === 3 && x.online);
+  admins.forEach((admin) => {
       io.to(admin.socketId).emit("updateUserList", users.filter(u => u.roleId !== 3 && u.messages.length > 0));
-    });
   });
+});
+
 
   socket.on('onMessage', (message) => {
     if (message.from === "Admin") {

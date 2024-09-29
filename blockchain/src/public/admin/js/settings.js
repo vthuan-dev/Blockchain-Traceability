@@ -10,7 +10,7 @@ function saveSettings() {
 
 function applySettings() {
     const language = localStorage.getItem('language') || 'vi';
-    const theme = localStorage.getItem('theme') || 'light-theme';
+    const theme = localStorage.getItem('theme') || 'light-theme';   
 
     applyTheme(theme);
     document.documentElement.lang = language;
@@ -53,6 +53,6 @@ if (document.querySelector('.settings-form')) {
     document.querySelector('.settings-form').addEventListener('submit', function(e) {
         e.preventDefault();
         saveSettings();
-        alert('Đã lưu thay đổi thành công!');
+        showMessage('Đã lưu thay đổi thành công!', 'success');
     });
 }

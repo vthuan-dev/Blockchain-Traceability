@@ -1,3 +1,5 @@
+// admin-auth.js
+
 function initAdminSocket() {
     const ENDPOINT = window.location.host.indexOf("localhost") >= 0 ? "http://127.0.0.1:3000" : window.location.host;
     window.socket = io(ENDPOINT);
@@ -5,7 +7,7 @@ function initAdminSocket() {
     window.socket.on('connect', () => {
         console.log('Admin socket connected');
         checkAdminAuth();
-        initUnreadCount(); // Thêm dòng này
+        initUnreadCount(); // Lắng nghe sự kiện để cập nhật tin nhắn chưa đọc
     });
 }
 
@@ -14,7 +16,6 @@ function checkAdminAuth() {
         .then(userInfo => {
             console.log('Admin đã đăng nhập:', userInfo);
             window.socket.emit("onLogin", userInfo);
-            // Đảm bảo rằng socket được truyền sang reply.js
             document.dispatchEvent(new CustomEvent('socketInitialized', { detail: window.socket }));
         })
         .catch(error => {
@@ -40,22 +41,27 @@ function getUserInfo() {
         });
 }
 
-document.addEventListener('DOMContentLoaded', initAdminSocket);
-
-// Bắt sự kiện từ reply.js để đảm bảo socket được truyền
-document.addEventListener('socketInitialized', (e) => {
-    window.socket = e.detail;
-    // Đảm bảo rằng initUnreadCount được gọi sau khi socket được khởi tạo
-    initUnreadCount();
-});
-
-// Thêm hàm này
+// Hàm lắng nghe và cập nhật số tin nhắn chưa đọc
 function initUnreadCount() {
     if (window.socket) {
         window.socket.on("updateUnreadCount", (count) => {
+            console.log("Received updateUnreadCount on admin page:", count); // Kiểm tra log này
             updateUnreadCount(count);
         });
     } else {
         console.error('Socket chưa được khởi tạo');
     }
 }
+
+
+
+// Hàm cập nhật số lượng tin nhắn chưa đọc trên tất cả các trang
+function updateUnreadCount(count) {
+    const replyCountElements = document.querySelectorAll('.reply-count');
+    replyCountElements.forEach(element => {
+        element.textContent = count;
+        element.style.display = count > 0 ? 'inline-block' : 'none';
+    });
+}
+
+document.addEventListener('DOMContentLoaded', initAdminSocket);

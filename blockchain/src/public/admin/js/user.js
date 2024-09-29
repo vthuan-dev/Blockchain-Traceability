@@ -115,11 +115,11 @@ window.UserManager = {
                 throw new Error('Lỗi khi xóa người dùng');
             }
             await response.json();
-            alert('Người dùng đã được xóa thành công');
+            showMessage('Người dùng đã được xóa thành công', 'success');
             this.fetchUserData();
         } catch (error) {
             console.error('Lỗi khi xóa người dùng:', error);
-            alert('Có lỗi xảy ra khi xóa người dùng: ' + error.message);
+            showMessage('Có lỗi xảy ra khi xóa người dùng: ' + error.message, 'error');
         }
     }
 };
@@ -223,7 +223,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const confirmPassword = document.getElementById('admin-confirm-password').value;
 
             if (password !== confirmPassword) {
-                alert('Mật khẩu xác nhận không khớp');
+                showMessage('Mật khẩu xác nhận không khớp', 'error');
                 return;
             }
 
@@ -237,15 +237,15 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.json())
             .then(data => {
                 if (data.error) {
-                    alert('Lỗi: ' + data.error);
+                    showMessage('Lỗi: ' + data.error, 'error');
                 } else {
-                    alert('Admin đã được thêm thành công');
+                    showMessage('Admin đã được thêm thành công', 'success');
                     window.location.href = 'user.html'; // Chuyển hướng về trang quản lý người dùng
                 }
             })
             .catch(error => {
                 console.error('Lỗi:', error);
-                alert('Đã xảy ra lỗi khi thêm admin');
+                showMessage('Đã xảy ra lỗi khi thêm admin', 'error');
             });
         });
     }

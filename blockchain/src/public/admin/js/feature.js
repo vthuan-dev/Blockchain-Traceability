@@ -277,14 +277,14 @@ async function deleteItem(url, id) {
         const response = await fetch(`${url}/${id}`, { method: 'DELETE' });
         if (!response.ok) throw new Error('Xóa thất bại');
         const data = await response.json();
-        alert(`${url.includes('products') ? 'Sản phẩm' : 'Người dùng'} đã được xóa thành công!`);
+        showMessage(`${url.includes('products') ? 'Sản phẩm' : 'Người dùng'} đã được xóa thành công!`, 'success');
         if (url.includes('products') && typeof window.ProductManager.fetchProductData === 'function') {
             window.ProductManager.fetchProductData();
         } else if (url.includes('users') && typeof window.UserManager.fetchUserData === 'function') {
             window.UserManager.fetchUserData();
         }
     } catch (error) {
-        alert('Có lỗi xảy ra khi xóa: ' + error.message);
+        showMessage('Có lỗi xảy ra khi xóa: ' + error.message, 'error');
     }
 }
 
@@ -297,12 +297,22 @@ function deleteProduct(productId) {
             return response.json();
         })
         .then(data => {
-            alert('Sản phẩm đã được xóa thành công!');
+            showMessage('Sản phẩm đã được xóa thành công!', 'success');
             window.ProductManager.fetchProductData();
         })
         .catch(error => {
-            alert('Có lỗi xảy ra khi xóa: ' + error.message);
+            showMessage('Có lỗi xảy ra khi xóa: ' + error.message, 'error');
         });
+}
+
+function showMessage(message, type) {
+    const messageContainer = document.getElementById('messageContainer');
+    messageContainer.className = type;
+    messageContainer.textContent = message;
+    messageContainer.style.display = 'block';
+    setTimeout(() => {
+        messageContainer.style.display = 'none';
+    }, 3000);
 }
 
 function deleteUser(userId) {

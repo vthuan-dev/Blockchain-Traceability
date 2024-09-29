@@ -10,8 +10,16 @@
         <link rel="stylesheet" href="./css/responsive.css">
         <link rel="stylesheet" href="./css/animation.css">
         <link rel="stylesheet" href="./css/theme.css">
+        <script>
+        // Áp dụng theme từ localStorage trước khi trang được hiển thị
+        (function() {
+            const theme = localStorage.getItem('theme') || 'light-theme';
+            document.documentElement.classList.add(theme);
+        })();
+    </script>
     </head>
     <body onload="time()">
+        <div id="messageContainer"></div>
         <header class="text-white py-2">
             <div class="container-fluid">
                 <div class="row align-items-center">

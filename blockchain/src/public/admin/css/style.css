@@ -604,3 +604,33 @@ textarea.form-input {
     background-color: #dc3545;
     color: white;
 }
+
+#messageContainer {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 15px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    z-index: 15000;
+    transition: opacity 0.5s ease-in-out;
+}
+
+/*alert*/
+.success {
+    background-color: #28a745;
+    color: #ffffff;
+}
+
+.warning {
+    background-color: #ffc107;
+    color: #ffffff;
+}
+
+.error {
+    background-color: #dc3545;
+    color: #ffffff;
+}
