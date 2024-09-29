@@ -1,9 +1,9 @@
 function updateUnreadCount(count) {
-    const replyCount = document.querySelector('.reply-count');
-    if (replyCount) {
-        replyCount.textContent = count;
-        replyCount.style.display = count > 0 ? 'inline-block' : 'none';
-    }
+    const replyCount = document.querySelectorAll('.reply-count');
+    replyCount.forEach(element => {
+        element.textContent = count;
+        element.style.display = count > 0 ? 'inline-block' : 'none';
+    });
 }
 
 document.addEventListener('socketInitialized', () => {

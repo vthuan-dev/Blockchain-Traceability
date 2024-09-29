@@ -3,7 +3,7 @@ window.ProductManager = {
     productData: [],
     filteredData: [],
     currentPage: 1,
-    rowsPerPage: 5, // Mặc định là 10, có thể thay đổi sau
+    rowsPerPage: 5, 
 
     formatDate: function(dateString) {
         return formatDate(dateString); // Sử dụng hàm từ feature.js
@@ -13,7 +13,7 @@ window.ProductManager = {
         if (!imagePath || imagePath === 'path/to/default-product-image.png') {
             return 'path/to/default-product-image.png';
         }
-        console.log('Image Path:', imagePath); // Thêm dòng này để kiểm tra URL của ảnh
+        console.log('Image Path:', imagePath); 
         return imagePath;
     },
 
@@ -281,15 +281,15 @@ document.addEventListener('DOMContentLoaded', function() {
         event.preventDefault();
         
         const formData = new FormData(event.target);
-
+    
         // Kiểm tra dữ liệu trước khi gửi
         for (let [key, value] of formData.entries()) {
             if (!value) {
-                alert(`Vui lòng điền đầy đủ thông tin: ${key}`);
+                showMessage(`Vui lòng điền đầy đủ thông tin: ${key}`, 'warning');
                 return;
             }
         }
-
+    
         fetch('http://localhost:3000/api/products', {
             method: 'POST',
             body: formData,
@@ -302,12 +302,14 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(data => {
             console.log('Sản phẩm đã được thêm:', data);
-            alert('Sản phẩm đã được thêm thành công!');
-            window.location.href = 'product.html';
+            showMessage('Sản phẩm đã được thêm thành công!', 'success');
+            setTimeout(() => {
+                window.location.href = 'product.html';
+            }, 2000);
         })
         .catch((error) => {
             console.error('Lỗi:', error);
-            alert('Có lỗi xảy ra khi thêm sản phẩm: ' + error.message);
+            showMessage('Có lỗi xảy ra khi thêm sản phẩm: ' + error.message, 'error');
         });
     }
 

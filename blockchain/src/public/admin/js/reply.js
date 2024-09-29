@@ -155,7 +155,7 @@ function submitMessage() {
     const messageBody = messageInput.value.trim();
 
     if (!messageBody || !selectedUser.name) {
-        alert("Vui lòng chọn người dùng và nhập tin nhắn");
+        showMessage("Vui lòng chọn người dùng và nhập tin nhắn", 'warning');
         return;
     }
 
