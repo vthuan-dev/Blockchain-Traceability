@@ -351,3 +351,5 @@ function hidePanel(panel) {
         document.querySelector('main').classList.remove('disable-pointer');
     }, 300);    
 }
+
+

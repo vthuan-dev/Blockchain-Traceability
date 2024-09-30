@@ -45,9 +45,10 @@
                                 <a class="dropdown-item" href="./caidat.html">
                                     <i class="fas fa-cog"></i> Cài đặt
                                 </a>
-                                <a class="dropdown-item" href="../account/dangnhap.html">
+                                <a class="dropdown-item" href="#" id="logoutButton">
                                     <i class="fas fa-sign-out-alt"></i> Đăng xuất
                                 </a>
+
                             </div>
                         </div>
                     </div>
@@ -167,6 +168,25 @@
         <script>
             document.addEventListener('DOMContentLoaded', applySettings);
         </script>
+
+        <script>document.getElementById('logoutButton').addEventListener('click', async function(e) {
+            e.preventDefault();
+            try {
+                const response = await fetch('/api/dangxuat', { 
+                    method: 'POST',
+                    credentials: 'same-origin'
+                });
+                if (response.ok) {
+                    window.location.href = '../account/dangnhap.html';
+                } else {
+                    console.error('Không thể đăng xuất');
+                    alert('Đăng xuất không thành công. Vui lòng thử lại.');
+                }
+            } catch (error) {
+                console.error('Lỗi khi đăng xuất:', error);
+                alert('Có lỗi xảy ra khi đăng xuất. Vui lòng thử lại sau.');
+            }
+        });</script>
         <!-- <script>
         document.addEventListener('DOMContentLoaded', () => {
             initAdminSocket();
