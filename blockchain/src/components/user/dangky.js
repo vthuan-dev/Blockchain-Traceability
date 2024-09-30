@@ -42,7 +42,17 @@
                 }
             }
         }
-
+        
+        async function emailExists(email) {
+            try {
+                const [userRows] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
+                const [adminRows] = await db.query('SELECT * FROM admin WHERE admin_email = ?', [email]);
+                return userRows.length > 0 || adminRows.length > 0;
+            } catch (error) {
+                console.error('Lỗi khi kiểm tra email:', error);
+                throw error;
+            }
+        }
        
     router.get('/wards/:districtCode', async (req, res) => {
         try {
@@ -153,8 +163,8 @@
                 const fullAddress = `${specific_address}, ${wardExists[0].ward_name}, ${districtExists[0].district_name}, ${provinceExists[0].province_name}`;
 
                 // Các kiểm tra khác (email, số điện thoại, vùng sản xuất, vai trò)
-                if (await recordExists('SELECT * FROM users WHERE email = ?', [email])) {
-                    return res.status(400).json({ message: 'Email đã tồn tại' });
+                if (await emailExists(email)) {
+                    return res.status(400).json({ message: 'Email đã tồn tại trong hệ thống' });
                 }
 
                 if (await recordExists('SELECT * FROM users WHERE phone = ?', [phone])) {

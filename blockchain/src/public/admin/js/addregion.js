@@ -27,7 +27,10 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => response.json())
         .then(districts => {
-            districtSelect.innerHTML = districts.map(d => `<option value="${d.district_id}">${d.district_name}</option>`).join('');
+            // Thêm tùy chọn mặc định
+            districtSelect.innerHTML = '<option value="">Chọn Quận/Huyện</option>';
+            // Thêm các quận/huyện vào danh sách
+            districtSelect.innerHTML += districts.map(d => `<option value="${d.district_id}">${d.district_name}</option>`).join('');
         })
         .catch(error => {
             console.error('Lỗi khi lấy thông tin tỉnh hoặc quận/huyện:', error);
@@ -36,14 +39,22 @@ document.addEventListener('DOMContentLoaded', function() {
     // Fetch wards based on selected district
     districtSelect.addEventListener('change', function() {
         const districtId = districtSelect.value;
-        fetch(`/api/wards/${districtId}`)
-            .then(response => response.json())
-            .then(wards => {
-                wardSelect.innerHTML = wards.map(w => `<option value="${w.ward_id}">${w.ward_name}</option>`).join('');
-            })
-            .catch(error => {
-                console.error('Lỗi khi lấy danh sách xã/phường:', error);
-            });
+        if (districtId) {
+            fetch(`/api/wards/${districtId}`)
+                .then(response => response.json())
+                .then(wards => {
+                    // Thêm tùy chọn mặc định
+                    wardSelect.innerHTML = '<option value="">Chọn Xã/Phường</option>';
+                    // Thêm các xã/phường vào danh sách
+                    wardSelect.innerHTML += wards.map(w => `<option value="${w.ward_id}">${w.ward_name}</option>`).join('');
+                })
+                .catch(error => {
+                    console.error('Lỗi khi lấy danh sách xã/phường:', error);
+                });
+        } else {
+            // Nếu không có quận/huyện nào được chọn, đặt lại danh sách xã/phường
+            wardSelect.innerHTML = '<option value="">Chọn Xã/Phường</option>';
+        }
     });
 
     const form = document.querySelector('.add-region-form');
@@ -72,14 +83,14 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             const data = await response.json();
             if (data.success) {
-                alert('Vùng sản xuất đã được thêm thành công');
+                showMessage('Vùng sản xuất đã được thêm thành công', 'success');
                 window.location.href = 'region.html';
             } else {
-                alert('Lỗi khi thêm vùng sản xuất: ' + data.error);
+                showMessage('Lỗi khi thêm vùng sản xuất: ' + data.error, 'error');
             }
         } catch (error) {
             console.error('Lỗi khi gửi yêu cầu:', error);
-            alert('Lỗi khi gửi yêu cầu');
+            showMessage('Lỗi khi gửi yêu cầu', 'error');
         }
     });
 });

@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="./css/theme.css">
 </head>
 <body onload="time()">
+    <div id="messageContainer"></div>
     <header class="text-white py-2">
         <div class="container-fluid">
             <div class="row align-items-center">
@@ -61,7 +62,9 @@
                 <div class="divider"></div>
                 <div class="section-title">TIỆN ÍCH</div>
                 <a href="#" class="menu-item rounded"><i class="fas fa-chart-bar"></i> Báo cáo và thống kê</a>
-                <a href="#" class="menu-item rounded"><i class="fas fa-comments"></i> Phản hồi</a>
+                <a href="reply.html" class="menu-item rounded"><i class="fas fa-comments"></i> Phản hồi
+                    <span class="badge badge-danger ml-2 reply-count" style="display: none;">0</span>
+                </a>
             </nav>
 
             <main class="col-md-10 col-12 px-2 offset-md-2 pt-5">
@@ -90,13 +93,13 @@
                                         <div class="col-md-6 form-group">
                                             <label for="district">Chọn quận/huyện</label>
                                             <select id="district" name="district" class="form-control">
-                                                <!-- Options sẽ được thêm vào đây từ API -->
+                                                <option value="">Chọn Quận/Huyện</option>
                                             </select>
                                         </div>
                                         <div class="col-md-6 form-group">
                                             <label for="ward">Chọn phường/xã</label>
                                             <select id="ward" name="ward" class="form-control">
-                                                <!-- Options sẽ được thêm vào đây từ API -->
+                                                <option value="">Chọn Xã/Phường</option>
                                             </select>
                                         </div>
                                     </div>
@@ -132,6 +135,9 @@
 
     <div id="overlay"></div>
     
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
+    <script src="./js/admin-auth.js"></script>
+    <script src="./js/unread-count.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="./js/feature.js"></script>
     <script src="./js/settings.js"></script>

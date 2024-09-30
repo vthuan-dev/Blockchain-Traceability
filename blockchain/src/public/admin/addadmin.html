@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="./css/theme.css">
 </head>
 <body onload="time()">
+    <div id="messageContainer"></div>
     <header class="text-white py-2">
         <div class="container-fluid">
             <div class="row align-items-center">
@@ -64,7 +65,7 @@
                 <div class="divider"></div>
                 <div class="section-title">TIỆN ÍCH</div>
                 <a href="#" class="menu-item rounded"><i class="fas fa-chart-bar"></i> Báo cáo và thống kê</a>
-                <a href="#" class="menu-item rounded"><i class="fas fa-comments"></i> Phản hồi</a>
+                <a href="reply.html" class="menu-item rounded"><i class="fas fa-comments"></i> Phản hồi</a>
             </nav>
 
             <main class="col-md-10 col-12 px-2 offset-md-2 pt-5">
@@ -131,6 +132,9 @@
 
     <div id="overlay"></div>
     
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
+    <script src="./js/admin-auth.js"></script>
+    <script src="./js/unread-count.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="./js/feature.js"></script>
     <script src="./js/user.js"></script>
