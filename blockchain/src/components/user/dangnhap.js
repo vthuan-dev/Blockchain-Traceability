@@ -38,6 +38,7 @@ module.exports = function(db) {
                 req.session.province_id = admin.province_id;
                 req.session.roleId = 3;
                 req.session.role = 'Admin';
+                req.session.isLoggedIn = true; // Khi đăng nhập thành công
 
                 res.status(200).json({ 
                     message: 'Đăng nhập thành công', 
@@ -82,6 +83,7 @@ module.exports = function(db) {
                 req.session.province_id = user.province_id;
                 req.session.region_id = user.region_id;
                 req.session.region = user.region;
+                req.session.isLoggedIn = true; // Khi đăng nhập thành công
 
                 res.status(200).json({ 
                     message: 'Đăng nhập thành công', 
@@ -174,7 +176,21 @@ module.exports = function(db) {
 
     router.get('/user-info', async (req, res) => {
         console.log('Session trong /api/user-info:', req.session);
-        if (req.session.adminId || (req.session.userId && req.session.userId !== 0)) {
+        if (req.session.adminId) {
+            try {
+                res.json({
+                    userId: req.session.adminId,
+                    name: req.session.adminName,
+                    email: req.session.adminEmail,
+                    roleId: req.session.roleId,
+                    isAdmin: true,
+                    province_id: req.session.province_id,
+                });
+            } catch (error) {
+                console.error('Lỗi khi lấy thông tin admin:', error);
+                res.status(500).json({ message: 'Lỗi server' });
+            }
+        } else if (req.session.userId && req.session.userId !== 0) {
             try {
                 let region = null;
                 if (req.session.region_id) {
@@ -183,21 +199,21 @@ module.exports = function(db) {
                 }
     
                 res.json({
-                    userId: req.session.userId || req.session.adminId,
-                    name: req.session.name || req.session.adminName,
-                    email: req.session.email || req.session.adminEmail,
+                    userId: req.session.userId,
+                    name: req.session.name,
+                    email: req.session.email,
                     roleId: req.session.roleId,
-                    isAdmin: req.session.role === 'Admin',
+                    isAdmin: false,
                     province_id: req.session.province_id,
                     region_id: req.session.region_id,
                     region: region
                 });
             } catch (error) {
-                console.error('Lỗi khi lấy thông tin region:', error);
+                console.error('Lỗi khi lấy thông tin user:', error);
                 res.status(500).json({ message: 'Lỗi server' });
             }
         } else {
-            console.log('No valid userId or adminId in session');
+            console.log('Không có userId hoặc adminId hợp lệ trong session');
             res.status(401).json({ message: 'Chưa đăng nhập hoặc session không hợp lệ' });
         }
     });

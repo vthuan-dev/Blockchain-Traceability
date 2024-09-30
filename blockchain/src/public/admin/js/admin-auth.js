@@ -33,7 +33,7 @@ function getUserInfo() {
             return response.json();
         })
         .then(data => {
-            if (data.roleId === 3) {
+            if (data.isAdmin && data.roleId === 3) {
                 return { name: data.name, roleId: data.roleId };
             } else {
                 throw new Error('Người dùng không phải là admin');
@@ -63,5 +63,16 @@ function updateUnreadCount(count) {
         element.style.display = count > 0 ? 'inline-block' : 'none';
     });
 }
+
+function initPeriodicUpdate() {
+    setInterval(() => {
+        if (window.socket) {
+            window.socket.emit("updateLastActiveTime", "Admin");
+        }
+    }, 5 * 60 * 1000); // Cập nhật mỗi 5 phút
+}
+
+// Gọi hàm này khi khởi tạo
+initPeriodicUpdate();
 
 document.addEventListener('DOMContentLoaded', initAdminSocket);

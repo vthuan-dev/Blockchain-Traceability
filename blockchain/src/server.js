@@ -264,61 +264,51 @@
     });
 
     app.get('/user-info', (req, res) => {
-      if (req.session && req.session.userId) {
+      console.log('Session trong /api/user-info:', req.session);
+      if (req.session && req.session.isLoggedIn) {
+        if (req.session.adminId) {
+          // Trả về thông tin admin nếu có adminId trong session
+          res.json({
+            userId: req.session.adminId,
+            name: req.session.adminName,
+            email: req.session.adminEmail,
+            roleId: req.session.roleId,
+            isAdmin: true,
+            province_id: req.session.province_id
+          });
+        } else if (req.session.userId) {
+          // Trả về thông tin user nếu có userId trong session
           res.json({
             userId: req.session.userId,
             name: req.session.name,
             email: req.session.email,
             roleId: req.session.roleId,
+            isAdmin: false,
             province_id: req.session.province_id,
             region_id: req.session.region_id,
             region: req.session.region
           });
+        } else {
+          // Trường hợp này không nên xảy ra, nhưng để đảm bảo
+          res.status(400).json({ error: 'Trạng thái đăng nhập không hợp lệ' });
+        }
       } else {
-          res.json({
-              name: "Người dùng ẩn danh",
-              roleId: 0
-          });
+        // Trả về thông tin người dùng ẩn danh nếu không đăng nhập
+        res.json({
+          name: "Người dùng ẩn danh",
+          roleId: 0,
+          isAdmin: false
+        });
       }
-  });
+    });
 
-    // app.get('/api/user-info', async (req, res) => { 
-    //   if (req.session.userId) {
-    //     try {
-    //       const [users] = await db.query(`
-    //         SELECT u.uid, u.name, u.email, r.role_name, reg.region_name 
-    //         FROM users u 
-    //         JOIN roles r ON u.role_id = r.role_id 
-    //         JOIN regions reg ON u.region_id = reg.region_id 
-    //         WHERE u.uid = ?
-    //       `, [req.session.userId]);
-          
-    //       const user = users[0];
-    //       if (user) {
-    //         res.json({
-    //           id: user.uid,  // Đảm bảo trả về ID người dùng
-    //           name: user.name,
-    //           email: user.email,
-    //           role: user.role_name,
-    //           region: user.region_name
-    //         });
-    //       } else {
-    //         res.status(404).json({ message: 'Không tìm thấy thông tin người dùng' });
-    //       }
-    //     } catch (error) {
-    //       console.error('Lỗi khi lấy thông tin người dùng:', error);
-    //       res.status(500).json({ message: 'Lỗi server' });
-    //     }
-    //   } else {
-    //     res.status(401).json({ message: 'Chưa đăng nhập' });
-    //   }
-    // });
 
     app.post('/api/dangxuat', (req, res) => {
         req.session.destroy((err) => {
             if (err) {
                 return res.status(500).json({ message: 'Không thể đăng xuất' });
             }
+            res.clearCookie('connect.sid'); // Xóa cookie session
             res.json({ message: 'Đăng xuất thành công' });
         });
     });
@@ -391,6 +381,13 @@ io.on('connection', (socket) => {
     admins.forEach(admin => {
         io.to(admin.socketId).emit("updateUnreadCount", unreadCount);
     });
+}
+
+function updateUserLastActiveTime(userName) {
+  const userIndex = users.findIndex(user => user.name === userName);
+  if (userIndex !== -1) {
+      users[userIndex].lastActiveTime = new Date().getTime();
+  }
 }
 
   socket.on('requestUserList', () => {
@@ -473,6 +470,7 @@ socket.on('onLogin', (user) => {
         user.unread = true;
         user.online = true;
         updateUnreadCountForAllAdmins();
+        updateUserLastActiveTime(message.from);
         admins.forEach((admin) => {
           io.to(admin.socketId).emit("message", message);
           io.to(admin.socketId).emit("updateUserList", users.filter(u => u.roleId !== 3 && u.messages.length > 0));
@@ -492,6 +490,7 @@ socket.on('onLogin', (user) => {
     if (existUser) {
       existUser.unread = false;
       updateUnreadCountForAllAdmins();
+      updateUserLastActiveTime(user.name);
       const admins = users.filter((x) => x.roleId === 3 && x.online);
       admins.forEach((admin) => {
         io.to(admin.socketId).emit("updateUser", existUser);
@@ -511,7 +510,13 @@ socket.on('onLogin', (user) => {
       });
     }
   });
+
+    socket.on("updateLastActiveTime", (userName) => {
+      updateUserLastActiveTime(userName);
+  });
 });
+
+
 
 server.listen(3000, () => {
   console.log('Server đang chạy trên cổng 3000');

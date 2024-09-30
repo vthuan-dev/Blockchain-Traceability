@@ -251,7 +251,7 @@ router.post('/api/products/update', upload.single('img'), async (req, res) => {
 
 // Cập nhật endpoint tạo admin mới
 router.post('/api/admin', async (req, res) => {
-    const { email, name, password } = req.body;
+    const { email, name, password, province_id } = req.body;
 
     if (!email || !name || !password) {
         return res.status(400).json({ error: 'Thiếu thông tin admin' });
@@ -259,8 +259,8 @@ router.post('/api/admin', async (req, res) => {
 
     try {
         const hashedPassword = await promisify(bcrypt.hash)(password, 10);
-        const query = 'INSERT INTO admin (admin_email, admin_name, admin_pass, role_id) VALUES (?, ?, ?, ?)';
-        const results = await queryDatabase(query, [email, name, hashedPassword, 3]);
+        const query = 'INSERT INTO admin (admin_email, admin_name, admin_pass, role_id, province_id) VALUES (?, ?, ?, ?, ?)';
+        const results = await queryDatabase(query, [email, name, hashedPassword, 3, province_id]);
         res.status(201).json({ message: 'Admin đã được thêm thành công', id: results.insertId });
     } catch (error) {
         console.error('Lỗi khi thêm admin:', error);
