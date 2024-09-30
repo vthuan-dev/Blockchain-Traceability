@@ -100,8 +100,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.renderTable();
             } catch (error) {
                 console.error('Lỗi khi lấy dữ liệu vùng sản xuất:', error);
-                // Hiển thị thông báo lỗi cho người dùng
-                alert('Có lỗi xảy ra khi tải dữ liệu vùng sản xuất. Vui lòng thử lại sau.');
+                showMessage('Có lỗi xảy ra khi tải dữ liệu vùng sản xuất. Vui lòng thử lại sau.', 'error');
             }
         },
 
@@ -121,11 +120,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     throw new Error('Lỗi khi xóa vùng sản xuất');
                 }
                 await response.json();
-                alert('Vùng sản xuất đã được xóa thành công');
+                showMessage('Vùng sản xuất đã được xóa thành công', 'success');
+            
                 this.fetchRegionData();
             } catch (error) {
                 console.error('Lỗi khi xóa vùng sản xuất:', error);
-                alert('Có lỗi xảy ra khi xóa vùng sản xuất: ' + error.message);
+                showMessage('Có lỗi xảy ra khi xóa vùng sản xuất: ' + error.message, 'error');
             }
         }
     };

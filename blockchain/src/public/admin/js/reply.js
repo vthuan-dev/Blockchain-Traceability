@@ -1,108 +1,97 @@
-// Khởi tạo socket.io và các biến dùng để quản lý trạng thái
-let socket = null;
 let selectedUser = {};
 let users = [];
 let messages = [];
 let messageBody = "";
+let unreadCount = 0;
 
-// Kết nối Socket.IO
-const ENDPOINT = window.location.host.indexOf("localhost") >= 0 ? "http://127.0.0.1:3000" : window.location.host;
-socket = io(ENDPOINT);
+// Lắng nghe sự kiện socketInitialized để đảm bảo socket đã sẵn sàng
+document.addEventListener('socketInitialized', (e) => {
 
-// Hàm để lấy thông tin người dùng đã đăng nhập
-function getUserInfo() {
-    return fetch('/api/user-info')  
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+    // Khi trang được tải, kiểm tra thông tin đăng nhập và kết nối
+    document.addEventListener('DOMContentLoaded', () => {
+        if (window.socket) {
+            window.socket.emit('requestUserList');
+        } else {
+            console.error('Socket chưa được khởi tạo');
+        }
+    });
+
+    // Lắng nghe các sự kiện từ server
+    window.socket.on("listUsers", (updatedUsers) => {
+        users = updatedUsers;
+        renderUserList();
+    });
+
+    window.socket.on("message", (data) => {
+        if (selectedUser.name === data.from) {
+            messages.push(data);
+            renderMessages();
+        } else {
+            const user = users.find((user) => user.name === data.from);
+            if (user) {
+                user.unread = true;
+                updateUserLastActiveTime(user.name);
+                renderUserList();
             }
-            return response.json();
-        })
-        .then(data => {
-            if (data.roleId === 3) {
-                return { name: data.name, roleId: data.roleId };
-            } else {
-                throw new Error('Người dùng không phải là admin');
-            }
-        });
-}
+        }
+    });
 
-// Khi trang được tải, kiểm tra thông tin đăng nhập và kết nối
-document.addEventListener('DOMContentLoaded', () => {
-    getUserInfo()
-        .then(userInfo => {
-            console.log('Admin đã đăng nhập:', userInfo);
-            socket.emit("onLogin", userInfo);
-        })
-        .catch(error => {
-            console.error('Lỗi khi lấy thông tin người dùng:', error);
-            // Có thể chuyển hướng người dùng đến trang đăng nhập ở đây
-            // window.location.href = '/login.html';
-        });
-});
+    window.socket.on("updateUser", (updatedUser) => {
+        const userIndex = users.findIndex(u => u.name === updatedUser.name);
+        if (userIndex !== -1) {
+            users[userIndex] = {...users[userIndex], ...updatedUser};
+        } else {
+            users.push(updatedUser);
+        }
+        renderUserList();
+    });
 
-// Lắng nghe các sự kiện từ server
-socket.on("listUsers", (updatedUsers) => {
-    users = updatedUsers;
-    renderUserList();
-});
+    // Khi kết nối socket thành công
+    window.socket.on('connect', () => {
+        console.log('Kết nối socket thành công');
+        // Yêu cầu danh sách người dùng từ server
+        window.socket.emit('requestUserList');
+    });
 
-socket.on("message", (data) => {
-    if (selectedUser.name === data.from) {
-        messages.push(data);
-        renderMessages();
-    } else {
-        const user = users.find((user) => user.name === data.from);
-        if (user) {
-            user.unread = true;
+    // Lắng nghe sự kiện cập nhật danh sách người dùng từ server
+    window.socket.on('updateUserList', (updatedUsers) => {
+        users = updatedUsers;
+        renderUserList();
+    });
+
+    // Lắng nghe sự kiện cập nhật trạng thái người dùng
+    window.socket.on('updateUserStatus', (updatedUser) => {
+        const userIndex = users.findIndex(user => user.name === updatedUser.name);
+        if (userIndex !== -1) {
+            users[userIndex] = updatedUser;
             renderUserList();
         }
-    }
-});
+    });
 
-socket.on("updateUser", (updatedUser) => {
-    const userIndex = users.findIndex(u => u.name === updatedUser.name);
-    if (userIndex !== -1) {
-        users[userIndex] = {...users[userIndex], ...updatedUser};
-    } else {
-        users.push(updatedUser);
-    }
-    renderUserList();
-});
-
-// Khi kết nối socket thành công
-socket.on('connect', () => {
-    console.log('Kết nối socket thành công');
-    // Yêu cầu danh sách người dùng từ server
-    socket.emit('requestUserList');
-});
-
-// Lắng nghe sự kiện cập nhật danh sách người dùng từ server
-socket.on('updateUserList', (updatedUsers) => {
-    users = updatedUsers;
-    renderUserList();
-});
-
-// Lắng nghe sự kiện cập nhật trạng thái người dùng
-socket.on('updateUserStatus', (updatedUser) => {
-    const userIndex = users.findIndex(user => user.name === updatedUser.name);
-    if (userIndex !== -1) {
-        users[userIndex] = updatedUser;
+    // Gọi renderUserList khi trang được tải
+    document.addEventListener('DOMContentLoaded', () => {
         renderUserList();
-    }
+    });
 });
 
-// Gọi renderUserList khi trang được tải
-document.addEventListener('DOMContentLoaded', () => {
-    renderUserList();
-});
+// Thêm hằng số cho thời gian không hoạt động tối đa (ví dụ: 1 ngày)
+const MAX_INACTIVE_TIME = 24 *60 * 60 * 1000;
 
-// Hàm để render danh sách người dùng
+// Sửa đổi hàm renderUserList
 function renderUserList() {
     const userListElement = document.getElementById('userList');
     userListElement.innerHTML = "";
+    unreadCount = 0;
 
-    users.filter((x) => x.name !== "Admin" && x.roleId !== 3 && x.messages && x.messages.length > 0).forEach((user) => {
+    const currentTime = new Date().getTime();
+
+    users.filter((x) => {
+        return x.name !== "Admin" && 
+               x.roleId !== 3 && 
+               x.messages && 
+               x.messages.length > 0 &&
+               (currentTime - x.lastActiveTime) <= MAX_INACTIVE_TIME; // Chỉ hiển thị người dùng hoạt động gần đây
+    }).forEach((user) => {
         const userItem = document.createElement('li');
         userItem.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
         if (selectedUser.name === user.name) {
@@ -115,6 +104,7 @@ function renderUserList() {
         if (user.unread) {
             statusBadge.classList.add('badge-danger');
             statusBadge.textContent = "New";
+            unreadCount++;
         } else if (user.online) {
             statusBadge.classList.add('badge-success');
             statusBadge.textContent = "Online";
@@ -127,6 +117,8 @@ function renderUserList() {
         userItem.addEventListener('click', () => selectUser(user));
         userListElement.appendChild(userItem);
     });
+
+    updateUnreadCount(unreadCount);
 }
 
 // Hàm để chọn người dùng
@@ -134,9 +126,11 @@ function selectUser(user) {
     selectedUser = user;
     messages = user.messages || [];
     user.unread = false;
+    updateUserLastActiveTime(user.name);
     renderMessages();
-    renderUserList(); // Gọi lại renderUserList để cập nhật trạng thái active
-    socket.emit("onUserSelected", user);
+    renderUserList();
+    sendUnreadCountToServer(); // Gửi số lượng tin nhắn chưa đọc đến server
+    window.socket.emit("onUserSelected", user);
 }
 
 // Hàm để render tin nhắn giữa admin và người dùng
@@ -170,7 +164,7 @@ function submitMessage() {
     const messageBody = messageInput.value.trim();
 
     if (!messageBody || !selectedUser.name) {
-        alert("Vui lòng chọn người dùng và nhập tin nhắn");
+        showMessage("Vui lòng chọn người dùng và nhập tin nhắn", 'warning');
         return;
     }
 
@@ -178,7 +172,7 @@ function submitMessage() {
     messages.push(message);
     renderMessages();
 
-    socket.emit("onMessage", message);
+    window.socket.emit("onMessage", message);
 
     messageInput.value = '';
 }
@@ -188,3 +182,37 @@ document.getElementById('messageForm').addEventListener('submit', (e) => {
     e.preventDefault();
     submitMessage();
 });
+
+// Thêm hàm để gửi số lượng tin nhắn chưa đọc đến server
+function sendUnreadCountToServer() {
+    if (window.socket) {
+        window.socket.emit('updateNewCount', unreadCount);
+    }
+}
+
+// Hàm để cập nhật số lượng tin nhắn chưa đọc
+function updateUnreadCount(count) {
+    const replyCountElements = document.querySelectorAll('.reply-count');
+    replyCountElements.forEach(element => {
+        element.textContent = count;
+        element.style.display = count > 0 ? 'inline-block' : 'none';
+    });
+
+    // Cập nhật title của trang nếu có tin nhắn mới
+    if (count > 0) {
+        document.title = `(${count}) Tin nhắn mới`;
+    } else {
+        document.title = 'Admin Dashboard';
+    }
+
+    // Lưu số lượng tin nhắn chưa đọc vào localStorage
+    localStorage.setItem('unreadCount', count);
+}
+
+// Thêm hàm để cập nhật thời gian hoạt động cuối cùng của người dùng
+function updateUserLastActiveTime(userName) {
+    const userIndex = users.findIndex(user => user.name === userName);
+    if (userIndex !== -1) {
+        users[userIndex].lastActiveTime = new Date().getTime();
+    }
+}

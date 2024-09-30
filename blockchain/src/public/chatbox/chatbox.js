@@ -18,15 +18,24 @@ function initializeSocket() {
     });
 
     socket.on("message", (data) => {
-        const messages = document.getElementById('messages');
-        const newMessage = document.createElement('li');
-        newMessage.className = 'list-group-item';
-        // Hiển thị "Bạn" cho tin nhắn của người dùng, và tên thật cho tin nhắn từ Admin
-        const displayName = data.from === userName ? "Bạn" : data.from;
-        newMessage.innerHTML = `<strong>${displayName}: </strong> ${data.body}`;
-        messages.appendChild(newMessage);
-        messages.scrollTop = messages.scrollHeight;
+        addMessage(data);
     });
+}
+
+function addMessage(data) {
+    const messages = document.getElementById('messages');
+    const newMessage = document.createElement('li');
+    newMessage.className = 'list-group-item';
+    // Hiển thị "Bạn" cho tin nhắn của người dùng, và tên thật cho tin nhắn từ Admin
+    const displayName = data.from === userName ? "Bạn" : data.from;
+    newMessage.innerHTML = `<strong>${displayName}: </strong> ${data.body}`;
+    messages.appendChild(newMessage);
+    scrollToBottom();
+}
+
+function scrollToBottom() {
+    const chatboxBody = document.querySelector('.chatbox-body');
+    chatboxBody.scrollTop = chatboxBody.scrollHeight;
 }
 
 // Lấy userName và roleId từ session khi người dùng đăng nhập
@@ -61,6 +70,7 @@ fetch('/user-info')
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('openChat').addEventListener('click', () => {
         document.getElementById('chatbox').style.display = 'block';
+        scrollToBottom();
     });
 
     document.getElementById('closeChat').addEventListener('click', () => {
@@ -74,18 +84,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!messageBody) {
             alert("Vui lòng nhập tin nhắn.");
         } else if (socket) {
-            const messages = document.getElementById('messages');
-            const newMessage = document.createElement('li');
-            newMessage.className = 'list-group-item';
-            newMessage.innerHTML = `<strong>Bạn: </strong> ${messageBody}`;
-            messages.appendChild(newMessage);
-            socket.emit("onMessage", {
+            const messageData = {
                 body: messageBody,
                 from: userName,
                 to: "Admin",
-            });
+            };
+            addMessage(messageData);
+            socket.emit("onMessage", messageData);
             messageInput.value = '';
-            messages.scrollTop = messages.scrollHeight;
         } else {
             console.error("Socket chưa được khởi tạo");
         }

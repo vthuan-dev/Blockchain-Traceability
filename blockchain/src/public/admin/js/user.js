@@ -115,11 +115,11 @@ window.UserManager = {
                 throw new Error('Lỗi khi xóa người dùng');
             }
             await response.json();
-            alert('Người dùng đã được xóa thành công');
+            showMessage('Người dùng đã được xóa thành công', 'success');
             this.fetchUserData();
         } catch (error) {
             console.error('Lỗi khi xóa người dùng:', error);
-            alert('Có lỗi xảy ra khi xóa người dùng: ' + error.message);
+            showMessage('Có lỗi xảy ra khi xóa người dùng: ' + error.message, 'error');
         }
     }
 };
@@ -223,30 +223,41 @@ document.addEventListener('DOMContentLoaded', function() {
             const confirmPassword = document.getElementById('admin-confirm-password').value;
 
             if (password !== confirmPassword) {
-                alert('Mật khẩu xác nhận không khớp');
+                showMessage('Mật khẩu xác nhận không khớp', 'error');
                 return;
             }
 
-            fetch('http://localhost:3000/api/admin', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, name, password }),
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    alert('Lỗi: ' + data.error);
-                } else {
-                    alert('Admin đã được thêm thành công');
-                    window.location.href = 'user.html'; // Chuyển hướng về trang quản lý người dùng
-                }
-            })
-            .catch(error => {
-                console.error('Lỗi:', error);
-                alert('Đã xảy ra lỗi khi thêm admin');
-            });
+            // Lấy province_id từ session
+            fetch('http://localhost:3000/api/user-info')
+                .then(response => response.json())
+                .then(data => {
+                    const province_id = data.province_id;
+
+                    fetch('http://localhost:3000/api/admin', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ email, name, password, province_id }),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            showMessage('Lỗi: ' + data.error, 'error');
+                        } else {
+                            showMessage('Admin đã được thêm thành công', 'success');
+                            window.location.href = 'user.html';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Lỗi:', error);
+                        showMessage('Đã xảy ra lỗi khi thêm admin', 'error');
+                    });
+                })
+                .catch(error => {
+                    console.error('Lỗi khi lấy thông tin người dùng:', error);
+                    showMessage('Đã xảy ra lỗi khi lấy thông tin người dùng', 'error');
+                });
         });
     }
 });
