@@ -30,6 +30,7 @@ document.addEventListener('socketInitialized', (e) => {
             const user = users.find((user) => user.name === data.from);
             if (user) {
                 user.unread = true;
+                updateUserLastActiveTime(user.name);
                 renderUserList();
             }
         }
@@ -73,13 +74,24 @@ document.addEventListener('socketInitialized', (e) => {
     });
 });
 
-// Hàm để render danh sách người dùng
+// Thêm hằng số cho thời gian không hoạt động tối đa (ví dụ: 1 ngày)
+const MAX_INACTIVE_TIME = 24 *60 * 60 * 1000;
+
+// Sửa đổi hàm renderUserList
 function renderUserList() {
     const userListElement = document.getElementById('userList');
     userListElement.innerHTML = "";
-    unreadCount = 0; // Reset unreadCount
+    unreadCount = 0;
 
-    users.filter((x) => x.name !== "Admin" && x.roleId !== 3 && x.messages && x.messages.length > 0).forEach((user) => {
+    const currentTime = new Date().getTime();
+
+    users.filter((x) => {
+        return x.name !== "Admin" && 
+               x.roleId !== 3 && 
+               x.messages && 
+               x.messages.length > 0 &&
+               (currentTime - x.lastActiveTime) <= MAX_INACTIVE_TIME; // Chỉ hiển thị người dùng hoạt động gần đây
+    }).forEach((user) => {
         const userItem = document.createElement('li');
         userItem.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
         if (selectedUser.name === user.name) {
@@ -92,7 +104,7 @@ function renderUserList() {
         if (user.unread) {
             statusBadge.classList.add('badge-danger');
             statusBadge.textContent = "New";
-            unreadCount++; // Tăng unreadCount
+            unreadCount++;
         } else if (user.online) {
             statusBadge.classList.add('badge-success');
             statusBadge.textContent = "Online";
@@ -106,7 +118,6 @@ function renderUserList() {
         userListElement.appendChild(userItem);
     });
 
-    // Cập nhật số lượng tin nhắn chưa đọc
     updateUnreadCount(unreadCount);
 }
 
@@ -115,6 +126,7 @@ function selectUser(user) {
     selectedUser = user;
     messages = user.messages || [];
     user.unread = false;
+    updateUserLastActiveTime(user.name);
     renderMessages();
     renderUserList();
     sendUnreadCountToServer(); // Gửi số lượng tin nhắn chưa đọc đến server
@@ -195,4 +207,12 @@ function updateUnreadCount(count) {
 
     // Lưu số lượng tin nhắn chưa đọc vào localStorage
     localStorage.setItem('unreadCount', count);
+}
+
+// Thêm hàm để cập nhật thời gian hoạt động cuối cùng của người dùng
+function updateUserLastActiveTime(userName) {
+    const userIndex = users.findIndex(user => user.name === userName);
+    if (userIndex !== -1) {
+        users[userIndex].lastActiveTime = new Date().getTime();
+    }
 }

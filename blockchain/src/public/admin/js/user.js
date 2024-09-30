@@ -227,26 +227,37 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            fetch('http://localhost:3000/api/admin', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, name, password }),
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    showMessage('Lỗi: ' + data.error, 'error');
-                } else {
-                    showMessage('Admin đã được thêm thành công', 'success');
-                    window.location.href = 'user.html'; // Chuyển hướng về trang quản lý người dùng
-                }
-            })
-            .catch(error => {
-                console.error('Lỗi:', error);
-                showMessage('Đã xảy ra lỗi khi thêm admin', 'error');
-            });
+            // Lấy province_id từ session
+            fetch('http://localhost:3000/api/user-info')
+                .then(response => response.json())
+                .then(data => {
+                    const province_id = data.province_id;
+
+                    fetch('http://localhost:3000/api/admin', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ email, name, password, province_id }),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            showMessage('Lỗi: ' + data.error, 'error');
+                        } else {
+                            showMessage('Admin đã được thêm thành công', 'success');
+                            window.location.href = 'user.html';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Lỗi:', error);
+                        showMessage('Đã xảy ra lỗi khi thêm admin', 'error');
+                    });
+                })
+                .catch(error => {
+                    console.error('Lỗi khi lấy thông tin người dùng:', error);
+                    showMessage('Đã xảy ra lỗi khi lấy thông tin người dùng', 'error');
+                });
         });
     }
 });
