@@ -2,6 +2,7 @@ let selectedUser = {};
 let users = [];
 let messages = [];
 let messageBody = "";
+let unreadCount = 0;
 
 // Lắng nghe sự kiện socketInitialized để đảm bảo socket đã sẵn sàng
 document.addEventListener('socketInitialized', (e) => {
@@ -76,7 +77,7 @@ document.addEventListener('socketInitialized', (e) => {
 function renderUserList() {
     const userListElement = document.getElementById('userList');
     userListElement.innerHTML = "";
-    let newCount = 0;
+    unreadCount = 0; // Reset unreadCount
 
     users.filter((x) => x.name !== "Admin" && x.roleId !== 3 && x.messages && x.messages.length > 0).forEach((user) => {
         const userItem = document.createElement('li');
@@ -91,7 +92,7 @@ function renderUserList() {
         if (user.unread) {
             statusBadge.classList.add('badge-danger');
             statusBadge.textContent = "New";
-            newCount++;
+            unreadCount++; // Tăng unreadCount
         } else if (user.online) {
             statusBadge.classList.add('badge-success');
             statusBadge.textContent = "Online";
@@ -105,22 +106,18 @@ function renderUserList() {
         userListElement.appendChild(userItem);
     });
 
-    // Gửi số lượng tin nhắn mới đến server
-    if (window.socket) {
-        console.log("Emitting updateNewCount with count:", newCount); // Thêm log để kiểm tra
-        window.socket.emit("updateNewCount", newCount);
-    }
+    // Cập nhật số lượng tin nhắn chưa đọc
+    updateUnreadCount(unreadCount);
 }
 
-
-    
 // Hàm để chọn người dùng
 function selectUser(user) {
     selectedUser = user;
     messages = user.messages || [];
     user.unread = false;
     renderMessages();
-    renderUserList(); // Gọi lại renderUserList để cập nhật trạng thái active
+    renderUserList();
+    sendUnreadCountToServer(); // Gửi số lượng tin nhắn chưa đọc đến server
     window.socket.emit("onUserSelected", user);
 }
 
@@ -173,3 +170,29 @@ document.getElementById('messageForm').addEventListener('submit', (e) => {
     e.preventDefault();
     submitMessage();
 });
+
+// Thêm hàm để gửi số lượng tin nhắn chưa đọc đến server
+function sendUnreadCountToServer() {
+    if (window.socket) {
+        window.socket.emit('updateNewCount', unreadCount);
+    }
+}
+
+// Hàm để cập nhật số lượng tin nhắn chưa đọc
+function updateUnreadCount(count) {
+    const replyCountElements = document.querySelectorAll('.reply-count');
+    replyCountElements.forEach(element => {
+        element.textContent = count;
+        element.style.display = count > 0 ? 'inline-block' : 'none';
+    });
+
+    // Cập nhật title của trang nếu có tin nhắn mới
+    if (count > 0) {
+        document.title = `(${count}) Tin nhắn mới`;
+    } else {
+        document.title = 'Admin Dashboard';
+    }
+
+    // Lưu số lượng tin nhắn chưa đọc vào localStorage
+    localStorage.setItem('unreadCount', count);
+}
