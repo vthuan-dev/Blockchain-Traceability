@@ -7,7 +7,7 @@ function initAdminSocket() {
     window.socket.on('connect', () => {
         console.log('Admin socket connected');
         checkAdminAuth();
-        initUnreadCount(); // Lắng nghe sự kiện để cập nhật tin nhắn chưa đọc
+        initUnreadCount(); // Thêm dòng này
     });
 }
 
@@ -45,15 +45,15 @@ function getUserInfo() {
 function initUnreadCount() {
     if (window.socket) {
         window.socket.on("updateUnreadCount", (count) => {
-            console.log("Received updateUnreadCount on admin page:", count); // Kiểm tra log này
+            console.log("Received updateUnreadCount:", count);
             updateUnreadCount(count);
+            // Lưu số lượng tin nhắn chưa đọc vào localStorage
+            localStorage.setItem('unreadCount', count);
         });
     } else {
         console.error('Socket chưa được khởi tạo');
     }
 }
-
-
 
 // Hàm cập nhật số lượng tin nhắn chưa đọc trên tất cả các trang
 function updateUnreadCount(count) {

@@ -1,18 +1,29 @@
 function updateUnreadCount(count) {
-    const replyCount = document.querySelectorAll('.reply-count');
-    replyCount.forEach(element => {
-        element.textContent = count;
-        element.style.display = count > 0 ? 'inline-block' : 'none';
+    const replyCountElements = document.querySelectorAll('.reply-count');
+    replyCountElements.forEach(element => {
+      element.textContent = count;
+      element.style.display = count > 0 ? 'inline-block' : 'none';
     });
+
+    // Cập nhật title của trang nếu có tin nhắn mới
+    if (count > 0) {
+      document.title = `(${count}) Tin nhắn mới`;
+    } else {
+      document.title = 'Admin Dashboard';
+    }
+
+    // Lưu số lượng tin nhắn chưa đọc vào localStorage
+    localStorage.setItem('unreadCount', count);
 }
 
-document.addEventListener('socketInitialized', () => {
-    if (window.socket) {
-        window.socket.on("updateUnreadCount", (count) => {
-            console.log("Received updateUnreadCount:", count); // Log để kiểm tra
-            updateUnreadCount(count);
-        });
-    } else {
-        console.error('Socket chưa được khởi tạo');
-    }
+// Thêm hàm để lấy số lượng tin nhắn chưa đọc từ localStorage
+function getUnreadCountFromStorage() {
+    return parseInt(localStorage.getItem('unreadCount') || '0');
+}
+
+// Gọi hàm này khi trang được tải
+document.addEventListener('DOMContentLoaded', () => {
+    const storedCount = getUnreadCountFromStorage();
+    updateUnreadCount(storedCount);
 });
+

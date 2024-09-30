@@ -384,6 +384,14 @@ let users = [];
 
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
+  
+  function updateUnreadCountForAllAdmins() {
+    const unreadCount = users.filter(user => user.unread).length;
+    const admins = users.filter(user => user.roleId === 3 && user.online);
+    admins.forEach(admin => {
+        io.to(admin.socketId).emit("updateUnreadCount", unreadCount);
+    });
+}
 
   socket.on('requestUserList', () => {
     const clientUsers = users.filter(user => user.messages && user.messages.length > 0).map(user => ({
@@ -395,16 +403,16 @@ io.on('connection', (socket) => {
     socket.emit('updateUserList', clientUsers);
   });
 
+  
+
   socket.on('updateNewCount', (count) => {
-    console.log("Received updateNewCount from client:", count);  // Đảm bảo log này xuất hiện khi tin nhắn mới được gửi
+    console.log("Received updateNewCount from client:", count);
     const admins = users.filter((x) => x.roleId === 3 && x.online);
     admins.forEach((admin) => {
-        console.log(`Sending updateUnreadCount (${count}) to admin: ${admin.name}`);  // Log kiểm tra
-        io.to(admin.socketId).emit("updateUnreadCount", count);  // Đảm bảo sự kiện được gửi đến admin
+        console.log(`Sending updateUnreadCount (${count}) to admin: ${admin.name}`);
+        io.to(admin.socketId).emit("updateUnreadCount", count);
     });
-});
-
-
+  });
 
 socket.on('onLogin', (user) => {
   const existingUser = users.find((x) => x.name === user.name);
@@ -464,6 +472,7 @@ socket.on('onLogin', (user) => {
         user.messages.push(message);
         user.unread = true;
         user.online = true;
+        updateUnreadCountForAllAdmins();
         admins.forEach((admin) => {
           io.to(admin.socketId).emit("message", message);
           io.to(admin.socketId).emit("updateUserList", users.filter(u => u.roleId !== 3 && u.messages.length > 0));
@@ -482,6 +491,7 @@ socket.on('onLogin', (user) => {
     const existUser = users.find((x) => x.name === user.name);
     if (existUser) {
       existUser.unread = false;
+      updateUnreadCountForAllAdmins();
       const admins = users.filter((x) => x.roleId === 3 && x.online);
       admins.forEach((admin) => {
         io.to(admin.socketId).emit("updateUser", existUser);
@@ -494,6 +504,7 @@ socket.on('onLogin', (user) => {
     const userIndex = users.findIndex((x) => x.socketId === socket.id);
     if (userIndex !== -1) {
       users[userIndex].online = false;
+      updateUnreadCountForAllAdmins();
       const admins = users.filter((x) => x.roleId === 3 && x.online);
       admins.forEach((admin) => {
         io.to(admin.socketId).emit("updateUserList", users.filter(u => u.roleId !== 3 && u.messages.length > 0));
