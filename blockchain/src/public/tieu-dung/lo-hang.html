@@ -185,6 +185,17 @@
             background-color: #ecf0f1;
             border-radius: 0 5px 5px 0;
         }
+
+        .activity-log {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .activity-log p {
+            margin-bottom: 5px;
+        }
     </style>
 </head>
 <body>
@@ -345,7 +356,7 @@
         console.error('Lỗi khi lấy thông tin sản phẩm:', error);
     }
 
-    updateRelatedParties(batchInfo);
+    await updateRelatedParties(batchInfo);
     updateAuthenticationInfo(batchInfo);
     updateBatchDetails(batchInfo);
 
@@ -373,15 +384,95 @@
         `;
     }
 
-    function updateRelatedParties(batchInfo) {
+    async function updateRelatedParties(batchInfo) {
         const lienketContent = document.getElementById('lienket');
         lienketContent.innerHTML = `
             <h2>Các bên có liên quan</h2>
             <p><strong>Nhà sản xuất:</strong> ${batchInfo.producer.name}</p>
             <p><strong>Địa chỉ:</strong> ${batchInfo.producer.address}</p>
             <p><strong>Số điện thoại:</strong> ${batchInfo.producer.phone}</p>
+            <h2>Các bên tham gia</h2>
+            <div id="activityLogs">Đang tải...</div>
         `;
+
+        try {
+            const response = await fetch(`/api/system-activity-logs/${batchInfo.sscc}`);
+            if (response.ok) {
+                const data = await response.json();
+                displayActivityLogs(data.activityLogs);
+            } else {
+                console.error('Không thể lấy nhật ký hoạt động');
+                document.getElementById('activityLogs').innerHTML = 'Không thể tải nhật ký hoạt động.';
+            }
+        } catch (error) {
+            console.error('Lỗi khi lấy nhật ký hoạt động:', error);
+            document.getElementById('activityLogs').innerHTML = 'Đã xảy ra lỗi khi tải nhật ký hoạt động.';
+        }
     }
+
+    function displayActivityLogs(logs) {
+    const logsContainer = document.getElementById('activityLogs');
+    if (logs.length === 0) {
+        logsContainer.innerHTML = 'Không có hoạt động nào được ghi nhận.';
+        return;
+    }
+
+    // Sắp xếp logs theo thời gian giảm dần (mới nhất lên đầu)
+    logs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+    const initialDisplayCount = 5; // Số lượng hoạt động hiển thị ban đầu
+    const displayLogs = (start, end) => {
+        const logsHtml = logs.slice(start, end).map(log => `
+         <div class="activity-log ${getActivityClass(log.activityName)}">
+            <p class="timestamp"><strong>Thời gian:</strong> ${new Date(log.timestamp).toLocaleString('vi-VN')}</p>
+            <p class="activity-name"><strong>Hoạt động:</strong> ${getActivityIcon(log.activityName)} ${translateActivityName(log.activityName)}</p>
+            <p class="description"><strong>Mô tả:</strong> ${translateDescription(log.description)}</p>
+            ${log.imageUrls.length > 0 ? `<p><strong>Hình ảnh:</strong> <a href="${log.imageUrls[0]}" target="_blank" class="image-link">Xem hình ảnh</a></p>` : ''}
+        </div>
+        `).join('');
+
+        logsContainer.innerHTML = logsHtml;
+
+        if (end < logs.length) {
+            logsContainer.innerHTML += `
+                <button id="loadMoreLogs" class="btn btn-primary mt-3">Xem thêm</button>
+            `;
+            document.getElementById('loadMoreLogs').addEventListener('click', () => {
+                displayLogs(0, end + 5);
+            });
+        }
+    };
+
+    displayLogs(0, initialDisplayCount);
+}
+function translateActivityName(activityName) {
+    const translations = {
+        "Transport Status Updated": "Cập nhật trạng thái vận chuyển",
+        "Warehouse Confirmation": "Xác nhận nhà kho",
+        "Create Batch": "Tạo lô hàng",
+        "Start Transport": "Bắt đầu vận chuyển",
+        "Warehouse Confirmation": "Xác nhận nhà kho",
+        "Stop Transport": "Tạm dừng vận chuyển",
+        "Finish Transport": "Hoàn thành vận chuyển",
+        "Batch Approved": "Lô hàng được chấp thuận",
+
+    };
+
+    return translations[activityName] || activityName;
+}
+
+function translateDescription(description) {
+    const translations = {
+        "Bat dau van chuyen": "Bắt đầu vận chuyển",
+        "Warehouse has confirmed receipt of the batch": "Nhà kho đã xác nhận nhận lô hàng",
+        "Hoan thanh van chuyen": "Hoàn thành vận chuyển",
+        "Tam dung van chuyen": "Tạm dừng vận chuyển",
+        "Batch has been approved by the approver": "Lô hàng đã được nhà kiểm duyệt chấp thuận",
+        // Thêm các bản dịch khác nếu cần
+    };
+
+    return translations[description] || description;
+}
 
     function updateAuthenticationInfo(batchInfo) {
         const xacthucContent = document.getElementById('xacthuc');
@@ -462,6 +553,24 @@ document.querySelectorAll('.tab-button').forEach(tab => {
 
 // Kích hoạt tab đầu tiên khi trang được tải
 document.querySelector('.tab-button').click();
+
+function getActivityClass(activityName) {
+    // Thêm class CSS dựa trên loại hoạt động
+    switch(activityName.toLowerCase()) {
+        case 'transport status updated': return 'activity-transport';
+        case 'warehouse confirmation': return 'activity-confirm';
+        default: return 'activity-default';
+    }
+}
+
+function getActivityIcon(activityName) {
+    // Thêm biểu tượng dựa trên loại hoạt động
+    switch(activityName.toLowerCase()) {
+        case 'transport status updated': return '🚚';
+        case 'warehouse confirmation': return '✅';
+        default: return '📝';
+    }
+}
     </script>
 </body>
 </html>
