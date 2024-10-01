@@ -241,3 +241,79 @@
             font-size: 1.2rem;
         }
     }
+
+    .activity-log {
+        background-color: #ffffff;
+        border-left: 5px solid #4CAF50;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        padding: 20px;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+    }
+
+    .activity-log:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    }
+
+    .activity-log p {
+        margin-bottom: 10px;
+        line-height: 1.6;
+    }
+
+    .activity-log strong {
+        color: #2c3e50;
+        font-weight: 600;
+    }
+
+    .activity-log .timestamp {
+        font-size: 0.9rem;
+        color: #7f8c8d;
+    }
+
+    .activity-log .activity-name {
+        font-size: 1.1rem;
+        color: #4CAF50;
+        font-weight: 600;
+    }
+
+    .activity-log .description {
+        color: #34495e;
+    }
+
+    .activity-log .image-link {
+        display: inline-block;
+        background-color: #4CAF50;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: background-color 0.3s ease;
+    }
+
+    .activity-log .image-link:hover {
+        background-color: #45a049;
+    }
+
+    .activity-transport { border-left-color: #3498db; }
+    .activity-confirm { border-left-color: #f1c40f; }
+    .activity-create { border-left-color: #e74c3c; }
+    .activity-default { border-left-color: #95a5a6; }
+
+    /* Thêm animation cho các activity log mới */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .activity-log {
+        animation: fadeInUp 0.5s ease-out;
+    }
