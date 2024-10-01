@@ -245,56 +245,89 @@
     .activity-log {
         background-color: #ffffff;
         border-left: 5px solid #4CAF50;
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        padding: 20px;
-        margin-bottom: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        padding: 25px;
+        margin-bottom: 30px;
         transition: all 0.3s ease;
     }
 
     .activity-log:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        transform: translateY(-5px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.15);
     }
 
-    .activity-log p {
-        margin-bottom: 10px;
-        line-height: 1.6;
+    .participant-info {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #e0e0e0;
     }
 
-    .activity-log strong {
-        color: #2c3e50;
+    .participant-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        margin-right: 15px;
+        object-fit: cover;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        border: 3px solid #fff;
+    }
+
+    .participant-details {
+        flex-grow: 1;
+    }
+
+    .participant-name {
+        font-size: 1.2rem;
         font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 5px;
+    }
+
+    .participant-role {
+        font-size: 0.9rem;
+        color: #7f8c8d;
+        font-weight: 500;
     }
 
     .activity-log .timestamp {
         font-size: 0.9rem;
-        color: #7f8c8d;
+        color: #95a5a6;
+        margin-bottom: 10px;
     }
 
     .activity-log .activity-name {
-        font-size: 1.1rem;
+        font-size: 1.2rem;
         color: #4CAF50;
         font-weight: 600;
+        margin-bottom: 10px;
     }
 
     .activity-log .description {
         color: #34495e;
+        line-height: 1.6;
+        margin-bottom: 15px;
     }
 
     .activity-log .image-link {
         display: inline-block;
         background-color: #4CAF50;
         color: white;
-        padding: 5px 10px;
-        border-radius: 5px;
+        padding: 8px 15px;
+        border-radius: 20px;
         text-decoration: none;
         font-size: 0.9rem;
-        transition: background-color 0.3s ease;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 5px rgba(76, 175, 80, 0.3);
     }
 
     .activity-log .image-link:hover {
         background-color: #45a049;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(76, 175, 80, 0.4);
     }
 
     .activity-transport { border-left-color: #3498db; }
@@ -302,7 +335,6 @@
     .activity-create { border-left-color: #e74c3c; }
     .activity-default { border-left-color: #95a5a6; }
 
-    /* Thêm animation cho các activity log mới */
     @keyframes fadeInUp {
         from {
             opacity: 0;
@@ -316,4 +348,34 @@
 
     .activity-log {
         animation: fadeInUp 0.5s ease-out;
+    }
+
+    @media (max-width: 768px) {
+        .activity-log {
+            padding: 20px;
+        }
+
+        .participant-avatar {
+            width: 50px;
+            height: 50px;
+        }
+
+        .participant-name {
+            font-size: 1.1rem;
+        }
+
+        .activity-log .activity-name {
+            font-size: 1.1rem;
+        }
+    }
+
+    .participant-link {
+        text-decoration: none;
+        color: inherit;
+        transition: color 0.3s ease;
+    }
+
+    .participant-link:hover {
+        color: #007bff;
+        text-decoration: underline;
     }

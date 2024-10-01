@@ -63,12 +63,12 @@ web3.eth.net.isListening()
 console.log('Admin address:', adminAddress);
   
 const traceabilityContractABI = require('../build/contracts/TraceabilityContract.json').abi;
-const traceabilityContractAddress = '0xffFf1EC07aeA95fFFb25AD9068aD726B86CCaCD7';
+const traceabilityContractAddress = '0x79D9B6CA99cDe89A548f0A6D1FAb783fB2Da919b';
 const traceabilityContract = new web3.eth.Contract(traceabilityContractABI, traceabilityContractAddress);
 
 // ABI và địa chỉ của contract ActivityLog
 const activityLogABI = require('../build/contracts/ActivityLog.json').abi;
-const activityLogAddress = '0x460a9F550159574d9d6A9b7731E9F74c434E22AF';
+const activityLogAddress = '0x6556d8435Cdc6D50a687d44ceE7dA19d952F4eac';
 const activityLogContract = new web3.eth.Contract(activityLogABI, activityLogAddress);
 
 // tạo biến lưu trữ file, giới hạn số lượng file và tên file, maxCount: số lượng file, name: tên file
@@ -1721,7 +1721,6 @@ app.get('/api/system-activity-logs/:sscc', async (req, res) => {
     const sscc = req.params.sscc;
     console.log('Đang truy xuất nhật ký hoạt động của hệ thống cho SSCC:', sscc);
 
-    // Lấy batchId từ SSCC
     const batchId = await traceabilityContract.methods.getBatchIdBySSCC(sscc).call();
     if (batchId == 0) {
       return res.status(404).json({ error: 'Batch không tồn tại với SSCC này' });
@@ -1731,35 +1730,27 @@ app.get('/api/system-activity-logs/:sscc', async (req, res) => {
     console.log('Số lượng nhật ký hoạt động của hệ thống:', systemActivityLogs.length);
 
     const convertedLogs = convertBigIntToString(systemActivityLogs);
-    const formattedLogs = convertedLogs.map(log => ({
-      timestamp: new Date(Number(log.timestamp) * 1000).toISOString(),
-      participantId: log.participantId,
-      activityName: log.activityName,
-      description: log.description,
-      imageUrls: log.imageUrls,
-      relatedProductIds: log.relatedProductIds.map(String)
+    const formattedLogs = await Promise.all(convertedLogs.map(async log => {
+      const participantInfo = await getParticipantInfo(log.participantId);
+      return {
+        timestamp: new Date(Number(log.timestamp) * 1000).toISOString(),
+        participantId: log.participantId,
+        participantInfo: participantInfo,
+        activityName: log.activityName,
+        description: log.description,
+        imageUrls: log.imageUrls,
+        relatedProductIds: log.relatedProductIds.map(String)
+      };
     }));
 
-    // Trích xuất thông tin người tham gia và producerId từ logs
     let producerId = null;
     const participantsMap = new Map();
     formattedLogs.forEach(log => {
       if (log.activityName === "Batch Created") {
-        const match = log.description.match(/created by producer (\d+)/);
-        if (match) {
-          producerId = match[1];
-          participantsMap.set(producerId, { id: producerId, type: "Producer" });
-        }
-      } else if (log.activityName === "Batch Approved") {
-        const match = log.description.match(/approved by approver (\d+)/);
-        if (match) {
-          participantsMap.set(match[1], { id: match[1], type: "Approver" });
-        }
-      } else if (log.activityName === "Transport Status Updated") {
-        const match = log.description.match(/by (\w+) with ID (\d+)/);
-        if (match) {
-          participantsMap.set(match[2], { id: match[2], type: match[1] });
-        }
+        producerId = log.participantId;
+      }
+      if (log.participantInfo) {
+        participantsMap.set(log.participantId, log.participantInfo);
       }
     });
 
@@ -1777,7 +1768,31 @@ app.get('/api/system-activity-logs/:sscc', async (req, res) => {
     res.status(500).json({ error: 'Lỗi khi truy xuất nhật ký hoạt động của hệ thống: ' + error.message });
   }
 });
-
+async function getParticipantInfo(participantId) {
+  try {
+    const [participant] = await db.query(`
+      SELECT u.uid, u.name, u.phone, u.address, u.avatar, r.role_name
+      FROM users u
+      JOIN roles r ON u.role_id = r.role_id
+      WHERE u.uid = ?
+    `, [participantId]);
+    
+    if (participant.length > 0) {
+      return {
+        id: participant[0].uid,
+        name: participant[0].name,
+        phone: participant[0].phone,
+        address: participant[0].address,
+        avatar: participant[0].avatar, // Trả về URL avatar như được lưu trong cơ sở dữ liệu
+        role: participant[0].role_name
+      };
+    }
+    return null;
+  } catch (error) {
+    console.error('Lỗi khi lấy thông tin người tham gia:', error);
+    return null;
+  }
+}
 // Hàm hỗ trợ để chuyển đổi BigInt thành string
 function convertBigIntToString(obj) {
   if (typeof obj !== 'object' || obj === null) {
