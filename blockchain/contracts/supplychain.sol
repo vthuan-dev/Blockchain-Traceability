@@ -529,6 +529,7 @@ mapping(uint256 => mapping(uint256 => bool)) private _warehouseConfirmations;
 
 // Thêm sự kiện để theo dõi xác nhận của các nhà kho
 event WarehouseConfirmed(uint256 indexed batchId, uint256 indexed warehouseId);
+
 function warehouseConfirmation(uint256 _batchId, uint256 _warehouseId) public {
     require(_batches[_batchId].batchId != 0, "Batch does not exist");
     require(_batches[_batchId].transportStatus == TransportStatus.Delivered, "Batch must be delivered before warehouse confirmation");
@@ -554,6 +555,7 @@ function warehouseConfirmation(uint256 _batchId, uint256 _warehouseId) public {
         relatedProductIds[0] = _batches[_batchId].productId;
         addSystemActivityLog(_batchId, "Warehouse Confirmation", "Warehouse has confirmed receipt of the batch", relatedProductIds);
     }
+    
 
 
 
