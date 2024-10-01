@@ -764,8 +764,8 @@ app.post('/approve-batch/:batchId', async (req, res) => {
       return res.status(400).json({ error: 'Lô hàng này đã được xử lý bởi người kiểm duyệt khác' });
     }
 
-    // Gọi hàm updateBatchStatus từ smart contract để phê duyệt (status 1 = Approved)
-    const result = await traceabilityContract.methods.updateBatchStatus(batchId, 1).send({ from: account.address, gas: 3000000 });
+    // Gọi hàm approveBatch từ smart contract
+    const result = await traceabilityContract.methods.approveBatch(batchId).send({ from: account.address, gas: 3000000 });
 
     res.status(200).json({
       message: 'Lô hàng đã được phê duyệt thành công',
@@ -798,8 +798,8 @@ app.post('/reject-batch/:batchId', async (req, res) => {
       return res.status(400).json({ error: 'Lô hàng này đã được xử lý bởi người kiểm duyệt khác' });
     }
 
-    // Gọi hàm updateBatchStatus từ smart contract để từ chối (status 2 = Rejected)
-    const result = await traceabilityContract.methods.updateBatchStatus(batchId, 2).send({ from: account.address, gas: 3000000 });
+    // Gọi hàm rejectBatch từ smart contract
+    const result = await traceabilityContract.methods.rejectBatch(batchId).send({ from: account.address, gas: 3000000 });
 
     res.status(200).json({
       message: 'Lô hàng đã bị từ chối thành công',
@@ -810,7 +810,6 @@ app.post('/reject-batch/:batchId', async (req, res) => {
     res.status(500).json({ error: 'Không thể từ chối lô hàng: ' + error.message });
   }
 });
-
 app.get('/batch-details/:batchId', async (req, res) => {
   try {
       const batchId = req.params.batchId;
