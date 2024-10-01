@@ -35,21 +35,11 @@
       saveUninitialized: false,
       cookie: { 
         secure: process.env.NODE_ENV === 'production',
-        maxAge: 24 * 60 * 60 * 1000 // 24 giờ
+        expires: false
       }
     }));
 
 
-  app.use(session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: { 
-      secure: process.env.NODE_ENV === 'production',
-      httpOnly: true,
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 ngày
-    }
-  }));
 
     const db = mysql.createPool({
       host: process.env.DB_HOST,
@@ -104,13 +94,16 @@
 
   app.use(express.static(path.join(__dirname, 'public')));
 
-  app.get('/trangchu.html', (req, res) => {
+  app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'tieu-dung', 'trangchu.html'));
   });
   app.get('/trangcanhan.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'tieu-dung', 'trangcanhan.html'));
   });
 
+  app.get('/lo-hang.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'tieu-dung', 'lo-hang.html'));
+  });
   app.get('/sanpham.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'tieu-dung', 'sanpham.html'));
   });
@@ -178,7 +171,7 @@
     if (req.session.userId) {
       next();
     } else {
-      res.status(401).json({ message: 'Unauthorized' });
+      res.redirect('/account/dangnhap.html');
     }
   }
 
@@ -262,7 +255,7 @@
       }
     });
 
-    app.get('/nhakiemduyet.html', requireAuth, (req, res) => {
+    app.get('/kiem-duyet/nhakiemduyet.html', requireAuth, (req, res) => {
       if (req.session.roleId === 2) {
         res.sendFile(path.join(__dirname, 'public', 'kiem-duyet', 'nhakiemduyet.html'));
       } else {
