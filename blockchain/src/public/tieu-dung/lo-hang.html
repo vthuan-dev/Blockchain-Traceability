@@ -306,7 +306,7 @@
 
         if (sscc) {
             try {
-                const response = await fetch(`/api/batch-info-by-sscc/${sscc}`);
+                const response = await fetch(`/api/batch-info-by-sscc-for-consumer/${sscc}`);
                 const batchInfo = await response.json();
 
                 if (response.ok) {
