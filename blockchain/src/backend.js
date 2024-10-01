@@ -63,12 +63,12 @@ web3.eth.net.isListening()
 console.log('Admin address:', adminAddress);
   
 const traceabilityContractABI = require('../build/contracts/TraceabilityContract.json').abi;
-const traceabilityContractAddress = '0x7B19e949f5103774a646Bf928484c8985A4FddA0';
+const traceabilityContractAddress = '0xffFf1EC07aeA95fFFb25AD9068aD726B86CCaCD7';
 const traceabilityContract = new web3.eth.Contract(traceabilityContractABI, traceabilityContractAddress);
 
 // ABI và địa chỉ của contract ActivityLog
 const activityLogABI = require('../build/contracts/ActivityLog.json').abi;
-const activityLogAddress = '0x84079264Ba28A4F383AE8406449C9c9a880a07fA';
+const activityLogAddress = '0x460a9F550159574d9d6A9b7731E9F74c434E22AF';
 const activityLogContract = new web3.eth.Contract(activityLogABI, activityLogAddress);
 
 // tạo biến lưu trữ file, giới hạn số lượng file và tên file, maxCount: số lượng file, name: tên file
@@ -743,6 +743,7 @@ async function getProducerRegion(producerId) {
     });
   });
 }
+
 app.post('/approve-batch/:batchId', async (req, res) => {
   try {
     if (!req.session.userId) {
@@ -765,8 +766,8 @@ app.post('/approve-batch/:batchId', async (req, res) => {
     }
 
     // Gọi hàm approveBatch từ smart contract
-    const result = await traceabilityContract.methods.approveBatch(batchId).send({ from: account.address, gas: 3000000 });
-
+// Gọi hàm approveBatch từ smart contract
+const result = await traceabilityContract.methods.approveBatch(batchId, userId).send({ from: account.address, gas: 3000000 });
     res.status(200).json({
       message: 'Lô hàng đã được phê duyệt thành công',
       transactionHash: result.transactionHash
@@ -799,8 +800,8 @@ app.post('/reject-batch/:batchId', async (req, res) => {
     }
 
     // Gọi hàm rejectBatch từ smart contract
-    const result = await traceabilityContract.methods.rejectBatch(batchId).send({ from: account.address, gas: 3000000 });
-
+// Gọi hàm rejectBatch từ smart contract
+const result = await traceabilityContract.methods.rejectBatch(batchId, userId).send({ from: account.address, gas: 3000000 });
     res.status(200).json({
       message: 'Lô hàng đã bị từ chối thành công',
       transactionHash: result.transactionHash
@@ -984,38 +985,48 @@ app.get('/api/rejected-batches', async (req, res) => {
 // ... (các import và cấu hình khác)
 app.post('/api/accept-transport', async (req, res) => {
   try {
-      const { sscc, action } = req.body;
-      const userId = req.session.userId;
-      const roleId = req.session.roleId;
+    const { sscc, action } = req.body;
+    const userId = req.session.userId;
+    const roleId = req.session.roleId;
 
-      console.log('Received request:', { sscc, action, userId, roleId });
+    console.log('Received request:', { sscc, action, userId, roleId });
 
-      if (!userId) {
-          return res.status(401).json({ error: 'Người dùng chưa đăng nhập' });
-      }
+    if (!userId) {
+      return res.status(401).json({ error: 'Người dùng chưa đăng nhập' });
+    }
 
-      // Kiểm tra quyền của người dùng
-      const [participant] = await db.query('SELECT * FROM users WHERE uid = ? AND role_id IN (6, 8)', [userId]);
-      if (!participant) {
-          return res.status(403).json({ error: 'Người dùng không có quyền vận chuyển hoặc nhận hàng' });
-      }
+    // Kiểm tra action hợp lệ
+    const validActions = ['Bat dau van chuyen', 'Tam dung van chuyen', 'Tiep tuc van chuyen', 'Hoan thanh van chuyen'];
+    if (!validActions.includes(action)) {
+      return res.status(400).json({ error: 'Hành động không hợp lệ' });
+    }
 
-      let participantType = roleId === 8 ? "Warehouse" : "Transporter";
-      console.log('Participant type:', participantType);
+    // Thực hiện các truy vấn đồng thời
+    const [participantResult, batchId] = await Promise.all([
+      db.query('SELECT * FROM users WHERE uid = ? AND role_id IN (6, 8)', [userId]),
+      traceabilityContract.methods.getBatchIdBySSCC(sscc).call()
+    ]);
 
-      const batchId = await traceabilityContract.methods.getBatchIdBySSCC(sscc).call();
-      if (!batchId) {
-          return res.status(404).json({ error: 'Không tìm thấy lô hàng với SSCC này' });
-      }
+    const [participant] = participantResult;
+    if (!participant) {
+      return res.status(403).json({ error: 'Người dùng không có quyền vận chuyển hoặc nhận hàng' });
+    }
 
-      console.log('Updating transport status:', { batchId, userId, action, participantType });
-      await traceabilityContract.methods.updateTransportStatus(batchId, userId, action, participantType)
-          .send({ from: account.address, gas: 500000 });
+    if (!batchId) {
+      return res.status(404).json({ error: 'Không tìm thấy lô hàng với SSCC này' });
+    }
 
-      res.json({ success: true, message: 'Đã cập nhật trạng thái vận chuyển thành công' });
+    const participantType = roleId === 8 ? "Warehouse" : "Transporter";
+    console.log('Participant type:', participantType);
+
+    console.log('Updating transport status:', { batchId, userId, action, participantType });
+    await traceabilityContract.methods.updateTransportStatus(batchId, userId, action, participantType)
+      .send({ from: account.address, gas: 500000 });
+
+    res.json({ success: true, message: 'Đã cập nhật trạng thái vận chuyển thành công' });
   } catch (error) {
-      console.error('Lỗi khi cập nhật trạng thái vận chuyển:', error);
-      res.status(500).json({ error: 'Không thể cập nhật trạng thái vận chuyển: ' + error.message });
+    console.error('Lỗi khi cập nhật trạng thái vận chuyển:', error);
+    res.status(500).json({ error: 'Không thể cập nhật trạng thái vận chuyển: ' + error.message });
   }
 });
 // Cập nhật route để lấy thông tin lô hàng
@@ -1705,42 +1716,93 @@ app.get('/api/batch-activity-logs/:sscc', async (req, res) => {
       res.status(500).json({ error: 'Không thể lấy nhật ký hoạt động của lô hàng: ' + error.message });
   }
 })
-
 app.get('/api/system-activity-logs/:sscc', async (req, res) => {
   try {
-      const sscc = req.params.sscc;
-      console.log('Đang truy xuất nhật ký hoạt động của hệ thống cho SSCC:', sscc);
+    const sscc = req.params.sscc;
+    console.log('Đang truy xuất nhật ký hoạt động của hệ thống cho SSCC:', sscc);
 
-      // Lấy batchId từ SSCC
-      const batchId = await traceabilityContract.methods.getBatchIdBySSCC(sscc).call();
-      if (batchId == 0) {
-          return res.status(404).json({ error: 'Batch không tồn tại với SSCC này' });
+    // Lấy batchId từ SSCC
+    const batchId = await traceabilityContract.methods.getBatchIdBySSCC(sscc).call();
+    if (batchId == 0) {
+      return res.status(404).json({ error: 'Batch không tồn tại với SSCC này' });
+    }
+
+    const systemActivityLogs = await activityLogContract.methods.getSystemActivityLogs(batchId).call();
+    console.log('Số lượng nhật ký hoạt động của hệ thống:', systemActivityLogs.length);
+
+    const convertedLogs = convertBigIntToString(systemActivityLogs);
+    const formattedLogs = convertedLogs.map(log => ({
+      timestamp: new Date(Number(log.timestamp) * 1000).toISOString(),
+      participantId: log.participantId,
+      activityName: log.activityName,
+      description: log.description,
+      imageUrls: log.imageUrls,
+      relatedProductIds: log.relatedProductIds.map(String)
+    }));
+
+    // Trích xuất thông tin người tham gia và producerId từ logs
+    let producerId = null;
+    const participantsMap = new Map();
+    formattedLogs.forEach(log => {
+      if (log.activityName === "Batch Created") {
+        const match = log.description.match(/created by producer (\d+)/);
+        if (match) {
+          producerId = match[1];
+          participantsMap.set(producerId, { id: producerId, type: "Producer" });
+        }
+      } else if (log.activityName === "Batch Approved") {
+        const match = log.description.match(/approved by approver (\d+)/);
+        if (match) {
+          participantsMap.set(match[1], { id: match[1], type: "Approver" });
+        }
+      } else if (log.activityName === "Transport Status Updated") {
+        const match = log.description.match(/by (\w+) with ID (\d+)/);
+        if (match) {
+          participantsMap.set(match[2], { id: match[2], type: match[1] });
+        }
       }
+    });
 
-      const systemActivityLogs = await activityLogContract.methods.getSystemActivityLogs(batchId).call();
-      console.log('Số lượng nhật ký hoạt động của hệ thống:', systemActivityLogs.length);
+    const response = {
+      message: 'Truy xuất nhật ký hoạt động của hệ thống thành công',
+      batchId: String(batchId),
+      producerId: producerId,
+      participants: Array.from(participantsMap.values()),
+      activityLogs: formattedLogs
+    };
 
-      const convertedLogs = convertBigIntToString(systemActivityLogs);
-      const formattedLogs = convertedLogs.map(log => ({
-          timestamp: new Date(Number(log.timestamp) * 1000).toISOString(),
-          uid: log.uid,
-          activityName: log.activityName,
-          description: log.description,
-          isSystemGenerated: log.isSystemGenerated,
-          imageUrls: log.imageUrls,
-          relatedProductIds: log.relatedProductIds
-      }));
-
-      res.status(200).json({
-          message: 'Truy xuất nhật ký hoạt động của hệ thống thành công',
-          activityLogs: formattedLogs
-      });
+    res.status(200).json(response);
   } catch (error) {
-      console.error('Lỗi khi truy xuất nhật ký hoạt động của hệ thống:', error);
-      res.status(500).json({ error: 'Lỗi khi truy xuất nhật ký hoạt động của hệ thống: ' + error.message });
+    console.error('Lỗi khi truy xuất nhật ký hoạt động của hệ thống:', error);
+    res.status(500).json({ error: 'Lỗi khi truy xuất nhật ký hoạt động của hệ thống: ' + error.message });
   }
 });
 
+// Hàm hỗ trợ để chuyển đổi BigInt thành string
+function convertBigIntToString(obj) {
+  if (typeof obj !== 'object' || obj === null) {
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(convertBigIntToString);
+  }
+
+  const result = {};
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      const value = obj[key];
+      if (typeof value === 'bigint') {
+        result[key] = value.toString();
+      } else if (typeof value === 'object') {
+        result[key] = convertBigIntToString(value);
+      } else {
+        result[key] = value;
+      }
+    }
+  }
+  return result;
+}
 app.get('/api/products', async (req, res) => {
   try {
     const [results] = await db.query('SELECT product_id, product_name FROM products');

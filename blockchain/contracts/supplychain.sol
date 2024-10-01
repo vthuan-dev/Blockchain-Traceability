@@ -96,59 +96,66 @@ event TransportStatusUpdated(
 );
 
 
+function addSystemActivityLog(
+    uint256 _batchId,
+    uint256 _participantId,
+    string memory _activityName,
+    string memory _description,
+    uint256[] memory _relatedProductIds
+) internal {
+    activityLogContract.addActivityLog(
+        _batchId,
+        _participantId,
+        _activityName,
+        _description,
+        true,
+        new string[](0),
+        _relatedProductIds
+    );
+}
+function createBatch(
+    string memory _name,
+    uint256 _producerId,
+    string memory _quantity,
+    string[] memory _productImageUrls,
+    string memory _certificateImageUrl,
+    string memory _farmPlotNumber,
+    uint256 _productId,
+    uint256 _startDate,
+    uint256 _endDate
+) public returns (uint256) {
+    string memory sscc = generateSSCC(_producerId);
+    uint256 newBatchId = _createBatch(BatchParams({
+        name: _name,
+        sscc: sscc,
+        producerId: _producerId,
+        quantity: _quantity,
+        productImageUrls: _productImageUrls,
+        certificateImageUrl: _certificateImageUrl,
+        farmPlotNumber: _farmPlotNumber,
+        productId: _productId,
+        startDate: _startDate,
+        endDate: _endDate
+    }));
 
+    // Ghi lại thông tin lô hàng vào nhật ký hoạt động
+    _addBatchCreationLog(newBatchId, _producerId, _name, _productId);
 
-    function addSystemActivityLog(
-        uint256 _uid,
-        string memory _activityName,
-        string memory _description,
-        uint256[] memory _relatedProductIds
-    ) internal {
-        activityLogContract.addActivityLog(
-            _uid,
-            _activityName,
-            _description,
-            true,
-            new string[](0),
-            _relatedProductIds
-        );
-    }
+    return newBatchId;
+}
 
-
-    function createBatch(
-        string memory _name,  // Thêm tham số tên lô hàng
-        uint256 _producerId,
-        string memory _quantity,
-        string[] memory _productImageUrls,
-        string memory _certificateImageUrl,
-        string memory _farmPlotNumber,
-        uint256 _productId,
-        uint256 _startDate,
-        uint256 _endDate
-    ) public returns (uint256) {
-        string memory sscc = generateSSCC(_producerId);
-        BatchParams memory params = BatchParams({
-            name: _name,  // Thêm tên lô hàng
-            sscc: sscc,
-            producerId: _producerId,
-            quantity: _quantity,
-            productImageUrls: _productImageUrls,
-            certificateImageUrl: _certificateImageUrl,
-            farmPlotNumber: _farmPlotNumber,
-            productId: _productId,
-            startDate: _startDate,
-            endDate: _endDate
-        });
-        uint256 newBatchId = _createBatch(params);
-
-        //Ghi lại thông tin lô hàng vào nhật ký hoạt động
+function _addBatchCreationLog(uint256 _batchId, uint256 _producerId, string memory _name, uint256 _productId) private {
     uint256[] memory relatedProductIds = new uint256[](1);
-        relatedProductIds[0] = _productId;
-        addSystemActivityLog(_producerId, "Batch Created", "A new batch has been created", relatedProductIds);
-
-
-        return newBatchId;
-    }
+    relatedProductIds[0] = _productId;
+    string memory description = string(abi.encodePacked("A new batch '", _name, "' has been created by producer ", uint2str(_producerId)));
+    addSystemActivityLog(
+        _batchId,
+        _producerId,
+        "Batch Created",
+        description,
+        relatedProductIds
+    );
+}
 
     function generateSSCC(uint256 _producerId) private view returns (string memory) {
         string memory prefix = "00";
@@ -294,18 +301,7 @@ event TransportStatusUpdated(
     }
 
     // hàm cập nhật trạng thái lô hàng
-function updateBatchStatus(uint256 _batchId, BatchStatus _newStatus) public {
-    require(_batches[_batchId].batchId != 0, "Batch does not exist");
-    // Thêm kiểm tra quyền nếu cần
-    _batches[_batchId].status = _newStatus;
-    emit BatchStatusUpdated(_batchId, _newStatus);
 
-    // Ghi lại nhật ký hoạt động khi cập nhật trạng thái lô hàng
-    uint256[] memory relatedProductIds = new uint256[](1);
-    relatedProductIds[0] = _batches[_batchId].productId;
-    addSystemActivityLog(_batchId, "Batch Status Updated", "The batch status has been updated", relatedProductIds);
-
-}
 function getPendingBatchesByProducer(uint256 _producerId) public view returns (Batch[] memory) {
     uint256 pendingCount = 0;
     for (uint256 i = 1; i <= _batchIdCounter; i++) {
@@ -385,11 +381,7 @@ function isProducerOfBatch(uint256 _batchId, uint256 _producerId) public view re
 
 
 
-modifier onlyApprover() {
-    // Implement logic to check if msg.sender is an approver
-    _;
-}
-function approveBatch(uint256 _batchId) public onlyApprover {
+function approveBatch(uint256 _batchId, uint256 _approverId) public {
     require(_batches[_batchId].batchId != 0, "Batch does not exist");
     require(_batches[_batchId].status == BatchStatus.PendingApproval, "Batch is not pending approval");
 
@@ -401,11 +393,16 @@ function approveBatch(uint256 _batchId) public onlyApprover {
     
     // Add system activity log
     uint256[] memory relatedProductIds = new uint256[](1);
-        relatedProductIds[0] = _batches[_batchId].productId;
-        addSystemActivityLog(_batchId, "Batch Approved", "Batch has been approved by the approver", relatedProductIds);
-    }
-
-function rejectBatch(uint256 _batchId) public onlyApprover {
+    relatedProductIds[0] = _batches[_batchId].productId;
+    addSystemActivityLog(
+        _batchId,
+        _approverId,
+        "Batch Approved",
+        string(abi.encodePacked("Batch '", _batches[_batchId].name, "' has been approved by approver ", uint2str(_approverId))),
+        relatedProductIds
+    );
+}
+function rejectBatch(uint256 _batchId, uint256 _approverId) public {
     require(_batches[_batchId].batchId != 0, "Batch does not exist");
     require(_batches[_batchId].status == BatchStatus.PendingApproval, "Batch is not pending approval");
 
@@ -414,12 +411,19 @@ function rejectBatch(uint256 _batchId) public onlyApprover {
     emit BatchRejected(_batchId, _batches[_batchId].producerId, _batches[_batchId].sscc);
     
     // Add system activity log
-  uint256[] memory relatedProductIds = new uint256[](1);
-        relatedProductIds[0] = _batches[_batchId].productId;
-        addSystemActivityLog(_batchId, "Batch Rejected", "Batch has been rejected by the approver", relatedProductIds);
+    uint256[] memory relatedProductIds = new uint256[](1);
+    relatedProductIds[0] = _batches[_batchId].productId;
+    addSystemActivityLog(
+        _batchId,
+        _approverId,
+        "Batch Rejected",
+        string(abi.encodePacked("Batch '", _batches[_batchId].name, "' has been rejected by approver ", uint2str(_approverId))),
+        relatedProductIds
+    );
 }
-function getActivityLogs(uint256 _uid) public view returns (ActivityLog.ActivityLogEntry[] memory) {
-    return activityLogContract.getActivityLogs(_uid);
+
+function getActivityLogs(uint256 _batchId) public view returns (ActivityLog.ActivityLogEntry[] memory) {
+    return activityLogContract.getActivityLogs(_batchId);
 }
 
 event BatchRejected(uint256 indexed batchId, uint256 producerId, string sscc);
@@ -466,61 +470,63 @@ function recordParticipation(uint256 _batchId, uint256 _participantId, string me
     emit ParticipationRecorded(_batchId, _participantId, _participantType, _action);
 }
 event LogParticipantType(uint256 indexed batchId, string participantType);
+   function updateTransportStatus(
+        uint256 _batchId, 
+        uint256 _participantId, 
+        string memory _action, 
+        string memory _participantType
+    ) public {
+        require(
+            keccak256(abi.encodePacked(_participantType)) == keccak256(abi.encodePacked("Transporter")) ||
+            keccak256(abi.encodePacked(_participantType)) == keccak256(abi.encodePacked("Warehouse")),
+            "Invalid participant type"
+        );
+        
+        require(_batches[_batchId].batchId != 0, "Batch does not exist");
+        require(_batches[_batchId].status == BatchStatus.Approved, "Batch must be approved");
 
-function updateTransportStatus(
-    uint256 _batchId, 
-    uint256 _participantId, 
-    string memory _action, 
-    string memory _participantType
-) public {
-    require(
-        keccak256(abi.encodePacked(_participantType)) == keccak256(abi.encodePacked("Transporter")) ||
-        keccak256(abi.encodePacked(_participantType)) == keccak256(abi.encodePacked("Warehouse")),
-        "Invalid participant type"
-    );
-    
-    require(_batches[_batchId].batchId != 0, "Batch does not exist");
-    require(_batches[_batchId].status == BatchStatus.Approved, "Batch must be approved");
-
-    TransportEvent memory newEvent = TransportEvent({
-        participantId: _participantId,
-        timestamp: block.timestamp,
-        action: _action,
-        participantType: _participantType
-    });
-    
-    _batchTransportEvents[_batchId].push(newEvent);
-    
-    if (keccak256(abi.encodePacked(_action)) == keccak256(abi.encodePacked("Bat dau van chuyen"))) {
-        _batches[_batchId].detailedTransportStatus = DetailedTransportStatus.InTransit;
-        _batches[_batchId].transportStatus = TransportStatus.InTransit;
-        _batches[_batchId].lastTransporterId = _participantId;
-    } else if (keccak256(abi.encodePacked(_action)) == keccak256(abi.encodePacked("Tam dung van chuyen"))) {
-        _batches[_batchId].detailedTransportStatus = DetailedTransportStatus.Paused;
-    } else if (keccak256(abi.encodePacked(_action)) == keccak256(abi.encodePacked("Tiep tuc van chuyen"))) {
-        _batches[_batchId].detailedTransportStatus = DetailedTransportStatus.InTransit;
-    } else if (keccak256(abi.encodePacked(_action)) == keccak256(abi.encodePacked("Hoan thanh van chuyen"))) {
-        _batches[_batchId].detailedTransportStatus = DetailedTransportStatus.Delivered;
-        _batches[_batchId].transportStatus = TransportStatus.Delivered;
+        TransportEvent memory newEvent = TransportEvent({
+            participantId: _participantId,
+            timestamp: block.timestamp,
+            action: _action,
+            participantType: _participantType
+        });
+        
+        _batchTransportEvents[_batchId].push(newEvent);
+        
+        if (keccak256(abi.encodePacked(_action)) == keccak256(abi.encodePacked("Bat dau van chuyen"))) {
+            _batches[_batchId].detailedTransportStatus = DetailedTransportStatus.InTransit;
+            _batches[_batchId].transportStatus = TransportStatus.InTransit;
+            _batches[_batchId].lastTransporterId = _participantId;
+        } else if (keccak256(abi.encodePacked(_action)) == keccak256(abi.encodePacked("Tam dung van chuyen"))) {
+            _batches[_batchId].detailedTransportStatus = DetailedTransportStatus.Paused;
+        } else if (keccak256(abi.encodePacked(_action)) == keccak256(abi.encodePacked("Tiep tuc van chuyen"))) {
+            _batches[_batchId].detailedTransportStatus = DetailedTransportStatus.InTransit;
+        } else if (keccak256(abi.encodePacked(_action)) == keccak256(abi.encodePacked("Hoan thanh van chuyen"))) {
+            _batches[_batchId].detailedTransportStatus = DetailedTransportStatus.Delivered;
+            _batches[_batchId].transportStatus = TransportStatus.Delivered;
+        }
+        
+        emit TransportStatusUpdated(_batchId, _batches[_batchId].detailedTransportStatus, _action, _participantId, _participantType);
+        
+        uint256[] memory relatedProductIds = new uint256[](1);
+        relatedProductIds[0] = _batches[_batchId].productId;
+        addSystemActivityLog(
+            _batchId,
+            _participantId,
+            "Transport Status Updated",
+            string(abi.encodePacked(
+                "Transport status updated to '", 
+                _action, 
+                "' by ", 
+                _participantType, 
+                " with ID ", 
+                uint2str(_participantId)
+            )),
+            relatedProductIds
+        );
     }
-    
-    emit TransportStatusUpdated(_batchId, _batches[_batchId].detailedTransportStatus, _action, _participantId, _participantType);
-    uint256[] memory relatedProductIds = new uint256[](1);
-    relatedProductIds[0] = _batches[_batchId].productId;
-    addSystemActivityLog(_batchId, "Transport Status Updated", _action, relatedProductIds);
 
-
-}
-function updateTransportStatusBySSCC(
-    string memory _sscc, 
-    uint256 _participantId, 
-    string memory _action, 
-    string memory _participantType
-) public {
-    uint256 batchId = _ssccToBatchId[_sscc];
-    require(batchId != 0, "Batch does not exist with this SSCC");
-    updateTransportStatus(batchId, _participantId, _action, _participantType);
-}
 
 // Đổi tên sự kiện
 // Thêm mapping để theo dõi xác nhận của các nhà kho
@@ -529,12 +535,10 @@ mapping(uint256 => mapping(uint256 => bool)) private _warehouseConfirmations;
 
 // Thêm sự kiện để theo dõi xác nhận của các nhà kho
 event WarehouseConfirmed(uint256 indexed batchId, uint256 indexed warehouseId);
-
 function warehouseConfirmation(uint256 _batchId, uint256 _warehouseId) public {
     require(_batches[_batchId].batchId != 0, "Batch does not exist");
     require(_batches[_batchId].transportStatus == TransportStatus.Delivered, "Batch must be delivered before warehouse confirmation");
     require(_batches[_batchId].detailedTransportStatus == DetailedTransportStatus.Delivered, "Batch must be in Delivered status");
-    //Nếu nhà kho đã xác nhận lô hàng thì không thể xác nhận lại
     require(!_warehouseConfirmations[_batchId][_warehouseId], "This warehouse has already confirmed this batch");
     
     // Đánh dấu nhà kho này đã xác nhận
@@ -551,11 +555,24 @@ function warehouseConfirmation(uint256 _batchId, uint256 _warehouseId) public {
     
     // Phát ra sự kiện
     emit WarehouseConfirmed(_batchId, _warehouseId);
-   uint256[] memory relatedProductIds = new uint256[](1);
-        relatedProductIds[0] = _batches[_batchId].productId;
-        addSystemActivityLog(_batchId, "Warehouse Confirmation", "Warehouse has confirmed receipt of the batch", relatedProductIds);
-    }
-    
+
+    // Thêm log hoạt động
+    uint256[] memory relatedProductIds = new uint256[](1);
+    relatedProductIds[0] = _batches[_batchId].productId;
+    addSystemActivityLog(
+        _batchId,
+        _warehouseId,
+        "Warehouse Confirmation",
+        string(abi.encodePacked(
+            "Warehouse with ID ", 
+            uint2str(_warehouseId), 
+            " has confirmed receipt of batch '", 
+            _batches[_batchId].name, 
+            "'"
+        )),
+        relatedProductIds
+    );
+}
 
 
 
@@ -608,9 +625,9 @@ function getBatchTransportStatus(uint256 _batchId) public view returns (Transpor
 }
 
 
-    function getBatchActivityLogs(uint256 _batchId) public view returns (ActivityLog.ActivityLogEntry[] memory) {
-        return activityLogContract.getActivityLogs(_batchId);
-    }
+    // function getBatchActivityLogs(uint256 _batchId) public view returns (ActivityLog.ActivityLogEntry[] memory) {
+    //     return activityLogContract.getActivityLogs(_batchId);
+    // }
 
     function getSystemActivityLogsBySSCC(string memory _sscc) public view returns (ActivityLog.ActivityLogEntry[] memory) {
         uint256 batchId = uint256(keccak256(abi.encodePacked(_sscc)));
