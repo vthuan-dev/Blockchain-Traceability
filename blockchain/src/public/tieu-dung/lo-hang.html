@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang chủ</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/trangchu.css">
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/sanpham.css">
+    <link rel="stylesheet" href="../css/chatbox.css">
+    <link rel="stylesheet" href="../css/lo-hang.css">
+    <link rel="stylesheet" href="../css/trangcanhan.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+        .product-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #ffffff;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            height: 100%;
+            width: 100%;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .product-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+            text-align: center;
+            margin-bottom: 15px;
+            height: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .product-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .carousel-item .col-md-3 {
+            padding: 15px;
+        }
+
+        #carouselProducts .carousel-inner {
+            padding: 20px 0;
+        }
+
+        .carousel-container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card-subtitle.mb-2.mt-4.text-muted {
+            font-size: 1.2rem;
+            color: #4CAF50 !important;
+            margin-bottom: 15px !important;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .container {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            padding: 30px;
+            margin-top: 30px;
+        }
+
+        .custom-img {
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .custom-img:hover {
+            transform: scale(1.05);
+        }
+
+        .ten_sanpham h3 {
+            color: #2c3e50;
+            font-size: 2rem;
+            margin-top: 20px;
+        }
+
+        .price h3 {
+            color: #27ae60;
+            font-size: 1.5rem;
+        }
+
+        .thanhphan .col {
+            background-color: #ecf0f1;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            width: 20%;
+        }
+
+        .thanhphan .col:hover {
+            background-color: #44bd32;
+            color: white;
+        }
+
+        .thanhphan .col i {
+            margin-right: 0px;
+        }
+
+        .tab-content {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .tab-content h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-content ul, .tab-content ol {
+            padding-left: 20px;
+        }
+
+        .tab-content li {
+            margin-bottom: 10px;
+        }
+
+        .btn-view-image {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-view-image:hover {
+            background-color: #2980b9;
+        }
+
+        .batch-info table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 10px;
+        }
+
+        .batch-info th, .batch-info td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .batch-info th {
+            background-color: #44bd32;
+            color: white;
+            border-radius: 5px 0 0 5px;
+        }
+
+        .batch-info td {
+            background-color: #ecf0f1;
+            border-radius: 0 5px 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar custom-navbar navbar-expand-lg navbar-light bg-light custom-navbar-height">
+        <div class="logo-home">
+            <a href="trangchu.html">
+                <img src="\hinhanh\Bitcoin-Blockchain-Network-icon-on-transparent-background-PNG.png" alt="logo" class="logo">
+            </a>
+        </div>
+        <a class="navbar-brand" href="#">Trang cá nhân</a>
+        <button class="navbar-toggler ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto"> 
+                <li class="nav-item active">
+                    <a class="nav-link" href="allsanpham.html">Sản phẩm</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="allnongdan.html">Nhà sản xuất</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="allnhakiemduyet.html">Nhà kiểm duyệt</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Vùng sản xuất</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Tin tức</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="./account/dangnhap.html">Đăng nhập</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="#">Trang chủ</a></li>
+                <li class="breadcrumb-item active" id="breadcrumbTitle" aria-current="page">Thông tin lô hàng</li>
+            </ol>
+        </nav>
+        <div class="sanpham">
+            <div class="row justify-content-center">
+                <div class="col-md-10">
+                    <div class="tieude text-center">
+                        <div class="row no-gutters justify-content-center">
+                            <div class="col-md-8 col-12 mb-4">
+                                <img src="" alt="" class="img-fluid custom-img" onclick="showImage(this)">
+                            </div>
+                        </div>
+                        <div class="ten_sanpham mb-3">
+                            <h3 class="font-weight-bold"></h3>
+                        </div>
+                        <div class="price mb-4">
+                            <h3 class="font-weight-bold"></h3>
+                        </div>
+                    </div>
+                    <div class="thanhphan">
+                        <div class="row no-gutters">
+                            <div class="col-3 p-2">
+                                <div class="tab-button" data-target="thongtin">
+                                    <i class="fas fa-info-circle"></i>
+                                    <span class="tab-text">Thông tin</span>
+                                </div>
+                            </div>
+                            <div class="col-3 p-2">
+                                <div class="tab-button" data-target="lienket">
+                                    <i class="fas fa-link"></i>
+                                    <span class="tab-text">Các bên liên quan</span>
+                                </div>
+                            </div>
+                            <div class="col-3 p-2">
+                                <div class="tab-button" data-target="xacthuc">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span class="tab-text">Xác thực</span>
+                                </div>
+                            </div>
+                            <div class="col-3 p-2">
+                                <div class="tab-button" data-target="lohang">
+                                    <i class="fas fa-box"></i>
+                                    <span class="tab-text">Lô hàng</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-content" id="thongtin">
+                            <!-- Nội dung thông tin sản phẩm -->
+                        </div>
+                        <div class="tab-content" id="lienket">
+                            <!-- Nội dung các bên liên quan -->
+                        </div>
+                        <div class="tab-content" id="xacthuc">
+                            <!-- Nội dung thông tin xác thực -->
+                        </div>
+                        <div class="tab-content" id="lohang">
+                            <!-- Nội dung thông tin lô hàng -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay" onclick="hideImage()">
+        <img id="overlay-img" src="" alt="">
+    </div>
+
+    <!-- jQuery và Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="../js_giaodien/sanpham.js"></script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const sscc = urlParams.get('sscc');
+
+        if (sscc) {
+            try {
+                const response = await fetch(`/api/batch-info-by-sscc/${sscc}`);
+                const batchInfo = await response.json();
+
+                if (response.ok) {
+                    updateBatchInfo(batchInfo);
+                    if (batchInfo.product) {
+                        updateProductInfo(batchInfo.product);
+                    } else {
+                        console.error('Không tìm thấy thông tin sản phẩm');
+                    }
+                } else {
+                    console.error('Lỗi khi lấy thông tin lô hàng:', batchInfo.error);
+                }
+            } catch (error) {
+                console.error('Lỗi khi gọi API:', error);
+            }
+        } else {
+            console.error('Không tìm thấy SSCC trong URL');
+        }
+    });
+    
+    async function updateBatchInfo(batchInfo) {
+    // Lấy thông tin sản phẩm từ SQL
+    try {
+        const response = await fetch(`/api/product/${batchInfo.productId}`);
+        if (response.ok) {
+            const productInfo = await response.json();
+            updateProductInfo(productInfo);
+            
+            // Cập nhật tên sản phẩm, hình ảnh và giá
+            document.querySelector('.ten_sanpham h3').textContent = productInfo.product_name;
+            document.querySelector('.custom-img').src = productInfo.img || '';
+            document.querySelector('.price h3').innerHTML = `Giá: <span>${productInfo.price.toLocaleString('vi-VN')} đ</span>`;        } else {
+            console.error('Không thể lấy thông tin sản phẩm');
+        }
+    } catch (error) {
+        console.error('Lỗi khi lấy thông tin sản phẩm:', error);
+    }
+
+    updateRelatedParties(batchInfo);
+    updateAuthenticationInfo(batchInfo);
+    updateBatchDetails(batchInfo);
+
+    document.querySelector('[data-target="lohang"]').click();
+}
+
+    function updateProductInfo(productInfo) {
+        const thongtinContent = document.getElementById('thongtin');
+        thongtinContent.innerHTML = `
+            <h2>Thông tin sản phẩm</h2>
+            <table class="table table-bordered">
+            
+            <h4>Mô tả:</h4>
+            <ul>
+                ${productInfo.description.split('\n').map(desc => `<li>${desc.trim()}</li>`).join('')}
+            </ul>
+            <h4>Công dụng:</h4>
+            <ul>
+                ${productInfo.uses.split('\n').map(use => `<li>${use.trim()}</li>`).join('')}
+            </ul>
+            <h4>Quy trình sản xuất:</h4>
+            <ol>
+                ${productInfo.process.split('\n').map(step => `<li>${step.trim()}</li>`).join('')}
+            </ol>
+        `;
+    }
+
+    function updateRelatedParties(batchInfo) {
+        const lienketContent = document.getElementById('lienket');
+        lienketContent.innerHTML = `
+            <h2>Các bên có liên quan</h2>
+            <p><strong>Nhà sản xuất:</strong> ${batchInfo.producer.name}</p>
+            <p><strong>Địa chỉ:</strong> ${batchInfo.producer.address}</p>
+            <p><strong>Số điện thoại:</strong> ${batchInfo.producer.phone}</p>
+        `;
+    }
+
+    function updateAuthenticationInfo(batchInfo) {
+        const xacthucContent = document.getElementById('xacthuc');
+        xacthucContent.innerHTML = `
+            <h2>Thông tin xác thực</h2>
+            <p><strong>Trạng thái:</strong> ${batchInfo.status}</p>
+            <p><strong>Chứng nhận:</strong> <a href="${batchInfo.certificateImageUrl}" target="_blank">Xem chứng nhận</a></p>
+        `;
+    }
+    
+    function updateBatchDetails(batchInfo) {
+    const lohangContent = document.getElementById('lohang');
+    lohangContent.innerHTML = `
+        <div class="batch-info">
+            <h2>Thông tin lô hàng</h2>
+            <table>
+                <tr>
+                    <th>Tên lô hàng</th>
+                    <td>${batchInfo.name}</td>
+                </tr>
+                <tr>
+                    <th>Số lượng (tấn)</th>
+                    <td>${batchInfo.quantity}</td>
+                </tr>
+                <tr>
+                    <th>Ngày tạo lô hàng</th>
+                    <td>${new Date(batchInfo.productionDate).toLocaleDateString('vi-VN')}</td>
+                </tr>
+                <tr>
+                    <th>Trạng thái vận chuyển</th>
+                    <td>${batchInfo.transportStatus}</td>
+                </tr>
+                <tr>
+                    <th>Người sản xuất</th>
+                    <td>${batchInfo.producer.name}</td>
+                </tr>
+                <tr>
+                    <th>Địa chỉ</th>
+                    <td>${batchInfo.producer.address || 'Không có thông tin'}</td>
+                </tr>
+                <tr>
+                    <th>Số điện thoại</th>
+                    <td>${batchInfo.producer.phone || 'Không có thông tin'}</td>
+                </tr>
+            </table>
+            <div class="text-center mt-4">
+                <button class="btn-view-image" onclick="showProductImages('${batchInfo.productImageUrls.join(',')}')">XEM ẢNH SẢN PHẨM</button>
+            </div>
+        </div>
+    `;
+}
+// Hàm để hiển thị ảnh sản phẩm
+function showProductImages(imageUrls) {
+    const urls = imageUrls.split(',');
+    if (urls.length > 0) {
+        const overlay = document.getElementById('overlay');
+        const overlayImg = document.getElementById('overlay-img');
+        overlayImg.src = urls[0]; // Hiển thị ảnh đầu tiên
+        overlay.style.display = 'flex';
+    }
+}
+
+// Đảm bảo rằng bạn đã có hàm hideImage() để đóng overlay
+function hideImage() {
+    document.getElementById('overlay').style.display = 'none';
+}
+document.querySelectorAll('.tab-button').forEach(tab => {
+    tab.addEventListener('click', function() {
+        document.querySelectorAll('.tab-button').forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        const target = this.getAttribute('data-target');
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.style.display = 'none';
+        });
+        document.getElementById(target).style.display = 'block';
+    });
+});
+
+// Kích hoạt tab đầu tiên khi trang được tải
+document.querySelector('.tab-button').click();
+    </script>
+</body>
+</html>
