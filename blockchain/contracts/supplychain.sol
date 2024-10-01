@@ -139,15 +139,15 @@ function createBatch(
     }));
 
     // Ghi lại thông tin lô hàng vào nhật ký hoạt động
-    _addBatchCreationLog(newBatchId, _producerId, _name, _productId);
+    _addBatchCreationLog(newBatchId, _producerId, _productId);
 
     return newBatchId;
 }
 
-function _addBatchCreationLog(uint256 _batchId, uint256 _producerId, string memory _name, uint256 _productId) private {
+function _addBatchCreationLog(uint256 _batchId, uint256 _producerId, uint256 _productId) private {
     uint256[] memory relatedProductIds = new uint256[](1);
     relatedProductIds[0] = _productId;
-    string memory description = string(abi.encodePacked("A new batch '", _name, "' has been created by producer ", uint2str(_producerId)));
+    string memory description = string(abi.encodePacked("A new batch has been created by producer "));
     addSystemActivityLog(
         _batchId,
         _producerId,
@@ -398,7 +398,7 @@ function approveBatch(uint256 _batchId, uint256 _approverId) public {
         _batchId,
         _approverId,
         "Batch Approved",
-        string(abi.encodePacked("Batch '", _batches[_batchId].name, "' has been approved by approver ", uint2str(_approverId))),
+        string(abi.encodePacked("Batch has been approved by approver ")),
         relatedProductIds
     );
 }
@@ -417,7 +417,7 @@ function rejectBatch(uint256 _batchId, uint256 _approverId) public {
         _batchId,
         _approverId,
         "Batch Rejected",
-        string(abi.encodePacked("Batch '", _batches[_batchId].name, "' has been rejected by approver ", uint2str(_approverId))),
+        string(abi.encodePacked("Batch has been rejected by approver ")),
         relatedProductIds
     );
 }
@@ -517,11 +517,7 @@ event LogParticipantType(uint256 indexed batchId, string participantType);
             "Transport Status Updated",
             string(abi.encodePacked(
                 "Transport status updated to '", 
-                _action, 
-                "' by ", 
-                _participantType, 
-                " with ID ", 
-                uint2str(_participantId)
+                _action
             )),
             relatedProductIds
         );
@@ -563,13 +559,7 @@ function warehouseConfirmation(uint256 _batchId, uint256 _warehouseId) public {
         _batchId,
         _warehouseId,
         "Warehouse Confirmation",
-        string(abi.encodePacked(
-            "Warehouse with ID ", 
-            uint2str(_warehouseId), 
-            " has confirmed receipt of batch '", 
-            _batches[_batchId].name, 
-            "'"
-        )),
+        string(abi.encodePacked("Warehouse has confirmed receipt of batch")),
         relatedProductIds
     );
 }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trang chủ</title>
+    <title>Thông tin lô hàng</title>
     <!-- Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../css/trangchu.css">
@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="../css/lo-hang.css">
     <link rel="stylesheet" href="../css/trangcanhan.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
+    <meta charset="UTF-8">
     <style>
         .product-card {
             display: flex;
@@ -205,7 +205,7 @@
                 <img src="\hinhanh\Bitcoin-Blockchain-Network-icon-on-transparent-background-PNG.png" alt="logo" class="logo">
             </a>
         </div>
-        <a class="navbar-brand" href="#">Trang cá nhân</a>
+        <a class="navbar-brand" href="#">Lô hàng</a>
         <button class="navbar-toggler ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -385,32 +385,31 @@
     }
 
     async function updateRelatedParties(batchInfo) {
-        const lienketContent = document.getElementById('lienket');
-        lienketContent.innerHTML = `
-            <h2>Các bên có liên quan</h2>
-            <p><strong>Nhà sản xuất:</strong> ${batchInfo.producer.name}</p>
-            <p><strong>Địa chỉ:</strong> ${batchInfo.producer.address}</p>
-            <p><strong>Số điện thoại:</strong> ${batchInfo.producer.phone}</p>
-            <h2>Các bên tham gia</h2>
-            <div id="activityLogs">Đang tải...</div>
-        `;
+    const lienketContent = document.getElementById('lienket');
+    lienketContent.innerHTML = `
+        <h2>Các bên có liên quan</h2>
+        <p><strong>Nhà sản xuất:</strong> ${batchInfo.producer.name}</p>
+        <p><strong>Địa chỉ:</strong> ${batchInfo.producer.address}</p>
+        <p><strong>Số điện thoại:</strong> ${batchInfo.producer.phone}</p>
+        <h2>Nhật ký hoạt động</h2>
+        <div id="activityLogs">Đang tải...</div>
+    `;
 
-        try {
-            const response = await fetch(`/api/system-activity-logs/${batchInfo.sscc}`);
-            if (response.ok) {
-                const data = await response.json();
-                displayActivityLogs(data.activityLogs);
-            } else {
-                console.error('Không thể lấy nhật ký hoạt động');
-                document.getElementById('activityLogs').innerHTML = 'Không thể tải nhật ký hoạt động.';
-            }
-        } catch (error) {
-            console.error('Lỗi khi lấy nhật ký hoạt động:', error);
-            document.getElementById('activityLogs').innerHTML = 'Đã xảy ra lỗi khi tải nhật ký hoạt động.';
+    try {
+        const response = await fetch(`/api/system-activity-logs/${batchInfo.sscc}`);
+        if (response.ok) {
+            const data = await response.json();
+            displayActivityLogs(data.activityLogs, data.participants);
+        } else {
+            console.error('Không thể lấy nhật ký hoạt động');
+            document.getElementById('activityLogs').innerHTML = 'Không thể tải nhật ký hoạt động.';
         }
+    } catch (error) {
+        console.error('Lỗi khi lấy nhật ký hoạt động:', error);
+        document.getElementById('activityLogs').innerHTML = 'Đã xảy ra lỗi khi tải nhật ký hoạt động.';
     }
-
-    function displayActivityLogs(logs) {
+}
+function displayActivityLogs(logs) {
     const logsContainer = document.getElementById('activityLogs');
     if (logs.length === 0) {
         logsContainer.innerHTML = 'Không có hoạt động nào được ghi nhận.';
@@ -422,14 +421,32 @@
 
     const initialDisplayCount = 5; // Số lượng hoạt động hiển thị ban đầu
     const displayLogs = (start, end) => {
-        const logsHtml = logs.slice(start, end).map(log => `
-         <div class="activity-log ${getActivityClass(log.activityName)}">
-            <p class="timestamp"><strong>Thời gian:</strong> ${new Date(log.timestamp).toLocaleString('vi-VN')}</p>
-            <p class="activity-name"><strong>Hoạt động:</strong> ${getActivityIcon(log.activityName)} ${translateActivityName(log.activityName)}</p>
-            <p class="description"><strong>Mô tả:</strong> ${translateDescription(log.description)}</p>
-            ${log.imageUrls.length > 0 ? `<p><strong>Hình ảnh:</strong> <a href="${log.imageUrls[0]}" target="_blank" class="image-link">Xem hình ảnh</a></p>` : ''}
-        </div>
-        `).join('');
+        const logsHtml = logs.slice(start, end).map(log => {
+            const participant = log.participantInfo;
+            const participantInfo = participant ? 
+                `
+                <div class="participant-info">
+                    <img src="${participant.avatar || '/images/default-avatar.png'}" alt="${participant.name}" class="participant-avatar">
+                    <div class="participant-details">
+                        <a href="${BASE_URL}/trangcanhan.html?uid=${participant.id}" class="participant-link">
+                            <p class="participant-name">${participant.name}</p>
+                            <p class="participant-role">${participant.role}</p>
+                        </a>
+                    </div>
+                </div>
+                ` : 
+                `<p><strong>Người thực hiện ID:</strong> ${log.participantId}</p>`;
+
+            return `
+            <div class="activity-log ${getActivityClass(log.activityName)}">
+                <p class="timestamp"><strong>Thời gian:</strong> ${new Date(log.timestamp).toLocaleString('vi-VN')}</p>
+                <p class="activity-name"><strong>Hoạt động:</strong> ${getActivityIcon(log.activityName)} ${translateActivityName(log.activityName)}</p>
+                ${participantInfo}
+                <p class="description"><strong>Mô tả:</strong> ${decodeAndTranslateDescription(log.description)}</p>
+                ${log.imageUrls && log.imageUrls.length > 0 ? `<p><strong>Hình ảnh:</strong> <a href="${log.imageUrls[0]}" target="_blank" class="image-link">Xem hình ảnh</a></p>` : ''}
+            </div>
+            `;
+        }).join('');
 
         logsContainer.innerHTML = logsHtml;
 
@@ -445,33 +462,57 @@
 
     displayLogs(0, initialDisplayCount);
 }
-function translateActivityName(activityName) {
-    const translations = {
-        "Transport Status Updated": "Cập nhật trạng thái vận chuyển",
-        "Warehouse Confirmation": "Xác nhận nhà kho",
-        "Create Batch": "Tạo lô hàng",
-        "Start Transport": "Bắt đầu vận chuyển",
-        "Warehouse Confirmation": "Xác nhận nhà kho",
-        "Stop Transport": "Tạm dừng vận chuyển",
-        "Finish Transport": "Hoàn thành vận chuyển",
-        "Batch Approved": "Lô hàng được chấp thuận",
+function decodeAndTranslateDescription(description) {
+    // Giải mã HTML entities
+    const decodedDescription = decodeHTMLEntities(description);
+    
+    // Dịch mô tả
+    return translateDescription(decodedDescription);
+}
 
-    };
-
-    return translations[activityName] || activityName;
+function decodeHTMLEntities(text) {
+    const textArea = document.createElement('textarea');
+    textArea.innerHTML = text;
+    return textArea.value;
 }
 
 function translateDescription(description) {
     const translations = {
         "Bat dau van chuyen": "Bắt đầu vận chuyển",
-        "Warehouse has confirmed receipt of the batch": "Nhà kho đã xác nhận nhận lô hàng",
+        "Warehouse has confirmed receipt of batch": "Nhà kho đã xác nhận nhận lô hàng",
         "Hoan thanh van chuyen": "Hoàn thành vận chuyển",
         "Tam dung van chuyen": "Tạm dừng vận chuyển",
         "Batch has been approved by the approver": "Lô hàng đã được nhà kiểm duyệt chấp thuận",
-        // Thêm các bản dịch khác nếu cần
+        "Transport status updated to 'Hoan thanh van chuyen'": "Trạng thái vận chuyển được cập nhật thành 'Hoàn thành vận chuyển'",
+        "Transport status updated to 'Bat dau van chuyen'": "Trạng thái vận chuyển được cập nhật thành 'Bắt đầu vận chuyển'",
+        "Transport status updated to 'Tam dung van chuyen'": "Trạng thái vận chuyển được cập nhật thành 'Tạm dừng vận chuyển'",
+        "A new batch has been created": "Một lô hàng mới đã được tạo",
+        "Batch has been approved": "Lô hàng đã được chấp thuận"
     };
 
-    return translations[description] || description;
+    // Tìm và thay thế các phần của mô tả
+    for (const [key, value] of Object.entries(translations)) {
+        if (description.includes(key)) {
+            description = description.replace(key, value);
+        }
+    }
+
+    return description;
+}
+
+function translateActivityName(activityName) {
+    const translations = {
+        "Transport Status Updated": "Cập nhật trạng thái vận chuyển",
+        "Warehouse Confirmation": "Nhà kho xác nhận nhận lô hàng",
+        "Create Batch": "Tạo lô hàng",
+        "Start Transport": "Bắt đầu vận chuyển",
+        "Stop Transport": "Tạm dừng vận chuyển",
+        "Finish Transport": "Hoàn thành vận chuyển",
+        "Batch Approved": "Lô hàng được phê duyệt",
+        "Batch Created": "Tạo lô hàng"
+    };
+
+    return translations[activityName] || activityName;
 }
 
     function updateAuthenticationInfo(batchInfo) {
@@ -572,5 +613,10 @@ function getActivityIcon(activityName) {
     }
 }
     </script>
+
+<script>
+
+    const BASE_URL = window.location.origin; // Lấy base URL của ứng dụng
+</script>
 </body>
 </html>

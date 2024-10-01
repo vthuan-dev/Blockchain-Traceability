@@ -100,6 +100,10 @@
   app.get('/trangcanhan.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'tieu-dung', 'trangcanhan.html'));
   });
+  app.get('/tieu-dung/trangcanhan.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'tieu-dung', 'trangcanhan.html'));
+  });
+
 
   app.get('/lo-hang.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'tieu-dung', 'lo-hang.html'));
