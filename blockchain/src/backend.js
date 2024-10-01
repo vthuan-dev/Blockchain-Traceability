@@ -1019,7 +1019,6 @@ app.post('/api/accept-transport', async (req, res) => {
   }
 });
 // Cập nhật route để lấy thông tin lô hàng
-
 app.get('/api/batch-info-by-sscc/:sscc', async (req, res) => {
   try {
     const sscc = req.params.sscc;
@@ -1031,6 +1030,7 @@ app.get('/api/batch-info-by-sscc/:sscc', async (req, res) => {
     
     const producerInfo = await getProducerById(batchInfo.producerId);
 
+    console.log('Calling isWarehouseConfirmed with:', batchInfo.batchId, userId);
     const warehouseConfirmed = await traceabilityContract.methods.isWarehouseConfirmed(batchInfo.batchId, userId).call();
 
     const confirmedWarehouseIds = await traceabilityContract.methods.getConfirmedWarehouses(batchInfo.batchId).call();
@@ -1043,6 +1043,9 @@ app.get('/api/batch-info-by-sscc/:sscc', async (req, res) => {
         name: warehouseInfo.name
       };
     }));
+
+
+    
 
     const safeConvert = (value) => {
       if (typeof value === 'bigint') {
@@ -1090,6 +1093,99 @@ app.get('/api/batch-info-by-sscc/:sscc', async (req, res) => {
     res.status(500).json({ error: 'Không thể lấy thông tin lô hàng: ' + error.message });
   }
 });
+
+
+
+
+
+app.get('/api/batch-info-by-sscc-for-consumer/:sscc', async (req, res) => {
+  try {
+    const sscc = req.params.sscc;
+    const userId = req.session.userId;
+
+    const batchInfo = await traceabilityContract.methods.getBatchBySSCC(sscc).call();
+    const transportStatus = await traceabilityContract.methods.getBatchTransportStatus(batchInfo.batchId).call();
+    const detailedTransportStatus = await traceabilityContract.methods.getDetailedTransportStatus(batchInfo.batchId).call();
+    
+    const producerInfo = await getProducerById(batchInfo.producerId);
+
+    // Lấy thông tin người dùng để xác định warehouseId
+    const [userInfo] = await db.query('SELECT * FROM users WHERE uid = ?', [userId]);
+    
+    if (!userInfo || userInfo.role_id !== 8) { // Giả sử role_id 8 là nhà kho
+      console.log('User is not a warehouse');
+      // Nếu không phải nhà kho, set warehouseConfirmed là false
+      var warehouseConfirmed = false;
+    } else {
+      const warehouseId = userInfo.warehouse_id; // Giả sử có trường warehouse_id trong bảng users
+      console.log('Calling isWarehouseConfirmed with:', batchInfo.batchId, warehouseId);
+      warehouseConfirmed = await traceabilityContract.methods.isWarehouseConfirmed(batchInfo.batchId, warehouseId).call();
+    }
+
+    const confirmedWarehouseIds = await traceabilityContract.methods.getConfirmedWarehouses(batchInfo.batchId).call();
+    
+    // Lấy thông tin chi tiết của các nhà kho đã xác nhận
+    const confirmedWarehouses = await Promise.all(confirmedWarehouseIds.map(async (warehouseId) => {
+      const warehouseInfo = await getWarehouseInfo(warehouseId);
+      return {
+        id: warehouseId.toString(),
+        name: warehouseInfo.name
+      };
+    }));
+
+
+    const safeConvert = (value) => {
+      if (typeof value === 'bigint') {
+        return value.toString();
+      }
+      if (Array.isArray(value)) {
+        return value.map(safeConvert);
+      }
+      if (typeof value === 'object' && value !== null) {
+        return Object.fromEntries(
+          Object.entries(value).map(([k, v]) => [k, safeConvert(v)])
+        );
+      }
+      return value;
+    };
+
+    const serializedBatchInfo = safeConvert({
+      batchId: batchInfo.batchId,
+      name: batchInfo.name,
+      sscc: batchInfo.sscc,
+      producerId: batchInfo.producerId,
+      quantity: batchInfo.quantity,
+      productionDate: new Date(Number(batchInfo.productionDate) * 1000).toISOString(),
+      status: translateStatus(batchInfo.status),
+      productImageUrls: batchInfo.productImageUrls,
+      certificateImageUrl: batchInfo.certificateImageUrl,
+      farmPlotNumber: batchInfo.farmPlotNumber,
+      productId: batchInfo.productId,
+      transportStatus: translateTransportStatus(transportStatus),
+      detailedTransportStatus: translateDetailedTransportStatus(detailedTransportStatus),
+      producer: {
+        name: producerInfo.name,
+        address: producerInfo.address,
+        phone: producerInfo.phone
+      },
+      warehouseConfirmed: warehouseConfirmed,
+      confirmedWarehouses: confirmedWarehouses
+    });
+
+    console.log('Serialized Batch Info:', JSON.stringify(serializedBatchInfo, null, 2));
+
+    res.json(serializedBatchInfo);
+  } catch (error) {
+    console.error('Lỗi khi lấy thông tin lô hàng từ SSCC:', error);
+    res.status(500).json({ error: 'Không thể lấy thông tin lô hàng: ' + error.message });
+  }
+});
+
+
+
+
+
+
 
 async function getProductInfoFromDatabase(productId) {
   return new Promise((resolve, reject) => {
