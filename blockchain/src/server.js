@@ -81,7 +81,6 @@
     next();
   });
   
-  // ... (phần code khác giữ nguyên)
 
   setupRoutes(app, db);
 
@@ -198,47 +197,47 @@
 
 
 
-    app.get('/', (req, res) => {
-      res.sendFile(path.join(__dirname, 'public', 'trangchu.html'));
-    });
+    // app.get('/', (req, res) => {
+    //   res.sendFile(path.join(__dirname, 'public', 'trangchu.html'));
+    // });
 
-    app.post('/api/dangnhap', async (req, res) => {
-      const { email, password } = req.body;
-      // ... xác thực người dùng ...
-      if (user && await bcrypt.compare(password, user.password)) {
-        req.session.userId = user.uid;
-      }
-      // ...
-    });
-    app.get('/api/products', async (req, res) => {
-      try {
-          const [products] = await db.query('SELECT product_id, product_name FROM products');
-          res.json(products);
-      } catch (error) {
-          console.error('Lỗi khi lấy danh sách sản phẩm:', error);
-          res.status(500).json({ error: 'Lỗi server khi lấy danh sách sản phẩm' });
-      }
-    });
+    // app.post('/api/dangnhap', async (req, res) => {
+    //   const { email, password } = req.body;
+    //   // ... xác thực người dùng ...
+    //   if (user && await bcrypt.compare(password, user.password)) {
+    //     req.session.userId = user.uid;
+    //   }
+    //   // ...
+    // });
+    // app.get('/api/products', async (req, res) => {
+    //   try {
+    //       const [products] = await db.query('SELECT product_id, product_name FROM products');
+    //       res.json(products);
+    //   } catch (error) {
+    //       console.error('Lỗi khi lấy danh sách sản phẩm:', error);
+    //       res.status(500).json({ error: 'Lỗi server khi lấy danh sách sản phẩm' });
+    //   }
+    // });
 
-    app.get('/api/nhasanxuat', async (req, res) => {
-      try {
-        const [rows] = await db.query('SELECT * FROM users WHERE role_id = 1');
-        res.json(rows);
-      } catch (err) {
-        console.error('Lỗi khi lấy danh sách nhà sản xuất:', err.message);
-        res.status(500).json({ error: 'Lỗi khi lấy danh sách nhà sản xuất' });
-      }
-    });
+    // app.get('/api/nhasanxuat', async (req, res) => {
+    //   try {
+    //     const [rows] = await db.query('SELECT * FROM users WHERE role_id = 1');
+    //     res.json(rows);
+    //   } catch (err) {
+    //     console.error('Lỗi khi lấy danh sách nhà sản xuất:', err.message);
+    //     res.status(500).json({ error: 'Lỗi khi lấy danh sách nhà sản xuất' });
+    //   }
+    // });
 
-    app.get('/api/nhakiemduyet', async (req, res) => {
-      try {
-        const [rows] = await db.query('SELECT * FROM users WHERE role_id = 2');
-        res.json(rows);
-      } catch (err) {
-        console.error('Lỗi khi lấy danh sách nhà kiểm duyệt:', err.message);
-        res.status(500).json({ error: 'Lỗi khi lấy danh sách nhà kiểm duyệt' });
-      }
-    });
+    // app.get('/api/nhakiemduyet', async (req, res) => {
+    //   try {
+    //     const [rows] = await db.query('SELECT * FROM users WHERE role_id = 2');
+    //     res.json(rows);
+    //   } catch (err) {
+    //     console.error('Lỗi khi lấy danh sách nhà kiểm duyệt:', err.message);
+    //     res.status(500).json({ error: 'Lỗi khi lấy danh sách nhà kiểm duyệt' });
+    //   }
+    // });
 
 
     // xac thuc dang nhap
@@ -293,7 +292,6 @@
             region: req.session.region
           });
         } else {
-          // Trường hợp này không nên xảy ra, nhưng để đảm bảo
           res.status(400).json({ error: 'Trạng thái đăng nhập không hợp lệ' });
         }
       } else {
