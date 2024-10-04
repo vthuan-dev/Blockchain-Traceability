@@ -297,18 +297,12 @@
                     
                     ${log.imageUrls && log.imageUrls.length > 0 ? `
                         <h6 class="card-subtitle mb-2 mt-4 text-muted">Ảnh/video hoạt động:</h6>
-                        <div id="carouselMedia${index}" class="carousel slide container my-3" data-bs-ride="carousel">
-                            <div class="carousel-inner">
-                                ${createCarouselItems(log.imageUrls, 4, false)}
-                            </div>
-                            <button class="carousel-control-prev" type="button" data-bs-target="#carouselMedia${index}" data-bs-slide="prev">
-                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                <span class="visually-hidden">Previous</span>
-                            </button>
-                            <button class="carousel-control-next" type="button" data-bs-target="#carouselMedia${index}" data-bs-slide="next">
-                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                <span class="visually-hidden">Next</span>
-                            </button>
+                        <div class="row">
+                            ${log.imageUrls.map(url => `
+                                <div class="col-6 col-md-4 col-lg-3 mb-3">
+                                    <img src="${url}" alt="Activity image" class="img-fluid rounded">
+                                </div>
+                            `).join('')}
                         </div>
                     ` : ''}
                 </div>
@@ -318,30 +312,26 @@
     }
 
     function createCarouselItems(items, itemsPerSlide, isProduct) {
-    let carouselItems = '';
-    for (let i = 0; i < items.length; i += itemsPerSlide) {
-        const slideItems = items.slice(i, i + itemsPerSlide);
-        carouselItems += `
-            <div class="carousel-item ${i === 0 ? 'active' : ''}">
-                <div class="row">
-                    ${slideItems.map(item => `
-                        <div class="col-md-6 col-lg-3"> <!-- Sử dụng col-md-6 cho tablet và col-lg-3 cho desktop -->
-                            <div class="product-card">
-                                ${isProduct ? `
+        let carouselItems = '';
+        for (let i = 0; i < items.length; i += itemsPerSlide) {
+            const slideItems = items.slice(i, i + itemsPerSlide);
+            carouselItems += `
+                <div class="carousel-item ${i === 0 ? 'active' : ''}">
+                    <div class="row">
+                        ${slideItems.map(item => `
+                            <div class="col-6 col-md-4 col-lg-3"> <!-- Sử dụng col-6 cho mobile, col-md-4 cho tablet và col-lg-3 cho desktop -->
+                                <div class="product-card">
                                     <div class="product-name">${item.product_name}</div>
                                     <img class="product-image" src="${item.image_url}" alt="${item.product_name}">
-                                ` : `
-                                    <img class="product-image" src="${item}" alt="Activity image">
-                                `}
+                                </div>
                             </div>
-                        </div>
-                    `).join('')}
+                        `).join('')}
+                    </div>
                 </div>
-            </div>
-        `;
+            `;
+        }
+        return carouselItems;
     }
-    return carouselItems;
-}
     function getUserIdFromURL() {
         const urlParams = new URLSearchParams(window.location.search);
         return urlParams.get('uid');
