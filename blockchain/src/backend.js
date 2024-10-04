@@ -1865,7 +1865,7 @@ app.get('/api/products', async (req, res) => {
         activityName: log.activityName,
         description: log.description,
         isSystemGenerated: log.isSystemGenerated,
-        imageUrls: log.imageUrls,
+        imageUrls: log.imageUrls || [],
         relatedProducts: relatedProducts.map(product => ({
           product_id: product.product_id,
           product_name: product.product_name,
