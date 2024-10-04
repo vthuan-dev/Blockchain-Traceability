@@ -313,25 +313,28 @@
     }
 
     function createCarouselItems(items, itemsPerSlide, isProduct) {
-        let carouselItems = '';
-        for (let i = 0; i < items.length; i += itemsPerSlide) {
-            const slideItems = items.slice(i, i + itemsPerSlide);
-            carouselItems += `
-                <div class="carousel-item ${i === 0 ? 'active' : ''}">
-                    <div class="row">
-                        ${slideItems.map(item => `
-                            <div class="col-6 col-md-4 col-lg-3"> <!-- Sử dụng col-6 cho mobile, col-md-4 cho tablet và col-lg-3 cho desktop -->
-                                <div class="product-card">
-                                    <div class="product-name">${item.product_name}</div>
-                                    <img class="product-image" src="${item.image_url}" alt="${item.product_name}">
-                                </div>
+    let carouselItems = '';
+    for (let i = 0; i < items.length; i += itemsPerSlide) {
+        const slideItems = items.slice(i, i + itemsPerSlide);
+        carouselItems += `
+            <div class="carousel-item ${i === 0 ? 'active' : ''}">
+                <div class="row">
+                    ${slideItems.map(item => `
+                        <div class="col-6 col-md-4 col-lg-3"> <!-- Sử dụng col-6 cho mobile, col-md-4 cho tablet và col-lg-3 cho desktop -->
+                            <div class="product-card" onclick="goToProductPage('${item.product_id}')">
+                                <div class="product-name">${item.product_name}</div>
+                                <img class="product-image" src="${item.image_url}" alt="${item.product_name}">
                             </div>
-                        `).join('')}
-                    </div>
+                        </div>
+                    `).join('')}
                 </div>
-            `;
-        }
+            </div>
+        `;
+    }
         return carouselItems;
+    }
+    function goToProductPage(productId) {
+        window.location.href = `sanpham.html?id=${productId}`;
     }
     function getUserIdFromURL() {
         const urlParams = new URLSearchParams(window.location.search);

@@ -103,7 +103,7 @@
     }
 
     .navbar-collapse.show {
-        top: 56px;
+        top: 90px;
     }
 
     .menu-overlay {
@@ -126,6 +126,7 @@
 
     .dropdown-menu {
         background-color: transparent;
+        background-color: #4cd137 !important;
     }
 
     .dropdown-item, #userRole, #logoutButton, #userRegion {
