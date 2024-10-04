@@ -1802,6 +1802,7 @@ app.get('/api/products', async (req, res) => {
             };
         }));
 
+        formattedLogs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
         console.log('Raw producer activity logs:', producerActivityLogs);
         console.log('Converted logs:', convertedLogs);
         console.log('Formatted logs:', formattedLogs);

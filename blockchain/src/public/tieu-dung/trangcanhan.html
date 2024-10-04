@@ -67,12 +67,12 @@
                                 <li><strong>Vùng sản xuất:</strong> <span class="profile-region"></span></li>
                                 <li class="position-relative">
                                     <strong>Điện thoại:</strong> 
-                                    <span class="profile-phone" id="phoneNumber"></span>
+                                    <span class="profile-phone" id="phoneNumber" data-phone=""></span>
                                     <div class="contact-options-dropdown" id="contactOptions">
-                                        <a href="" class="dropdown-item call-option">
+                                        <a id="callOption" class="dropdown-item call-option">
                                             <i class="fas fa-phone"></i> Gọi
                                         </a>
-                                        <a href="" class="dropdown-item zalo-option" target="_blank">
+                                        <a id="zaloOption" class="dropdown-item zalo-option">
                                             <i class="fab fa-facebook-messenger"></i> Zalo
                                         </a>
                                     </div>
@@ -165,6 +165,7 @@
             document.querySelector('.profile-img').src = user.avatar;
             document.querySelector('.profile-name').textContent = user.name;
             document.querySelector('.profile-phone').textContent = user.phone;
+            document.querySelector('.profile-phone').setAttribute('data-phone', user.phone);
             document.querySelector('.profile-address').textContent = user.address;
             document.querySelector('.profile-region').textContent = user.region_name || 'Không xác định';
         } catch (error) {
@@ -348,6 +349,27 @@
             }
         }
     });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    const phoneNumber = document.getElementById('phoneNumber');
+    const callOption = document.getElementById('callOption');
+    const zaloOption = document.getElementById('zaloOption');
+
+    // Lấy số điện thoại từ thuộc tính data-phone
+    const phone = phoneNumber.getAttribute('data-phone');
+
+    callOption.addEventListener('click', function(e) {
+        e.preventDefault();
+        window.location.href = `tel:${phone}`;
+    });
+
+    zaloOption.addEventListener('click', function(e) {
+        e.preventDefault();
+        // Chuyển hướng đến Zalo với số điện thoại
+        window.location.href = `https://zalo.me/${phone}`;
+    });
+});
 </script>
 
     
