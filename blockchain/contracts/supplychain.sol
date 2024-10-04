@@ -156,21 +156,32 @@ function _addBatchCreationLog(uint256 _batchId, uint256 _producerId, uint256 _pr
         relatedProductIds
     );
 }
+function generateSSCC(uint256 _producerId) private view returns (string memory) {
+    string memory prefix = "00";
+    string memory companyPrefix = padLeft(uint2str(_producerId), 6); // Giảm xuống 6 chữ số
+    uint256 serialNumber = uint256(keccak256(abi.encodePacked(block.timestamp, _producerId))) % 1000000000; // Giữ nguyên 9 chữ số
+    string memory serialReference = padLeft(uint2str(serialNumber), 9); // Giữ nguyên 9 chữ số
+    
+    string memory ssccWithoutCheck = string(abi.encodePacked(prefix, companyPrefix, serialReference));
+    uint8 checkDigit = calculateCheckDigit(ssccWithoutCheck);
+    
+    return string(abi.encodePacked(ssccWithoutCheck, uint2str(uint256(checkDigit))));
+}
 
-    function generateSSCC(uint256 _producerId) private view returns (string memory) {
-        string memory prefix = "00";
-        string memory companyPrefix = uint2str(_producerId);
-        uint256 serialNumber = uint256(keccak256(abi.encodePacked(block.timestamp, _producerId)));
-        string memory serialReference = uint2str(serialNumber);
-        
-        string memory ssccWithoutCheck = string(abi.encodePacked(prefix, companyPrefix, serialReference));
-        uint8 checkDigit = calculateCheckDigit(ssccWithoutCheck);
-        
-        string memory sscc = string(abi.encodePacked(ssccWithoutCheck, uint2str(uint256(checkDigit))));
-        
-        return sscc;
+function padLeft(string memory str, uint256 length) private pure returns (string memory) {
+    bytes memory strBytes = bytes(str);
+    if (strBytes.length >= length) return str;
+    
+    bytes memory result = new bytes(length);
+    uint256 paddingLength = length - strBytes.length;
+    for (uint256 i = 0; i < paddingLength; i++) {
+        result[i] = '0';
     }
-
+    for (uint256 i = 0; i < strBytes.length; i++) {
+        result[i + paddingLength] = strBytes[i];
+    }
+    return string(result);
+}
     function calculateCheckDigit(string memory _code) private pure returns (uint8) {
         bytes memory codeBytes = bytes(_code);
         uint256 sum = 0;

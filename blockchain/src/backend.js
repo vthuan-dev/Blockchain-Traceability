@@ -63,12 +63,12 @@ web3.eth.net.isListening()
 console.log('Admin address:', adminAddress);
   
 const traceabilityContractABI = require('../build/contracts/TraceabilityContract.json').abi;
-const traceabilityContractAddress = '0x79D9B6CA99cDe89A548f0A6D1FAb783fB2Da919b';
+const traceabilityContractAddress = '0x71425A1716E4872e3eB8Fca76B0eD7D90876896c';
 const traceabilityContract = new web3.eth.Contract(traceabilityContractABI, traceabilityContractAddress);
 
 // ABI và địa chỉ của contract ActivityLog
 const activityLogABI = require('../build/contracts/ActivityLog.json').abi;
-const activityLogAddress = '0x6556d8435Cdc6D50a687d44ceE7dA19d952F4eac';
+const activityLogAddress = '0x5b1D4B6B5fa9249479d5532352dA744c4E0aFbfe';
 const activityLogContract = new web3.eth.Contract(activityLogABI, activityLogAddress);
 
 // tạo biến lưu trữ file, giới hạn số lượng file và tên file, maxCount: số lượng file, name: tên file
