@@ -1,5 +1,5 @@
 .thanhphan .col {
-    background-color: #32ff7e;
+    background-color: #4cd137;
     border: 1px solid #dee2e6;
     border-radius: 5px;
     padding: 15px;
@@ -64,7 +64,7 @@
         margin-top: 20px; /* Khoảng cách trên */
         margin-bottom: 20px; /* Khoảng cách dưới */
         padding: 10px; /* Khoảng cách bên trong */
-        border-bottom: 2px solid #3498db; /* Đường viền dưới */
+        border-bottom: 2px solid #4cd137; /* Đường viền dưới */
         display: inline-block; /* Hiển thị dưới dạng khối nội tuyến */
         background-color: #ecf0f1; /* Màu nền */
         border-radius: 5px; /* Bo góc */
@@ -78,7 +78,7 @@
         margin-top: 15px; /* Khoảng cách trên */
         margin-bottom: 10px; /* Khoảng cách dưới */
         padding: 5px; /* Khoảng cách bên trong */
-        border-left: 4px solid #3498db; /* Đường viền trái */
+        border-left: 4px solid #4cd137; /* Đường viền trái */
         background-color: #ecf0f1; /* Màu nền */
         border-radius: 3px; /* Bo góc */
     }
