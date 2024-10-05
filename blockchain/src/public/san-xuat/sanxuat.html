@@ -632,9 +632,9 @@ function displayBatches(batches, containerId) {
             if (qrCodeElement) {
                 let qrData = '';
                 if (batch.sscc && batch.sscc.trim() !== '') {
-                    qrData = `SSCC:${batch.sscc}`;
+                    qrData = batch.sscc;
                 } else if (batch.batchId && batch.batchId.trim() !== '') {
-                    qrData = `BatchID:${batch.batchId}`;
+                    qrData = batch.batchId;
                 }
 
                 if (qrData) {
@@ -663,33 +663,33 @@ function displayBatches(batches, containerId) {
     });
 }
 
-function showLargeQRCode(qrData, batchId) {
+function showLargeQRCode(sscc, batchId) {
     const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.style.display = 'flex';
+    modal.style.justifyContent = 'center';
+    modal.style.alignItems = 'center';
     modal.style.position = 'fixed';
     modal.style.top = '0';
     modal.style.left = '0';
     modal.style.width = '100%';
     modal.style.height = '100%';
-    modal.style.backgroundColor = 'rgba(0,0,0,0.8)';
-    modal.style.display = 'flex';
-    modal.style.justifyContent = 'center';
-    modal.style.alignItems = 'center';
+    modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
     modal.style.zIndex = '1000';
 
     const container = document.createElement('div');
     container.style.backgroundColor = 'white';
     container.style.padding = '20px';
     container.style.borderRadius = '10px';
-    container.style.display = 'flex';
-    container.style.flexDirection = 'column';
-    container.style.alignItems = 'center';
+    container.style.textAlign = 'center';
+
     container.style.maxWidth = '90%';
     container.style.maxHeight = '90%';
     container.style.overflow = 'auto';
 
     const largeCanvas = document.createElement('canvas');
     const size = Math.min(300, window.innerWidth * 0.8);
-    generateQRCodeWithLogo(largeCanvas, qrData, size, true, function (error) {
+    generateQRCodeWithLogo(largeCanvas, sscc, size, true, function (error) {
     if (error) {
         console.error('Error generating large QR code:', error);
         container.innerHTML = '<p>Không thể tạo mã QR</p>';
@@ -735,8 +735,16 @@ function showLargeQRCode(qrData, batchId) {
 
     document.body.appendChild(modal);
 }
-function generateQRCodeWithLogo(canvas, data, size, showLogo, callback) {
-    QRCode.toCanvas(canvas, data, { width: size, height: size, errorCorrectionLevel: 'H' }, function (error) {
+function generateQRUrl(sscc) {
+    // Tạo URL cho mã QR với định dạng mong muốn
+    return `${window.location.origin}/tieu-dung/lo-hang.html?sscc=${sscc}`;
+}
+
+function generateQRCodeWithLogo(canvas, sscc, size, showLogo, callback) {
+    // Tạo URL cho mã QR
+    const qrUrl = generateQRUrl(sscc);
+    
+    QRCode.toCanvas(canvas, qrUrl, { width: size, height: size, errorCorrectionLevel: 'H' }, function (error) {
         if (error) {
             callback(error);
             return;

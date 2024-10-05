@@ -131,33 +131,25 @@
     <script src="../js_giaodien/sanpham.js"></script>
 
     <script>
-    document.addEventListener('DOMContentLoaded', async () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const sscc = urlParams.get('sscc');
-
-        if (sscc) {
-            try {
-                const response = await fetch(`/api/batch-info-by-sscc-for-consumer/${sscc}`);
-                const batchInfo = await response.json();
-
-                if (response.ok) {
-                    updateBatchInfo(batchInfo);
-                    if (batchInfo.product) {
-                        updateProductInfo(batchInfo.product);
-                    } else {
-                        console.error('Không tìm thấy thông tin sản phẩm');
-                    }
-                } else {
-                    console.error('Lỗi khi lấy thông tin lô hàng:', batchInfo.error);
-                }
-            } catch (error) {
-                console.error('Lỗi khi gọi API:', error);
+  document.addEventListener('DOMContentLoaded', async function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const sscc = urlParams.get('sscc');
+    if (sscc) {
+        try {
+            const response = await fetch(`/api/batch-info-by-sscc-for-consumer/${sscc}`);
+            const batchInfo = await response.json();
+            if (response.ok) {
+                updateBatchInfo(batchInfo);
+            } else {
+                console.error('Lỗi khi lấy thông tin lô hàng:', batchInfo.error);
             }
-        } else {
-            console.error('Không tìm thấy SSCC trong URL');
+        } catch (error) {
+            console.error('Lỗi khi gọi API:', error);
         }
-    });
-    
+    } else {
+        console.error('Không tìm thấy SSCC trong URL');
+    }
+});
     async function updateBatchInfo(batchInfo) {
     // Lấy thông tin sản phẩm từ SQL
     try {
