@@ -316,7 +316,7 @@
             res.json({ message: 'Đăng xuất thành công' });
         });
     });
-    console.log('Các route đã đăng ký:', app._router.stack.filter(r => r.route).map(r => r.route.path));
+    //console.log('Các route đã đăng ký:', app._router.stack.filter(r => r.route).map(r => r.route.path));
 
     const manageRoutes = require('./manage.js');
     app.use('/', manageRoutes);
