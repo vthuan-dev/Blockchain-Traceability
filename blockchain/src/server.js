@@ -94,6 +94,13 @@
 
   app.use(express.static(path.join(__dirname, 'public')));
 
+
+  //route chuyển hướng lô hàng 
+  app.get('/batch/:sscc', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'tieu-dung', 'batch-redirect.html'));
+  });
+
+
   app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'tieu-dung', 'trangchu.html'));
   });

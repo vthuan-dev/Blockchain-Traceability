@@ -385,17 +385,29 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         reader.readAsDataURL(file);
     }
-
     function handleQRCode(decodedText) {
         console.log("QR Code detected:", decodedText);
-        const parts = decodedText.split(':');
-        if (parts.length === 2 && parts[0] === 'SSCC') {
-            const sscc = parts[1];
-            console.log("Extracted SSCC:", sscc); // Thêm log để kiểm tra giá trị SSCC
+        // Trích xuất SSCC từ URL
+        const sscc = extractSSCC(decodedText);
+        if (sscc) {
+            console.log("Extracted SSCC:", sscc);
             fetchBatchInfoBySSCC(sscc);
         } else {
-            alert('Mã QR không hợp lệ');
+            console.error('Không thể trích xuất SSCC từ URL:', decodedText);
+            alert('Mã QR không hợp lệ hoặc không chứa SSCC');
         }
+    }
+    
+    function extractSSCC(url) {
+        // Kiểm tra nếu url chứa '/batch/'
+        if (url.includes('/batch/')) {
+            // Lấy phần cuối cùng của URL sau '/batch/'
+            const parts = url.split('/batch/');
+            return parts[parts.length - 1];
+        }
+        // Nếu không, tìm kiếm tham số sscc trong URL
+        const match = url.match(/sscc=([^&]+)/);
+        return match ? match[1] : null;
     }
 
     const closeButton = document.querySelector('.close');
