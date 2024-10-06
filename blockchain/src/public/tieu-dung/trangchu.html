@@ -192,10 +192,22 @@
 
     <script src="../../components/tieu-dung/trang-chu.js"></script> 
     <script>
-        function toggleChat() {
-            var chatbox = document.getElementById("chatbox");
-            chatbox.classList.toggle("show");
-        }
+       function toggleChat() {
+    var chatbox = document.getElementById("chatbox");
+    if (chatbox.classList.contains("show")) {
+        chatbox.classList.remove("show");
+        chatbox.classList.add("hide");
+        setTimeout(() => {
+            chatbox.style.display = "none";
+            chatbox.classList.remove("hide");
+        }, 300); // Match this to the animation duration
+    } else {
+        chatbox.style.display = "block";
+        // Force a reflow before adding the 'show' class
+        chatbox.offsetHeight;
+        chatbox.classList.add("show");
+    }
+}
     </script>
 <script>
     // lấy danh sách sản phẩm để hiển thị trên trang chủ

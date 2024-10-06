@@ -68,12 +68,17 @@
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     overflow: hidden;
     z-index: 1000;
-    display: none;
-    transition: all 0.3s ease;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    pointer-events: none;
 }
 
 .chatbox.show {
-    display: block;
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+    animation: slideUp 0.3s ease forwards;
 }
 
 .chatbox-header {
@@ -223,10 +228,35 @@
     background-color: #45a049;
 }
 
-/* Animation for chat opening */
+/* Animation for chat opening and closing */
 @keyframes slideUp {
-    from { transform: translateY(100%); }
-    to { transform: translateY(0); }
+    from { 
+        opacity: 0;
+        transform: translateY(20px); 
+    }
+    to { 
+        opacity: 1;
+        transform: translateY(0); 
+    }
+}
+
+@keyframes slideDown {
+    from { 
+        opacity: 1;
+        transform: translateY(0); 
+    }
+    to { 
+        opacity: 0;
+        transform: translateY(20px); 
+    }
+}
+
+.chatbox.show {
+    animation: slideUp 0.3s ease forwards;
+}
+
+.chatbox.hide {
+    animation: slideDown 0.3s ease forwards;
 }
 
 .system-message {
