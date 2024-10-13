@@ -313,6 +313,11 @@ app.get('/nhakiemduyet.html', requireAuth, (req, res) => {
   //   }
   // });
 
+  app.get('/api/region', async (req, res) => {
+    const [regions] = await db.query('SELECT * FROM regions');
+    res.json(regions);
+  });
+
   app.post('/api/capnhatthongtin', upload.single('avatar'), async (req, res) => {
     try {
       await authenticateAnonymously(); // Xác thực với Firebase
