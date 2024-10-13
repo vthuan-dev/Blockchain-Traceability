@@ -243,7 +243,7 @@
             res.status(500).json({ error: 'Đã xảy ra lỗi server' });
         });
 
-        console.log('Các route đã đăng ký trong dangky.js:', router.stack.map(layer => layer.route?.path).filter(Boolean));
+      //  console.log('Các route đã đăng ký trong dangky.js:', router.stack.map(layer => layer.route?.path).filter(Boolean));
 
         return router;
     };

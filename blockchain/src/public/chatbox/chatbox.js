@@ -10,8 +10,8 @@ function initializeSocket() {
         console.log("Đã kết nối với server");
         if (!userName || !userRoleId) {
             // Tạo một ID ngẫu nhiên cho người dùng ẩn danh
-            const anonymousId = 'anonymous_' + Math.random().toString(36).substr(2, 9);
-            userName = anonymousId;
+            const randomId = Math.random().toString(36).substr(2, 6);
+            userName = `Người dùng vãng lai ${randomId}`;
             userRoleId = 0;
         }
         socket.emit("onLogin", { name: userName, roleId: userRoleId });
@@ -21,18 +21,25 @@ function initializeSocket() {
         addMessage(data);
     });
 }
-
 function addMessage(data) {
     const messages = document.getElementById('messages');
     const newMessage = document.createElement('li');
     newMessage.className = 'list-group-item';
-    // Hiển thị "Bạn" cho tin nhắn của người dùng, và tên thật cho tin nhắn từ Admin
-    const displayName = data.from === userName ? "Bạn" : data.from;
-    newMessage.innerHTML = `<strong>${displayName}: </strong> ${data.body}`;
+    
+    if (data.from === 'Admin') {
+        newMessage.classList.add('admin');
+        newMessage.innerHTML = `
+            <span class="admin-name">Admin</span>
+            <span>${data.body}</span>
+        `;
+    } else {
+        newMessage.classList.add(data.from === userName ? 'sent' : 'received');
+        newMessage.textContent = data.body;
+    }
+    
     messages.appendChild(newMessage);
     scrollToBottom();
 }
-
 function scrollToBottom() {
     const chatboxBody = document.querySelector('.chatbox-body');
     chatboxBody.scrollTop = chatboxBody.scrollHeight;
@@ -52,8 +59,8 @@ fetch('/user-info')
             userRoleId = data.roleId;
         } else {
             // Tạo một ID ngẫu nhiên cho người dùng ẩn danh
-            const anonymousId = 'anonymous_' + Math.random().toString(36).substr(2, 9);
-            userName = anonymousId;
+            const randomId = Math.random().toString(36).substr(2, 6);
+            userName = `Người dùng vãng lai ${randomId}`;
             userRoleId = 0;
         }
         console.log("Thông tin người dùng:", { userName, userRoleId });
@@ -61,8 +68,8 @@ fetch('/user-info')
     })
     .catch(error => {
         console.error('Lỗi khi lấy thông tin người dùng:', error);
-        const anonymousId = 'anonymous_' + Math.random().toString(36).substr(2, 9);
-        userName = anonymousId;
+        const randomId = Math.random().toString(36).substr(2, 6);
+        userName = `Người dùng vãng lai ${randomId}`;
         userRoleId = 0;
         initializeSocket();
     });

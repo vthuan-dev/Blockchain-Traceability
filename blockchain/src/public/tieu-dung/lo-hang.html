@@ -13,190 +13,10 @@
     <link rel="stylesheet" href="../css/lo-hang.css">
     <link rel="stylesheet" href="../css/trangcanhan.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <meta charset="UTF-8">
-    <style>
-        .product-card {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background-color: #ffffff;
-            border-radius: 10px;
-            padding: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-            height: 100%;
-            width: 100%;
-        }
-
-        .product-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        .product-name {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #333;
-            text-align: center;
-            margin-bottom: 15px;
-            height: auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .product-image {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 8px;
-            margin-top: 10px;
-        }
-
-        .carousel-item .col-md-3 {
-            padding: 15px;
-        }
-
-        #carouselProducts .carousel-inner {
-            padding: 20px 0;
-        }
-
-        .carousel-container {
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .card-subtitle.mb-2.mt-4.text-muted {
-            font-size: 1.2rem;
-            color: #4CAF50 !important;
-            margin-bottom: 15px !important;
-        }
-
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Arial', sans-serif;
-        }
-
-        .container {
-            background-color: white;
-            border-radius: 15px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-            padding: 30px;
-            margin-top: 30px;
-        }
-
-        .custom-img {
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
-        }
-
-        .custom-img:hover {
-            transform: scale(1.05);
-        }
-
-        .ten_sanpham h3 {
-            color: #2c3e50;
-            font-size: 2rem;
-            margin-top: 20px;
-        }
-
-        .price h3 {
-            color: #27ae60;
-            font-size: 1.5rem;
-        }
-
-        .thanhphan .col {
-            background-color: #ecf0f1;
-            border-radius: 10px;
-            padding: 15px;
-            margin: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            width: 20%;
-        }
-
-        .thanhphan .col:hover {
-            background-color: #44bd32;
-            color: white;
-        }
-
-        .thanhphan .col i {
-            margin-right: 0px;
-        }
-
-        .tab-content {
-            background-color: white;
-            border-radius: 10px;
-            padding: 20px;
-            margin-top: 20px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-
-        .tab-content h2 {
-            color: #2c3e50;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-        }
-
-        .tab-content ul, .tab-content ol {
-            padding-left: 20px;
-        }
-
-        .tab-content li {
-            margin-bottom: 10px;
-        }
-
-        .btn-view-image {
-            background-color: #3498db;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .btn-view-image:hover {
-            background-color: #2980b9;
-        }
-
-        .batch-info table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0 10px;
-        }
-
-        .batch-info th, .batch-info td {
-            padding: 15px;
-            text-align: left;
-            border-bottom: 1px solid #ecf0f1;
-        }
-
-        .batch-info th {
-            background-color: #44bd32;
-            color: white;
-            border-radius: 5px 0 0 5px;
-        }
-
-        .batch-info td {
-            background-color: #ecf0f1;
-            border-radius: 0 5px 5px 0;
-        }
-
-        .activity-log {
-            background-color: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 5px;
-            padding: 15px;
-            margin-bottom: 15px;
-        }
-        .activity-log p {
-            margin-bottom: 5px;
-        }
-    </style>
+   
 </head>
 <body>
     <nav class="navbar custom-navbar navbar-expand-lg navbar-light bg-light custom-navbar-height">
@@ -311,33 +131,25 @@
     <script src="../js_giaodien/sanpham.js"></script>
 
     <script>
-    document.addEventListener('DOMContentLoaded', async () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const sscc = urlParams.get('sscc');
-
-        if (sscc) {
-            try {
-                const response = await fetch(`/api/batch-info-by-sscc-for-consumer/${sscc}`);
-                const batchInfo = await response.json();
-
-                if (response.ok) {
-                    updateBatchInfo(batchInfo);
-                    if (batchInfo.product) {
-                        updateProductInfo(batchInfo.product);
-                    } else {
-                        console.error('Không tìm thấy thông tin sản phẩm');
-                    }
-                } else {
-                    console.error('Lỗi khi lấy thông tin lô hàng:', batchInfo.error);
-                }
-            } catch (error) {
-                console.error('Lỗi khi gọi API:', error);
+  document.addEventListener('DOMContentLoaded', async function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const sscc = urlParams.get('sscc');
+    if (sscc) {
+        try {
+            const response = await fetch(`/api/batch-info-by-sscc-for-consumer/${sscc}`);
+            const batchInfo = await response.json();
+            if (response.ok) {
+                updateBatchInfo(batchInfo);
+            } else {
+                console.error('Lỗi khi lấy thông tin lô hàng:', batchInfo.error);
             }
-        } else {
-            console.error('Không tìm thấy SSCC trong URL');
+        } catch (error) {
+            console.error('Lỗi khi gọi API:', error);
         }
-    });
-    
+    } else {
+        console.error('Không tìm thấy SSCC trong URL');
+    }
+});
     async function updateBatchInfo(batchInfo) {
     // Lấy thông tin sản phẩm từ SQL
     try {
@@ -383,30 +195,55 @@
             </ol>
         `;
     }
-
     async function updateRelatedParties(batchInfo) {
-    const lienketContent = document.getElementById('lienket');
-    lienketContent.innerHTML = `
-        <h2>Các bên có liên quan</h2>
-        <p><strong>Nhà sản xuất:</strong> ${batchInfo.producer.name}</p>
-        <p><strong>Địa chỉ:</strong> ${batchInfo.producer.address}</p>
-        <p><strong>Số điện thoại:</strong> ${batchInfo.producer.phone}</p>
-        <h2>Nhật ký hoạt động</h2>
-        <div id="activityLogs">Đang tải...</div>
-    `;
+        const lienketContent = document.getElementById('lienket');
+        
+        console.log('Batch Info:', batchInfo);
 
-    try {
-        const response = await fetch(`/api/system-activity-logs/${batchInfo.sscc}`);
-        if (response.ok) {
-            const data = await response.json();
-            displayActivityLogs(data.activityLogs, data.participants);
-        } else {
-            console.error('Không thể lấy nhật ký hoạt động');
-            document.getElementById('activityLogs').innerHTML = 'Không thể tải nhật ký hoạt động.';
+        const producerId = batchInfo.producerId;
+        console.log('Producer ID:', producerId);
+
+        if (!batchInfo.producer) {
+            console.error('Không có thông tin về nhà sản xuất');
+            lienketContent.innerHTML = '<p>Không có thông tin về nhà sản xuất</p>';
+            return;
         }
-    } catch (error) {
-        console.error('Lỗi khi lấy nhật ký hoạt động:', error);
-        document.getElementById('activityLogs').innerHTML = 'Đã xảy ra lỗi khi tải nhật ký hoạt động.';
+
+        const producerName = batchInfo.producer.name || 'Không có tên';
+        const producerAddress = batchInfo.producer.address || 'Không có thông tin';
+        const producerPhone = batchInfo.producer.phone || 'Không có thông tin';
+
+        lienketContent.innerHTML = `
+        <h2>Các bên có liên quan</h2>
+        <p><strong>Nhà sản xuất:</strong> <a href="/trangcanhan.html?uid=${producerId}" class="producer-link">${producerName}</a></p>
+        <p><strong>Địa chỉ:</strong> ${producerAddress}</p>
+        <p><strong>Số điện thoại:</strong> ${producerPhone}</p>
+        <h5 class="activity-log-title">Nhật ký lô hàng</h5>
+        <div id="activityLogs">Đang tải...</div>
+        `;
+
+        // Phần còn lại của hàm giữ nguyên
+        try {
+            const response = await fetch(`/api/system-activity-logs/${batchInfo.sscc}`);
+            if (response.ok) {
+                const data = await response.json();
+                displayActivityLogs(data.activityLogs);
+            } else {
+                console.error('Không thể lấy nhật ký hoạt động');
+                document.getElementById('activityLogs').innerHTML = 'Không thể tải nhật ký hoạt động.';
+            }
+        } catch (error) {
+            console.error('Lỗi khi lấy nhật ký hoạt động:', error);
+            document.getElementById('activityLogs').innerHTML = 'Đã xảy ra lỗi khi tải nhật ký hoạt động.';
+        }
+}
+
+// Thêm hàm này vào script của bạn
+function goToProducerPage(producerId) {
+    if (producerId) {
+        window.location.href = `trangcanhan.html?uid=${producerId}`;
+    } else {
+        console.error('Không có ID người sản xuất');
     }
 }
 function displayActivityLogs(logs) {
@@ -452,8 +289,7 @@ function displayActivityLogs(logs) {
 
         if (end < logs.length) {
             logsContainer.innerHTML += `
-                <button id="loadMoreLogs" class="btn btn-primary mt-3">Xem thêm</button>
-            `;
+                    <button id="loadMoreLogs">Xem thêm</button>            `;
             document.getElementById('loadMoreLogs').addEventListener('click', () => {
                 displayLogs(0, end + 5);
             });
@@ -559,8 +395,10 @@ function translateActivityName(activityName) {
                     <td>${batchInfo.producer.phone || 'Không có thông tin'}</td>
                 </tr>
             </table>
-            <div class="text-center mt-4">
-                <button class="btn-view-image" onclick="showProductImages('${batchInfo.productImageUrls.join(',')}')">XEM ẢNH SẢN PHẨM</button>
+          <div class="text-center mt-4">
+            <button class="btn-view-image" onclick="showProductImages('${batchInfo.productImageUrls.join(',')}')">
+                <i class="fas fa-camera mr-2"></i> Xem ảnh sản phẩm
+            </button>
             </div>
         </div>
     `;

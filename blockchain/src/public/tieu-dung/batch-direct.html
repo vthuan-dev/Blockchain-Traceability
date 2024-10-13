@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chuyển hướng lô hàng</title>
+</head>
+<body>
+    <h1>Đang chuyển hướng...</h1>
+    <p>Nếu bạn không được chuyển hướng tự động, vui lòng <a id="redirectLink" href="#">nhấn vào đây</a>.</p>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const sscc = urlParams.get('sscc');
+        if (sscc) {
+            const redirectUrl = `/lo-hang.html?sscc=${sscc}`;
+            document.getElementById('redirectLink').href = redirectUrl;
+            window.location.href = redirectUrl;
+        } else {
+            console.error('Không tìm thấy SSCC trong URL');
+            document.body.innerHTML += '<p>Lỗi: Không tìm thấy mã SSCC</p>';
+        }
+    });
+    </script>
+</body>
+</html>

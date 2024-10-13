@@ -16,40 +16,41 @@
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
 <body>
     <!-- Thanh điều hướng -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light custom-navbar-height">
-        <div class="logo">
-            <img src="..\hinhanh\Bitcoin-Blockchain-Network-icon-on-transparent-background-PNG.png" alt="Logo" class="logo-image">
-        </div>
-        <a class="navbar-brand" href="sanxuat.html">Sản xuất</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav"> <!-- Các mục điều hướng bên trái -->
-                <li class="nav-item">
-                    <a class="nav-link" href="sanxuat.html"> Quản lí lô hàng</a>
-                </li>
-              
-                <li class="nav-item">
-                    <a class="nav-link" href="nhatky-hoatdong.html">Quản lí hoạt động</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Thông báo</a>
-                </li>
-            </ul>
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <span id="userName">Tên người dùng</span>
-                    </a>
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="#" id="userRole">Vai trò</a>
-                        <a class="dropdown-item" href="#" id="userRegion">Khu vực</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#" id="logoutButton">Đăng xuất</a>
-                    </div>
-                </li>
-            </ul>
+    <nav class="navbar navbar-expand-lg navbar-light custom-navbar">
+        <div class="container">
+            <a class="navbar-brand" href="sanxuat.html">
+                <img src="..\hinhanh\Bitcoin-Blockchain-Network-icon-on-transparent-background-PNG.png" alt="Logo" class="logo-image">
+                <span>Sản xuất</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="sanxuat.html">Quản lí lô hàng</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="nhatky-hoatdong.html">Quản lí hoạt động</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Thông báo</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span id="userName">Nguyễn Văn Thuần</span>
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="#" id="userRole">Vai trò: Người sản xuất</a>
+                            <a class="dropdown-item" href="#" id="userRegion">Khu vực: Vùng Thốt Nốt</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="#" id="logoutButton">Đăng xuất</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
         </div>
     </nav>
     
@@ -631,9 +632,9 @@ function displayBatches(batches, containerId) {
             if (qrCodeElement) {
                 let qrData = '';
                 if (batch.sscc && batch.sscc.trim() !== '') {
-                    qrData = `SSCC:${batch.sscc}`;
+                    qrData = batch.sscc;
                 } else if (batch.batchId && batch.batchId.trim() !== '') {
-                    qrData = `BatchID:${batch.batchId}`;
+                    qrData = batch.batchId;
                 }
 
                 if (qrData) {
@@ -662,33 +663,33 @@ function displayBatches(batches, containerId) {
     });
 }
 
-function showLargeQRCode(qrData, batchId) {
+function showLargeQRCode(sscc, batchId) {
     const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.style.display = 'flex';
+    modal.style.justifyContent = 'center';
+    modal.style.alignItems = 'center';
     modal.style.position = 'fixed';
     modal.style.top = '0';
     modal.style.left = '0';
     modal.style.width = '100%';
     modal.style.height = '100%';
-    modal.style.backgroundColor = 'rgba(0,0,0,0.8)';
-    modal.style.display = 'flex';
-    modal.style.justifyContent = 'center';
-    modal.style.alignItems = 'center';
+    modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
     modal.style.zIndex = '1000';
 
     const container = document.createElement('div');
     container.style.backgroundColor = 'white';
     container.style.padding = '20px';
     container.style.borderRadius = '10px';
-    container.style.display = 'flex';
-    container.style.flexDirection = 'column';
-    container.style.alignItems = 'center';
+    container.style.textAlign = 'center';
+
     container.style.maxWidth = '90%';
     container.style.maxHeight = '90%';
     container.style.overflow = 'auto';
 
     const largeCanvas = document.createElement('canvas');
     const size = Math.min(300, window.innerWidth * 0.8);
-    generateQRCodeWithLogo(largeCanvas, qrData, size, true, function (error) {
+    generateQRCodeWithLogo(largeCanvas, sscc, size, true, function (error) {
     if (error) {
         console.error('Error generating large QR code:', error);
         container.innerHTML = '<p>Không thể tạo mã QR</p>';
@@ -734,8 +735,16 @@ function showLargeQRCode(qrData, batchId) {
 
     document.body.appendChild(modal);
 }
-function generateQRCodeWithLogo(canvas, data, size, showLogo, callback) {
-    QRCode.toCanvas(canvas, data, { width: size, height: size, errorCorrectionLevel: 'H' }, function (error) {
+function generateQRUrl(sscc) {
+    // Tạo URL cho mã QR với định dạng mong muốn
+    return `${window.location.origin}/tieu-dung/lo-hang.html?sscc=${sscc}`;
+}
+
+function generateQRCodeWithLogo(canvas, sscc, size, showLogo, callback) {
+    // Tạo URL cho mã QR
+    const qrUrl = generateQRUrl(sscc);
+    
+    QRCode.toCanvas(canvas, qrUrl, { width: size, height: size, errorCorrectionLevel: 'H' }, function (error) {
         if (error) {
             callback(error);
             return;
