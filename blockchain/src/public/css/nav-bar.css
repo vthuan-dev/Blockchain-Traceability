@@ -75,13 +75,19 @@
     font-weight: bold;
 }
 
-#userRole {
-    color: rgba(255, 255, 255, 0.8) !important; /* Màu chữ cho vai trò */
+/* #userRole {
+    color: rgba(255, 255, 255, 0.8) !important; 
 }
 
 #userRegion {
     font-size: 0.9rem;
     color: #6c757d;
+} */
+
+.common-user-info {
+    font-size: 0.9rem;
+    color: #6c757d;
+    font-weight: bold;
 }
 
 /* Responsive styles */

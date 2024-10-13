@@ -257,60 +257,71 @@
     }
 
     // Sử dụng middleware cho các route cần xác thực
-    app.get('/san-xuat/sanxuat.html', requireAuth, (req, res) => {
-      if (req.session.roleId === 1) {
-        res.sendFile(path.join(__dirname, 'public', 'san-xuat', 'sanxuat.html'));
-      } else {
-        res.status(403).send('Forbidden');
-      }
-    });
+    // app.get('/san-xuat/sanxuat.html', requireAuth, (req, res) => {
+    //   if (req.session.roleId === 1) {
+    //     res.sendFile(path.join(__dirname, 'public', 'san-xuat', 'sanxuat.html'));
+    //   } else {
+    //     res.status(403).send('Forbidden');
+    //   }
+    // });
 
-    app.get('/kiem-duyet/nhakiemduyet.html', requireAuth, (req, res) => {
-      if (req.session.roleId === 2) {
-        res.sendFile(path.join(__dirname, 'public', 'kiem-duyet', 'nhakiemduyet.html'));
-      } else {
-        res.status(403).send('Forbidden');
-      }
-    });
+    // app.get('/kiem-duyet/nhakiemduyet.html', requireAuth, (req, res) => {
+    //   if (req.session.roleId === 2) {
+    //     res.sendFile(path.join(__dirname, 'public', 'kiem-duyet', 'nhakiemduyet.html'));
+    //   } else {
+    //     res.status(403).send('Forbidden');
+    //   }
+    // });
 
-    app.get('/user-info', (req, res) => {
-      console.log('Session trong /api/user-info:', req.session);
-      if (req.session && req.session.isLoggedIn) {
-        if (req.session.adminId) {
-          // Trả về thông tin admin nếu có adminId trong session
-          res.json({
-            userId: req.session.adminId,
-            name: req.session.adminName,
-            email: req.session.adminEmail,
-            roleId: req.session.roleId,
-            isAdmin: true,
-            province_id: req.session.province_id
-          });
-        } else if (req.session.userId) {
-          // Trả về thông tin user nếu có userId trong session
-          res.json({
-            userId: req.session.userId,
-            name: req.session.name,
-            email: req.session.email,
-            roleId: req.session.roleId,
-            isAdmin: false,
-            province_id: req.session.province_id,
-            region_id: req.session.region_id,
-            region: req.session.region
-          });
-        } else {
-          res.status(400).json({ error: 'Trạng thái đăng nhập không hợp lệ' });
+    // app.get('/user-info', (req, res) => {
+    //   console.log('Session trong /api/user-info:', req.session);
+    //   if (req.session && req.session.isLoggedIn) {
+    //     if (req.session.adminId) {
+    //       // Trả về thông tin admin nếu có adminId trong session
+    //       res.json({
+    //         userId: req.session.adminId,
+    //         name: req.session.adminName,
+    //         email: req.session.adminEmail,
+    //         roleId: req.session.roleId,
+    //         isAdmin: true,
+    //         province_id: req.session.province_id
+    //       });
+    //     } else if (req.session.userId) {
+    //       // Trả về thông tin user nếu có userId trong session
+    //       res.json({
+    //         userId: req.session.userId,
+    //         name: req.session.name,
+    //         email: req.session.email,
+    //         roleId: req.session.roleId,
+    //         isAdmin: false,
+    //         province_id: req.session.province_id,
+    //         region_id: req.session.region_id,
+    //         region: req.session.region
+    //       });
+    //     } else {
+    //       res.status(400).json({ error: 'Trạng thái đăng nhập không hợp lệ' });
+    //     }
+    //   } else {
+    //     // Trả về thông tin người dùng ẩn danh nếu không đăng nhập
+    //     res.json({
+    //       name: "Người dùng ẩn danh",
+    //       roleId: 0,
+    //       isAdmin: false
+    //     });
+    //   }
+    // });
+
+    app.post('/api/capnhatthongtin', async (req, res) => {
+      const { name, address, dob, gender, password, confirmPassword } = req.body;
+      const [users] = await db.query('SELECT * FROM users WHERE uid = ?', [req.session.userId]);
+      if (users.length > 0){
+        const user = users[0];
+        if (password && password === confirmPassword){
+          const hashedPassword = await bcrypt.hash(password, 10);
+          
         }
-      } else {
-        // Trả về thông tin người dùng ẩn danh nếu không đăng nhập
-        res.json({
-          name: "Người dùng ẩn danh",
-          roleId: 0,
-          isAdmin: false
-        });
       }
     });
-
 
     app.post('/api/dangxuat', (req, res) => {
         req.session.destroy((err) => {
