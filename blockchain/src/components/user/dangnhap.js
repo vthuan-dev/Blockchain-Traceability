@@ -75,6 +75,11 @@ module.exports = function(db) {
                 if (isAdmin && user.role_id !== 3) {
                     return res.status(403).json({ message: 'Bạn không có quyền đăng nhập với tư cách Admin' });
                 }
+                let region = null;
+                if (user.region_id) {
+                    const [regions] = await db.query('SELECT * FROM regions WHERE region_id = ?', [user.region_id]);
+                    region = regions[0] ? regions[0].region_name : null;
+                }
 
                 req.session.userId = user.uid;
                 req.session.isAdmin = false;
@@ -89,10 +94,10 @@ module.exports = function(db) {
                 req.session.district_id = user.district_id;
                 req.session.ward_id = user.ward_id;
                 req.session.region_id = user.region_id;
-                req.session.region = regions[0].region_name;
+                req.session.region = region;
                 req.session.avatar = user.avatar;
-                req.session.isLoggedIn = true; // Khi đăng nhập thành công
-
+                req.session.isLoggedIn = true;
+    
                 res.status(200).json({ 
                     message: 'Đăng nhập thành công', 
                     user: {
@@ -108,12 +113,12 @@ module.exports = function(db) {
                         district_id: user.district_id,
                         ward_id: user.ward_id,
                         region_id: user.region_id,
-                        region: regions[0].region_name,
+                        region: region,
                         avatar: user.avatar
                     }
                 });
             }
-
+    
         } catch (error) {
             console.error('Lỗi khi đăng nhập:', error);
             res.status(500).json({ message: 'Internal server error', error: error.message });

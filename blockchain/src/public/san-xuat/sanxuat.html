@@ -167,29 +167,30 @@
    <script>
     document.addEventListener('DOMContentLoaded', async function() {
         try {
-            const response = await fetch('/api/user-info');
+            const response = await fetch('/api/user-info', {
+                credentials: 'include'
+            });
             if (response.ok) {
-                if( data.roleId !== 0){
                 const data = await response.json();
-                document.getElementById('userName').textContent = data.name;
-                document.getElementById('userRole').textContent = `Vai trò: ${getRoleName(data.roleId)}`;
-                document.getElementById('userRegion').textContent = `Khu vực: ${data.region}`;
-            }
-                else {
-                    alert('Phiên đăng nhập đã hết hạn hoặc không hợp lệ. Vui lòng đăng nhập lại.');
-                    window.location.href = '../account/dangnhap.html';
+                if (data.roleId !== 0) {
+                    document.getElementById('userName').textContent = data.name;
+                    document.getElementById('userRole').textContent = `Vai trò: ${getRoleName(data.roleId)}`;
+                    document.getElementById('userRegion').textContent = `Khu vực: ${data.region}`;
+                    
+                    fetchAndDisplayPendingBatches();
+                } else {
+                    throw new Error('Phiên đăng nhập không hợp lệ');
                 }
             } else {
-                console.error('Không thể lấy thông tin người dùng');
-                alert('Phiên đăng nhập đã hết hạn hoặc không hợp lệ. Vui lòng đăng nhập lại.');
-                window.location.href = '../account/dangnhap.html';
+                throw new Error('Không thể lấy thông tin người dùng');
             }
         } catch (error) {
             console.error('Lỗi:', error);
-            alert('Có lỗi xảy ra khi kiểm tra thông tin đăng nhập. Vui lòng thử lại sau.');
+            alert('Phiên đăng nhập đã hết hạn hoặc không hợp lệ. Vui lòng đăng nhập lại.');
+            window.location.href = '../account/dangnhap.html';
         }
 
-        // Xử lý đăng xuất
+        
         document.getElementById('logoutButton').addEventListener('click', async function(e) {
             e.preventDefault();
             try {
@@ -200,16 +201,13 @@
                 if (response.ok) {
                     window.location.href = '../account/dangnhap.html';
                 } else {
-                    console.error('Không thể đăng xuất');
-                    alert('Đăng xuất không thành công. Vui lòng thử lại.');
+                    throw new Error('Không thể đăng xuất');
                 }
             } catch (error) {
                 console.error('Lỗi khi đăng xuất:', error);
                 alert('Có lỗi xảy ra khi đăng xuất. Vui lòng thử lại sau.');
             }
         });
-
-        // Gọi hàm mặc định khi trang được tải
     });
     </script>
 
