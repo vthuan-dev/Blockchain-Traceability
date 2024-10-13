@@ -90,6 +90,7 @@ module.exports = function(db) {
                 req.session.ward_id = user.ward_id;
                 req.session.region_id = user.region_id;
                 req.session.region = regions[0].region_name;
+                req.session.avatar = user.avatar;
                 req.session.isLoggedIn = true; // Khi đăng nhập thành công
 
                 res.status(200).json({ 
@@ -107,7 +108,8 @@ module.exports = function(db) {
                         district_id: user.district_id,
                         ward_id: user.ward_id,
                         region_id: user.region_id,
-                        region: regions[0].region_name
+                        region: regions[0].region_name,
+                        avatar: user.avatar
                     }
                 });
             }
@@ -196,7 +198,6 @@ module.exports = function(db) {
                 const [districts] = await db.query('SELECT * FROM districts where district_id = ?', [req.session.district_id]);
                 const [wards] = await db.query('SELECT * FROM wards where ward_id = ?', [req.session.ward_id]);
 
-                let userData;
                 if (req.session.adminId) {
                     // Trả về thông tin admin nếu có adminId trong session
                     res.json({
@@ -229,7 +230,8 @@ module.exports = function(db) {
                         district: districts[0].district_name,
                         ward: wards[0].ward_name,
                         region_id: req.session.region_id,
-                        region: req.session.region
+                        region: req.session.region,
+                        avatar: req.session.avatar
                     });
                 } else {
                     res.status(400).json({ error: 'Trạng thái đăng nhập không hợp lệ' });

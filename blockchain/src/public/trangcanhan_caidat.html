@@ -62,11 +62,38 @@
         <div class="container mt-4">
             <div class="row justify-content-center align-items-center">
                 <div class="col-11 col-sm-8 p-0">
-                    <div class="form-title row justify-content-center">
-                        <h5><b>Thông tin cá nhân</b></h5>
+                    <div class="row justify-content-center">
+                        <div class="col-4">
+                            <div class="avatar-container">
+                                <div class="avatar-preview">
+                                    <div id="imagePreview">
+                                        <img src="${getAvatar(req.session.avatar)}" alt="Avatar" id="avatarImage">
+                                    </div>
+                                </div>
+                                <div class="avatar-info">
+                                    <div class="avatar-label">
+                                        <strong>Ảnh đại diện</strong>
+                                    </div>
+                                    <div class="avatar-edit">
+                                        <input type='file' id="imageUpload" accept=".png, .jpg, .jpeg" />
+                                        <label for="imageUpload" title="Tải lên ảnh mới">
+                                            <i class="fas fa-camera"></i>
+                                        </label>
+                                    </div>
+                                    <!-- <div class="file-info" id="fileInfo" style="display: none;">
+                                        <span>File đã chọn: </span>
+                                        <span id="fileName"></span>
+                                    </div> -->
+                                </div>
+                            </div>
+                        </div>
                     </div>
+                    <hr>
+                        <div class="form-title row justify-content-center">
+                            <h5><b>Thông tin cá nhân</b></h5>
+                        </div>
                     <div class="profile-container"> 
-                        <form id="profile-form" action="update_profile.php" method="POST">
+                        <form id="profile-form">
                             <div class="form-group">
                                 <label for="name">Họ và tên:</label>
                                 <div class="input-group">
@@ -78,16 +105,16 @@
                             </div>
                             <div class="form-group">
                                 <label for="phone">Số điện thoại:</label>
-                                <input type="text" id="phoneInput" name="phone" class="form-control" value="{{phone}}" readonly>
-                            </div>
-                            <div class="form-group">
-                                <label for="email">Địa chỉ email:</label>
                                 <div class="input-group">
-                                    <input type="email" id="emailInput" name="email" class="form-control" value="{{email}}" readonly>
+                                    <input type="text" id="phoneInput" name="phone" class="form-control" value="{{phone}}" readonly>
                                     <div class="input-group-append">
                                         <span class="input-group-text" id="basic-addon2"><i class="fas fa-edit"></i></span>
                                     </div>
                                 </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Địa chỉ email:</label>
+                                <input type="email" id="emailInput" name="email" class="form-control" value="{{email}}" readonly>
                             </div>
                             <div class="form-group">
                                 <label for="address">Địa chỉ:</label>
@@ -129,7 +156,7 @@
                                     <button class="btn btn-primary btn-lg mx-2" data-toggle="modal" data-target="#confirmModal" id="saveButton">
                                         <b>Lưu</b>
                                     </button>
-                                </div>
+                                    </div>
                             </div>
                         </form>
                     </div>
@@ -399,9 +426,12 @@
                 if (response.ok){
                     const data = await response.json();
 
-                    const dob = new Date(data.dob);
-                    const formattedDob = dob.toISOString().split('T')[0];
-                    if (data.roleId !== 0){
+                    if (data.userId){
+                        const dob = new Date(data.dob);
+                        const formattedDob = dob.toISOString().split('T')[0];
+
+                        const avatarImage = document.getElementById('avatarImage');
+
                         document.getElementById('userName').textContent = data.name;
                         document.getElementById('userRole').textContent = `Vai trò: ${getRoleName(data.roleId)}`;
                         document.getElementById('userRegion').textContent = `Khu vực: ${data.region}`;
@@ -411,19 +441,21 @@
                         document.getElementById('addressInput').value = data.address;
                         document.getElementById('dobInput').value = formattedDob;
                         document.getElementById('genderInput').value = data.gender;
+                       
+                        avatarImage.src = getAvatar(data.avatar);
                     } else {
-                        alert('Phiên đăng nhập đã hết hạn hoặc không hợp lệ. Vui lòng đăng nhập lại.');
-                        window.location.href = '../account/dangnhap.html';
-                    }
-                }  else {
-                    console.error('Không thể lấy thông tin người dùng');
-                    alert('Phiên đăng nhập đã hết hạn hoặc không hợp lệ. Vui lòng đăng nhập lại.');
-                    // window.location.href = '../account/dangnhap.html';       
+                    throw new Error('Không tìm thấy thông tin người dùng');
                 }
-            } catch (error){
-                console.error('Lỗi:', error);
-            }            
-        });
+            } else {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Không thể lấy thông tin người dùng');
+            }
+        } catch (error) {
+            console.error('Lỗi:', error.message);
+            alert('Phiên đăng nhập đã hết hạn hoặc không hợp lệ. Vui lòng đăng nhập lại.');
+            window.location.href = '../account/dangnhap.html';
+        }
+    });
 
         function getRoleName(roleId) {
         switch (roleId) {
@@ -436,7 +468,9 @@
         }
     }
 
-    
+    function getAvatar(avatar) {
+        return avatar || './upload/avatars/default-avatar.png';
+    }
 
     document.getElementsByClassName('input-group-text')[0].addEventListener('click', function(){
         document.getElementById('userNameInput').removeAttribute('readonly');
@@ -453,15 +487,15 @@
     });
 
     document.getElementsByClassName('input-group-text')[1].addEventListener('click', function(){
-        document.getElementById('emailInput').removeAttribute('readonly');
+        document.getElementById('phoneInput').removeAttribute('readonly');
         document.addEventListener('click', function(e) {
-            if (e.target !== document.getElementById('emailInput') && e.target !== document.getElementsByClassName('input-group-text')[1]) {
-                document.getElementById('emailInput').setAttribute('readonly', '');
+            if (e.target !== document.getElementById('phoneInput') && e.target !== document.getElementsByClassName('input-group-text')[1]) {
+                document.getElementById('phoneInput').setAttribute('readonly', '');
             }
         });
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
-                document.getElementById('emailInput').setAttribute('readonly', '');
+                document.getElementById('phoneInput').setAttribute('readonly', '');
             }
         });
     });
@@ -470,43 +504,75 @@
         $('#editAddressModal').modal('show');
     });
 
-    document.getElementById('saveButton').addEventListener('submit', async function(e){
-        e.preventDefault();
-        const name = document.getElementById('userNameInput').value;
-        const email = document.getElementById('emailInput').value;
-        const address = document.getElementById('addressInput').value;
-        const dob = document.getElementById('dobInput').value;
-        const gender = document.getElementById('genderInput').value;
-        const password = document.getElementById('password').value;
-        const confirmPassword = document.getElementById('confirm-password').value;
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('profile-form');
+        const saveButton = document.getElementById('saveButton');
 
-        function validatePassword(password) {
-            const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*(_|[^\w])).{8,}$/;
-            return regex.test(password);
-        }
+        saveButton.addEventListener('click', async function(e) {
+            e.preventDefault(); // Ngăn chặn hành vi mặc định của button
 
-        if (!validatePassword(password)) {
-            alert('Mật khẩu phải có ít nhất 8 ký tự, bao gồm ít nhất 1 số, 1 chữ thường, 1 chữ hoa, 1 ký tự đặc biệt.');
-            return;
-        }
+            const name = document.getElementById('userNameInput').value;
+            const phone = document.getElementById('phoneInput').value;
+            const address = document.getElementById('addressInput').value;
+            const dob = document.getElementById('dobInput').value;
+            const gender = document.getElementById('genderInput').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
 
-        if (password !== confirmPassword) {
-            alert('Mật khẩu và xác nhận mật khẩu không khớp.');
-            return;
-        }
+            function validatePassword(password) {
+                const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*(_|[^\w])).{8,}$/;
+                return regex.test(password);
+            }
 
-        
+            // Uncomment nếu bạn muốn kích hoạt việc kiểm tra mật khẩu
+            // if (!validatePassword(password)) {
+            //     alert('Mật khẩu phải có ít nhất 8 ký tự, bao gồm ít nhất 1 số, 1 chữ thường, 1 chữ hoa, 1 ký tự đặc biệt.');
+            //     return;
+            // }
 
-        try{
-            const response = await fetch('/api/capnhatthongtin', {
-                method: 'POST',
-                body: JSON.stringify({name, email, address, dob, gender, password, confirmPassword}),
-            });
+            if (password !== confirmPassword) {
+                alert('Mật khẩu và xác nhận mật khẩu không khớp.');
+                return;
+            }
 
-            if (response.ok){}
+            try {
+                const response = await fetch('/api/capnhatthongtin', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({name, phone, address, dob, gender, password, confirmPassword}),
+                });
 
-        }catch(error){
-            console.error('Lỗi:', error);
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.updated) {
+                        alert('Thông tin người dùng đã được cập nhật thành công. Hãy đăng nhập lại để tiếp tục.');
+                        window.location.href = '../account/dangnhap.html';
+                    }
+                } else {
+                    alert('Có lỗi xảy ra khi cập nhật thông tin');
+                }
+            } catch (error) {
+                console.error('Lỗi:', error);
+                alert('Có lỗi xảy ra khi gửi yêu cầu');
+            }
+        });
+    });
+
+    document.getElementById('imageUpload').addEventListener('change', function(e) {
+        var file = e.target.files[0];
+        if (file) {
+            // Hiển thị preview ảnh
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('avatarImage').src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+
+            // Hiển thị tên file
+            // document.getElementById('fileName').textContent = file.name;
+            // document.getElementById('fileInfo').style.display = 'block';
         }
     });
     </script>

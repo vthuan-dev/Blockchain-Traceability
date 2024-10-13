@@ -1,7 +1,16 @@
 const { initializeApp } = require("firebase/app");
 const { getStorage, ref, uploadBytes, getDownloadURL } = require("firebase/storage");
 const { getAuth, signInAnonymously } = require("firebase/auth");
-require('dotenv').config(); // Thêm dòng này để sử dụng biến môi trường
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../../.env') }); // Thêm dòng này để sử dụng biến môi trường
+
+// var admin = require("firebase-admin");
+
+// var serviceAccount = require("path/to/serviceAccountKey.json");
+
+// admin.initializeApp({
+//   credential: admin.credential.cert(serviceAccount)
+// });
 
 // Sử dụng biến môi trường để cấu hình Firebase
 const firebaseConfig = {
