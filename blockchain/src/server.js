@@ -93,6 +93,13 @@
 
   app.use(express.static(path.join(__dirname, 'public')));
 
+
+  //route chuyển hướng lô hàng 
+  app.get('/batch/:sscc', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'tieu-dung', 'batch-redirect.html'));
+  });
+
+
   app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'tieu-dung', 'trangchu.html'));
   });
@@ -314,7 +321,7 @@
             res.json({ message: 'Đăng xuất thành công' });
         });
     });
-    console.log('Các route đã đăng ký:', app._router.stack.filter(r => r.route).map(r => r.route.path));
+    //console.log('Các route đã đăng ký:', app._router.stack.filter(r => r.route).map(r => r.route.path));
 
     const manageRoutes = require('./manage.js');
     app.use('/', manageRoutes);

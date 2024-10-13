@@ -10,26 +10,8 @@
     <link rel="stylesheet" href="./css/responsive.css">
     <link rel="stylesheet" href="./css/animation.css">  
     <link rel="stylesheet" href="./css/theme.css">
-    <style>
-        #userList .list-group-item {
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        #userList .list-group-item:hover {
-            background-color: #f8f9fa;
-        }
-
-        #userList .list-group-item.active {
-            background-color: #007bff;
-            color: white;
-        }
-
-        #userList .list-group-item.active .badge {
-            background-color: white;
-            color: #007bff;
-        }
-    </style>
+    <link rel="stylesheet" href="./css/reply.css">
+   
 </head>
 <body onload="time()">
     <div id="messageContainer"></div>
@@ -101,28 +83,29 @@
                     </div>
                 </div>
                 <div class="row mt-3">
-                    <div class="col-md-4">
+                    <div class="col-md-4 col-12 mb-3">
                         <h5 class="card-title">Người dùng đang online</h5>
                         <ul class="list-group" id="userList"></ul>
                     </div>
 
-                    <div class="col-md-8">
-                        <div class="card">
-                            <div class="card-body">
-                                <h5 class="card-title">Chat với người dùng</h5>
-                                <ul class="list-group" id="messageList"></ul>
+                <!-- ... (giữ nguyên phần đầu) ... -->
 
-                                <form id="messageForm">
-                                    <div class="input-group mt-3">
-                                        <input type="text" id="messageInput" class="form-control" placeholder="Nhập tin nhắn..." autocomplete="off">
-                                        <div class="input-group-append">
-                                            <button class="btn btn-primary" type="submit">Gửi</button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
+                <div class="col-md-8 col-12">
+                    <div class="card chat-box">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Chat với người dùng</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group" id="messageList"></ul>
+                            <form id="messageForm">
+                                <input type="text" id="messageInput" class="form-control" placeholder="Nhập tin nhắn..." autocomplete="off">
+                                <button class="btn" type="submit"><i class="fas fa-paper-plane"></i></button>
+                            </form>
                         </div>
                     </div>
+                </div>
+
+<!-- ... (giữ nguyên phần còn lại) ... -->
                 </div>
             </main>
         </div>
@@ -161,10 +144,64 @@
     <script src="./js/feature.js"></script>
     <script src="./js/settings.js"></script>
     
-    
     <script>
         document.addEventListener('DOMContentLoaded', applySettings);
         
+        function updateUserList(users) {
+            const userList = document.getElementById('userList');
+            userList.innerHTML = '';
+            users.forEach(user => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                li.setAttribute('data-user-id', user.id);
+                
+                // Kiểm tra xem tên người dùng có bắt đầu bằng "Người dùng vãng lai" không
+                const displayName = user.name.startsWith("Người dùng vãng lai") ? user.name : `${user.name} (${user.role})`;
+                
+                li.innerHTML = `
+                    ${displayName}
+                    <span class="badge badge-primary badge-pill">${user.unreadCount}</span>
+                `;
+                li.addEventListener('click', () => selectUser(user));
+                userList.appendChild(li);
+            });
+        }
     </script>
+   <script>
+    function addMessageToList(message) {
+        const li = document.createElement('li');
+        li.className = `list-group-item ${message.from === 'Admin' ? 'admin' : 'user'}`;
+        
+        let messageContent;
+        if (message.from === 'Admin') {
+            messageContent = `<strong>Admin</strong>${message.body}`;
+        } else {
+            messageContent = `<strong>${message.from}</strong>${message.body}`;
+        }
+        
+        li.innerHTML = messageContent;
+        document.getElementById('messageList').appendChild(li);
+        
+        // Scroll to bottom
+        const messageList = document.getElementById('messageList');
+        messageList.scrollTop = messageList.scrollHeight;
+    }
+
+    document.getElementById('messageForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const messageInput = document.getElementById('messageInput');
+        const message = messageInput.value.trim();
+        if (message) {
+            addMessageToList({from: 'Admin', body: message});
+            messageInput.value = '';
+            // Gửi tin nhắn đến server ở đây (nếu cần)
+        }
+    });
+
+    // Thêm hàm này để xử lý tin nhắn từ người dùng
+    function handleUserMessage(userId, message) {
+        addMessageToList({from: userId, body: message});
+    }
+</script>
 </body>
 </html>

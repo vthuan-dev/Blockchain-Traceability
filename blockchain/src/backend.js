@@ -63,12 +63,12 @@ web3.eth.net.isListening()
 console.log('Admin address:', adminAddress);
   
 const traceabilityContractABI = require('../build/contracts/TraceabilityContract.json').abi;
-const traceabilityContractAddress = '0x79D9B6CA99cDe89A548f0A6D1FAb783fB2Da919b';
+const traceabilityContractAddress = '0x71425A1716E4872e3eB8Fca76B0eD7D90876896c';
 const traceabilityContract = new web3.eth.Contract(traceabilityContractABI, traceabilityContractAddress);
 
 // ABI và địa chỉ của contract ActivityLog
 const activityLogABI = require('../build/contracts/ActivityLog.json').abi;
-const activityLogAddress = '0x6556d8435Cdc6D50a687d44ceE7dA19d952F4eac';
+const activityLogAddress = '0x5b1D4B6B5fa9249479d5532352dA744c4E0aFbfe';
 const activityLogContract = new web3.eth.Contract(activityLogABI, activityLogAddress);
 
 // tạo biến lưu trữ file, giới hạn số lượng file và tên file, maxCount: số lượng file, name: tên file
@@ -82,9 +82,14 @@ const upload = multer({
 
 const activityUpload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
-}).array('imageUrls', 5); // Thay đổi 'activityImages' thành 'imageUrls'
-
+  fileFilter: (req, file, cb) => {
+      if (file.mimetype.startsWith('image/')) {
+          cb(null, true);
+      } else {
+          cb(new Error('Chỉ chấp nhận file ảnh'), false);
+      }
+  }
+}).array('imageUrls', 5); // Cho phép tối đa 5 ảnh
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('*.css', (req, res, next) => {
   res.set('Content-Type', 'text/css');
@@ -411,7 +416,6 @@ app.post('/createbatch', (req, res, next) => {
   app.get('/create-activity', (req, res) => {
     res.sendFile(path.join(__dirname, 'public',  'san-xuat','them-nkhd.html'));
   });
-
   app.post('/createactivity', (req, res, next) => {
     activityUpload(req, res, function (err) {
         if (err instanceof multer.MulterError) {
@@ -426,46 +430,11 @@ app.post('/createbatch', (req, res, next) => {
         console.log('Received body:', req.body);
         console.log('Received files:', req.files);
 
-        // Lấy uid từ session
-        const uid = req.session.userId;
-        if (!uid) {
-            return res.status(401).json({ error: 'Người dùng chưa đăng nhập' });
-        }
-
-        const cleanBody = Object.keys(req.body).reduce((acc, key) => {
-            acc[key.trim()] = req.body[key];
-            return acc;
-        }, {});
-
-        const { activityName, description, relatedProductIds, isSystemGenerated } = cleanBody;
-
-        if (!activityName || !description) {
-            return res.status(400).json({ error: 'Thiếu thông tin bắt buộc' });
-        }
-
-        const userExists = await checkUserExists(uid);
-        if (!userExists) {
-            return res.status(400).json({ error: 'Người dùng không tồn tại' });
-        }
-
-        const productIds = Array.isArray(relatedProductIds) 
-            ? relatedProductIds.map(id => parseInt(id, 10))
-            : relatedProductIds ? [parseInt(relatedProductIds, 10)] : [];
-
-        if (productIds.length > 0) {
-            for (const productId of productIds) {
-                const productExists = await checkProductExists(productId);
-                if (!productExists) {
-                    return res.status(400).json({ error: `Sản phẩm với ID ${productId} không tồn tại` });
-                }
-            }
-        }
+        const { activityName, description, relatedProductIds, isSystemGenerated } = req.body;
+        const uid = req.session.userId; // Lấy uid từ session
 
         let imageUrls = [];
-
         if (req.files && req.files.length > 0) {
-            console.log(`Số ảnh nhận được: ${req.files.length}`);
-            
             for (const file of req.files) {
                 try {
                     const result = await uploadFile(file.buffer, file.originalname);
@@ -475,87 +444,65 @@ app.post('/createbatch', (req, res, next) => {
                     console.error(`Lỗi khi tải lên ảnh ${file.originalname}:`, uploadError);
                 }
             }
-            
-            console.log(`Tổng số URL ảnh hoạt động sau khi xử lý: ${imageUrls.length}`);
+        }
+
+        console.log('imageUrls sau khi xử lý:', imageUrls);
+
+        // Chuyển đổi relatedProductIds thành mảng số nguyên
+        const productIds = Array.isArray(relatedProductIds) 
+            ? relatedProductIds.map(id => parseInt(id, 10))
+            : relatedProductIds ? [parseInt(relatedProductIds, 10)] : [];
+
+        console.log('Bắt đầu gọi hàm addActivityLog');
+        console.log('uid:', uid);
+        console.log('activityName:', activityName);
+        console.log('description:', description);
+        console.log('isSystemGenerated:', isSystemGenerated === 'true');
+        console.log('imageUrls:', imageUrls);
+        console.log('productIds:', productIds);
+
+        const gasEstimate = await activityLogContract.methods.addActivityLog(
+            BigInt(uid),
+            BigInt(uid),
+            activityName,
+            description,
+            isSystemGenerated === 'true',
+            imageUrls,
+            productIds.map(id => BigInt(id))
+        ).estimateGas({ from: account.address });
+
+        console.log('Ước tính gas:', gasEstimate);
+
+        const result = await activityLogContract.methods.addActivityLog(
+            BigInt(uid),
+            BigInt(uid),
+            activityName,
+            description,
+            isSystemGenerated === 'true',
+            imageUrls,
+            productIds.map(id => BigInt(id))
+        ).send({ 
+            from: account.address, 
+            gas: Math.floor(Number(gasEstimate) * 1.5).toString()
+        });
+
+        console.log('Kết quả giao dịch:', result);
+        if (result.events && result.events.ActivityLogAdded) {
+            console.log('Event ActivityLogAdded:', result.events.ActivityLogAdded.returnValues);
         } else {
-            console.log('Không có ảnh hoạt động được tải lên');
+            console.log('Không tìm thấy event ActivityLogAdded');
         }
 
-        const networkId = await web3.eth.net.getId();
-        console.log('Network ID:', networkId);
-
-        const balance = await web3.eth.getBalance(account.address);
-        console.log('Account balance:', web3.utils.fromWei(balance, 'ether'), 'ETH');
-
-        const currentLogCount = await activityLogContract.methods.getActivityLogCount(parseInt(uid, 10)).call();
-        console.log('Current activity log count:', currentLogCount);
-
-        try {
-            const totalBatches = await traceabilityContract.methods.getTotalBatches().call();
-            console.log('Total batches:', totalBatches);
-        } catch (error) {
-            console.error('Error calling getTotalBatches:', error);
-        }
-
-        try {
-            console.log('Bắt đầu gọi hàm addActivityLog');
-            const gasEstimate = await activityLogContract.methods.addActivityLog(
-                parseInt(uid, 10),
-                activityName,
-                description,
-                isSystemGenerated === 'true',
-                imageUrls,
-                productIds
-            ).estimateGas({ from: account.address });
-            
-            console.log('Ước tính gas:', gasEstimate);
-
-            const result = await activityLogContract.methods.addActivityLog(
-                parseInt(uid, 10),
-                activityName,
-                description,
-                isSystemGenerated === 'true',
-                imageUrls,
-                productIds
-            ).send({ 
-                from: account.address, 
-                gas: Math.floor(Number(gasEstimate) * 1.5).toString()
-            });
-            console.log('Kết quả giao dịch:', result);
-            if (result.events && result.events.ActivityLogAdded) {
-                console.log('Event ActivityLogAdded:', result.events.ActivityLogAdded.returnValues);
-            } else {
-                console.log('Không tìm thấy event ActivityLogAdded');
-            }
-            
-            const newLogCount = await activityLogContract.methods.getActivityLogCount(parseInt(uid, 10)).call();
-            console.log('New activity log count:', newLogCount);
-            
-            res.status(200).json({
-                message: 'Nhật ký hoạt động đã được thêm thành công',
-                transactionHash: result.transactionHash,
-                imageUrls: imageUrls
-            });
-        } catch (error) {
-            console.error('Chi tiết lỗi:', error);
-            if (error.message.includes('revert')) {
-                console.error('Lỗi revert:', error.message);
-                try {
-                    const revertReason = await web3.eth.call(error.receipt);
-                    console.error('Lý do revert:', revertReason);
-                } catch (callError) {
-                    console.error('Không thể lấy lý do revert:', callError);
-                }
-            }
-            res.status(500).json({ error: 'Lỗi thêm nhật ký hoạt động: ' + error.message });
-        }
-
+        res.status(200).json({
+            message: 'Nhật ký hoạt động đã được thêm thành công',
+            transactionHash: result.transactionHash,
+            imageUrls: imageUrls
+        });
     } catch (error) {
         console.error('Lỗi thêm nhật ký hoạt động:', error);
         res.status(500).json({ error: 'Lỗi thêm nhật ký hoạt động: ' + error.message });
     }
 });
-
 
   app.get('/api/pending-batches', async (req, res) => {
     try {
@@ -1855,6 +1802,7 @@ app.get('/api/products', async (req, res) => {
             };
         }));
 
+        formattedLogs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
         console.log('Raw producer activity logs:', producerActivityLogs);
         console.log('Converted logs:', convertedLogs);
         console.log('Formatted logs:', formattedLogs);
@@ -1918,7 +1866,7 @@ app.get('/api/products', async (req, res) => {
         activityName: log.activityName,
         description: log.description,
         isSystemGenerated: log.isSystemGenerated,
-        imageUrls: log.imageUrls,
+        imageUrls: log.imageUrls || [],
         relatedProducts: relatedProducts.map(product => ({
           product_id: product.product_id,
           product_name: product.product_name,

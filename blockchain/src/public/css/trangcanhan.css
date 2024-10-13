@@ -358,51 +358,68 @@ h2.text-danger:hover {
     flex-direction: column;
     align-items: center;
     background-color: #ffffff;
-    border-radius: 10px;
-    padding: 15px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
     height: 100%;
-    width: 100%; /* Đảm bảo card chiếm toàn bộ chiều rộng của cột */
+    width: 100%;
 }
 
 .product-name {
-    font-size: 1.1rem;
+    font-size: 0.9rem;
     font-weight: 600;
     color: #333;
     text-align: center;
-    margin-bottom: 15px;
-    height: auto; /* Cho phép tên sản phẩm xuống dòng nếu cần */
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    margin-bottom: 8px;
+    height: 40px; /* Giới hạn chiều cao của tên sản phẩm */
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
 }
 
 .product-image {
     width: 100%;
-    height: 200px; /* Tăng chiều cao của ảnh */
+    height: 120px; /* Giảm chiều cao của ảnh */
     object-fit: cover;
-    border-radius: 8px;
-    margin-top: 10px;
+    border-radius: 6px;
+    margin-top: 5px;
 }
 
-.carousel-item .col-md-3 {
-    padding: 15px; /* Tăng padding để tạo khoảng cách giữa các sản phẩm */
+.carousel-item .col-md-6 {
+    padding: 8px; /* Giảm padding để các sản phẩm gần nhau hơn */
 }
 
 #carouselProducts .carousel-inner {
-    padding: 20px 0;
+    padding: 10px 0;
 }
 
 .card-subtitle.mb-2.mt-4.text-muted {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     color: #4CAF50 !important;
-    margin-bottom: 15px !important;
+    margin-bottom: 10px !important;
 }
 
 /* Thêm style cho container của carousel */
 .carousel-container {
     width: 100%;
-    max-width: 1200px; /* Hoặc chiều rộng mong muốn */
+    max-width: 100%; /* Sử dụng toàn bộ chiều rộng có sẵn */
     margin: 0 auto;
+}
+
+/* Điều chỉnh kích thước cho màn hình nhỏ hơn */
+@media (max-width: 768px) {
+    .product-card {
+        padding: 8px;
+    }
+
+    .product-name {
+        font-size: 0.8rem;
+        height: 36px;
+    }
+
+    .product-image {
+        height: 100px;
+    }
 }
