@@ -86,6 +86,8 @@ module.exports = function(db) {
                 req.session.dob = user.dob;
                 req.session.gender = user.gender;
                 req.session.province_id = user.province_id;
+                req.session.district_id = user.district_id;
+                req.session.ward_id = user.ward_id;
                 req.session.region_id = user.region_id;
                 req.session.region = regions[0].region_name;
                 req.session.isLoggedIn = true; // Khi đăng nhập thành công
@@ -102,6 +104,8 @@ module.exports = function(db) {
                         dob: user.dob,
                         gender: user.gender,
                         province_id: user.province_id,
+                        district_id: user.district_id,
+                        ward_id: user.ward_id,
                         region_id: user.region_id,
                         region: regions[0].region_name
                     }
@@ -187,6 +191,12 @@ module.exports = function(db) {
         console.log('Session trong /api/user-info:', req.session);
         if (req.session && req.session.isLoggedIn) {
             try {
+                // Lấy danh sách tất cả tỉnh, huyện, xã
+                const [provinces] = await db.query('SELECT * FROM provinces where province_id = ?', [req.session.province_id]);
+                const [districts] = await db.query('SELECT * FROM districts where district_id = ?', [req.session.district_id]);
+                const [wards] = await db.query('SELECT * FROM wards where ward_id = ?', [req.session.ward_id]);
+
+                let userData;
                 if (req.session.adminId) {
                     // Trả về thông tin admin nếu có adminId trong session
                     res.json({
@@ -215,7 +225,9 @@ module.exports = function(db) {
                         dob: req.session.dob,
                         gender: req.session.gender,
                         isAdmin: false,
-                        province_id: req.session.province_id,
+                        province: provinces[0].province_name,
+                        district: districts[0].district_name,
+                        ward: wards[0].ward_name,
                         region_id: req.session.region_id,
                         region: req.session.region
                     });

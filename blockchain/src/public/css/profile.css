@@ -1,0 +1,16 @@
+.input-group-append .input-group-text {
+    cursor: pointer; /* Thay đổi con trỏ khi hover */
+    transition: background-color 0.3s ease; /* Thêm hiệu ứng chuyển đổi mượt mà */
+}
+
+.input-group-append .input-group-text:hover {
+    background-color: #e0e0e0; /* Màu nền khi hover */
+    color: #007bff; /* Màu chữ khi hover */
+}
+
+.btn-lg {
+    padding: 10px 20px;
+    font-size: 18px;
+    min-width: 120px;
+}
+
