@@ -618,52 +618,6 @@ app.get('/nhakiemduyet.html', requireAuth, (req, res) => {
         });
     });
     //console.log('Các route đã đăng ký:', app._router.stack.filter(r => r.route).map(r => r.route.path));
-
-    const manageRoutes = require('./manage.js');
-    app.use('/', manageRoutes);
-
-    const { sendNotification } = require('./notification.js');
-
-    // Thêm clientId vào thông báo
-    app.post('/api/notifications/:id/read', async (req, res) => {
-      try {
-        const notificationId = req.params.id;
-        console.log('Đang xóa thông báo với ID:', notificationId);
-        const [result] = await db.query('DELETE FROM notification WHERE id = ?', [notificationId]);
-        console.log('Kết quả xóa:', result);
-        if (result.affectedRows > 0) {
-          res.status(200).json({ message: 'Thông báo đã được xóa' });
-        } else {
-          res.status(404).json({ error: 'Không tìm thấy thông báo' });
-        }
-      } catch (error) {
-        console.error('Lỗi khi xóa thông báo:', error);
-        res.status(500).json({ error: 'Lỗi server khi xóa thông báo' });
-      }
-    });
-
-    const { saveNotification } = require('./notification');
-
-    app.get('/api/notifications', async (req, res) => {
-      console.log('Session adminId:', req.session.adminId);  // Log giá trị userId
-      try {
-        const [notifications] = await db.query(`
-          SELECT n.id AS notification_id, r.content AS message, r.created_on, nt.name AS notification_type
-          FROM notification n
-          JOIN notification_object no ON n.notification_object_id = no.id
-          JOIN register r ON no.entity_id = r.id
-          JOIN notification_type nt ON no.entity_type_id = nt.id
-          WHERE n.recipient_type = 'admin' AND n.admin_id = ?
-          ORDER BY r.created_on DESC
-        `, [req.session.adminId]);
-    
-        res.json(notifications);
-      } catch (error) {
-        console.error('Lỗi khi lấy thông báo:', error);
-        res.status(500).json({ error: 'Lỗi server khi lấy thông báo' });
-      }
-    });
-
     
   app.post('/api/notifications/mark-all-read', async (req, res) => {
     try {
