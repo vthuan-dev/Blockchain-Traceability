@@ -397,10 +397,6 @@ app.get('/nhakiemduyet.html', requireAuth, (req, res) => {
           throw new Error('Không có hàng nào được cập nhật trong cơ sở dữ liệu');
         }
   
-        // Kiểm tra dữ liệu sau khi cập nhật
-        const [updatedUser] = await connection.query('SELECT * FROM users WHERE uid = ?', [userId]);
-        console.log('User data after update:', updatedUser[0]);
-  
         // Cập nhật session với thông tin mới
         Object.keys(fields).forEach(key => {
           if (fields[key]) {
