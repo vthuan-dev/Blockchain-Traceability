@@ -2,16 +2,26 @@ const admin = require("firebase-admin");
 const { initializeApp } = require("firebase/app");
 const { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } = require("firebase/storage");
 const path = require('path');
-require('dotenv').config({ path: path.resolve(__dirname, '../../.env') }); // Thêm dòng này để sử dụng biến môi trường
+require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 const { getAuth } = require("firebase/auth");
 
-// Thay đổi đường dẫn đến file service account mới của bạn
-const serviceAccount = require("./config/nckh-60471-firebase-adminsdk-8mdwy-9be31f7d4a.json");
-
 // Khởi tạo Firebase Admin SDK
+const serviceAccount = {
+  type: process.env.FIREBASE_ADMIN_TYPE,
+  project_id: process.env.FIREBASE_ADMIN_PROJECT_ID,
+  private_key_id: process.env.FIREBASE_ADMIN_PRIVATE_KEY_ID,
+  private_key: process.env.FIREBASE_ADMIN_PRIVATE_KEY.replace(/\\n/g, '\n'),
+  client_email: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
+  client_id: process.env.FIREBASE_ADMIN_CLIENT_ID,
+  auth_uri: process.env.FIREBASE_ADMIN_AUTH_URI,
+  token_uri: process.env.FIREBASE_ADMIN_TOKEN_URI,
+  auth_provider_x509_cert_url: process.env.FIREBASE_ADMIN_AUTH_PROVIDER_X509_CERT_URL,
+  client_x509_cert_url: process.env.FIREBASE_ADMIN_CLIENT_X509_CERT_URL
+};
+
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  storageBucket: "nckh-60471.appspot.com" // Đảm bảo đây là tên bucket chính xác
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET
 });
 
 // Lấy bucket từ Admin SDK
@@ -19,13 +29,13 @@ const adminBucket = admin.storage().bucket();
 
 // Khởi tạo Firebase SDK thông thường
 const firebaseConfig = {
-  apiKey: "AIzaSyBoQ2awa55USQWa761znOQfgrMQQ6mDjCo",
-  authDomain: "nckh-60471.firebaseapp.com",
-  projectId: "nckh-60471",
-  storageBucket: "nckh-60471.appspot.com", // Đảm bảo đây là tên bucket chính xác
-  messagingSenderId: "1010939149692",
-  appId: "1:1010939149692:web:65fded95a0addc68deb8f9",
-  measurementId: "G-7ZDW2SJV3F"
+  apiKey: process.env.FIREBASE_API_KEY,
+  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.FIREBASE_PROJECT_ID,
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.FIREBASE_APP_ID,
+  measurementId: process.env.FIREBASE_MEASUREMENT_ID
 };
 
 const firebaseApp = initializeApp(firebaseConfig);
