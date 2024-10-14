@@ -609,6 +609,7 @@
         const result = await response.json();
         if (result.updated) {
                 showNotification('Thông tin người dùng đã được cập nhật thành công.');
+                window.history.back();
           if (result.avatarUrl) {
             document.getElementById('avatarImage').src = result.avatarUrl;
             // Cập nhật giá trị mặc định cho avatar
