@@ -6,7 +6,7 @@ require('dotenv').config({ path: path.resolve(__dirname, '../../.env') }); // Th
 const { getAuth } = require("firebase/auth");
 
 // Thay đổi đường dẫn đến file service account mới của bạn
-const serviceAccount = require("./config/nckh-60471-firebase-adminsdk-8mdwy-7148d9a5ea.json");
+const serviceAccount = require("./config/nckh-60471-firebase-adminsdk-8mdwy-9be31f7d4a.json");
 
 // Khởi tạo Firebase Admin SDK
 admin.initializeApp({
