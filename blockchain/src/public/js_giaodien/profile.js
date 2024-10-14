@@ -44,4 +44,18 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 });
 
-// ... existing code ...
+function hasDataChanged() {
+    const name = document.getElementById('userNameInput');
+    const phone = document.getElementById('phoneInput');
+    const address = document.getElementById('addressInput');
+    const dob = document.getElementById('dobInput');
+    const gender = document.getElementById('genderInput');
+    const avatarInput = document.getElementById('imageUpload');
+
+    return name.value !== name.defaultValue ||
+           phone.value !== phone.defaultValue ||
+           address.value !== address.defaultValue ||
+           dob.value !== dob.defaultValue ||
+           gender.value !== gender.defaultValue ||
+           avatarInput.files.length > 0;
+}

@@ -49,6 +49,9 @@
             </div>
         </div>
     </nav>
+
+    <div id="notification" class="notification" style="display: none;"></div>
+
         
     <main class="mb-2">
         <div class="container mt-4">
@@ -531,12 +534,35 @@
     document.getElementsByClassName('input-group-text')[2].addEventListener('click', function(){
         $('#editAddressModal').modal('show');
     });
+
+    function showNotification(message, type = 'success') {
+        const notification = document.getElementById('notification');
+        notification.textContent = message;
+        notification.className = `notification ${type}`;
+        notification.style.display = 'block';
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 10);
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 300);
+        }, 3000);
+    }
+
+
+
     document.addEventListener('DOMContentLoaded', function() {
   const form = document.getElementById('profile-form');
   const saveButton = document.getElementById('saveButton');
 
   saveButton.addEventListener('click', async function(e) {
     e.preventDefault();
+    if (!hasDataChanged()) {
+        showNotification('Không có thay đổi nào để lưu.', 'error');
+        return;
+    }
 
     const formData = new FormData();
 
@@ -581,7 +607,7 @@
       if (response.ok) {
         const result = await response.json();
         if (result.updated) {
-          alert('Thông tin người dùng đã được cập nhật thành công.');
+                showNotification('Thông tin người dùng đã được cập nhật thành công.');
           if (result.avatarUrl) {
             document.getElementById('avatarImage').src = result.avatarUrl;
             // Cập nhật giá trị mặc định cho avatar
@@ -597,15 +623,15 @@
           // Refresh trang để cập nhật thông tin mới
           window.location.reload();
         } else {
-          alert(result.message);
+          showNotification(result.message || 'Có lỗi xảy ra khi cập nhật thông tin.', 'error');
         }
       } else {
         const errorData = await response.json();
-        alert(errorData.error || 'Có lỗi xảy ra khi cập nhật thông tin');
-      }
+        showNotification(result.message || 'Có lỗi xảy ra khi cập nhật thông tin.', 'error');
+    }
     } catch (error) {
       console.error('Lỗi:', error);
-      alert('Có lỗi xảy ra khi gửi yêu cầu');
+      showNotification('Có lỗi xảy ra khi gửi yêu cầu', 'error');
     }
   });
 });
@@ -626,5 +652,12 @@
         }
     });
     </script>
+
+<script>
+    document.getElementById('cancelButton').addEventListener('click', function(e) {
+        e.preventDefault(); // Ngăn chặn hành vi mặc định của nút
+        window.history.back(); // Quay lại trang trước đó
+    });
+</script>
 </body>
 </html>
