@@ -6,7 +6,18 @@
   const multer = require('multer');
   require('./websocket');
 
-  const { uploadFile: uploadFileFirebase, deleteFile } = require('./firebase');
+  const { ref, uploadBytes, getDownloadURL, deleteObject, admin, adminBucket } = require('./firebase');
+  const { storage } = require('./firebase');
+
+  const { signInWithEmailAndPassword } = require("firebase/auth");
+
+const { 
+  uploadFile: uploadFileFirebase, 
+  deleteFile, 
+   
+   
+
+} = require('./firebase');
   const bcrypt = require('bcrypt');
   const nodemailer = require('nodemailer');
   require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
@@ -316,96 +327,111 @@ app.get('/nhakiemduyet.html', requireAuth, (req, res) => {
     const [regions] = await db.query('SELECT * FROM regions');
     res.json(regions);
   });
-app.post('/api/capnhatthongtin', upload.single('avatar'), async (req, res) => {
-  try {
-    const { name, phone, address, dob, gender, password, confirmPassword } = req.body;
-    const userId = req.session.userId;
 
-    if (!userId) {
-      return res.status(401).json({ error: 'Người dùng chưa đăng nhập' });
-    }
-
-    let updateFields = [];
-    let updateValues = [];
-
-    if (name) {
-      updateFields.push('name = ?');
-      updateValues.push(name);
-    }
-    if (phone) {
-      updateFields.push('phone = ?');
-      updateValues.push(phone);
-    }
-    if (address) {
-      updateFields.push('address = ?');
-      updateValues.push(address);
-    }
-    if (dob) {
-      updateFields.push('dob = ?');
-      updateValues.push(dob);
-    }
-    if (gender) {
-      updateFields.push('gender = ?');
-      updateValues.push(gender);
-    }
-
-    if (password) {
-      if (password !== confirmPassword) {
-        return res.status(400).json({ error: 'Mật khẩu và xác nhận mật khẩu không khớp' });
+  
+  app.post('/api/capnhatthongtin', upload.single('avatar'), async (req, res) => {
+    let connection;
+    try {
+      connection = await db.getConnection();
+      await connection.beginTransaction();
+  
+      const { name, phone, address, dob, gender } = req.body;
+      const userId = req.session.userId;
+  
+      console.log('Received data:', { name, phone, address, dob, gender, userId });
+  
+      if (!userId) {
+        return res.status(401).json({ error: 'Người dùng chưa đăng nhập' });
       }
-      const hashedPassword = await bcrypt.hash(password, 10);
-      updateFields.push('password = ?');
-      updateValues.push(hashedPassword);
-    }
-
-    if (req.file) {
-      try {
-        const [currentUser] = await db.query('SELECT avatar FROM users WHERE uid = ?', [userId]);
-        const currentAvatarUrl = currentUser[0]?.avatar;
-
-        if (currentAvatarUrl) {
-          await deleteFile(currentAvatarUrl);
-        }
-
-        const avatarUrl = await uploadFileFirebase(req.file);
-        updateFields.push('avatar = ?');
-        updateValues.push(avatarUrl);
-
-        console.log('Avatar moi:' , avatarUrl);
-      } catch (uploadError) {
-        console.error('Lỗi khi xử lý avatar:', uploadError);
-        return res.status(500).json({ error: 'Lỗi khi xử lý ảnh đại diện' });
+  
+      let updateFields = [];
+      let updateValues = [];
+  
+      if (name) {
+        updateFields.push('name = ?');
+        updateValues.push(name);
       }
-    }
-
-    if (updateFields.length > 0) {
-      const updateQuery = `UPDATE users SET ${updateFields.join(', ')} WHERE uid = ?`;
-      updateValues.push(userId);
-
-      const [result] = await db.query(updateQuery, updateValues);
-      
-      if (result.affectedRows > 0) {
-        // Cập nhật session với thông tin mới
-        if (name) req.session.name = name;
-        if (phone) req.session.phone = phone;
-        if (address) req.session.address = address;
-        if (gender) req.session.gender = gender;
-        if (req.file) req.session.avatar = avatarUrl;
-
-        res.json({ message: 'Thông tin người dùng đã được cập nhật thành công', updated: true ,
-          avatar: req.file ? avatarUrl : undefined
+      if (phone) {
+        updateFields.push('phone = ?');
+        updateValues.push(phone);
+      }
+      if (address) {
+        updateFields.push('address = ?');
+        updateValues.push(address);
+      }
+      if (dob) {
+        updateFields.push('dob = ?');
+        updateValues.push(dob);
+      }
+      if (gender) {
+        updateFields.push('gender = ?');
+        updateValues.push(gender);
+      }
+    
+      if (req.file) {
+        const sanitizedFileName = req.file.originalname.replace(/\s+/g, '_').toLowerCase();
+        const fileName = `avatars/${Date.now()}_${sanitizedFileName}`;
+        const file = adminBucket.file(fileName);
+  
+        await file.save(req.file.buffer, {
+          metadata: { contentType: req.file.mimetype }
         });
-      } else {
-        res.status(404).json({ message: 'Không tìm thấy người dùng', updated: false });
+  
+        const [url] = await file.getSignedUrl({
+          action: 'read',
+          expires: '03-09-2491'
+        });
+  
+        updateFields.push('avatar = ?');
+        updateValues.push(url);
+  
+        // Xóa avatar cũ nếu có
+        const [oldUser] = await connection.query('SELECT avatar FROM users WHERE uid = ?', [userId]);
+        if (oldUser[0].avatar) {
+          const oldFileName = oldUser[0].avatar.split('/').pop().split('?')[0];
+          const oldFile = adminBucket.file(`avatars/${oldFileName}`);
+          await oldFile.delete().catch(error => console.log('Lỗi khi xóa avatar cũ:', error));
+        }
+  
+        req.session.avatar = url;
       }
-    } else {
-      res.json({ message: 'Không có thay đổi nào cần được cập nhật', updated: false });
+      
+      if (updateFields.length > 0) {
+        const updateQuery = `UPDATE users SET ${updateFields.join(', ')} WHERE uid = ?`;
+        updateValues.push(userId);
+  
+        console.log('Update Query:', updateQuery);
+        console.log('Update Values:', updateValues);
+  
+        const [result] = await connection.query(updateQuery, updateValues);
+        console.log('Update Result:', result);
+  
+        // Cập nhật session với thông tin mới
+        Object.keys(req.body).forEach(key => {
+          if (req.body[key] && key !== 'avatar') {
+            req.session[key] = req.body[key];
+          }
+        });
+  
+        console.log('Updated Session:', req.session);
+  
+        await connection.commit();
+        res.json({ updated: true, message: 'Thông tin đã được cập nhật', avatarUrl: req.session.avatar });
+      } else {
+        res.json({ updated: false, message: 'Không có thông tin nào được cập nhật' });
+      }
+    } catch (error) {
+      if (connection) {
+        await connection.rollback();
+      }
+      console.error('Lỗi khi cập nhật thông tin người dùng:', error);
+      res.status(500).json({ error: 'Lỗi khi cập nhật thông tin người dùng' });
+    } finally {
+      if (connection) {
+        connection.release();
+      }
     }
-  } catch (error) {
-    console.error('Lỗi khi cập nhật thông tin người dùng:', error);
-    res.status(500).json({ error: 'Lỗi khi cập nhật thông tin người dùng' });
-  }
-});
+  });
   app.post('/api/dangxuat', (req, res) => {
       req.session.destroy((err) => {
           if (err) {
