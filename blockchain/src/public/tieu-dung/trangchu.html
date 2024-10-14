@@ -27,13 +27,13 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto"> 
                 <li class="nav-item active">
-                    <a class="nav-link" href="allsanpham.html">Sản phẩm</a>
+                    <a class="nav-link" href="./allsanpham.html">Sản phẩm</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="allnongdan.html">Nhà sản xuất</a>
+                    <a class="nav-link" href="./allnongdan.html">Nhà sản xuất</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="allnhakiemduyet.html">Nhà kiểm duyệt</a>
+                    <a class="nav-link" href="./allnhakiemduyet.html">Nhà kiểm duyệt</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#">Vùng sản xuất</a>
@@ -188,26 +188,26 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/babel-standalone/babel.min.js"></script>
-    <script src="./chatbox/chatbox.js"></script>
-
     <script src="../../components/tieu-dung/trang-chu.js"></script> 
+    <script src="../chatbox/chatbox.js"></script>
+
     <script>
        function toggleChat() {
-    var chatbox = document.getElementById("chatbox");
-    if (chatbox.classList.contains("show")) {
-        chatbox.classList.remove("show");
-        chatbox.classList.add("hide");
-        setTimeout(() => {
-            chatbox.style.display = "none";
-            chatbox.classList.remove("hide");
-        }, 300); // Match this to the animation duration
-    } else {
-        chatbox.style.display = "block";
-        // Force a reflow before adding the 'show' class
-        chatbox.offsetHeight;
-        chatbox.classList.add("show");
-    }
-}
+            var chatbox = document.getElementById("chatbox");
+            if (chatbox.classList.contains("show")) {
+                chatbox.classList.remove("show");
+                chatbox.classList.add("hide");
+                setTimeout(() => {
+                    chatbox.style.display = "none";
+                    chatbox.classList.remove("hide");
+                }, 300); // Match this to the animation duration
+            } else {
+                chatbox.style.display = "block";
+                // Force a reflow before adding the 'show' class
+                chatbox.offsetHeight;
+                chatbox.classList.add("show");
+            }
+        }
     </script>
 <script>
     // lấy danh sách sản phẩm để hiển thị trên trang chủ
