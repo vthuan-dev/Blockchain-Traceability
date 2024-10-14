@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', async function() {
             const navbarBrand = document.querySelector('.navbar-brand');
             const brandSpan = navbarBrand.querySelector('span');
 
-
             // Xóa các mục điều hướng hiện tại
             navItems.innerHTML = '';
 
@@ -34,16 +33,54 @@ document.addEventListener('DOMContentLoaded', async function() {
                     <li class="nav-item"><a class="nav-link" href="../admin/dashboard.html">Bảng điều khiển</a></li>
                     <li class="nav-item"><a class="nav-link" href="../admin/users.html">Quản lí người dùng</a></li>
                 `;
+            } else if (roleId === 6 || roleId === 8) { // Người vận chuyển hoặc Nhà kho
+                navbarBrand.setAttribute('href', './van-chuyen/van-chuyen.html');
+                brandSpan.textContent = roleId === 6 ? 'Vận chuyển' : 'Nhà kho';
+                navItems.innerHTML += `
+                    <li class="nav-item"><a class="nav-link" href="./van-chuyen/van-chuyen.html">Quản lí lô hàng</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Quản lí hoạt động</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Thông báo</a></li>
+                `;
             }
-            // Thêm các vai trò khác nếu cần
+
+            // Ẩn vùng sản xuất cho vai trò vận chuyển và nhà kho
+            const productionArea = document.getElementById('productionArea');
+            const regionInput = document.getElementById('regionInput');
+            if (roleId === 6 || roleId === 8 || data.region === null || data.region === 'null' || data.region === '') {
+                if (productionArea) {
+                    productionArea.style.display = 'none';
+                }
+                if (regionInput) {
+                    regionInput.closest('.form-group').style.display = 'none';
+                }
+            } else {
+                if (productionArea) {
+                    productionArea.style.display = 'block';
+                }
+                if (regionInput) {
+                    regionInput.closest('.form-group').style.display = 'block';
+                }
+            }
+
+            const userRegionContainer = document.getElementById('userRegionContainer');
+            const userRegion = document.getElementById('userRegion');
+            
+            if (data.region === null || data.region === 'null' || data.region === '') {
+                userRegionContainer.style.display = 'none';
+            } else {
+                userRegion.textContent = `Khu vực: ${data.region}`;
+                userRegionContainer.style.display = 'block';
+            }
         } else {
-            console.error('Không thể lấy thông tin người dùng');
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Không thể lấy thông tin người dùng');
         }
     } catch (error) {
-        console.error('Lỗi:', error);
+        console.error('Lỗi:', error.message);
+        alert('Phiên đăng nhập đã hết hạn hoặc không hợp lệ. Vui lòng đăng nhập lại.');
+        window.location.href = '../account/dangnhap.html';
     }
 });
-
 function hasDataChanged() {
     const name = document.getElementById('userNameInput');
     const phone = document.getElementById('phoneInput');
