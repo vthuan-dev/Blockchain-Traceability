@@ -20,6 +20,7 @@ function translateParticipantType(type) {
     };
     return types[type] || type;
 }
+
 async function displayTransportHistory(sscc) {
     try {
         const response = await fetch(`/api/batch-transport-history/${sscc}`);
@@ -430,3 +431,49 @@ window.openImageModal = openImageModal;
 window.openImageGallery = openImageGallery;
 window.expandImage = expandImage;
 window.closeModal = closeModal;
+
+
+
+async function updateTransportStatus(sscc, action) {
+    console.log('Updating transport status:', { sscc, action });
+    try {
+        const response = await fetch('/api/accept-transport', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ sscc, action })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || 'Không thể cập nhật trạng thái vận chuyển');
+        }
+
+        showActionMessage(data.message, 'success');
+        await fetchBatchInfoBySSCC(sscc);
+    } catch (error) {
+        console.error('Error:', error);
+        showActionMessage('Có lỗi xảy ra khi cập nhật trạng thái vận chuyển: ' + error.message, 'error');
+    }
+}
+
+function showActionMessage(message, type) {
+    const actionMessage = document.getElementById('actionMessage');
+    actionMessage.textContent = message;
+    actionMessage.className = `action-message ${type}`;
+    actionMessage.style.display = 'block';
+    
+    // Force a reflow
+    void actionMessage.offsetWidth;
+    
+    actionMessage.classList.add('show');
+
+    setTimeout(() => {
+        actionMessage.classList.remove('show');
+        setTimeout(() => {
+            actionMessage.style.display = 'none';
+        }, 300); // Đợi cho animation kết thúc
+    }, 3000);
+}

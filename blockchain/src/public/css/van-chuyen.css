@@ -275,3 +275,149 @@ body {
         background-color: #28a745;
         color: #ffffff;
 }
+.action-message {
+    display: none;
+    position: fixed;
+    top: 70px; /* Điều chỉnh vị trí để không bị che bởi navbar */
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 15px 30px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    z-index: 1100; /* Đảm bảo hiển thị trên các phần tử khác */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    max-width: 90%;
+    width: auto;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.action-message.success {
+    background-color: #4CAF50;
+    color: #ffffff;
+    border-left: 5px solid #45a049;
+}
+
+.action-message.error {
+    background-color: #f44336;
+    color: #ffffff;
+    border-left: 5px solid #d32f2f;
+}
+
+.action-message::before {
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    margin-right: 10px;
+}
+
+.action-message.success::before {
+    content: "\f00c"; /* Checkmark icon */
+}
+
+.action-message.error::before {
+    content: "\f071"; /* Warning icon */
+}
+
+.action-message.show {
+    display: block;
+    opacity: 1;
+}
+
+/* Thêm hoặc cập nhật phần responsive design */
+@media (max-width: 768px) {
+    .container {
+        max-width: 100%;
+        padding: 0 15px;
+    }
+
+    .qr-scanner-container, #batchInfo {
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+
+    .btn {
+        padding: 15px 20px;
+        font-size: 16px;
+        height: auto;
+        white-space: normal;
+    }
+
+    .batch-info-table {
+        font-size: 14px;
+    }
+
+    .batch-info-table th,
+    .batch-info-table td {
+        padding: 12px 8px;
+    }
+
+    .batch-info-table th {
+        font-size: 14px;
+    }
+
+    #qr-reader {
+        width: 100% !important;
+        height: auto !important;
+    }
+
+    .action-message {
+        width: 90%;
+        max-width: none;
+        font-size: 14px;
+        padding: 12px 20px;
+    }
+
+    .modal-content {
+        width: 95%;
+        padding: 10px;
+    }
+
+    #modalImage {
+        max-width: 100%;
+        height: auto;
+    }
+
+    .image-gallery {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    }
+
+    .gallery-image {
+        height: 100px;
+    }
+}
+
+/* Thêm styles cho màn hình cực nhỏ */
+@media (max-width: 480px) {
+    .btn {
+        font-size: 14px;
+        padding: 12px 15px;
+    }
+
+    .qr-scanner-container h5,
+    #batchInfo h5 {
+        font-size: 18px;
+    }
+
+    .batch-info-table {
+        font-size: 12px;
+    }
+
+    .batch-info-table th,
+    .batch-info-table td {
+        padding: 10px 5px;
+    }
+
+    .action-message {
+        font-size: 13px;
+        padding: 10px 15px;
+    }
+}
+
+/* Điều chỉnh chiều cao tối thiểu cho container chính */
+@media (max-height: 600px) {
+    .container {
+        min-height: calc(100vh - 60px);
+    }
+}
