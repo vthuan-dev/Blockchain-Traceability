@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="./css/nav-bar.css">
     <link rel="stylesheet" href="./css/chatbox.css">
     <link rel="stylesheet" href="./css/profile.css">
+    
     <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
@@ -530,86 +531,90 @@
     document.getElementsByClassName('input-group-text')[2].addEventListener('click', function(){
         $('#editAddressModal').modal('show');
     });
-
     document.addEventListener('DOMContentLoaded', function() {
-        const form = document.getElementById('profile-form');
-        const saveButton = document.getElementById('saveButton');
+  const form = document.getElementById('profile-form');
+  const saveButton = document.getElementById('saveButton');
 
-        saveButton.addEventListener('click', async function(e) {
-            e.preventDefault();
+  saveButton.addEventListener('click', async function(e) {
+    e.preventDefault();
 
-            const formData = new FormData();
+    const formData = new FormData();
 
-            // Chỉ thêm các trường đã thay đổi vào formData
-            const name = document.getElementById('userNameInput');
-            if (!name.readOnly && name.value !== name.defaultValue) {
-                formData.append('name', name.value);
-            }
+    // Chỉ thêm các trường đã thay đổi vào formData
+    const name = document.getElementById('userNameInput');
+    if (!name.readOnly && name.value !== name.defaultValue) {
+      formData.append('name', name.value);
+    }
 
-            const phone = document.getElementById('phoneInput');
-            if (!phone.readOnly && phone.value !== phone.defaultValue) {
-                formData.append('phone', phone.value);
-            }
+    const phone = document.getElementById('phoneInput');
+    if (!phone.readOnly && phone.value !== phone.defaultValue) {
+      formData.append('phone', phone.value);
+    }
 
-            const address = document.getElementById('addressInput');
-            if (address.value !== address.defaultValue) {
-                formData.append('address', address.value);
-            }
+    const address = document.getElementById('addressInput');
+    if (address.value !== address.defaultValue) {
+      formData.append('address', address.value);
+    }
 
-            const dob = document.getElementById('dobInput');
-            if (dob.value !== dob.defaultValue) {
-                formData.append('dob', dob.value);
-            }
+    const dob = document.getElementById('dobInput');
+    if (dob.value !== dob.defaultValue) {
+      formData.append('dob', dob.value);
+    }
 
-            const gender = document.getElementById('genderInput');
-            if (gender.value !== gender.defaultValue) {
-                formData.append('gender', gender.value);
-            }
+    const gender = document.getElementById('genderInput');
+    if (gender.value !== gender.defaultValue) {
+      formData.append('gender', gender.value);
+    }
 
-            // Thêm avatar nếu có
-            const avatarInput = document.getElementById('imageUpload');
-            if (avatarInput.files.length > 0) {
-                formData.append('avatar', avatarInput.files[0]);
-            }
+    // Thêm avatar nếu có
+    const avatarInput = document.getElementById('imageUpload');
+    if (avatarInput.files.length > 0) {
+      formData.append('avatar', avatarInput.files[0]);
+    }
 
-            try {
-                const response = await fetch('/api/capnhatthongtin', {
-                    method: 'POST',
-                    body: formData
-                });
+    try {
+      const response = await fetch('/api/capnhatthongtin', {
+        method: 'POST',
+        body: formData
+      });
 
-                if (response.ok) {
-                    const result = await response.json();
-                    if (result.updated) {
-                        alert('Thông tin người dùng đã được cập nhật thành công.');
-                        if (result.avatarUrl) {
-                            document.getElementById('avatarImage').src = result.avatarUrl;
-                        }
-                        // Cập nhật giá trị mặc định cho các trường input
-                        name.defaultValue = name.value;
-                        phone.defaultValue = phone.value;
-                        address.defaultValue = address.value;
-                        dob.defaultValue = dob.value;
-                        gender.defaultValue = gender.value;
-                    } else {
-                        alert(result.message);
-                    }
-                } else {
-                    const errorData = await response.json();
-                    alert(errorData.error || 'Có lỗi xảy ra khi cập nhật thông tin');
-                }
-            } catch (error) {
-                console.error('Lỗi:', error);
-                alert('Có lỗi xảy ra khi gửi yêu cầu');
-            }
-        });
-    });
+      if (response.ok) {
+        const result = await response.json();
+        if (result.updated) {
+          alert('Thông tin người dùng đã được cập nhật thành công.');
+          if (result.avatarUrl) {
+            document.getElementById('avatarImage').src = result.avatarUrl;
+            // Cập nhật giá trị mặc định cho avatar
+            document.getElementById('avatarImage').dataset.defaultSrc = result.avatarUrl;
+          }
+          // Cập nhật giá trị mặc định cho các trường input
+          name.defaultValue = name.value;
+          phone.defaultValue = phone.value;
+          address.defaultValue = address.value;
+          dob.defaultValue = dob.value;
+          gender.defaultValue = gender.value;
+
+          // Refresh trang để cập nhật thông tin mới
+          window.location.reload();
+        } else {
+          alert(result.message);
+        }
+      } else {
+        const errorData = await response.json();
+        alert(errorData.error || 'Có lỗi xảy ra khi cập nhật thông tin');
+      }
+    } catch (error) {
+      console.error('Lỗi:', error);
+      alert('Có lỗi xảy ra khi gửi yêu cầu');
+    }
+  });
+});
 
     document.getElementById('imageUpload').addEventListener('change', function(e) {
         var file = e.target.files[0];
         if (file) {
             // Hiển thị preview ảnh
-            var reader = new FileReader();
+            var reader = new FileReader();capnhatthongtin
             reader.onload = function(e) {
                 document.getElementById('avatarImage').src = e.target.result;
             }

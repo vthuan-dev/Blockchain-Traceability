@@ -134,15 +134,7 @@ app.get('/sanpham.html', (req, res) => {
   // Xử lý logic đăng ký ở đây
 //});
 
-app.post('/api/dangnhap', async (req, res) => {
-  const { email, password } = req.body;
-  // ... xác thực người dùng ...
-  if (user && await bcrypt.compare(password, user.password)) {
-    req.session.userId = user.uid;
-    // ... các xử lý khác ...
-  }
-  // ...
-});
+
 app.get('/api/products', async (req, res) => {
   try {
       const [products] = await db.query('SELECT product_id, product_name FROM products');
@@ -327,10 +319,9 @@ app.get('/nhakiemduyet.html', requireAuth, (req, res) => {
     const [regions] = await db.query('SELECT * FROM regions');
     res.json(regions);
   });
-
-  
   app.post('/api/capnhatthongtin', upload.single('avatar'), async (req, res) => {
     let connection;
+    let tempAvatarUrl = null;
     try {
       connection = await db.getConnection();
       await connection.beginTransaction();
@@ -347,55 +338,51 @@ app.get('/nhakiemduyet.html', requireAuth, (req, res) => {
       let updateFields = [];
       let updateValues = [];
   
-      if (name) {
-        updateFields.push('name = ?');
-        updateValues.push(name);
-      }
-      if (phone) {
-        updateFields.push('phone = ?');
-        updateValues.push(phone);
-      }
-      if (address) {
-        updateFields.push('address = ?');
-        updateValues.push(address);
-      }
-      if (dob) {
-        updateFields.push('dob = ?');
-        updateValues.push(dob);
-      }
-      if (gender) {
-        updateFields.push('gender = ?');
-        updateValues.push(gender);
-      }
-    
-      if (req.file) {
-        const sanitizedFileName = req.file.originalname.replace(/\s+/g, '_').toLowerCase();
-        const fileName = `avatars/${Date.now()}_${sanitizedFileName}`;
-        const file = adminBucket.file(fileName);
-  
-        await file.save(req.file.buffer, {
-          metadata: { contentType: req.file.mimetype }
-        });
-  
-        const [url] = await file.getSignedUrl({
-          action: 'read',
-          expires: '03-09-2491'
-        });
-  
-        updateFields.push('avatar = ?');
-        updateValues.push(url);
-  
-        // Xóa avatar cũ nếu có
-        const [oldUser] = await connection.query('SELECT avatar FROM users WHERE uid = ?', [userId]);
-        if (oldUser[0].avatar) {
-          const oldFileName = oldUser[0].avatar.split('/').pop().split('?')[0];
-          const oldFile = adminBucket.file(`avatars/${oldFileName}`);
-          await oldFile.delete().catch(error => console.log('Lỗi khi xóa avatar cũ:', error));
+      // Xử lý các trường thông tin khác
+      const fields = { name, phone, address, dob, gender };
+      for (const [key, value] of Object.entries(fields)) {
+        if (value) {
+          updateFields.push(`${key} = ?`);
+          updateValues.push(value);
         }
-  
-        req.session.avatar = url;
       }
-      
+  
+      // Xử lý avatar
+      if (req.file) {
+        try {
+          // Xóa avatar cũ
+          const [oldUser] = await connection.query('SELECT avatar FROM users WHERE uid = ?', [userId]);
+          if (oldUser[0] && oldUser[0].avatar) {
+            const oldFileName = oldUser[0].avatar.split('/').pop().split('?')[0];
+            const oldFile = adminBucket.file(`avatars/${oldFileName}`);
+            await oldFile.delete().catch(error => console.log('Lỗi khi xóa avatar cũ từ Firebase:', error));
+          }
+  
+          // Upload avatar mới
+          const sanitizedFileName = req.file.originalname.replace(/\s+/g, '_').toLowerCase();
+          const fileName = `avatars/${Date.now()}_${sanitizedFileName}`;
+          const file = adminBucket.file(fileName);
+  
+          await file.save(req.file.buffer, {
+            metadata: { contentType: req.file.mimetype }
+          });
+  
+          const [url] = await file.getSignedUrl({
+            action: 'read',
+            expires: '03-09-2491'
+          });
+  
+          tempAvatarUrl = url;
+          updateFields.push('avatar = ?');
+          updateValues.push(tempAvatarUrl);
+  
+          console.log('Avatar mới đã được upload:', tempAvatarUrl);
+        } catch (uploadError) {
+          console.error('Lỗi khi upload avatar:', uploadError);
+          throw new Error('Lỗi khi upload avatar');
+        }
+      }
+  
       if (updateFields.length > 0) {
         const updateQuery = `UPDATE users SET ${updateFields.join(', ')} WHERE uid = ?`;
         updateValues.push(userId);
@@ -406,17 +393,37 @@ app.get('/nhakiemduyet.html', requireAuth, (req, res) => {
         const [result] = await connection.query(updateQuery, updateValues);
         console.log('Update Result:', result);
   
+        if (result.affectedRows === 0) {
+          throw new Error('Không có hàng nào được cập nhật trong cơ sở dữ liệu');
+        }
+  
+        // Kiểm tra dữ liệu sau khi cập nhật
+        const [updatedUser] = await connection.query('SELECT * FROM users WHERE uid = ?', [userId]);
+        console.log('User data after update:', updatedUser[0]);
+  
         // Cập nhật session với thông tin mới
-        Object.keys(req.body).forEach(key => {
-          if (req.body[key] && key !== 'avatar') {
-            req.session[key] = req.body[key];
+        Object.keys(fields).forEach(key => {
+          if (fields[key]) {
+            req.session[key] = fields[key];
           }
+        });
+  
+        if (tempAvatarUrl) {
+          req.session.avatar = tempAvatarUrl;
+        }
+  
+        // Đảm bảo session được lưu
+        await new Promise((resolve, reject) => {
+          req.session.save((err) => {
+            if (err) reject(err);
+            else resolve();
+          });
         });
   
         console.log('Updated Session:', req.session);
   
         await connection.commit();
-        res.json({ updated: true, message: 'Thông tin đã được cập nhật', avatarUrl: req.session.avatar });
+        res.json({ updated: true, message: 'Thông tin đã được cập nhật', avatarUrl: tempAvatarUrl });
       } else {
         res.json({ updated: false, message: 'Không có thông tin nào được cập nhật' });
       }
@@ -424,14 +431,19 @@ app.get('/nhakiemduyet.html', requireAuth, (req, res) => {
       if (connection) {
         await connection.rollback();
       }
-      console.error('Lỗi khi cập nhật thông tin người dùng:', error);
-      res.status(500).json({ error: 'Lỗi khi cập nhật thông tin người dùng' });
+      console.error('Lỗi chi tiết khi cập nhật thông tin người dùng:', error);
+      let errorMessage = 'Lỗi khi cập nhật thông tin người dùng';
+      if (error.message) {
+        errorMessage += `: ${error.message}`;
+      }
+      res.status(500).json({ error: errorMessage });
     } finally {
       if (connection) {
         connection.release();
       }
     }
   });
+  
   app.post('/api/dangxuat', (req, res) => {
       req.session.destroy((err) => {
           if (err) {

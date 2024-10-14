@@ -5,12 +5,13 @@ const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') }); // Thêm dòng này để sử dụng biến môi trường
 const { getAuth } = require("firebase/auth");
 
-const serviceAccount = require("./config/nckh-d946f-firebase-adminsdk-lcxc4-6736053840.json");
+// Thay đổi đường dẫn đến file service account mới của bạn
+const serviceAccount = require("./config/nckh-60471-firebase-adminsdk-8mdwy-d8db9c40ff.json");
 
 // Khởi tạo Firebase Admin SDK
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  storageBucket: "nckh-d946f.appspot.com" // Sử dụng tên bucket mặc định của dự án
+  storageBucket: "nckh-60471.appspot.com" // Đảm bảo đây là tên bucket chính xác
 });
 
 // Lấy bucket từ Admin SDK
@@ -18,12 +19,13 @@ const adminBucket = admin.storage().bucket();
 
 // Khởi tạo Firebase SDK thông thường
 const firebaseConfig = {
-  apiKey: process.env.FIREBASE_API_KEY,
-  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.FIREBASE_PROJECT_ID,
-  storageBucket: "nckh-d946f.appspot.com", // Sử dụng tên bucket mặc định của dự án
-  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.FIREBASE_APP_ID
+  apiKey: "AIzaSyBoQ2awa55USQWa761znOQfgrMQQ6mDjCo",
+  authDomain: "nckh-60471.firebaseapp.com",
+  projectId: "nckh-60471",
+  storageBucket: "nckh-60471.appspot.com", // Đảm bảo đây là tên bucket chính xác
+  messagingSenderId: "1010939149692",
+  appId: "1:1010939149692:web:65fded95a0addc68deb8f9",
+  measurementId: "G-7ZDW2SJV3F"
 };
 
 const firebaseApp = initializeApp(firebaseConfig);
@@ -42,12 +44,18 @@ async function uploadFile(file) {
 
   return new Promise((resolve, reject) => {
     blobStream.on('error', (error) => {
-      reject('Lỗi khi upload file: ' + error);
+      console.error('Lỗi khi upload file:', error);
+      reject('Lỗi khi upload file: ' + error.message);
     });
 
     blobStream.on('finish', async () => {
-      const publicUrl = `https://storage.googleapis.com/${adminBucket.name}/${fileUpload.name}`;
-      resolve(publicUrl);
+      try {
+        const publicUrl = `https://storage.googleapis.com/${adminBucket.name}/${fileUpload.name}`;
+        resolve(publicUrl);
+      } catch (error) {
+        console.error('Lỗi khi lấy URL công khai:', error);
+        reject('Lỗi khi lấy URL công khai: ' + error.message);
+      }
     });
 
     blobStream.end(file.buffer);
