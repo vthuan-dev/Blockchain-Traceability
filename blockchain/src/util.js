@@ -12,5 +12,10 @@ function convertBigIntToString(item) {
     }
     return item;
   }
+
+  function getFullAvatarUrl(avatarPath) {
+    if (!avatarPath) return '/path/to/default/avatar.png';
+    return `https://storage.googleapis.com/nckh-60471.appspot.com/${avatarPath}`;
+}
   
-  module.exports = { convertBigIntToString };
+  module.exports = { convertBigIntToString, getFullAvatarUrl };
