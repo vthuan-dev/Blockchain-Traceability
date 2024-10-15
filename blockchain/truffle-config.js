@@ -1,5 +1,7 @@
 const HDWalletProvider = require('@truffle/hdwallet-provider');
-require('dotenv').config({ path: '../.env' });
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
+const { Network, Alchemy } = require("alchemy-sdk");
 
 module.exports = {
   networks: {
@@ -9,33 +11,14 @@ module.exports = {
       network_id: "*",
       db_path: "./ganache-db"
     },
-    goerli: {
-      provider: () => {
-        if (!process.env.MNEMONIC) {
-          throw new Error("MNEMONIC không được định nghĩa trong file .env");
-        }
-        return new HDWalletProvider(
-          process.env.MNEMONIC,
-          `https://goerli.infura.io/v3/${process.env.INFURA_PROJECT_ID}`
-        );
-      },
-      network_id: 5,
-      gas: 5500000,
-      confirmations: 2,
-      timeoutBlocks: 200,
-      skipDryRun: true
-    },
     sepolia: {
-      provider: () => {
-        if (!process.env.MNEMONIC) {
-          throw new Error("MNEMONIC không được định nghĩa trong file .env");
-        }
-        return new HDWalletProvider(
-          process.env.MNEMONIC,
-          `https://sepolia.infura.io/v3/${process.env.INFURA_PROJECT_ID}`
-        );
-      },
-      network_id: 11155111, // ID mạng của Sepolia
+      provider: () => new HDWalletProvider({
+        mnemonic: {
+          phrase: process.env.MNEMONIC
+        },
+        providerOrUrl: `https://eth-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`
+      }),
+      network_id: 11155111,
       gas: 5500000,
       confirmations: 2,
       timeoutBlocks: 200,
@@ -60,3 +43,6 @@ module.exports = {
     }
   }
 };
+console.log('MNEMONIC from env:', process.env.MNEMONIC);
+console.log('MNEMONIC length:', process.env.MNEMONIC ? process.env.MNEMONIC.trim().split(' ').length : 'undefined');
+console.log('INFURA_PROJECT_ID:', process.env.INFURA_PROJECT_ID);

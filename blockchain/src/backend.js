@@ -12,6 +12,8 @@ const FormData = require('form-data');
 const path = require('path');
 const sharp = require('sharp');
 const QrCode = require('qrcode-reader');
+const { Network, Alchemy } = require("alchemy-sdk");
+
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 
 const storage = multer.memoryStorage();
@@ -47,12 +49,17 @@ const uploadQR = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
 });
+const settings = {
+  apiKey: process.env.ALCHEMY_API_KEY,
+  network: Network.ETH_SEPOLIA,
+};
 
-const web3 = new Web3(new Web3.providers.HttpProvider(`https://sepolia.infura.io/v3/${process.env.INFURA_PROJECT_ID}`));
+const alchemy = new Alchemy(settings);
+const web3 = new Web3(new Web3.providers.HttpProvider(`https://eth-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`));
 
-const account = web3.eth.accounts.privateKeyToAccount('0xe9437cabf0c3b29aac95c0338c1177a53f6a2487e15480d959f37cb1597b5795');
+const account = web3.eth.accounts.privateKeyToAccount(process.env.PRIVATE_KEY);
 web3.eth.accounts.wallet.add(account);
-web3.eth.defaultAccount = account.address
+web3.eth.defaultAccount = account.address;
 
 const adminAddress = account.address;
 

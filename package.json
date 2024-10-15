@@ -20,6 +20,8 @@
     "@firebase/storage": "^0.13.2",
     "@openzeppelin/contracts": "^5.0.2",
     "@pinata/sdk": "^2.1.0",
+    "@truffle/hdwallet-provider": "^2.1.15",
+    "alchemy-sdk": "^3.4.3",
     "axios": "^1.7.7",
     "bcrypt": "^5.1.1",
     "bn.js": "^5.2.1",
@@ -53,7 +55,7 @@
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
     "twilio": "^5.2.2",
-    "web3": "^4.12.1"
+    "web3": "^4.13.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
