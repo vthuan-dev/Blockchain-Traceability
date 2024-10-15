@@ -4,8 +4,9 @@
   "main": "src/app.js",
   "scripts": {
     "test": "mocha --require @babel/register src/test/*.test.js",
-    "start": "nodemon ./src/app.js",
-    "build": "webpack"
+    "start": "node blockchain/src/app.js",
+    "build": "webpack",
+    "dev": "nodemon blockchain/src/app.js"
   },
   "keywords": [],
   "author": "",

@@ -4,10 +4,10 @@
   const mysql = require('mysql2/promise');
   const path = require('path');
   const multer = require('multer');
-  require('./websocket');
+  require('./websocket.js');
 
-  const { ref, uploadBytes, getDownloadURL, deleteObject, admin, adminBucket } = require('./firebase');
-  const { storage } = require('./firebase');
+  const { ref, uploadBytes, getDownloadURL, deleteObject, admin, adminBucket } = require('./firebase.js');
+  const { storage } = require('./firebase.js');
 
   const { signInWithEmailAndPassword } = require("firebase/auth");
 
@@ -17,7 +17,7 @@ const {
    
    
 
-} = require('./firebase');
+} = require('./firebase.js');
   const bcrypt = require('bcrypt');
   const nodemailer = require('nodemailer');
   require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
@@ -65,8 +65,8 @@ const {
     queueLimit: 0
   });
   const upload = multer({ storage: multer.memoryStorage() });
-  const dangkyRoutes = require('./components/user/dangky')(db, upload);
-  const dangnhapRoutes = require('./components/user/dangnhap')(db);
+  const dangkyRoutes = require('./components/user/dangky.js')(db, upload);
+  const dangnhapRoutes = require('./components/user/dangnhap.js')(db);
   app.use('/api', dangkyRoutes);
   app.use('/api', dangnhapRoutes);
   const { 
@@ -474,7 +474,7 @@ app.get('/nhakiemduyet.html', requireAuth, (req, res) => {
     }
   });
 
-  const { saveNotification } = require('./notification');
+  const { saveNotification } = require('./notification.js');
 
   app.get('/api/notifications', async (req, res) => {
     console.log('Session adminId:', req.session.adminId);  // Log giá trị userId
