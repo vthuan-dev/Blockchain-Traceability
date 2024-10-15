@@ -2,14 +2,7 @@ const HDWalletProvider = require('@truffle/hdwallet-provider');
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
-const mnemonic = process.env.MNEMONIC.trim();
-console.log('MNEMONIC raw:', mnemonic);
-console.log('MNEMONIC length:', mnemonic.split(' ').length);
-
-if (!mnemonic || mnemonic.split(' ').length !== 12) {
-  console.error('MNEMONIC không hợp lệ hoặc không được định nghĩa');
-  process.exit(1);
-}
+const privateKey = process.env.PRIVATE_KEY;
 
 module.exports = {
   networks: {
@@ -20,19 +13,14 @@ module.exports = {
       db_path: "./ganache-db"
     },
     sepolia: {
-      provider: () => {
-        return new HDWalletProvider({
-          mnemonic: {
-            phrase: mnemonic
-          },
-          providerOrUrl: `https://eth-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`
-        });
-      },
+      provider: () => new HDWalletProvider(privateKey, `https://eth-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`),
       network_id: 11155111,
-      gas: 5500000,
+      gas: 15000000,  // Tăng từ 8000000 lên 15000000
+      gasPrice: 10000000000, // 10 Gwei
       confirmations: 2,
       timeoutBlocks: 200,
-      skipDryRun: true
+      skipDryRun: true,
+      networkCheckTimeout: 10000
     },
   },
 
@@ -42,18 +30,13 @@ module.exports = {
 
   compilers: {
     solc: {
-      version: "0.8.20",     
-      settings: {            
+      version: "0.8.20",
+      settings: {
         optimizer: {
           enabled: true,
-          runs: 1
+          runs: 200
         },
-        evmVersion: "istanbul",
       }
     }
   }
 };
-
-console.log('MNEMONIC từ env:', mnemonic ? '******' : 'không xác định');
-console.log('Độ dài MNEMONIC:', mnemonic ? mnemonic.trim().split(' ').length : 'không xác định');
-console.log('ALCHEMY_API_KEY:', process.env.ALCHEMY_API_KEY ? '******' : 'không xác định');
