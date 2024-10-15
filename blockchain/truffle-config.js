@@ -1,7 +1,15 @@
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
-const { Network, Alchemy } = require("alchemy-sdk");
+
+const mnemonic = process.env.MNEMONIC.trim();
+console.log('MNEMONIC raw:', mnemonic);
+console.log('MNEMONIC length:', mnemonic.split(' ').length);
+
+if (!mnemonic || mnemonic.split(' ').length !== 12) {
+  console.error('MNEMONIC không hợp lệ hoặc không được định nghĩa');
+  process.exit(1);
+}
 
 module.exports = {
   networks: {
@@ -12,12 +20,14 @@ module.exports = {
       db_path: "./ganache-db"
     },
     sepolia: {
-      provider: () => new HDWalletProvider({
-        mnemonic: {
-          phrase: process.env.MNEMONIC
-        },
-        providerOrUrl: `https://eth-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`
-      }),
+      provider: () => {
+        return new HDWalletProvider({
+          mnemonic: {
+            phrase: mnemonic
+          },
+          providerOrUrl: `https://eth-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`
+        });
+      },
       network_id: 11155111,
       gas: 5500000,
       confirmations: 2,
@@ -43,6 +53,7 @@ module.exports = {
     }
   }
 };
-console.log('MNEMONIC from env:', process.env.MNEMONIC);
-console.log('MNEMONIC length:', process.env.MNEMONIC ? process.env.MNEMONIC.trim().split(' ').length : 'undefined');
-console.log('INFURA_PROJECT_ID:', process.env.INFURA_PROJECT_ID);
+
+console.log('MNEMONIC từ env:', mnemonic ? '******' : 'không xác định');
+console.log('Độ dài MNEMONIC:', mnemonic ? mnemonic.trim().split(' ').length : 'không xác định');
+console.log('ALCHEMY_API_KEY:', process.env.ALCHEMY_API_KEY ? '******' : 'không xác định');

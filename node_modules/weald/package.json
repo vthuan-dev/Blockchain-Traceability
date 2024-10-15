@@ -1,6 +1,6 @@
 {
   "name": "weald",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "The debug module but TypeScript",
   "license": "Apache-2.0 OR MIT",
   "homepage": "https://github.com/achingbrain/weald#readme",
