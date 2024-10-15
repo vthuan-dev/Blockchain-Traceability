@@ -243,7 +243,7 @@
 
     <!-- jQuery và Bootstrap JavaScript -->
     <!-- AOS JavaScript -->
-    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script> <!-- Sử dụng phiên bản đầy đủ -->
     <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
@@ -252,6 +252,26 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="./js_giaodien/sanpham.js"></script>
     <script src="./js_giaodien/profile.js"></script>
+    <script src="./chatbox/chatbox.js"></script>
+
+    <script>
+       function toggleChat() {
+            var chatbox = document.getElementById("chatbox");
+            if (chatbox.classList.contains("show")) {
+                chatbox.classList.remove("show");
+                chatbox.classList.add("hide");
+                setTimeout(() => {
+                    chatbox.style.display = "none";
+                    chatbox.classList.remove("hide");
+                }, 300); // Match this to the animation duration
+            } else {
+                chatbox.style.display = "block";
+                // Force a reflow before adding the 'show' class
+                chatbox.offsetHeight;
+                chatbox.classList.add("show");
+            }
+        }
+    </script>
     <script>
         document.addEventListener('DOMContentLoaded', function(){
             const provinceSelect = document.getElementById('modalProvince');

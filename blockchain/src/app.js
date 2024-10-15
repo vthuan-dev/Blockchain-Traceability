@@ -184,10 +184,12 @@ app.get('/van-chuyen/van-chuyen.html', requireAuth, (req, res) => {
 function requireAuth(req, res, next) {
   if (req.session.userId) {
     next();
+
   } else {
     res.redirect('/account/dangnhap.html');
   }
 }
+
 
 app.get('/san-xuat/sanxuat.html', requireAuth, (req, res) => {
   if (req.session.roleId === 1) {
@@ -496,6 +498,127 @@ app.get('/nhakiemduyet.html', requireAuth, (req, res) => {
     }
   });
 
+
+
+    // app.get('/', (req, res) => {
+    //   res.sendFile(path.join(__dirname, 'public', 'trangchu.html'));
+    // });
+
+    // app.post('/api/dangnhap', async (req, res) => {
+    //   const { email, password } = req.body;
+    //   // ... xác thực người dùng ...
+    //   if (user && await bcrypt.compare(password, user.password)) {
+    //     req.session.userId = user.uid;
+    //   }
+    //   // ...
+    // });
+    // app.get('/api/products', async (req, res) => {
+    //   try {
+    //       const [products] = await db.query('SELECT product_id, product_name FROM products');
+    //       res.json(products);
+    //   } catch (error) {
+    //       console.error('Lỗi khi lấy danh sách sản phẩm:', error);
+    //       res.status(500).json({ error: 'Lỗi server khi lấy danh sách sản phẩm' });
+    //   }
+    // });
+
+    // app.get('/api/nhasanxuat', async (req, res) => {
+    //   try {
+    //     const [rows] = await db.query('SELECT * FROM users WHERE role_id = 1');
+    //     res.json(rows);
+    //   } catch (err) {
+    //     console.error('Lỗi khi lấy danh sách nhà sản xuất:', err.message);
+    //     res.status(500).json({ error: 'Lỗi khi lấy danh sách nhà sản xuất' });
+    //   }
+    // });
+
+    // app.get('/api/nhakiemduyet', async (req, res) => {
+    //   try {
+    //     const [rows] = await db.query('SELECT * FROM users WHERE role_id = 2');
+    //     res.json(rows);
+    //   } catch (err) {
+    //     console.error('Lỗi khi lấy danh sách nhà kiểm duyệt:', err.message);
+    //     res.status(500).json({ error: 'Lỗi khi lấy danh sách nhà kiểm duyệt' });
+    //   }
+    // });
+
+
+    // xac thuc dang nhap
+    function requireAuth(req, res, next) {
+      if (req.session.userId) {
+        next();
+      } else {
+        res.status(401).json({ message: 'Unauthorized' });
+      }
+    }
+
+    // Sử dụng middleware cho các route cần xác thực
+    app.get('/san-xuat/sanxuat.html', requireAuth, (req, res) => {
+      if (req.session.roleId === 1) {
+        res.sendFile(path.join(__dirname, 'public', 'san-xuat', 'sanxuat.html'));
+      } else {
+        res.status(403).send('Forbidden');
+      }
+    });
+
+    app.get('/kiem-duyet/nhakiemduyet.html', requireAuth, (req, res) => {
+      if (req.session.roleId === 2) {
+        res.sendFile(path.join(__dirname, 'public', 'kiem-duyet', 'nhakiemduyet.html'));
+      } else {
+        res.status(403).send('Forbidden');
+      }
+    });
+
+    app.get('/user-info', (req, res) => {
+      console.log('Session trong /api/user-info:', req.session);
+      if (req.session && req.session.isLoggedIn) {
+        if (req.session.adminId) {
+          // Trả về thông tin admin nếu có adminId trong session
+          res.json({
+            userId: req.session.adminId,
+            name: req.session.adminName,
+            email: req.session.adminEmail,
+            roleId: req.session.roleId,
+            isAdmin: true,
+            province_id: req.session.province_id
+          });
+        } else if (req.session.userId) {
+          // Trả về thông tin user nếu có userId trong session
+          res.json({
+            userId: req.session.userId,
+            name: req.session.name,
+            email: req.session.email,
+            roleId: req.session.roleId,
+            isAdmin: false,
+            province_id: req.session.province_id,
+            region_id: req.session.region_id,
+            region: req.session.region
+          });
+        } else {
+          res.status(400).json({ error: 'Trạng thái đăng nhập không hợp lệ' });
+        }
+      } else {
+        // Trả về thông tin người dùng ẩn danh nếu không đăng nhập
+        res.json({
+          name: "Người dùng ẩn danh",
+          roleId: 0,
+          isAdmin: false
+        });
+      }
+    });
+
+
+    app.post('/api/dangxuat', (req, res) => {
+        req.session.destroy((err) => {
+            if (err) {
+                return res.status(500).json({ message: 'Không thể đăng xuất' });
+            }
+            res.clearCookie('connect.sid'); // Xóa cookie session
+            res.json({ message: 'Đăng xuất thành công' });
+        });
+    });
+    //console.log('Các route đã đăng ký:', app._router.stack.filter(r => r.route).map(r => r.route.path));
+    
   app.post('/api/notifications/mark-all-read', async (req, res) => {
     try {
       await db.query('DELETE FROM notification WHERE recipient_type = "admin" AND admin_id = ?', [req.session.adminId]);
@@ -505,6 +628,7 @@ app.get('/nhakiemduyet.html', requireAuth, (req, res) => {
       res.status(500).json({ error: 'Lỗi server khi xóa tất cả thông báo' });
     }
   });
+
 
 // Thiết lập Socket.io cho Chatbox
 let users = [];

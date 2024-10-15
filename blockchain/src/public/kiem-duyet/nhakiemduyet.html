@@ -7,6 +7,7 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../css/nhakiemduyet.css">
     <link rel="stylesheet" href="../css/nav-bar.css">
+    <link rel="stylesheet" href="../css/chatbox.css">
     <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
 
    
@@ -95,13 +96,60 @@
         </div>
     </main>
 
+
+    <div class="chat-icon" id="openChat" onclick="toggleChat()"></div>
+        <i class="fas fa-comments"></i>
+        <div class="tooltip">Đặt câu hỏi cho chúng tôi</div>
+    </div>
+
+    <!-- Khung chat -->
+    <div id="chatbox" class="chatbox">
+        <div class="chatbox-header">
+            <strong>Hỗ trợ</strong>
+            <button id="closeChat" class="btn-close" onclick="toggleChat()">x</button>
+        </div>
+        <div class="chatbox-body">
+            <ul id="messages" class="list-group">
+                <li class="list-group-item system-message"><strong>Hệ thống: </strong> Chào bạn, hãy đặt câu hỏi của bạn.</li>
+            </ul>
+        </div>
+        <div class="chatbox-footer">
+            <form id="messageForm" class="d-flex">
+                <input id="messageInput" type="text" class="form-control" placeholder="type message">
+                <button type="submit" class="btn btn-primary">Send</button>
+            </form>
+        </div>
+    </div>
+
     <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
     <script>AOS.init();</script>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="js_giaodien/sanpham.js"></script>
+    <script src="../chatbox/chatbox.js"></script>
+
+    <script>
+       function toggleChat() {
+            var chatbox = document.getElementById("chatbox");
+            if (chatbox.classList.contains("show")) {
+                chatbox.classList.remove("show");
+                chatbox.classList.add("hide");
+                setTimeout(() => {
+                    chatbox.style.display = "none";
+                    chatbox.classList.remove("hide");
+                }, 300); // Match this to the animation duration
+            } else {
+                chatbox.style.display = "block";
+                // Force a reflow before adding the 'show' class
+                chatbox.offsetHeight;
+                chatbox.classList.add("show");
+            }
+        }
+    </script>
+
     <script>
         
         let currentBatchId;
