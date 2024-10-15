@@ -53,11 +53,17 @@ module.exports = function(db) {
             } else {
                 const [users] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
                 const user = users[0];
-                const [regions] = await db.query('SELECT * FROM regions WHERE region_id = ?', [user.region_id])
 
                 if (!user) {
                     return res.status(401).json({ message: 'Email hoặc mật khẩu không đúng' });
                 }
+
+                // Kiểm tra region_id trước khi truy vấn
+                let regions = [];
+                if (user.region_id) {
+                    [regions] = await db.query('SELECT * FROM regions WHERE region_id = ?', [user.region_id]);
+                }
+
                 if (!user.passwd) {
                     return res.status(500).json({ message: 'Internal server error', error: 'Mật khẩu không đúng' });
                 }
@@ -75,10 +81,10 @@ module.exports = function(db) {
                 if (isAdmin && user.role_id !== 3) {
                     return res.status(403).json({ message: 'Bạn không có quyền đăng nhập với tư cách Admin' });
                 }
+
                 let region = null;
-                if (user.region_id) {
-                    const [regions] = await db.query('SELECT * FROM regions WHERE region_id = ?', [user.region_id]);
-                    region = regions[0] ? regions[0].region_name : null;
+                if (user.region_id && regions.length > 0) {
+                    region = regions[0].region_name;
                 }
 
                 req.session.userId = user.uid;
