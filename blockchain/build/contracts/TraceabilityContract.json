@@ -356,8 +356,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -468,8 +467,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -580,8 +578,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -692,8 +689,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [],
@@ -798,8 +794,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -910,8 +905,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [],
@@ -924,8 +918,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -949,8 +942,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -1047,8 +1039,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -1159,8 +1150,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -1271,8 +1261,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -1291,8 +1280,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -1311,8 +1299,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -1410,8 +1397,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -1430,8 +1416,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -1450,8 +1435,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -1475,8 +1459,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -1517,8 +1500,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -1537,8 +1519,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -1599,8 +1580,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -1619,8 +1599,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -1681,8 +1660,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     }
   ],
   "metadata": "{\"compiler\":{\"version\":\"0.8.20+commit.a1b79de6\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_activityLogAddress\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"uid\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"activityName\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"description\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"isSystemGenerated\",\"type\":\"bool\"},{\"indexed\":false,\"internalType\":\"string[]\",\"name\":\"imageUrls\",\"type\":\"string[]\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"relatedProductIds\",\"type\":\"uint256[]\"}],\"name\":\"ActivityLogAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"batchId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"producerId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"sscc\",\"type\":\"string\"}],\"name\":\"BatchApproved\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"batchId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"producerId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"sscc\",\"type\":\"string\"}],\"name\":\"BatchApprovedForQR\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"batchId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"sscc\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"producerId\",\"type\":\"uint256\"}],\"name\":\"BatchCreated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"batchId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"producerId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"sscc\",\"type\":\"string\"}],\"name\":\"BatchRejected\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"batchId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"enum TraceabilityContract.BatchStatus\",\"name\":\"newStatus\",\"type\":\"uint8\"}],\"name\":\"BatchStatusUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"batchId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"participantType\",\"type\":\"string\"}],\"name\":\"LogParticipantType\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"batchId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"participantId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"participantType\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"action\",\"type\":\"string\"}],\"name\":\"ParticipationRecorded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"batchId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"enum TraceabilityContract.DetailedTransportStatus\",\"name\":\"newStatus\",\"type\":\"uint8\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"action\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"participantId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"participantType\",\"type\":\"string\"}],\"name\":\"TransportStatusUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"batchId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"warehouseId\",\"type\":\"uint256\"}],\"name\":\"WarehouseConfirmed\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_batchId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_approverId\",\"type\":\"uint256\"}],\"name\":\"approveBatch\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_batchId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_transporterId\",\"type\":\"uint256\"}],\"name\":\"canStartTransport\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"_name\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"_producerId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"_quantity\",\"type\":\"string\"},{\"internalType\":\"string[]\",\"name\":\"_productImageUrls\",\"type\":\"string[]\"},{\"internalType\":\"string\",\"name\":\"_certificateImageUrl\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"_farmPlotNumber\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"_productId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_startDate\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_endDate\",\"type\":\"uint256\"}],\"name\":\"createBatch\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_batchId\",\"type\":\"uint256\"}],\"name\":\"getActivityLogs\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"batchId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"participantId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"activityName\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"description\",\"type\":\"string\"},{\"internalType\":\"bool\",\"name\":\"isSystemActivity\",\"type\":\"bool\"},{\"internalType\":\"string[]\",\"name\":\"imageUrls\",\"type\":\"string[]\"},{\"internalType\":\"uint256[]\",\"name\":\"relatedProductIds\",\"type\":\"uint256[]\"}],\"internalType\":\"struct ActivityLog.ActivityLogEntry[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getAllPendingBatches\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"batchId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"sscc\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"producerId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"quantity\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"productionDate\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"startDate\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"endDate\",\"type\":\"uint256\"},{\"internalType\":\"enum TraceabilityContract.BatchStatus\",\"name\":\"status\",\"type\":\"uint8\"},{\"internalType\":\"string[]\",\"name\":\"productImageUrls\",\"type\":\"string[]\"},{\"internalType\":\"string\",\"name\":\"certificateImageUrl\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"farmPlotNumber\",\"type\":\"string\"},{\"internalType\":\"bytes32\",\"name\":\"dataHash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"productId\",\"type\":\"uint256\"},{\"internalType\":\"enum TraceabilityContract.TransportStatus\",\"name\":\"transportStatus\",\"type\":\"uint8\"},{\"internalType\":\"enum TraceabilityContract.DetailedTransportStatus\",\"name\":\"detailedTransportStatus\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"lastTransporterId\",\"type\":\"uint256\"},{\"internalType\":\"bool\",\"name\":\"warehouseConfirmed\",\"type\":\"bool\"}],\"internalType\":\"struct TraceabilityContract.Batch[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_producerId\",\"type\":\"uint256\"}],\"name\":\"getApprovedBatchesByProducer\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"batchId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"sscc\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"producerId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"quantity\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"productionDate\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"startDate\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"endDate\",\"type\":\"uint256\"},{\"internalType\":\"enum TraceabilityContract.BatchStatus\",\"name\":\"status\",\"type\":\"uint8\"},{\"internalType\":\"string[]\",\"name\":\"productImageUrls\",\"type\":\"string[]\"},{\"internalType\":\"string\",\"name\":\"certificateImageUrl\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"farmPlotNumber\",\"type\":\"string\"},{\"internalType\":\"bytes32\",\"name\":\"dataHash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"productId\",\"type\":\"uint256\"},{\"internalType\":\"enum TraceabilityContract.TransportStatus\",\"name\":\"transportStatus\",\"type\":\"uint8\"},{\"internalType\":\"enum TraceabilityContract.DetailedTransportStatus\",\"name\":\"detailedTransportStatus\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"lastTransporterId\",\"type\":\"uint256\"},{\"internalType\":\"bool\",\"name\":\"warehouseConfirmed\",\"type\":\"bool\"}],\"internalType\":\"struct TraceabilityContract.Batch[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"_sscc\",\"type\":\"string\"}],\"name\":\"getBatchBySSCC\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"batchId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"sscc\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"producerId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"quantity\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"productionDate\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"startDate\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"endDate\",\"type\":\"uint256\"},{\"internalType\":\"enum TraceabilityContract.BatchStatus\",\"name\":\"status\",\"type\":\"uint8\"},{\"internalType\":\"string[]\",\"name\":\"productImageUrls\",\"type\":\"string[]\"},{\"internalType\":\"string\",\"name\":\"certificateImageUrl\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"farmPlotNumber\",\"type\":\"string\"},{\"internalType\":\"bytes32\",\"name\":\"dataHash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"productId\",\"type\":\"uint256\"},{\"internalType\":\"enum TraceabilityContract.TransportStatus\",\"name\":\"transportStatus\",\"type\":\"uint8\"},{\"internalType\":\"enum TraceabilityContract.DetailedTransportStatus\",\"name\":\"detailedTransportStatus\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"lastTransporterId\",\"type\":\"uint256\"},{\"internalType\":\"bool\",\"name\":\"warehouseConfirmed\",\"type\":\"bool\"}],\"internalType\":\"struct TraceabilityContract.Batch\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_batchId\",\"type\":\"uint256\"}],\"name\":\"getBatchDetails\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"batchId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"sscc\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"producerId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"quantity\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"productionDate\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"startDate\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"endDate\",\"type\":\"uint256\"},{\"internalType\":\"enum TraceabilityContract.BatchStatus\",\"name\":\"status\",\"type\":\"uint8\"},{\"internalType\":\"string[]\",\"name\":\"productImageUrls\",\"type\":\"string[]\"},{\"internalType\":\"string\",\"name\":\"certificateImageUrl\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"farmPlotNumber\",\"type\":\"string\"},{\"internalType\":\"bytes32\",\"name\":\"dataHash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"productId\",\"type\":\"uint256\"},{\"internalType\":\"enum TraceabilityContract.TransportStatus\",\"name\":\"transportStatus\",\"type\":\"uint8\"},{\"internalType\":\"enum TraceabilityContract.DetailedTransportStatus\",\"name\":\"detailedTransportStatus\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"lastTransporterId\",\"type\":\"uint256\"},{\"internalType\":\"bool\",\"name\":\"warehouseConfirmed\",\"type\":\"bool\"}],\"internalType\":\"struct TraceabilityContract.Batch\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"_sscc\",\"type\":\"string\"}],\"name\":\"getBatchIdBySSCC\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_batchId\",\"type\":\"uint256\"}],\"name\":\"getBatchTransportStatus\",\"outputs\":[{\"internalType\":\"enum TraceabilityContract.TransportStatus\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"producerId\",\"type\":\"uint256\"}],\"name\":\"getBatchesByProducer\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"batchId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"sscc\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"producerId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"quantity\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"productionDate\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"startDate\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"endDate\",\"type\":\"uint256\"},{\"internalType\":\"enum TraceabilityContract.BatchStatus\",\"name\":\"status\",\"type\":\"uint8\"},{\"internalType\":\"string[]\",\"name\":\"productImageUrls\",\"type\":\"string[]\"},{\"internalType\":\"string\",\"name\":\"certificateImageUrl\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"farmPlotNumber\",\"type\":\"string\"},{\"internalType\":\"bytes32\",\"name\":\"dataHash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"productId\",\"type\":\"uint256\"},{\"internalType\":\"enum TraceabilityContract.TransportStatus\",\"name\":\"transportStatus\",\"type\":\"uint8\"},{\"internalType\":\"enum TraceabilityContract.DetailedTransportStatus\",\"name\":\"detailedTransportStatus\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"lastTransporterId\",\"type\":\"uint256\"},{\"internalType\":\"bool\",\"name\":\"warehouseConfirmed\",\"type\":\"bool\"}],\"internalType\":\"struct TraceabilityContract.Batch[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_batchId\",\"type\":\"uint256\"}],\"name\":\"getConfirmedWarehouses\",\"outputs\":[{\"internalType\":\"uint256[]\",\"name\":\"\",\"type\":\"uint256[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_batchId\",\"type\":\"uint256\"}],\"name\":\"getDetailedTransportStatus\",\"outputs\":[{\"internalType\":\"enum TraceabilityContract.DetailedTransportStatus\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_producerId\",\"type\":\"uint256\"}],\"name\":\"getPendingBatchesByProducer\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"batchId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"sscc\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"producerId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"quantity\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"productionDate\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"startDate\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"endDate\",\"type\":\"uint256\"},{\"internalType\":\"enum TraceabilityContract.BatchStatus\",\"name\":\"status\",\"type\":\"uint8\"},{\"internalType\":\"string[]\",\"name\":\"productImageUrls\",\"type\":\"string[]\"},{\"internalType\":\"string\",\"name\":\"certificateImageUrl\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"farmPlotNumber\",\"type\":\"string\"},{\"internalType\":\"bytes32\",\"name\":\"dataHash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"productId\",\"type\":\"uint256\"},{\"internalType\":\"enum TraceabilityContract.TransportStatus\",\"name\":\"transportStatus\",\"type\":\"uint8\"},{\"internalType\":\"enum TraceabilityContract.DetailedTransportStatus\",\"name\":\"detailedTransportStatus\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"lastTransporterId\",\"type\":\"uint256\"},{\"internalType\":\"bool\",\"name\":\"warehouseConfirmed\",\"type\":\"bool\"}],\"internalType\":\"struct TraceabilityContract.Batch[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_producerId\",\"type\":\"uint256\"}],\"name\":\"getProducerActivityLogsByProducerId\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"batchId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"participantId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"activityName\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"description\",\"type\":\"string\"},{\"internalType\":\"bool\",\"name\":\"isSystemActivity\",\"type\":\"bool\"},{\"internalType\":\"string[]\",\"name\":\"imageUrls\",\"type\":\"string[]\"},{\"internalType\":\"uint256[]\",\"name\":\"relatedProductIds\",\"type\":\"uint256[]\"}],\"internalType\":\"struct ActivityLog.ActivityLogEntry[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_producerId\",\"type\":\"uint256\"}],\"name\":\"getRejectedBatchesByProducer\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"batchId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"sscc\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"producerId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"quantity\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"productionDate\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"startDate\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"endDate\",\"type\":\"uint256\"},{\"internalType\":\"enum TraceabilityContract.BatchStatus\",\"name\":\"status\",\"type\":\"uint8\"},{\"internalType\":\"string[]\",\"name\":\"productImageUrls\",\"type\":\"string[]\"},{\"internalType\":\"string\",\"name\":\"certificateImageUrl\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"farmPlotNumber\",\"type\":\"string\"},{\"internalType\":\"bytes32\",\"name\":\"dataHash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"productId\",\"type\":\"uint256\"},{\"internalType\":\"enum TraceabilityContract.TransportStatus\",\"name\":\"transportStatus\",\"type\":\"uint8\"},{\"internalType\":\"enum TraceabilityContract.DetailedTransportStatus\",\"name\":\"detailedTransportStatus\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"lastTransporterId\",\"type\":\"uint256\"},{\"internalType\":\"bool\",\"name\":\"warehouseConfirmed\",\"type\":\"bool\"}],\"internalType\":\"struct TraceabilityContract.Batch[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"_sscc\",\"type\":\"string\"}],\"name\":\"getSystemActivityLogsBySSCC\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"batchId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"participantId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"activityName\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"description\",\"type\":\"string\"},{\"internalType\":\"bool\",\"name\":\"isSystemActivity\",\"type\":\"bool\"},{\"internalType\":\"string[]\",\"name\":\"imageUrls\",\"type\":\"string[]\"},{\"internalType\":\"uint256[]\",\"name\":\"relatedProductIds\",\"type\":\"uint256[]\"}],\"internalType\":\"struct ActivityLog.ActivityLogEntry[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getTotalBatches\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"_sscc\",\"type\":\"string\"}],\"name\":\"getTransportHistoryBySSCC\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"participantId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"action\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"participantType\",\"type\":\"string\"}],\"internalType\":\"struct TraceabilityContract.TransportEvent[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_batchId\",\"type\":\"uint256\"}],\"name\":\"isBatchApproved\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_batchId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_producerId\",\"type\":\"uint256\"}],\"name\":\"isProducerOfBatch\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"_sscc\",\"type\":\"string\"}],\"name\":\"isValidSSCC\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_batchId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_warehouseId\",\"type\":\"uint256\"}],\"name\":\"isWarehouseConfirmed\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_batchId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_participantId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"_participantType\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"_action\",\"type\":\"string\"}],\"name\":\"recordParticipation\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_batchId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_approverId\",\"type\":\"uint256\"}],\"name\":\"rejectBatch\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"sscc\",\"type\":\"string\"}],\"name\":\"ssccExists\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_batchId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_participantId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"_action\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"_participantType\",\"type\":\"string\"}],\"name\":\"updateTransportStatus\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_batchId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_warehouseId\",\"type\":\"uint256\"}],\"name\":\"warehouseConfirmation\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/supplychain.sol\":\"TraceabilityContract\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":1},\"remappings\":[]},\"sources\":{\"project:/contracts/ActivityLog.sol\":{\"keccak256\":\"0x2b6b7ed1c3c9907fb4af441d23d431c06dcb64fa52793ab0e487381c527702ce\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://40965859247ef4c492420f4ea4c5ed58a2474ca863df9411fe72daefa6b15929\",\"dweb:/ipfs/QmNfWkM4ZZxqNVoxh6YQ3LqZCEfdVLDmWXUvEhVc6UQkdH\"]},\"project:/contracts/supplychain.sol\":{\"keccak256\":\"0x478d4fcb4b165df3fcca92c2f6f205c96fec073727975c79076c9cca8e189220\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://24522bf944d42a1dfd05c8b4c854cf1fdc17cfb7bdb31ac74428d310ba17bc3e\",\"dweb:/ipfs/QmcMw4qsv72MjfBPehUvryfRxBU6Re4mm8BgvnxtD84Yr6\"]}},\"version\":1}",
@@ -62747,8 +62725,7 @@
     }
   },
   "schemaVersion": "3.4.16",
-  "updatedAt": "2024-10-04T22:18:27.473Z",
-  "networkType": "ethereum",
+  "updatedAt": "2024-10-15T10:59:10.874Z",
   "devdoc": {
     "kind": "dev",
     "methods": {},

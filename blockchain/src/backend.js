@@ -48,7 +48,7 @@ const uploadQR = multer({
   limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
 });
 
-const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
+const web3 = new Web3(new Web3.providers.HttpProvider(`https://sepolia.infura.io/v3/${process.env.INFURA_PROJECT_ID}`));
 
 const account = web3.eth.accounts.privateKeyToAccount('0xe9437cabf0c3b29aac95c0338c1177a53f6a2487e15480d959f37cb1597b5795');
 web3.eth.accounts.wallet.add(account);
