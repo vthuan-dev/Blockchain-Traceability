@@ -15,7 +15,7 @@
     z-index: 1000 !important;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
     transition: transform 0.3s, box-shadow 0.3s !important;
-}
+    position: relative; 
 
 .chat-icon:hover {
     transform: scale(1.1);
@@ -37,10 +37,9 @@
     padding: 8px;
     position: absolute;
     z-index: 1001;
-    bottom: 100%;
-    right: 100%;
+    bottom: 70px; /* Điều chỉnh vị trí */
+    right: 0; /* Căn chỉnh tooltip với biểu tượng */
     margin-right: -10px;
-    margin-bottom: -10px;
     opacity: 0;
     transition: opacity 0.3s, visibility 0.3s;
 }
