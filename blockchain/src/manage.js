@@ -6,7 +6,7 @@ const bodyParser = require('body-parser');
 const multer = require('multer');
 const bcrypt = require('bcrypt');
 const axios = require('axios');
-const { storage, ref, uploadBytes, getDownloadURL, authenticateAnonymously, admin } = require('./firebase');
+const { storage, ref, uploadBytes, getDownloadURL, authenticateAnonymously, admin, adminBucket } = require('./firebase');
 
 const router = express.Router(); // Sử dụng Router
 router.use(cors()); // Cho phép CORS để client có thể gọi API
@@ -67,11 +67,13 @@ router.get('/api/theproducts', async (req, res) => {
 
 // Thêm endpoint mới để xử lý việc thêm sản phẩm
 router.post('/api/products', upload.single('img'), async (req, res) => {
+    let connection;
+    let tempImgUrl = null;
     try {
+        connection = await db.getConnection();
+        await connection.beginTransaction();
+
         console.log('Bắt đầu xử lý yêu cầu thêm sản phẩm');
-        
-        // Xóa phần xác thực ẩn danh
-        // await authenticateAnonymously();
         
         const { product_name, price, description, uses, process } = req.body;
         const img = req.file;
@@ -81,46 +83,55 @@ router.post('/api/products', upload.single('img'), async (req, res) => {
             return res.status(400).json({ error: 'Thiếu thông tin sản phẩm' });
         }
 
-        let imgUrl = null;
         if (img) {
             try {
                 const sanitizedFileName = img.originalname.replace(/\s+/g, '_').toLowerCase();
-                const bucket = admin.storage().bucket();
-                const fileUpload = bucket.file(`products/${Date.now()}_${sanitizedFileName}`);
-                
-                const blobStream = fileUpload.createWriteStream({
-                    metadata: {
-                        contentType: img.mimetype
-                    }
+                const fileName = `products/${Date.now()}_${sanitizedFileName}`;
+                const file = adminBucket.file(fileName);
+
+                await file.save(img.buffer, {
+                    metadata: { contentType: img.mimetype }
                 });
 
-                blobStream.on('error', (error) => {
-                    console.error('Lỗi khi tải lên Firebase:', error);
-                    res.status(500).json({ error: 'Lỗi khi tải lên hình ảnh' });
+                const [url] = await file.getSignedUrl({
+                    action: 'read',
+                    expires: '03-09-2491'
                 });
 
-                blobStream.on('finish', async () => {
-                    imgUrl = `https://storage.googleapis.com/${bucket.name}/${fileUpload.name}`;
-                    console.log('URL hình ảnh sau khi tải lên:', imgUrl);
-                    
-                    // Lưu vào cơ sở dữ liệu
-                    const query = 'INSERT INTO products (product_name, price, description, img, uses, process) VALUES (?, ?, ?, ?, ?, ?)';
-                    const results = await queryDatabase(query, [product_name, price, description, imgUrl, uses, process]);
-                    console.log('Kết quả sau khi thêm vào cơ sở dữ liệu:', results);
-                    
-                    res.status(201).json({ message: 'Sản phẩm đã được thêm thành công', id: results.insertId, imgUrl: imgUrl });
-                });
-
-                blobStream.end(img.buffer);
+                tempImgUrl = url;
+                console.log('Hình ảnh sản phẩm đã được upload:', tempImgUrl);
             } catch (uploadError) {
-                console.error('Lỗi khi tải lên Firebase:', uploadError);
-                return res.status(500).json({ error: 'Lỗi khi tải lên hình ảnh' });
+                console.error('Lỗi khi upload hình ảnh:', uploadError);
+                throw new Error('Lỗi khi upload hình ảnh');
             }
         }
+
+        const query = 'INSERT INTO products (product_name, price, description, img, uses, process) VALUES (?, ?, ?, ?, ?, ?)';
+        const [result] = await connection.query(query, [product_name, price, description, tempImgUrl, uses, process]);
+        
+        console.log('Kết quả sau khi thêm vào cơ sở dữ liệu:', result);
+
+        if (result.affectedRows === 0) {
+            throw new Error('Không có hàng nào được thêm vào cơ sở dữ liệu');
+        }
+
+        await connection.commit();
+        res.status(201).json({ message: 'Sản phẩm đã được thêm thành công', id: result.insertId, imgUrl: tempImgUrl });
     } catch (error) {
+        if (connection) {
+            await connection.rollback();
+        }
         console.error('Lỗi chi tiết:', error);
         console.error('Stack trace:', error.stack);
-        res.status(500).json({ error: 'Lỗi khi xử lý yêu cầu thêm sản phẩm: ' + error.message });
+        let errorMessage = 'Lỗi khi xử lý yêu cầu thêm sản phẩm';
+        if (error.message) {
+            errorMessage += `: ${error.message}`;
+        }
+        res.status(500).json({ error: errorMessage });
+    } finally {
+        if (connection) {
+            connection.release();
+        }
     }
 });
 // Endpoint để xóa sản phẩm
@@ -196,10 +207,11 @@ router.get('/caidat', (req, res) => {
 
 // Endpoint để cập nhật sản phẩm
 router.post('/api/products/update', upload.single('img'), async (req, res) => {
+    let connection;
+    let tempImgUrl = null;
     try {
-        // Xóa phần xác thực ẩn danh
-        // const user = await authenticateAnonymously();
-        // console.log("Đã xác thực ẩn danh:", user.uid);
+        connection = await db.getConnection();
+        await connection.beginTransaction();
 
         console.log('Dữ liệu nhận được:', req.body, req.file);
 
@@ -208,59 +220,84 @@ router.post('/api/products/update', upload.single('img'), async (req, res) => {
         let updateFields = [];
         let updateValues = [];
 
-        if (product_name) {
-            updateFields.push('product_name = ?');
-            updateValues.push(product_name);
-        }
-        if (price) {
-            updateFields.push('price = ?');
-            updateValues.push(price);
-        }
-        if (description) {
-            updateFields.push('description = ?');
-            updateValues.push(description);
-        }
-        if (uses) {
-            updateFields.push('uses = ?');
-            updateValues.push(uses);
-        }
-        if (process) {
-            updateFields.push('process = ?');
-            updateValues.push(process);
+        // Xử lý các trường thông tin khác
+        const fields = { product_name, price, description, uses, process };
+        for (const [key, value] of Object.entries(fields)) {
+            if (value) {
+                updateFields.push(`${key} = ?`);
+                updateValues.push(value);
+            }
         }
 
+        // Xử lý hình ảnh
         if (req.file) {
-            const bucket = admin.storage().bucket();
-            const fileUpload = bucket.file(`products/${Date.now()}_${req.file.originalname}`);
-            
-            const blobStream = fileUpload.createWriteStream({
-                metadata: {
-                    contentType: req.file.mimetype
+            try {
+                // Xóa hình ảnh cũ
+                const [oldProduct] = await connection.query('SELECT img FROM products WHERE product_id = ?', [product_id]);
+                if (oldProduct[0] && oldProduct[0].img) {
+                    const oldFileName = oldProduct[0].img.split('/').pop().split('?')[0];
+                    const oldFile = adminBucket.file(`products/${oldFileName}`);
+                    await oldFile.delete().catch(error => console.log('Lỗi khi xóa hình ảnh cũ từ Firebase:', error));
                 }
-            });
 
-            blobStream.on('error', (error) => {
-                console.error('Lỗi khi tải lên Firebase:', error);
-                res.status(500).json({ error: 'Lỗi khi tải lên hình ảnh' });
-            });
+                // Upload hình ảnh mới
+                const sanitizedFileName = req.file.originalname.replace(/\s+/g, '_').toLowerCase();
+                const fileName = `products/${Date.now()}_${sanitizedFileName}`;
+                const file = adminBucket.file(fileName);
 
-            blobStream.on('finish', async () => {
-                const imgUrl = `https://storage.googleapis.com/${bucket.name}/${fileUpload.name}`;
+                await file.save(req.file.buffer, {
+                    metadata: { contentType: req.file.mimetype }
+                });
+
+                const [url] = await file.getSignedUrl({
+                    action: 'read',
+                    expires: '03-09-2491'
+                });
+
+                tempImgUrl = url;
                 updateFields.push('img = ?');
-                updateValues.push(imgUrl);
+                updateValues.push(tempImgUrl);
 
-                // Tiếp tục với phần cập nhật cơ sở dữ liệu
-                // ... (giữ nguyên phần còn lại của mã)
-            });
+                console.log('Hình ảnh mới đã được upload:', tempImgUrl);
+            } catch (uploadError) {
+                console.error('Lỗi khi upload hình ảnh:', uploadError);
+                throw new Error('Lỗi khi upload hình ảnh');
+            }
+        }
 
-            blobStream.end(req.file.buffer);
+        if (updateFields.length > 0) {
+            const updateQuery = `UPDATE products SET ${updateFields.join(', ')} WHERE product_id = ?`;
+            updateValues.push(product_id);
+
+            console.log('Update Query:', updateQuery);
+            console.log('Update Values:', updateValues);
+
+            const [result] = await connection.query(updateQuery, updateValues);
+            console.log('Update Result:', result);
+
+            if (result.affectedRows === 0) {
+                throw new Error('Không có hàng nào được cập nhật trong cơ sở dữ liệu');
+            }
+
+            await connection.commit();
+            res.json({ updated: true, message: 'Sản phẩm đã được cập nhật', imgUrl: tempImgUrl });
         } else {
-            // Tiếp tục với phần cập nhật cơ sở dữ liệu nếu không có file
-            // ... (giữ nguyên phần còn lại của mã)
+            res.json({ updated: false, message: 'Không có thông tin nào được cập nhật' });
         }
     } catch (error) {
-        console.error('Lỗi khi cập nhật sản phẩm:', error);
-        res.status(500).json({ error: 'Lỗi khi cập nhật sản phẩm' });
+        if (connection) {
+            await connection.rollback();
+        }
+        console.error('Lỗi chi tiết khi cập nhật sản phẩm:', error);
+        let errorMessage = 'Lỗi khi cập nhật sản phẩm';
+        if (error.message) {
+            errorMessage += `: ${error.message}`;
+        }
+        res.status(500).json({ error: errorMessage });
+    } finally {
+        if (connection) {
+            connection.release();
+        }
     }
 });
 
@@ -319,7 +356,7 @@ router.get('/api/districts/:provinceCode', async (req, res) => {
         res.json(districts);
     } catch (error) {
         console.error('Lỗi khi lấy danh sách quận/huyện:', error);
-        res.status(500).json({ error: 'Lỗi khi lấy danh sách quận/huyện' });
+        res.status(500).json({ error: 'Lỗi khi lấy danh sách quận/huy��n' });
     }
 });
 

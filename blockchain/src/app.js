@@ -321,6 +321,7 @@ app.get('/nhakiemduyet.html', requireAuth, (req, res) => {
     const [regions] = await db.query('SELECT * FROM regions');
     res.json(regions);
   });
+  
   app.post('/api/capnhatthongtin', upload.single('avatar'), async (req, res) => {
     let connection;
     let tempAvatarUrl = null;
