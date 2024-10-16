@@ -152,7 +152,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -213,7 +214,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -274,7 +276,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     },
     {
       "inputs": [
@@ -335,7 +338,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     }
   ],
   "metadata": "{\"compiler\":{\"version\":\"0.8.20+commit.a1b79de6\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"batchId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"participantId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"activityName\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"description\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"isSystemGenerated\",\"type\":\"bool\"},{\"indexed\":false,\"internalType\":\"string[]\",\"name\":\"imageUrls\",\"type\":\"string[]\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"relatedProductIds\",\"type\":\"uint256[]\"}],\"name\":\"ActivityLogAdded\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_batchId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_participantId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"_activityName\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"_description\",\"type\":\"string\"},{\"internalType\":\"bool\",\"name\":\"_isSystemActivity\",\"type\":\"bool\"},{\"internalType\":\"string[]\",\"name\":\"_imageUrls\",\"type\":\"string[]\"},{\"internalType\":\"uint256[]\",\"name\":\"_relatedProductIds\",\"type\":\"uint256[]\"}],\"name\":\"addActivityLog\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_uid\",\"type\":\"uint256\"}],\"name\":\"getActivityLogs\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"batchId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"participantId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"activityName\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"description\",\"type\":\"string\"},{\"internalType\":\"bool\",\"name\":\"isSystemActivity\",\"type\":\"bool\"},{\"internalType\":\"string[]\",\"name\":\"imageUrls\",\"type\":\"string[]\"},{\"internalType\":\"uint256[]\",\"name\":\"relatedProductIds\",\"type\":\"uint256[]\"}],\"internalType\":\"struct ActivityLog.ActivityLogEntry[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_uid\",\"type\":\"uint256\"}],\"name\":\"getProducerActivityLogs\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"batchId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"participantId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"activityName\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"description\",\"type\":\"string\"},{\"internalType\":\"bool\",\"name\":\"isSystemActivity\",\"type\":\"bool\"},{\"internalType\":\"string[]\",\"name\":\"imageUrls\",\"type\":\"string[]\"},{\"internalType\":\"uint256[]\",\"name\":\"relatedProductIds\",\"type\":\"uint256[]\"}],\"internalType\":\"struct ActivityLog.ActivityLogEntry[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_uid\",\"type\":\"uint256\"}],\"name\":\"getSystemActivityLogs\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"batchId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"participantId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"activityName\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"description\",\"type\":\"string\"},{\"internalType\":\"bool\",\"name\":\"isSystemActivity\",\"type\":\"bool\"},{\"internalType\":\"string[]\",\"name\":\"imageUrls\",\"type\":\"string[]\"},{\"internalType\":\"uint256[]\",\"name\":\"relatedProductIds\",\"type\":\"uint256[]\"}],\"internalType\":\"struct ActivityLog.ActivityLogEntry[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"_sscc\",\"type\":\"string\"}],\"name\":\"getSystemActivityLogsBySSCC\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"batchId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"participantId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"activityName\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"description\",\"type\":\"string\"},{\"internalType\":\"bool\",\"name\":\"isSystemActivity\",\"type\":\"bool\"},{\"internalType\":\"string[]\",\"name\":\"imageUrls\",\"type\":\"string[]\"},{\"internalType\":\"uint256[]\",\"name\":\"relatedProductIds\",\"type\":\"uint256[]\"}],\"internalType\":\"struct ActivityLog.ActivityLogEntry[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/ActivityLog.sol\":\"ActivityLog\"},\"evmVersion\":\"shanghai\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"project:/contracts/ActivityLog.sol\":{\"keccak256\":\"0x6a7ee74fc834607df9db7432e8894d462797597f2983c96a4d87b1070608f4ad\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://1bd5ceba59eb238f396167f38f2223f7d89826e92ea42f0d03a79073bb723288\",\"dweb:/ipfs/QmcBX7ZyYMC56a8gQZ69pRFDDVQd9bdnCFNAKRDFoQDM1G\"]}},\"version\":1}",
@@ -14844,10 +14848,17 @@
       "links": {},
       "address": "0x5b1D4B6B5fa9249479d5532352dA744c4E0aFbfe",
       "transactionHash": "0x3aafbba921a0e89533e713abfe52937cf59a3ce5b623fcfeb4336863c8fcc748"
+    },
+    "11155111": {
+      "events": {},
+      "links": {},
+      "address": "0x05952dfAe4906cFC689a6cffA56EEc518d791A8B",
+      "transactionHash": "0xf4a6f721ea1238d02b530f9ad26514dae8317f5d6675eba488c0f19098f310c0"
     }
   },
   "schemaVersion": "3.4.16",
-  "updatedAt": "2024-10-15T20:35:45.196Z",
+  "updatedAt": "2024-10-16T08:20:16.605Z",
+  "networkType": "ethereum",
   "devdoc": {
     "kind": "dev",
     "methods": {},

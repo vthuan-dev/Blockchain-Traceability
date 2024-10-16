@@ -4,6 +4,8 @@ const multer = require('multer');
 const express = require('express');
 const app = express();
 const { Web3 } = require('web3');
+const HDWalletProvider = require('@truffle/hdwallet-provider');
+
 const dotenv = require('dotenv');
 const mysql = require('mysql');
 require('dotenv').config();
@@ -17,6 +19,8 @@ const { Network, Alchemy } = require("alchemy-sdk");
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 
 const storage = multer.memoryStorage();
+
+
 
 const s3Client = new S3Client({
   endpoint: 'https://s3.filebase.com',
@@ -55,9 +59,24 @@ const settings = {
 };
 
 const alchemy = new Alchemy(settings);
-const web3 = new Web3(new Web3.providers.HttpProvider(`https://eth-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`));
+// Thêm dòng này ở đầu file nếu chưa có
+//const Web3 = require('web3');
 
-const account = web3.eth.accounts.privateKeyToAccount(process.env.PRIVATE_KEY);
+// Sửa đổi cách đọc và xử lý private key
+const privateKey = process.env.PRIVATE_KEY;
+if (!privateKey || privateKey.length !== 64) {
+  console.error('Invalid private key in .env file');
+  process.exit(1);
+}
+
+const formattedPrivateKey = privateKey.startsWith('0x') ? privateKey : `0x${privateKey}`;
+
+// Khởi tạo Web3 và tài khoản
+const web3 = new Web3(`https://eth-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`);
+const account = web3.eth.accounts.privateKeyToAccount(formattedPrivateKey);
+web3.eth.accounts.wallet.add(account);
+web3.eth.defaultAccount = account.address;
+
 web3.eth.accounts.wallet.add(account);
 web3.eth.defaultAccount = account.address;
 
@@ -70,12 +89,12 @@ web3.eth.net.isListening()
 console.log('Admin address:', adminAddress);
   
 const traceabilityContractABI = require('../build/contracts/TraceabilityContract.json').abi;
-const traceabilityContractAddress = '0x71425A1716E4872e3eB8Fca76B0eD7D90876896c';
+const traceabilityContractAddress = '0x0d8198B9362BC0fd21895f9dB64eb81528255F40';
 const traceabilityContract = new web3.eth.Contract(traceabilityContractABI, traceabilityContractAddress);
 
 // ABI và địa chỉ của contract ActivityLog
 const activityLogABI = require('../build/contracts/ActivityLog.json').abi;
-const activityLogAddress = '0x5b1D4B6B5fa9249479d5532352dA744c4E0aFbfe';
+const activityLogAddress = '0x05952dfAe4906cFC689a6cffA56EEc518d791A8B';
 const activityLogContract = new web3.eth.Contract(activityLogABI, activityLogAddress);
 
 // tạo biến lưu trữ file, giới hạn số lượng file và tên file, maxCount: số lượng file, name: tên file

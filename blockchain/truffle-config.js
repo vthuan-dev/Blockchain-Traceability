@@ -2,7 +2,7 @@ const HDWalletProvider = require('@truffle/hdwallet-provider');
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
-const privateKey = process.env.PRIVATE_KEY;
+const privateKey = process.env.PRIVATE_KEY.startsWith('0x') ? process.env.PRIVATE_KEY.slice(2) : process.env.PRIVATE_KEY;
 
 module.exports = {
   networks: {
@@ -13,14 +13,17 @@ module.exports = {
       db_path: "./ganache-db"
     },
     sepolia: {
-      provider: () => new HDWalletProvider(privateKey, `https://eth-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`),
+      provider: () => new HDWalletProvider({
+        privateKeys: [privateKey],
+        providerOrUrl: `https://eth-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`
+      }),
       network_id: 11155111,
-      gas: 15000000,  // Tăng từ 8000000 lên 15000000
-      gasPrice: 10000000000, // 10 Gwei
+      gas: 30000000, // Tăng lên tối đa
+      gasPrice: 20000000000, // 20 Gwei, có thể điều chỉnh
       confirmations: 2,
       timeoutBlocks: 200,
       skipDryRun: true,
-      networkCheckTimeout: 10000
+      networkCheckTimeout: 1000000
     },
   },
 
