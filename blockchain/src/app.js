@@ -59,7 +59,7 @@ const {
     port: process.env.DB_PORT,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_DATABASE,
-    connectTimeout: 60000,
+    connectTimeout: 200000,
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
