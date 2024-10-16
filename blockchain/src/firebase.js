@@ -3,7 +3,7 @@ const { initializeApp } = require("firebase/app");
 const { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } = require("firebase/storage");
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
-const { getAuth } = require("firebase/auth");
+const { getAuth, signInAnonymously } = require("firebase/auth");
 
 // Khởi tạo Firebase Admin SDK
 const serviceAccount = {
@@ -97,6 +97,22 @@ async function uploadFileFirebase(file) {
   return url;
 }
 
+async function authenticateAnonymously() {
+  try {
+    console.log('Bắt đầu xác thực ẩn danh');
+    const auth = getAuth(firebaseApp);
+    console.log('Auth instance:', auth);
+    const userCredential = await signInAnonymously(auth);
+    console.log("Xác thực ẩn danh thành công:", userCredential.user.uid);
+    return userCredential.user;
+  } catch (error) {
+    console.error("Lỗi xác thực ẩn danh:", error);
+    console.error("Error code:", error.code);
+    console.error("Error message:", error.message);
+    throw error;
+  }
+}
+
 module.exports = { 
   uploadFile, 
   deleteFile, 
@@ -108,5 +124,6 @@ module.exports = {
   getDownloadURL,
   deleteObject,
   admin,
-  adminBucket
+  adminBucket,
+  authenticateAnonymously
 };
