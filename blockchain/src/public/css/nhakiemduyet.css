@@ -612,7 +612,6 @@ body {
   display: block; /* Hiển thị khi active */
 }
 
-<style>
 /* Đảm bảo modal được căn giữa màn hình */
 .modal {
 display: none;
