@@ -16,6 +16,7 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
     transition: transform 0.3s, box-shadow 0.3s !important;
     position: relative; 
+}
 
 .chat-icon:hover {
     transform: scale(1.1);
@@ -61,7 +62,7 @@
     position: fixed;
     bottom: 20px;
     right: 20px;
-    width: 300px;
+    width: 300px; /* Có thể điều chỉnh kích thước nếu cần */
     background-color: #f8f9fa;
     border-radius: 15px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
@@ -104,7 +105,7 @@
 }
 
 .chatbox-body {
-    height: 300px;
+    height: 300px; /* Có thể điều chỉnh chiều cao */
     overflow-y: auto;
     padding: 15px;
     background-color: #ffffff;
