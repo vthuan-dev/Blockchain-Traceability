@@ -295,18 +295,101 @@ window.StatManager = {
         });
     },
 
-    // renderProductStats() {
-    //     const productContent = `
-    //         <div class="stat-card-custom bg-blue">
-    //             <div class="stat-info">
-    //                 <h3>Tổng số sản phẩm</h3>
-    //                 <p>Đang tải...</p>
-    //             </div>
-    //         </div>
-    //     `;
-    //     document.getElementById('products').innerHTML = productContent;
-    //     this.updateProductCount();
-    // },
+    async renderProductStats() {
+        const productContent = `
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="stat-card-custom bg-blue">
+                        <div class="stat-info">
+                            <h3>Tổng số sản phẩm</h3>
+                            <p id="totalProducts">Đang tải...</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card-custom bg-green">
+                        <div class="stat-info">
+                            <h3>Giá trung bình</h3>
+                            <p id="averagePrice">Đang tải...</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="chart-container" style="position: relative; height:250px; width:100%">
+                        <canvas id="priceRangeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.getElementById('products').innerHTML = productContent;
+        await this.updateProductStats();
+    },
+
+    async updateProductStats() {
+        try {
+            const response = await fetch('/api/theproducts');
+            const products = await response.json();
+            
+            // Tổng số sản phẩm
+            const totalProducts = products.length;
+            document.getElementById('totalProducts').textContent = totalProducts;
+
+            // Giá trung bình
+            const totalPrice = products.reduce((sum, product) => sum + parseFloat(product.price), 0);
+            const averagePrice = totalPrice / totalProducts;
+            document.getElementById('averagePrice').textContent = `${averagePrice.toLocaleString('vi-VN')} VNĐ`;
+
+            // Thống kê theo khoảng giá
+            const priceRanges = {
+                '<100k': 0,
+                '100k-500k': 0,
+                '>500k': 0
+            };
+
+            products.forEach(product => {
+                const price = parseFloat(product.price);
+                if (price < 100000) {
+                    priceRanges['<100k']++;
+                } else if (price >= 100000 && price <= 500000) {
+                    priceRanges['100k-500k']++;
+                } else {
+                    priceRanges['>500k']++;
+                }
+            });
+
+            this.createPriceRangeChart(priceRanges);
+
+        } catch (error) {
+            console.error('Lỗi khi lấy thống kê sản phẩm:', error);
+        }
+    },
+
+    createPriceRangeChart(data) {
+        const ctx = document.getElementById('priceRangeChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: Object.keys(data),
+                datasets: [{
+                    data: Object.values(data),
+                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Phân bố giá sản phẩm'
+                    },
+                    legend: {
+                        position: 'right'
+                    }
+                }
+            }
+        });
+    },
 
     initTabs() {
         const tabs = document.querySelectorAll('#statsTabs .nav-link');
@@ -336,4 +419,5 @@ document.addEventListener('DOMContentLoaded', () => {
     StatManager.updateProductCount();
     StatManager.initTabs();
     StatManager.renderUserStats();
+    StatManager.renderProductStats();
 })
