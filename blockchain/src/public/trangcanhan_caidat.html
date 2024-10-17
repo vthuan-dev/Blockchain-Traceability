@@ -193,6 +193,31 @@
         </div>
     </div> -->
 
+    <!-- Modal -->
+    <div class="chat-icon" id="openChat" onclick="toggleChat()">
+        <i class="fas fa-comments"></i>
+        <div class="tooltip">Đặt câu hỏi cho chúng tôi</div>
+    </div>
+
+    <!-- Khung chat -->
+    <div id="chatbox" class="chatbox">
+        <div class="chatbox-header">
+            <strong>Hỗ trợ</strong>
+            <button id="closeChat" class="btn-close" onclick="toggleChat()">x</button>
+        </div>
+        <div class="chatbox-body">
+            <ul id="messages" class="list-group">
+                <li class="list-group-item system-message"><strong>Hệ thống: </strong> Chào bạn, hãy đặt câu hỏi của bạn.</li>
+            </ul>
+        </div>
+        <div class="chatbox-footer">
+            <form id="messageForm" class="d-flex">
+                <input id="messageInput" type="text" class="form-control" placeholder="type message">
+                <button type="submit" class="btn btn-primary">Send</button>
+            </form>
+        </div>
+    </div>
+
     <!-- Modal Chỉnh sửa Địa chỉ -->
     <div class="modal fade" id="editAddressModal" tabindex="-1" role="dialog" aria-labelledby="editAddressModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">

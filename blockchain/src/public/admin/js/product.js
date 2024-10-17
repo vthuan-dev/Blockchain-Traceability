@@ -38,6 +38,14 @@ window.ProductManager = {
             return;
         }
 
+        function escapeString(str) {
+            return str.replace(/\\/g, '\\\\')
+                      .replace(/'/g, "\\'")
+                      .replace(/"/g, '\\"')
+                      .replace(/\n/g, '\\n')
+                      .replace(/\r/g, '\\r');
+        }
+
         paginatedData.forEach(product => {
             const imagePath = this.getProductImagePath(product.img);
             console.log('Rendering Image Path:', imagePath); // Thêm dòng này để kiểm tra URL của ảnh khi render
@@ -52,7 +60,7 @@ window.ProductManager = {
                     </td>
                     <td style="text-align: center; vertical-align: middle;">${this.formatDate(product.created_at)}</td>
                     <td style="text-align: center; vertical-align: middle;">
-                        <button class="action-icons bg-blue" title="Sửa" onclick="window.ProductManager.editProduct(${product.product_id}, '${product.product_name}', ${product.price}, '${product.description}', '${product.uses}', '${product.process}', '${product.img}')"><i class="fas fa-edit"></i></button>
+                        <button class="action-icons bg-blue" title="Sửa" onclick="window.ProductManager.editProduct(${product.product_id}, '${escapeString(product.product_name)}', ${product.price}, '${escapeString(product.description)}', '${escapeString(product.uses)}', '${escapeString(product.process)}', '${escapeString(product.img)}')"><i class="fas fa-edit"></i></button>
                         <button class="action-icons bg-red" title="Xóa"><i class="fas fa-trash-alt"></i></button>
                     </td>
                 </tr>
@@ -89,12 +97,44 @@ window.ProductManager = {
     },
 
     editProduct: function(id, name, price, description, uses, process, img) {
-        const editLink = document.createElement('a');
-        editLink.href = `editproduct.html?id=${id}&name=${encodeURIComponent(name)}&price=${price}&description=${encodeURIComponent(description)}&uses=${encodeURIComponent(uses)}&process=${encodeURIComponent(process)}&img=${encodeURIComponent(img)}`;
-        editLink.style.display = 'none';
-        document.body.appendChild(editLink);
-        editLink.click();
-        document.body.removeChild(editLink);
+        console.log('ID:', id);
+        console.log('Name:', name);
+        console.log('Price:', price);
+        console.log('Description:', description); // Kiểm tra giá trị của description
+        console.log('Uses:', uses);
+        console.log('Process:', process);
+        console.log('Image:', img);
+
+        const productData = {
+            id, name, price, description, uses, process, img
+        };
+        
+        // Nén dữ liệu sản phẩm trước khi lưu vào localStorage
+        const compressedData = LZString.compressToUTF16(JSON.stringify(productData));
+        console.log('Kích thước dữ liệu nén:', compressedData.length);
+        localStorage.setItem('editingProduct', compressedData);
+        
+        // Chuyển hướng đến trang chỉnh sửa
+        window.location.href = 'editproduct.html';
+    },
+
+    getEditingProduct: function() {
+        const compressedData = localStorage.getItem('editingProduct');
+        if (compressedData) {
+            try {
+                // Giải nén dữ liệu
+                const decodedData = LZString.decompressFromUTF16(compressedData);
+                return JSON.parse(decodedData);
+            } catch (error) {
+                console.error('Lỗi khi giải nén dữ liệu sản phẩm:', error);
+                return null;
+            }
+        }
+        return null;
+    },
+
+    clearEditingProduct: function() {
+        localStorage.removeItem('editingProduct');
     },
 
     updateProduct: function(productData) {
@@ -114,8 +154,13 @@ window.ProductManager = {
         .then(data => {
             console.log('Sản phẩm đã được cập nhật:', data);
             this.fetchProductData();
+            // Chuyển hướng về trang danh sách sản phẩm sau khi cập nhật thành công
+            window.location.href = 'product.html';
         })
-        .catch(error => console.error('Lỗi khi cập nhật sản phẩm:', error));
+        .catch(error => {
+            console.error('Lỗi khi cập nhật sản phẩm:', error);
+            alert('Có lỗi xảy ra khi cập nhật sản phẩm. Vui lòng thử lại.');
+        });
     }
 };
 

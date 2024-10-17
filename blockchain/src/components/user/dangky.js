@@ -1,6 +1,7 @@
     require('dotenv').config();
     const express = require('express');
     const mysql = require('mysql2/promise');
+    const fs = require('fs').promises;
     const path = require('path');
     const bcrypt = require('bcrypt');
     const multer = require('multer');
@@ -115,13 +116,24 @@
         router.get('/provinces', async (req, res) => {
             try {
                 console.log('Đang gọi API provinces...');
-                const response = await axios.get('https://provinces.open-api.vn/api/p/');
+                const response = await axios.get('https://provinces.open-api.vn/api/p/', { timeout: 100000 });
                 const provinces = response.data.map(p => ({ province_id: p.code, province_name: p.name }));
                 console.log('Kết quả API provinces:', provinces);
+                await fs.writeFile(path.join(__dirname, 'provinces_data.json'), JSON.stringify(provinces));
                 res.json(provinces);
             } catch (error) {
-                console.error('Lỗi khi lấy danh sách tỉnh/thành phố:', error);
-                res.status(500).json({ error: 'Lỗi khi lấy danh sách tỉnh/thành phố' });
+                console.error('Lỗi khi lấy danh sách tỉnh/thành phố từ API:', error);
+        
+                try {
+                    // Đọc dữ liệu từ file dự phòng
+                    const data = await fs.readFile(path.join(__dirname, 'provinces_data.json'), 'utf8');
+                    const provinces = JSON.parse(data);
+                    console.log('Sử dụng dữ liệu dự phòng từ file');
+                    res.json(provinces);
+                } catch (fileError) {
+                    console.error('Lỗi khi đọc file dự phòng:', fileError);
+                    res.status(500).json({ error: 'Không thể lấy danh sách tỉnh/thành phố' });
+                }
             }
         });
         
