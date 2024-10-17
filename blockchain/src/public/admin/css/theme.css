@@ -63,98 +63,85 @@ body.light-theme .clock {
 
 /* Theme tối */
 body.dark-theme {
-    background-color: #2c2c2c; /* Màu nền sáng hơn */
+    background-color: #0a0e17; /* Màu nền tối hơn */
     color: #e0e0e0;
 }
 
 body.dark-theme header {
-    background-color: #f5f5f5; /* Màu nền header sáng hơn */
-    color: #333333; /* Màu chữ tối hơn để tạo sự tương phản */
+    background-color: #1c2236; /* Màu nền header tối hơn */
+    color: #ffffff;
 }
 
 body.dark-theme header .header-title h2 {
-    color: #333333; /* Màu chữ của tiêu đề header */
+    color: #ffffff;
 }
 
 body.dark-theme header .header-icons i {
-    color: #333333; /* Màu biểu tượng tối hơn để tạo sự tương phản */
-}
-
-body.dark-theme header .header-icons .badge {
-    background-color: #ff0000; /* Màu nền của badge */
-    color: #ffffff; /* Màu chữ của badge */
+    color: #ffffff;
 }
 
 body.dark-theme main {
-    background-color: #424242; /* Màu nền main nhạt hơn */
-    color: #e0e0e0; /* Màu chữ của main */
-    min-height: 100vh; /* Đảm bảo main chiếm toàn bộ chiều cao */
+    background-color: #0a0e17; /* Màu nền main tối hơn */
+    color: #e0e0e0;
 }
 
 body.dark-theme nav {
-    background-color: #424242; /* Màu nền nav nhạt hơn */
+    background-color: #1a1f2c; /* Màu nền nav tối hơn */
     color: #e0e0e0;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* Thêm bóng đổ */
 }
 
 body.dark-theme .sidebar {
-    background-color: #333333; /* Màu nền sidebar nhạt hơn */
-    box-shadow: 2px 0 4px rgba(0,0,0,0.2); /* Thêm bóng đổ */
-}
-
-body.dark-theme .sidebar .menu-item {
-    color: #e0e0e0;
+    background-color: #1c2236; /* Màu nền sidebar tối hơn */
 }
 
 body.dark-theme .sidebar .menu-item:hover,
 body.dark-theme .sidebar .menu-item.active {
-    background-color: #555555; /* Màu nền khi hover hoặc active nhạt hơn */
-    color: #ffffff;
+    background-color: #2a3142; /* Màu nền khi hover hoặc active */
+    color: #4fd1c5; /* Màu chữ xanh mint khi active */
 }
 
 body.dark-theme .btn-primary {
-    background-color: #4caf50;
-    border-color: #4caf50;
-    color: #ffffff;
+    background-color: #4fd1c5; /* Màu nút chính xanh mint */
+    border-color: #4fd1c5;
+    color: #0a0e17;
 }
 
 body.dark-theme .btn-primary:hover {
-    background-color: #45a049;
-    border-color: #45a049;
+    background-color: #45b7ab; /* Màu nút chính khi hover */
+    border-color: #45b7ab;
 }
 
 body.dark-theme .card {
-    background-color: #f5f5f5; /* Màu nền card giống với header */
-    color: #333333; /* Màu chữ tối hơn để tạo sự tương phản */
-    border: none;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* Thêm bóng đổ */
+    background-color: #1a1f2c; /* Màu nền card tối hơn */
+    color: #ffffff;
 }
 
 body.dark-theme .form-input {
-    background-color: #555555; /* Màu nền input nhạt hơn */
+    background-color: #2a3142; /* Màu nền input tối hơn */
     color: #e0e0e0;
-    border: 1px solid #5a5a5a; /* Màu viền input sáng hơn */
-}
-
-body.dark-theme .form-label {
-    color: #b0b0b0;
+    border: 1px solid #3a4255; /* Màu viền input */
 }
 
 body.dark-theme .chat-box {
-    background-color: #424242; /* Màu nền chat box nhạt hơn */
+    background-color: #1a1f2c; /* Màu nền chat box tối hơn */
     color: #e0e0e0;
-    border: 1px solid #4a4a4a; /* Màu viền chat box sáng hơn */
+    border: 1px solid #2a3142;
 }
 
 body.dark-theme .chat-box input[type="text"] {
-    background-color: #555555; /* Màu nền input chat nhạt hơn */
+    background-color: #2a3142; /* Màu nền input chat tối hơn */
     color: #e0e0e0;
-    border: 1px solid #5a5a5a; /* Màu viền input chat sáng hơn */
+    border: 1px solid #3a4255;
 }
 
 body.dark-theme .chat-box button {
-    background-color: #4caf50;
-    border-color: #4caf50;
+    background-color: #4fd1c5; /* Màu nút gửi tin nhắn */
+    border-color: #4fd1c5;
+    color: #0a0e17;
+}
+
+body.dark-theme .online-user {
+    background-color: #2a3142; /* Màu nền của phần hiển thị người dùng online */
     color: #ffffff;
 }
 
@@ -162,9 +149,95 @@ body.dark-theme .clock {
     color: #333333; /* Màu chữ của đồng hồ trong giao diện tối */
 }
 
-body.dark-theme .online-user {
-    background-color: #555555; /* Màu nền của phần hiển thị người dùng online nhạt hơn */
-    color: #ffffff; /* Màu chữ của phần hiển thị người dùng online */
-    padding: 10px;
-    border-radius: 5px;
+/* Theme tối - bổ sung */
+body.dark-theme .header-logo img {
+    filter: brightness(0) invert(1); /* Đảo ngược màu logo để hiển thị trên nền tối */
+}
+
+body.dark-theme #clock {
+    color: #e0e0e0; /* Màu sáng hơn cho đồng hồ */
+}
+
+body.dark-theme .dropdown-header,
+body.dark-theme .dropdown-item {
+    color: #e0e0e0;
+    background-color: #1a1f2c;
+}
+
+body.dark-theme .dropdown-item:hover {
+    background-color: #2a3142;
+}
+
+body.dark-theme #section-title-red {
+    color: #ff6b6b; /* Màu đỏ nhạt hơn cho tiêu đề "XIN CHÀO" */
+}
+
+body.dark-theme .list-group-item {
+    background-color: #1a1f2c;
+    color: #e0e0e0;
+    border-color: #2a3142;
+}
+
+body.dark-theme #notificationList {
+    background-color: #1a1f2c;
+    color: #e0e0e0;
+}
+
+body.dark-theme #notificationList li {
+    border-color: #2a3142;
+}
+
+/* body.dark-theme .fas,
+body.dark-theme .far {
+    color: #4fd1c5;
+} */
+
+body.dark-theme .dropdown-divider {
+    border-top-color: #2a3142;
+}
+
+body.dark-theme .form-label {
+    color: #e0e0e0; /* Màu sáng cho các nhãn form trong chế độ tối */
+}
+
+body.dark-theme label[for="language"],
+body.dark-theme label[for="background-color"] {
+    color: #e0e0e0; 
+}
+
+body.dark-theme .table {
+    color: #e0e0e0; 
+    background-color: #1a2035; 
+}
+
+body.dark-theme .table thead th {
+    background-color: #252d47; 
+    color: #ffffff; 
+    border-color: #3a4255; 
+}
+
+body.dark-theme .table tbody tr {
+    background-color: #141822; 
+    transition: background-color 0.3s ease, color 0.3s ease; 
+}
+
+body.dark-theme .table-hover tbody tr:hover {
+    background-color: #2a3142; 
+    color: #ffffff; 
+}
+
+body.dark-theme .table td,
+body.dark-theme .table th {
+    border-color: #3a4255; 
+}
+
+
+body.dark-theme .table-striped tbody tr:nth-of-type(odd) {
+    background-color: #1e2439; 
+}
+
+
+body.dark-theme .table-striped tbody tr:nth-of-type(odd):hover {
+    background-color: #2a3142; 
+    color: #ffffff;
 }
