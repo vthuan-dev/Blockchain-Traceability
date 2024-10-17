@@ -58,7 +58,7 @@ window.UserManager = {
                     <td style="text-align: center; vertical-align: middle;">${user.name}</td>
                     <td style="text-align: center; vertical-align: middle;">${user.email}</td>
                     <td style="text-align: center; vertical-align: middle;"><img src="${avatarPath}" alt="Avatar" class="user-avatar" style="width: 50px; height: 50px; object-fit: cover; border-radius: 50%;"></td>
-                    <td style="text-align: center; vertical-align: middle;">${user.address}</td>
+                    <td style="text-align: center; vertical-align: middle; min-width: 250px; max-width: 300px; white-space: normal; word-wrap: break-word;">${user.address}</td>
                     <td style="text-align: center; vertical-align: middle;">${user.region_id}</td>
                     <td style="text-align: center; vertical-align: middle;">${this.formatDate(user.dob)}</td>
                     <td style="text-align: center; vertical-align: middle;">${user.gender}</td>
