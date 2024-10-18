@@ -25,6 +25,23 @@
         return requiredFields.filter(field => !data[field]);
     }
 
+    async function fetchDataFromJson() {
+        try {
+            const data = await fs.readFile(path.join(__dirname, 'data.json'), 'utf8');
+            const jsonData = JSON.parse(data);
+            
+            if (jsonData.error === 0) {
+               // console.log('Dữ liệu tỉnh thành, quận huyện, phường xã:', jsonData.data);
+                return jsonData.data; // Trả về dữ liệu để sử dụng
+            } else {
+                throw new Error(jsonData.error_text);
+            }
+        } catch (error) {
+            console.error('Lỗi khi đọc dữ liệu từ file JSON:', error);
+            throw error; // Ném lỗi để xử lý ở nơi khác
+        }
+    }
+
     module.exports = function(db) {
         router.get('/dangky', function(req, res) {
             res.sendFile(path.join(__dirname, '../../public/account/dangky.html'));
@@ -55,41 +72,48 @@
             }
         }
        
-    router.get('/wards/:districtCode', async (req, res) => {
+       
+
+    router.get('/districts/:provinceId', async (req, res) => {
+        const provinceId = req.params.provinceId;
         try {
-            console.log('Đang xử lý yêu cầu wards cho quận/huyện:', req.params.districtCode);
-            const response = await axios.get(`https://provinces.open-api.vn/api/d/${req.params.districtCode}?depth=2`);
-            const wards = response.data.wards.map(w => ({ ward_id: w.code, ward_name: w.name }));
-            console.log('Kết quả API wards:', wards);
-            res.json(wards);
+            const provincesData = await fetchDataFromJson();
+            const province = provincesData.find(p => p.id === provinceId);
+            
+            if (province) {
+                res.json(province.data2); // Trả về danh sách huyện
+            } else {
+                res.status(404).json({ error: 'Không tìm thấy tỉnh' });
+            }
         } catch (error) {
-            console.error('Lỗi khi lấy danh sách xã/phường:', error);
-            res.status(500).json({ error: 'Lỗi khi lấy danh sách xã/phường' });
+            res.status(500).json({ error: 'Không thể lấy dữ liệu huyện' });
         }
     });
 
-        router.get('/districts/:provinceCode', async (req, res) => {
-            try {
-                console.log('Đang gọi API districts cho tỉnh:', req.params.provinceCode);
-                const response = await axios.get(`https://provinces.open-api.vn/api/p/${req.params.provinceCode}?depth=2`);
-                const districts = response.data.districts.map(d => ({ district_id: d.code, district_name: d.name }));
-                console.log('Kết quả API districts:', districts);
-                res.json(districts);
-            } catch (error) {
-                console.error('Lỗi khi lấy danh sách quận/huyện:', error);
-                res.status(500).json({ error: 'Lỗi khi lấy danh sách quận/huyện' });
+
+    router.get('/wards/:districtId', async (req, res) => {
+        const districtId = req.params.districtId;
+        try {
+            const provincesData = await fetchDataFromJson();
+            let wards = [];
+            
+            // Tìm huyện có id trùng khớp
+            for (const province of provincesData) {
+                const district = province.data2.find(d => d.id === districtId);
+                if (district) {
+                    wards = district.data3;
+                    break;
+                }
             }
-        });
-        router.get('/api/wards/:districtCode', async (req, res) => {
-            try {
-                console.log('Đang xử lý yêu cầu wards cho quận/huyện:', req.params.districtCode);
-                const response = await axios.get(`https://provinces.open-api.vn/api/d/${req.params.districtCode}?depth=2`);
-                const wards = response.data.wards.map(w => ({ ward_id: w.code, ward_name: w.name }));
-                console.log('Kết quả API wards:', wards);
+    
+            if (wards.length > 0) {
                 res.json(wards);
-            } catch (error) {
-                console.error('Lỗi khi lấy danh sách xã/phường:', error);
-                res.status(500).json({ error: 'Lỗi khi lấy danh sách xã/phường' });
+            } else {
+                res.status(404).json({ error: 'Không tìm thấy xã/phường cho huyện này' });
+            }
+        } catch (error) {
+            console.error('Lỗi khi lấy danh sách xã/phường:', error);
+            res.status(500).json({ error: 'Không thể lấy dữ liệu xã/phường' });
             }
         });
         
@@ -116,27 +140,10 @@
        
         router.get('/provinces', async (req, res) => {
             try {
-                console.log('Đang gọi API provinces...');
-                const response = await axios.get('https://provinces.open-api.vn/api/p/', { timeout: 20000 }); // Tăng thời gian timeout lên 20 giây
-                const provinces = response.data.map(p => ({ province_id: p.code, province_name: p.name }));
-                console.log('Kết quả API provinces:', provinces);
-                await fs.writeFile(path.join(__dirname, 'provinces_data.json'), JSON.stringify(provinces));
-                res.json(provinces);
+                const provincesData = await fetchDataFromJson();
+                res.json(provincesData);
             } catch (error) {
-                console.error('Lỗi khi lấy danh sách tỉnh/thành phố từ API:', error);
-        
-                // Kiểm tra sự tồn tại của file dự phòng trước khi đọc
-                const filePath = path.join(__dirname, 'provinces_data.json');
-                try {
-                    await fs.access(filePath); // Kiểm tra xem file có tồn tại không
-                    const data = await fs.readFile(filePath, 'utf8');
-                    const provinces = JSON.parse(data);
-                    console.log('Sử dụng dữ liệu dự phòng từ file');
-                    res.json(provinces);
-                } catch (fileError) {
-                    console.error('Lỗi khi đọc file dự phòng:', fileError);
-                    res.status(500).json({ error: 'Không thể lấy danh sách tỉnh/thành phố' });
-                }
+                res.status(500).json({ error: 'Không thể lấy dữ liệu tỉnh/thành phố' });
             }
         });
         
@@ -159,7 +166,7 @@
                     provinceExists = [{ province_name: provinceResponse.data.name }];
                 }
 
-                // Kiểm tra và thêm huyện nếu chưa tồn tại
+                // Kiểm tra và thêm huyện nếu chưa t��n tại
                 let [districtExists] = await db.query('SELECT district_name FROM districts WHERE district_id = ?', [district_id]);
                 if (districtExists.length === 0) {
                     const districtResponse = await axios.get(`https://provinces.open-api.vn/api/d/${district_id}`);
@@ -262,4 +269,8 @@
 
         return router;
     };
+
+
+
+
 

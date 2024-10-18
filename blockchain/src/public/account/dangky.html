@@ -430,6 +430,7 @@
             });
         });
     </script>
+    
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const provinceSelect = document.getElementById('province');
@@ -438,7 +439,7 @@
             const specificAddressInput = document.getElementById('specific_address');
             const fullAddressInput = document.getElementById('full_address');
 
-            // Load provinces
+            // Tải danh sách tỉnh
             fetch('/api/provinces')
                 .then(response => {
                     if (!response.ok) {
@@ -447,30 +448,26 @@
                     return response.json();
                 })
                 .then(provinces => {
-                    console.log('Provinces data:', provinces);
                     provinces.forEach(province => {
                         const option = document.createElement('option');
-                        option.value = province.province_id;
-                        option.textContent = province.province_name;
+                        option.value = province.id; // Sử dụng id của tỉnh
+                        option.textContent = province.name; // Tên tỉnh
                         provinceSelect.appendChild(option);
                     });
-                    provinceSelect.disabled = false; // Enable the select after loading
                 })
                 .catch(error => {
                     console.error('Error fetching provinces:', error);
-                    // Hiển thị thông báo lỗi cho người dùng
+                    alert('Không thể lấy danh sách tỉnh. Vui lòng thử lại sau.');
                 });
 
-            // Load districts when province is selected
+            // Cập nhật danh sách huyện khi tỉnh được chọn
             provinceSelect.addEventListener('change', function() {
-                districtSelect.innerHTML = '<option value="">Chọn Quận/Huyện</option>';
-                wardSelect.innerHTML = '<option value="">Chọn Xã/Phường</option>';
-                districtSelect.disabled = !this.value;
-                wardSelect.disabled = true;
-                updateFullAddress();
+                const selectedProvinceId = this.value;
+                districtSelect.innerHTML = '<option value="">Chọn Quận/Huyện</option>'; // Reset danh sách huyện
+                wardSelect.innerHTML = '<option value="">Chọn Xã/Phường</option>'; // Reset danh sách xã
 
-                if (this.value) {
-                    fetch(`/api/districts/${this.value}`)
+                if (selectedProvinceId) {
+                    fetch(`/api/districts/${selectedProvinceId}`)
                         .then(response => {
                             if (!response.ok) {
                                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -478,51 +475,52 @@
                             return response.json();
                         })
                         .then(districts => {
-                            console.log('Districts data:', districts);
                             districts.forEach(district => {
                                 const option = document.createElement('option');
-                                option.value = district.district_id;
-                                option.textContent = district.district_name;
+                                option.value = district.id; // Sử dụng id của huyện
+                                option.textContent = district.name; // Tên huyện
                                 districtSelect.appendChild(option);
                             });
+                            districtSelect.disabled = false; // Kích hoạt select huyện
                         })
                         .catch(error => {
                             console.error('Error fetching districts:', error);
                             alert('Không thể lấy danh sách quận/huyện. Vui lòng thử lại sau.');
                         });
+                } else {
+                    districtSelect.disabled = true; // Vô hiệu hóa select huyện nếu không có tỉnh nào được chọn
                 }
             });
 
-            // Load wards when district is selected
+            // Cập nhật danh sách xã khi huyện được chọn
             districtSelect.addEventListener('change', function() {
-                wardSelect.innerHTML = '<option value="">Chọn Xã/Phường</option>';
-                wardSelect.disabled = !this.value;
-                updateFullAddress();
+    const selectedDistrictId = this.value;
+    wardSelect.innerHTML = '<option value="">Chọn Xã/Phường</option>'; // Reset danh sách xã
+    wardSelect.disabled = !selectedDistrictId; // Kích hoạt hoặc vô hiệu hóa select xã
 
-                if (this.value) {
-                    fetch(`/api/wards/${this.value}`)
-                        .then(response => {
-                            console.log('Nhận được phản hồi từ API wards:', response.status);
-                            if (!response.ok) {
-                                throw new Error(`HTTP error! status: ${response.status}`);
-                            }
-                            return response.json();
-                        })
-                        .then(wards => {
-                            console.log('Dữ liệu wards nhận được:', wards);
-                            wards.forEach(ward => {
-                                const option = document.createElement('option');
-                                option.value = ward.ward_id;
-                                option.textContent = ward.ward_name;
-                                wardSelect.appendChild(option);
-                            });
-                        })
-                        .catch(error => {
-                            console.error('Lỗi khi fetch wards:', error);
-                            alert('Không thể lấy danh sách xã/phường. Vui lòng thử lại sau.');
-                        });
+    if (selectedDistrictId) {
+        fetch(`/api/wards/${selectedDistrictId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
+                return response.json();
+            })
+            .then(wards => {
+                wards.forEach(ward => {
+                    const option = document.createElement('option');
+                    option.value = ward.id; // Sử dụng id của xã
+                    option.textContent = ward.name; // Tên xã
+                    wardSelect.appendChild(option);
+                });
+                wardSelect.disabled = false; // Kích hoạt select xã
+            })
+            .catch(error => {
+                console.error('Error fetching wards:', error);
+                alert('Không thể lấy danh sách xã/phường. Vui lòng thử lại sau.');
             });
+    }
+});
 
             wardSelect.addEventListener('change', updateFullAddress);
             specificAddressInput.addEventListener('input', updateFullAddress);
