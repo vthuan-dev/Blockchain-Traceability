@@ -200,7 +200,7 @@
         </form>
         <br>
         <div class="dangnhap">
-            <p>Hoặc <a href="http://localhost:3000/api/dangnhap">Đăng nhập</a> nếu như bạn đã có tài khoản</p>
+            <p>Hoặc <a href="http://localhost:3000/dangnhap">Đăng nhập</a> nếu như bạn đã có tài khoản</p>
         </div>
     </div>
 
@@ -260,7 +260,7 @@
                     regionSelect.appendChild(option);
                 });
             } catch (error) {
-                console.error('Lỗi khi lấy danh sách vùng sản xuất:', error);
+                console.error('Lỗi khi lấy danh s��ch vùng sản xuất:', error);
                 // Hiển thị thông báo lỗi cho người dùng
             }
         });
@@ -300,7 +300,7 @@
         }
     });
 
-    // Xử lý sự kiện đóng modal thành công
+    // Xử lý sự kiện óng modal thành công
     closeSuccessModalButton.addEventListener('click', function() {
         successModal.hide(); // Ẩn modal thành công
         window.location.href = '/api/dangnhap'; // Chuyển hướng đến trang đăng nhập

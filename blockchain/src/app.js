@@ -67,8 +67,8 @@ const {
   const upload = multer({ storage: multer.memoryStorage() });
   const dangkyRoutes = require('./components/user/dangky.js')(db, upload);
   const dangnhapRoutes = require('./components/user/dangnhap.js')(db);
-  app.use('/api', dangkyRoutes);
-  app.use('/api', dangnhapRoutes);
+  app.use('/', dangkyRoutes);
+  app.use('/', dangnhapRoutes);
   const { 
     s3Client, 
     web3, 

@@ -12,6 +12,8 @@
     const { storage, ref, uploadBytes, getDownloadURL, authenticateAnonymously, admin, adminBucket } = require('../../firebase');
     const { saveNotification } = require('../../notification');
 
+    const jsonData = require('./data.json');
+
     const router = express.Router();
     
     // Sử dụng memoryStorage thay vì diskStorage
@@ -31,7 +33,9 @@
     async function fetchDataFromJson() {
         try {
             const data = await fs.readFile(path.join(__dirname, 'data.json'), 'utf8');
-            return JSON.parse(data);
+            const parsedData = JSON.parse(data);
+            console.log('Dữ liệu từ file JSON:', parsedData);
+            return parsedData.data; // Trả về mảng data thay vì toàn bộ object
         } catch (error) {
             console.error('Lỗi khi đọc dữ liệu từ file JSON:', error);
             throw error;
@@ -123,27 +127,44 @@
                 throw error;
             }
         }
-       
+        router.get('/api/provinces', (req, res) => {
+            console.log('Route /api/provinces được gọi');
+            try {
+                const provinces = jsonData.data.map(province => ({
+                    id: province.id,
+                    name: province.name
+                }));
+                console.log('Provinces data:', provinces);
+                res.json(provinces);
+            } catch (error) {
+                console.error('Lỗi khi lấy danh sách tỉnh:', error);
+                res.status(500).json({ error: 'Không thể lấy danh sách tỉnh' });
+            }
+        });
        
 
-    router.get('/districts/:provinceId', async (req, res) => {
+    router.get('/api/districts/:provinceId', async (req, res) => {
         const provinceId = req.params.provinceId;
         try {
+            console.log('Đang lấy dữ liệu huyện cho tỉnh:', provinceId);
             const provincesData = await fetchDataFromJson();
             const province = provincesData.find(p => p.id === provinceId);
             
-            if (province) {
-                res.json(province.data2); // Trả về danh sách huyện
+            if (province && province.data2) {
+                console.log('Dữ liệu huyện:', province.data2);
+                res.json(province.data2);
             } else {
-                res.status(404).json({ error: 'Không tìm thấy tỉnh' });
+                console.log('Không tìm thấy tỉnh hoặc dữ liệu huyện với ID:', provinceId);
+                res.status(404).json({ error: 'Không tìm thấy dữ liệu huyện' });
             }
         } catch (error) {
+            console.error('Lỗi khi lấy dữ liệu huyện:', error);
             res.status(500).json({ error: 'Không thể lấy dữ liệu huyện' });
         }
     });
 
 
-    router.get('/wards/:districtId', async (req, res) => {
+    router.get('/api/wards/:districtId', async (req, res) => {
         const districtId = req.params.districtId;
         try {
             const provincesData = await fetchDataFromJson();
@@ -169,7 +190,7 @@
             }
         });
         
-        router.get('/regions', async (req, res) => {
+        router.get('/api/regions', async (req, res) => {
             try {
                 const provinceId = req.query.province_id;
                 
@@ -179,10 +200,14 @@
         
                 console.log('Đang truy vấn regions cho tỉnh:', provinceId);
                 
-                // Sửa đổi câu truy vấn để chỉ lấy các vùng có 2 chữ số đầu của region_id trùng với provinceId
                 const [regions] = await db.query('SELECT * FROM regions WHERE LEFT(region_id, 2) = ?', [provinceId.substring(0, 2)]);
                 
                 console.log('Kết quả truy vấn regions:', regions);
+                
+                if (regions.length === 0) {
+                    return res.status(404).json({ error: 'Không tìm thấy vùng sản xuất cho tỉnh này' });
+                }
+                
                 res.json(regions);
             } catch (error) {
                 console.error('Lỗi khi lấy danh sách vùng sản xuất:', error);
@@ -190,18 +215,11 @@
             }
         });
        
-        router.get('/provinces', async (req, res) => {
-            try {
-                const provincesData = await fetchDataFromJson();
-                res.json(provincesData);
-            } catch (error) {
-                res.status(500).json({ error: 'Không thể lấy dữ liệu tỉnh/thành phố' });
-            }
-        });
+    
         
 
         
-        router.post('/register', upload.single('avatar'), async function(req, res) {
+        router.post('/api/register', upload.single('avatar'), async function(req, res) {
             let connection;
             let tempImgUrl = null;
             try {
@@ -294,7 +312,7 @@
                 }
             }
         });
-        
+   
         router.get(['/api/verify/:token', '/verify/:token'], async function(req, res) {
             const { token } = req.params;
             try {
@@ -318,6 +336,16 @@
 
         return router;
     };
+
+
+
+
+
+
+
+
+
+
 
 
 
