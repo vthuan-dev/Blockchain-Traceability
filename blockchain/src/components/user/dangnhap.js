@@ -6,11 +6,11 @@ const { sendEmail } = require('./sendmail');
 const router = express.Router();
 
 module.exports = function(db) {
-    router.get('/dangnhap', (req, res) => {
+    router.get('/api/dangnhap', (req, res) => {
         res.sendFile(path.join(__dirname, '../../public/account/dangnhap.html'));
     });
 
-    router.post('/dangnhap', async function(req, res) {
+    router.post('/api/dangnhap', async function(req, res) {
         const { email, password, isAdmin } = req.body;
 
         if (!email || !password) {
@@ -39,6 +39,8 @@ module.exports = function(db) {
                 req.session.roleId = 3;
                 req.session.role = 'Admin';
                 req.session.isLoggedIn = true; // Khi đăng nhập thành công
+
+                console.log('Admin session after login:', req.session);
 
                 res.status(200).json({ 
                     message: 'Đăng nhập thành công', 
@@ -104,6 +106,16 @@ module.exports = function(db) {
                 req.session.avatar = user.avatar;
                 req.session.isLoggedIn = true;
     
+                // Thêm log này sau khi set tất cả các thông tin session
+                console.log('User session after login:', {
+                    userId: req.session.userId,
+                    name: req.session.name,
+                    email: req.session.email,
+                    roleId: req.session.roleId,
+                    isLoggedIn: req.session.isLoggedIn,
+                    // ... (các thông tin session khác)
+                });
+    
                 res.status(200).json({ 
                     message: 'Đăng nhập thành công', 
                     user: {
@@ -127,6 +139,7 @@ module.exports = function(db) {
     
         } catch (error) {
             console.error('Lỗi khi đăng nhập:', error);
+            console.log('Session khi xảy ra lỗi:', req.session);
             res.status(500).json({ message: 'Internal server error', error: error.message });
         }
     });
@@ -199,18 +212,15 @@ module.exports = function(db) {
             res.status(401).json({ message: 'Chưa đăng nhập' });
         }
     });
-
     router.get('/user-info', async (req, res) => {
         console.log('Session trong /api/user-info:', req.session);
+        console.log('isLoggedIn:', req.session.isLoggedIn);
+        console.log('roleId:', req.session.roleId);
+    
         if (req.session && req.session.isLoggedIn) {
             try {
-                // Lấy danh sách tất cả tỉnh, huyện, xã
-                const [provinces] = await db.query('SELECT * FROM provinces where province_id = ?', [req.session.province_id]);
-                const [districts] = await db.query('SELECT * FROM districts where district_id = ?', [req.session.district_id]);
-                const [wards] = await db.query('SELECT * FROM wards where ward_id = ?', [req.session.ward_id]);
-
                 if (req.session.adminId) {
-                    // Trả về thông tin admin nếu có adminId trong session
+                    // Trả về thông tin admin
                     res.json({
                         userId: req.session.adminId,
                         name: req.session.adminName,
@@ -219,8 +229,12 @@ module.exports = function(db) {
                         isAdmin: true,
                         province_id: req.session.province_id
                     });
-                } else if (req.session.userId && req.session.userId !== 0) {
-                    // Trả về thông tin user nếu có userId trong session
+                } else if (req.session.userId) {
+                    // Lấy thông tin chi tiết cho user
+                    const [provinces] = await db.query('SELECT * FROM provinces WHERE province_id = ?', [req.session.province_id]);
+                    const [districts] = await db.query('SELECT * FROM districts WHERE district_id = ?', [req.session.district_id]);
+                    const [wards] = await db.query('SELECT * FROM wards WHERE ward_id = ?', [req.session.ward_id]);
+                    
                     let region = null;
                     if (req.session.region_id) {
                         const [regions] = await db.query('SELECT region_name FROM regions WHERE region_id = ?', [req.session.region_id]);
@@ -237,23 +251,23 @@ module.exports = function(db) {
                         dob: req.session.dob,
                         gender: req.session.gender,
                         isAdmin: false,
-                        province: provinces[0].province_name,
-                        district: districts[0].district_name,
-                        ward: wards[0].ward_name,
+                        province: provinces[0]?.province_name,
+                        district: districts[0]?.district_name,
+                        ward: wards[0]?.ward_name,
                         region_id: req.session.region_id,
-                        region: req.session.region,
+                        region: region,
                         avatar: req.session.avatar
                     });
                 } else {
                     res.status(400).json({ error: 'Trạng thái đăng nhập không hợp lệ' });
                 }
             } catch (error) {
-                console.error('Lỗi khi lấy thông tin:', error);
-                res.status(500).json({ message: 'Lỗi server' });
+                console.error('Lỗi khi lấy thông tin user:', error);
+                res.status(500).json({ message: 'Lỗi server khi lấy thông tin user', error: error.message });
             }
         } else {
-            // Trả về thông tin người dùng ẩn danh nếu không đăng nhập
-            res.json({
+            res.status(401).json({
+                message: 'Phiên đăng nhập đã hết hạn hoặc không hợp lệ. Vui lòng đăng nhập lại.',
                 name: "Người dùng ẩn danh",
                 roleId: 0,
                 isAdmin: false

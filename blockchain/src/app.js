@@ -47,7 +47,7 @@ const {
     saveUninitialized: false,
     cookie: { 
       secure: process.env.NODE_ENV === 'production',
-      expires: false
+      maxAge: 24 * 60 * 60 * 1000 // 24 giờ
     }
   }));
 
@@ -92,7 +92,9 @@ app.use((req, res, next) => {
   }
   next();
 });
-
+app.get('/api/check-login', (req, res) => {
+  res.json({ isLoggedIn: req.session.isLoggedIn === true });
+});
 
 setupRoutes(app, db);
 
@@ -255,10 +257,10 @@ app.get('/nhakiemduyet.html', requireAuth, (req, res) => {
 
   // xac thuc dang nhap
   function requireAuth(req, res, next) {
-    if (req.session.userId) {
+    if (req.session.userId && req.session.isLoggedIn) {
       next();
     } else {
-      res.status(401).json({ message: 'Unauthorized' });
+      res.redirect('/account/dangnhap.html');
     }
   }
 
