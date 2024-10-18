@@ -127,7 +127,7 @@
                 throw error;
             }
         }
-        router.get('/api/provinces', (req, res) => {
+        router.get('/provinces', (req, res) => {
             console.log('Route /api/provinces được gọi');
             try {
                 const provinces = jsonData.data.map(province => ({
@@ -143,7 +143,7 @@
         });
        
 
-    router.get('/api/districts/:provinceId', async (req, res) => {
+    router.get('/districts/:provinceId', async (req, res) => {
         const provinceId = req.params.provinceId;
         try {
             console.log('Đang lấy dữ liệu huyện cho tỉnh:', provinceId);
@@ -164,7 +164,7 @@
     });
 
 
-    router.get('/api/wards/:districtId', async (req, res) => {
+    router.get('/wards/:districtId', async (req, res) => {
         const districtId = req.params.districtId;
         try {
             const provincesData = await fetchDataFromJson();
@@ -190,7 +190,7 @@
             }
         });
         
-        router.get('/api/regions', async (req, res) => {
+        router.get('/regions', async (req, res) => {
             try {
                 const provinceId = req.query.province_id;
                 
@@ -219,7 +219,7 @@
         
 
         
-        router.post('/api/register', upload.single('avatar'), async function(req, res) {
+        router.post('/register', upload.single('avatar'), async function(req, res) {
             let connection;
             let tempImgUrl = null;
             try {
@@ -313,7 +313,7 @@
             }
         });
    
-        router.get(['/api/verify/:token', '/verify/:token'], async function(req, res) {
+        router.get(['/verify/:token', '/verify/:token'], async function(req, res) {
             const { token } = req.params;
             try {
                 const [result] = await db.query('UPDATE users SET is_approved = true WHERE verificationToken = ?', [token]);

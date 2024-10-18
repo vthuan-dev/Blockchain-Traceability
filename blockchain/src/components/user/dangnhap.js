@@ -6,11 +6,11 @@ const { sendEmail } = require('./sendmail');
 const router = express.Router();
 
 module.exports = function(db) {
-    router.get('/api/dangnhap', (req, res) => {
+    router.get('/dangnhap', (req, res) => {
         res.sendFile(path.join(__dirname, '../../public/account/dangnhap.html'));
     });
 
-    router.post('/api/dangnhap', async function(req, res) {
+    router.post('/dangnhap', async function(req, res) {
         const { email, password, isAdmin } = req.body;
 
         if (!email || !password) {
