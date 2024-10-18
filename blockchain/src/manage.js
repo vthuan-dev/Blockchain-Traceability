@@ -459,8 +459,8 @@ router.get('/api/users/stats', async (req, res) => {
         const roleQuery = `
             SELECT 
                 CASE
-                    WHEN role_id = 1 THEN 'Nhà sản xuất'
-                    WHEN role_id = 2 THEN 'Nhà kiểm duyệt'
+                    WHEN role_id = 1 THEN 'Sản xuất'
+                    WHEN role_id = 2 THEN 'Kiểm duyệt'
                     WHEN role_id = 6 THEN 'Vận chuyển'
                     WHEN role_id = 8 THEN 'Nhà kho'
                 END AS role, 

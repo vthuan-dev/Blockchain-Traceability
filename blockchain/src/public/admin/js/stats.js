@@ -41,7 +41,7 @@ window.StatManager = {
 
     async renderUserStats() {
         const userContent = `
-        <div class="row">
+        <div class="row chart-row">
             <div class="col-md-9">
                 <div class="row">
                     <div class="col-md-4">
@@ -61,6 +61,9 @@ window.StatManager = {
                     </div>
                 </div>
             </div>
+
+            <div class="chart-separator"></div> 
+            
             <div class="col-md-3">
                 <div class="chart-container" style="position: relative; height:250px; width:100%">
                     <input type="text" id="provinceSearch" placeholder="Tìm kiếm tỉnh" class="form-control mb-2">
@@ -68,6 +71,7 @@ window.StatManager = {
                 </div>
             </div>
         </div>
+        
         <div class="row mt-4">
             <div class="col-12">
                 <div class="chart-container" style="position: relative; height:400px; width:100%">
@@ -215,20 +219,22 @@ window.StatManager = {
                 },
                 scales: {
                     x: {
-                        beginAtZero: true
+                        beginAtZero: true,
+                        ticks: {
+                            display: false // Ẩn các con số bên dưới các cột
+                        }
                     }
                 }
             }
         });
-
-
+    
         // Thêm chức năng tìm kiếm
         document.getElementById('provinceSearch').addEventListener('input', (e) => {
             const searchTerm = e.target.value.toLowerCase();
             const filteredData = data.filter(item => 
                 item.province_name.toLowerCase().includes(searchTerm)
             );
-
+    
             chart.data.labels = filteredData.map(item => item.province_name);
             chart.data.datasets[0].data = filteredData.map(item => item.user_count);
             chart.update();

@@ -156,6 +156,34 @@ header {
     text-align: right;
 }
 
+.chart-container {
+    margin-bottom: 20px; /* Thêm khoảng cách dưới mỗi biểu đồ */
+}
+
+@media (max-width: 768px) {
+    .chart-container {
+        margin-bottom: 40px; /* Tăng khoảng cách trên thiết bị di động */
+    }
+}
+
+.chart-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center; /* Căn giữa các phần tử theo chiều dọc */
+}
+
+.chart-separator {
+    border-top: 1px solid #ccc; /* Đường kẻ ngang */
+    margin: 20px 0; /* Khoảng cách trên dưới */
+}
+
+@media (max-width: 768px) {
+    .chart-separator {
+        border-top: none; /* Bỏ đường kẻ trên thiết bị di động */
+        margin: 0;
+    }
+}
+
 /* Chỉnh dropdown */
 .dropdown-menu {
     background-color: #fff;
