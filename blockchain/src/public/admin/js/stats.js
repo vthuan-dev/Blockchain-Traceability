@@ -41,49 +41,49 @@ window.StatManager = {
 
     async renderUserStats() {
         const userContent = `
-            <div class="row">
-                <div class="col-md-9">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="chart-container" style="position: relative; height:250px; width:100%">
-                                <canvas id="genderChart"></canvas>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="chart-container" style="position: relative; height:250px; width:100%">
-                                <canvas id="roleChart"></canvas>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="chart-container" style="position: relative; height:250px; width:100%">
-                                <canvas id="ageChart"></canvas>
-                            </div>
+        <div class="row">
+            <div class="col-md-9">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="chart-container" style="position: relative; height:250px; width:100%">
+                            <canvas id="genderChart"></canvas>
                         </div>
                     </div>
-                </div>
-                <div class="col-md-3" style="border-left: 1px solid #ccc; padding-left: 20px;">
-                    <div class="chart-container" style="position: relative; height:250px; width:100%">
-                        <input type="text" id="provinceSearch" placeholder="Tìm kiếm tỉnh" class="form-control mb-2">
-                        <canvas id="provinceChart"></canvas>
+                    <div class="col-md-4">
+                        <div class="chart-container" style="position: relative; height:250px; width:100%">
+                            <canvas id="roleChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="chart-container" style="position: relative; height:250px; width:100%">
+                            <canvas id="ageChart"></canvas>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="row mt-4">
-                <div class="col-12">
-                    <div class="chart-container" style="position: relative; height:400px; width:100%">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h5>Số lượng đăng ký người dùng</h5>
-                            <select id="registrationPeriod" class="form-control" style="width: auto;">
-                                <option value="monthly">Theo tháng</option>
-                                <option value="weekly">Theo tuần</option>
-                            </select>
-                        </div>
-                        <canvas id="registrationChart"></canvas>
-                    </div>
+            <div class="col-md-3">
+                <div class="chart-container" style="position: relative; height:250px; width:100%">
+                    <input type="text" id="provinceSearch" placeholder="Tìm kiếm tỉnh" class="form-control mb-2">
+                    <canvas id="provinceChart"></canvas>
                 </div>
             </div>
-        `;
-        document.getElementById('users').innerHTML = userContent;
+        </div>
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="chart-container" style="position: relative; height:400px; width:100%">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5>Số lượng đăng ký người dùng</h5>
+                        <select id="registrationPeriod" class="form-control" style="width: auto;">
+                            <option value="monthly">Theo tháng</option>
+                            <option value="weekly">Theo tuần</option>
+                        </select>
+                    </div>
+                    <canvas id="registrationChart"></canvas>
+                </div>
+            </div>
+        </div>
+    `;
+    document.getElementById('users').innerHTML = userContent;
 
         try {
             const [statsResponse, provinceStatsResponse, registrationStatsResponse] = await Promise.all([
@@ -255,9 +255,9 @@ window.StatManager = {
                     x: {
                         type: 'time',
                         time: {
-                            unit: 'month',
+                            unit: 'day',
                             parser: 'yyyy-MM-dd',
-                            tooltipFormat: 'MM/yyyy'
+                            tooltipFormat: 'dd/MM/yyyy'
                         },
                         title: {
                             display: true,
@@ -269,6 +269,10 @@ window.StatManager = {
                         title: {
                             display: true,
                             text: 'Số lượng đăng ký'
+                        },
+                        ticks: {
+                            stepSize: 1,
+                            precision: 0
                         }
                     }
                 }
@@ -276,20 +280,58 @@ window.StatManager = {
         });
     
         function updateChart(period) {
-            const chartData = data[period];
-            chart.data.datasets[0].data = chartData.map(item => ({
-                x: period === 'monthly' 
-                    ? `${item.year}-${item.month.toString().padStart(2, '0')}-01`
-                    : `${item.year}-01-01`,
-                y: item.count
-            }));
-            chart.options.scales.x.time.unit = period === 'monthly' ? 'month' : 'week';
-            chart.options.scales.x.time.tooltipFormat = period === 'monthly' ? 'MM/yyyy' : "'Tuần' ww, yyyy";
+            if (period === 'monthly') {
+                const dailyData = data.daily;
+                const labels = [];
+                const dataPoints = [];
+                let cumulativeCount = 0;
+        
+                // Tạo mảng chứa 30 ngày gần nhất
+                const thirtyDaysAgo = new Date();
+                thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 29); // 30 ngày tính cả ngày hiện tại
+                
+                for (let d = new Date(thirtyDaysAgo); d <= new Date(); d.setDate(d.getDate() + 1)) {
+                    const dateString = d.toISOString().split('T')[0];
+                    labels.push(dateString);
+                    
+                    const dayData = dailyData.find(item => {
+                        const itemDate = new Date(item.date).toISOString().split('T')[0];
+                        return itemDate === dateString;
+                    });
+        
+                    if (dayData) {
+                        cumulativeCount += dayData.count;
+                    }
+                    dataPoints.push(cumulativeCount);
+                }
+        
+                chart.data.labels = labels;
+                chart.data.datasets[0].data = dataPoints;
+                chart.options.scales.x.time.unit = 'day';
+                chart.options.scales.x.time.tooltipFormat = 'dd/MM/yyyy';
+            } else {
+                const weeklyData = data.weekly;
+                const labels = [];
+                const dataPoints = [];
+                let cumulativeCount = 0;
+        
+                weeklyData.forEach(item => {
+                    const date = new Date(item.year, 0, 1 + (item.week - 1) * 7);
+                    labels.push(date.toISOString().split('T')[0]);
+                    cumulativeCount += item.count;
+                    dataPoints.push(cumulativeCount);
+                });
+        
+                chart.data.labels = labels;
+                chart.data.datasets[0].data = dataPoints;
+                chart.options.scales.x.time.unit = 'week';
+                chart.options.scales.x.time.tooltipFormat = 'dd/MM/yyyy';
+            }
             chart.update();
         }
-    
-        updateChart('monthly');
-    
+        
+        updateChart('monthly'); // Hiển thị mặc định là 30 ngày gần nhất
+        
         document.getElementById('registrationPeriod').addEventListener('change', (e) => {
             updateChart(e.target.value);
         });

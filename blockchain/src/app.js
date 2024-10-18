@@ -317,6 +317,17 @@ app.get('/nhakiemduyet.html', requireAuth, (req, res) => {
   //   }
   // });
 
+  app.get('/api/address-data', async (req, res) => {
+    try {
+      const data = await fs.readFile(path.join(__dirname, 'components/user/data.json'), 'utf8');
+      const jsonData = JSON.parse(data);
+      res.json(jsonData);
+    } catch (error) {
+      console.error('Lỗi khi đọc dữ liệu từ file JSON:', error);
+      res.status(500).json({ error: 'Lỗi server khi đọc dữ liệu' });
+    }
+  });
+
   app.get('/api/region', async (req, res) => {
     const [regions] = await db.query('SELECT * FROM regions');
     res.json(regions);
@@ -499,49 +510,11 @@ app.get('/nhakiemduyet.html', requireAuth, (req, res) => {
     }
   });
 
+  
 
 
-    // app.get('/', (req, res) => {
-    //   res.sendFile(path.join(__dirname, 'public', 'trangchu.html'));
-    // });
 
-    // app.post('/api/dangnhap', async (req, res) => {
-    //   const { email, password } = req.body;
-    //   // ... xác thực người dùng ...
-    //   if (user && await bcrypt.compare(password, user.password)) {
-    //     req.session.userId = user.uid;
-    //   }
-    //   // ...
-    // });
-    // app.get('/api/products', async (req, res) => {
-    //   try {
-    //       const [products] = await db.query('SELECT product_id, product_name FROM products');
-    //       res.json(products);
-    //   } catch (error) {
-    //       console.error('Lỗi khi lấy danh sách sản phẩm:', error);
-    //       res.status(500).json({ error: 'Lỗi server khi lấy danh sách sản phẩm' });
-    //   }
-    // });
-
-    // app.get('/api/nhasanxuat', async (req, res) => {
-    //   try {
-    //     const [rows] = await db.query('SELECT * FROM users WHERE role_id = 1');
-    //     res.json(rows);
-    //   } catch (err) {
-    //     console.error('Lỗi khi lấy danh sách nhà sản xuất:', err.message);
-    //     res.status(500).json({ error: 'Lỗi khi lấy danh sách nhà sản xuất' });
-    //   }
-    // });
-
-    // app.get('/api/nhakiemduyet', async (req, res) => {
-    //   try {
-    //     const [rows] = await db.query('SELECT * FROM users WHERE role_id = 2');
-    //     res.json(rows);
-    //   } catch (err) {
-    //     console.error('Lỗi khi lấy danh sách nhà kiểm duyệt:', err.message);
-    //     res.status(500).json({ error: 'Lỗi khi lấy danh sách nhà kiểm duyệt' });
-    //   }
-    // });
+    
 
 
     // xac thuc dang nhap

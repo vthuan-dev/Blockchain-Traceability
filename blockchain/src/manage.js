@@ -547,14 +547,26 @@ router.get('/api/users/registration-stats', async (req, res) => {
             ORDER BY year, week
         `;
 
-        const [monthlyResults, weeklyResults] = await Promise.all([
+        const dailyQuery = `
+            SELECT DATE(created_at) AS date, COUNT(*) AS count
+            FROM users 
+            WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+            GROUP BY DATE(created_at)
+            ORDER BY date
+        `;
+
+        const [monthlyResults, weeklyResults, dailyResults] = await Promise.all([
             queryDatabase(monthlyQuery),
-            queryDatabase(weeklyQuery)
+            queryDatabase(weeklyQuery),
+            queryDatabase(dailyQuery)
         ]);
+
+        console.log('Daily Results:', dailyResults);
 
         res.json({
             monthly: monthlyResults,
-            weekly: weeklyResults
+            weekly: weeklyResults,
+            daily: dailyResults
         });
     } catch (error) {
         console.error('Lỗi khi lấy thống kê đăng ký người dùng:', error);
