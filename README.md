@@ -16,6 +16,7 @@ Dự án này là một hệ thống truy xuất nguồn gốc bưởi sử dụ
 - **Other**: Web3.js, Multer (file upload), Nodemailer (email verification)
 - **Tools**: Truffle, Ganache, MetaMask
 - **Storage**: Firebase, AWS S3, IPFS Filebase
+- **Testnet** : Sepolia
 
 ## Chức Năng Chính
 
