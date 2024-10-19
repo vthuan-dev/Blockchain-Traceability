@@ -288,7 +288,16 @@
                 const [result] = await connection.query(sql, values);
                 const userId = result.insertId;
 
-                // ... (giữ nguyên phần code gửi email xác thực và lưu thông báo)
+               // Sau khi insert user thành công
+                const verificationLink = `${process.env.BASE_URL}/api/verify/${verificationToken}`;
+                await sendEmail(
+                    email,
+                    name,
+                    verificationLink,
+                    'Xác thực tài khoản của bạn',
+                    path.join(__dirname, '../../public/account/xacthuc.html')
+                );
+                console.log('Email xác thực đã được gửi thành công');
 
                 await connection.commit();
                 res.status(201).json({ 
@@ -301,11 +310,13 @@
                     await connection.rollback();
                 }
                 console.error('Lỗi chi tiết khi đăng ký:', error);
-                let errorMessage = 'Lỗi khi xử lý yêu cầu đăng ký';
-                if (error.message) {
-                    errorMessage += `: ${error.message}`;
+                if (error.code === 'ENOENT') {
+                    res.status(500).json({ error: 'Không tìm thấy file template email. Vui lòng kiểm tra lại đường dẫn.' });
+                } else if (error.message.includes('email')) {
+                    res.status(500).json({ error: 'Không thể gửi email xác thực. Vui lòng kiểm tra cấu hình email.' });
+                } else {
+                    res.status(500).json({ error: 'Lỗi khi xử lý yêu cầu đăng ký: ' + error.message });
                 }
-                res.status(500).json({ error: errorMessage });
             } finally {
                 if (connection) {
                     connection.release();
@@ -336,6 +347,7 @@
 
         return router;
     };
+
 
 
 

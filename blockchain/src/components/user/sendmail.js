@@ -4,8 +4,21 @@ const nodemailer = require('nodemailer');
 
 // Hàm gửi email
 async function sendEmail(userEmail, userName, link, subject, templatePath) {
+    console.log('Bắt đầu gửi email');
+    console.log('Email người nhận:', userEmail);
+    console.log('Tên người nhận:', userName);
+    console.log('Link xác thực:', link);
+    console.log('Đường dẫn template:', templatePath);
+
     // Đọc nội dung file HTML
-    const emailTemplate = fs.readFileSync(templatePath, 'utf8');
+    let emailTemplate;
+    try {
+        emailTemplate = fs.readFileSync(templatePath, 'utf8');
+        console.log('Đã đọc file template thành công');
+    } catch (error) {
+        console.error('Lỗi khi đọc file template:', error);
+        throw error;
+    }
 
     // Tạo transporter dùng 
     let transporter = nodemailer.createTransport({
