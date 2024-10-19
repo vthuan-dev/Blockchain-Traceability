@@ -53,6 +53,8 @@ router.get('/api/users', async (req, res) => {
     }
 });
 
+
+
 // Endpoint để lấy thông tin sản phẩm
 router.get('/api/theproducts', async (req, res) => {
     try {
@@ -433,6 +435,142 @@ router.delete('/api/regions/:id', async (req, res) => {
     } catch (error) {
         console.error('Lỗi khi xóa vùng sản xuất:', error);
         res.status(500).json({ error: 'Lỗi khi xóa vùng sản xuất' });
+    }
+});
+
+// Thêm endpoint mới để lấy thống kê người dùng
+router.get('/api/users/stats', async (req, res) => {
+    try {
+        // Truy vấn thống kê giới tính
+        const genderQuery = `
+            SELECT 
+                CASE 
+                    WHEN gender = 'Nam' THEN 'male'
+                    WHEN gender = 'Nữ' THEN 'female'
+                    ELSE 'other'
+                END AS gender, 
+                COUNT(*) AS count 
+            FROM users 
+            GROUP BY gender
+        `;
+        const genderResults = await queryDatabase(genderQuery);
+
+        // Truy vấn thống kê vai trò
+        const roleQuery = `
+            SELECT 
+                CASE
+                    WHEN role_id = 1 THEN 'Sản xuất'
+                    WHEN role_id = 2 THEN 'Kiểm duyệt'
+                    WHEN role_id = 6 THEN 'Vận chuyển'
+                    WHEN role_id = 8 THEN 'Nhà kho'
+                END AS role, 
+                COUNT(*) AS count 
+            FROM users 
+            GROUP BY role_id
+        `;
+        const roleResults = await queryDatabase(roleQuery);
+
+        // Truy vấn thống kê độ tuổi
+        const ageQuery = `
+            SELECT
+                CASE
+                    WHEN TIMESTAMPDIFF(YEAR, dob, CURDATE()) BETWEEN 18 AND 25 THEN 'age18to25'
+                    WHEN TIMESTAMPDIFF(YEAR, dob, CURDATE()) BETWEEN 26 AND 35 THEN 'age26to35'
+                    WHEN TIMESTAMPDIFF(YEAR, dob, CURDATE()) BETWEEN 36 AND 45 THEN 'age36to45'
+                    ELSE 'age46plus'
+                END AS age_group,
+                COUNT(*) AS count
+            FROM users
+            GROUP BY age_group
+        `;
+        const ageResults = await queryDatabase(ageQuery);
+
+        // Xử lý kết quả và tạo đối tượng phản hồi
+        const genderData = genderResults.reduce((acc, item) => {
+            acc[item.gender] = item.count;
+            return acc;
+        }, {});
+
+        const roleData = roleResults.reduce((acc, item) => {
+            acc[item.role] = item.count;
+            return acc;
+        }, {});
+
+        const ageData = ageResults.reduce((acc, item) => {
+            acc[item.age_group] = item.count;
+            return acc;
+        }, {});
+
+        res.json({
+            genderData,
+            roleData,
+            ageData
+        });
+
+    } catch (error) {
+        console.error('Lỗi khi lấy thống kê người dùng:', error);
+        res.status(500).json({ error: 'Lỗi khi lấy thống kê người dùng' });
+    }
+});
+
+// Thêm endpoint mới để lấy thống kê người dùng theo tỉnh
+router.get('/api/users/stats/province', async (req, res) => {
+    try {
+        const query = `
+            SELECT u.province_id, p.province_name, COUNT(*) as user_count
+            FROM users u
+            JOIN provinces p ON u.province_id = p.province_id
+            GROUP BY u.province_id, p.province_name
+            ORDER BY user_count DESC
+            LIMIT 5
+        `;
+        const results = await queryDatabase(query);
+        res.json(results);
+    } catch (error) {
+        console.error('Lỗi khi lấy thống kê người dùng theo tỉnh:', error);
+        res.status(500).json({ error: 'Lỗi khi lấy thống kê người dùng theo tỉnh' });
+    }
+});
+
+router.get('/api/users/registration-stats', async (req, res) => {
+    try {
+        const monthlyQuery = `
+            SELECT YEAR(created_at) AS year, MONTH(created_at) AS month, COUNT(*) AS count
+            FROM users 
+            GROUP BY year, month
+            ORDER BY year, month
+        `;
+        const weeklyQuery = `
+            SELECT YEAR(created_at) AS year, WEEK(created_at, 1) AS week, COUNT(*) AS count
+            FROM users 
+            GROUP BY year, week
+            ORDER BY year, week
+        `;
+
+        const dailyQuery = `
+            SELECT DATE(created_at) AS date, COUNT(*) AS count
+            FROM users 
+            WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+            GROUP BY DATE(created_at)
+            ORDER BY date
+        `;
+
+        const [monthlyResults, weeklyResults, dailyResults] = await Promise.all([
+            queryDatabase(monthlyQuery),
+            queryDatabase(weeklyQuery),
+            queryDatabase(dailyQuery)
+        ]);
+
+        console.log('Daily Results:', dailyResults);
+
+        res.json({
+            monthly: monthlyResults,
+            weekly: weeklyResults,
+            daily: dailyResults
+        });
+    } catch (error) {
+        console.error('Lỗi khi lấy thống kê đăng ký người dùng:', error);
+        res.status(500).json({ error: 'Lỗi khi lấy thống kê đăng ký người dùng' });
     }
 });
 
