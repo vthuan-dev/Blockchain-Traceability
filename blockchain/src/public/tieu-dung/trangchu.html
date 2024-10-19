@@ -1,172 +1,205 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Trang chủ</title>
     <!-- Bootstrap CSS -->
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/trangchu.css">
-    <link rel="stylesheet" href="css/chatbox.css">
-    <link rel="stylesheet" href="css/trangcanhan.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
-</head>
-<body>
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/trangchu.css" />
+    <link rel="stylesheet" href="css/chatbox.css" />
+    <link rel="stylesheet" href="css/trangcanhan.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
     <!-- Thanh điều hướng -->
-    <nav class="navbar custom-navbar navbar-expand-lg navbar-light bg-light custom-navbar-height">
-        <div class="logo-home">
-            <a href="trangchu.html">
-                <img src="\hinhanh\Bitcoin-Blockchain-Network-icon-on-transparent-background-PNG.png" alt="logo" class="logo">
-            </a>
-        </div>
-        <a class="navbar-brand" href="#">Trang cá nhân</a>
-        <button class="navbar-toggler ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ml-auto"> 
-                <li class="nav-item active">
-                    <a class="nav-link" href="./allsanpham.html">Sản phẩm</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="./allnongdan.html">Nhà sản xuất</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="./allnhakiemduyet.html">Nhà kiểm duyệt</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Vùng sản xuất</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Tin tức</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="./account/dangnhap.html">Đăng nhập</a>
-                </li>
-            </ul>
-        </div>
+    <nav
+      class="navbar custom-navbar navbar-expand-lg navbar-light bg-light custom-navbar-height"
+    >
+      <div class="logo-home">
+        <a href="trangchu.html">
+          <img
+            src="\hinhanh\Bitcoin-Blockchain-Network-icon-on-transparent-background-PNG.png"
+            alt="logo"
+            class="logo"
+          />
+        </a>
+      </div>
+      <a class="navbar-brand" href="#">Trang cá nhân</a>
+      <button
+        class="navbar-toggler ml-auto"
+        type="button"
+        data-toggle="collapse"
+        data-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item active">
+            <a class="nav-link" href="./allsanpham.html">Sản phẩm</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="./allnongdan.html">Nhà sản xuất</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="./allnhakiemduyet.html">Nhà kiểm duyệt</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Vùng sản xuất</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Tin tức</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="./account/dangnhap.html">Đăng nhập</a>
+          </li>
+        </ul>
+      </div>
     </nav>
     <div class="container mt-4">
-        <div class="banner d-flex justify-content-center">
-            <img src=".\hinhanh\banner.jpg" class="img-fluid custom-img" alt="Responsive image">
-        </div>
+      <div class="banner d-flex justify-content-center">
+        <img
+          src=".\hinhanh\banner.jpg"
+          class="img-fluid custom-img"
+          alt="Responsive image"
+        />
+      </div>
 
-        <div class="sanpham">
-                <h2 class="highlighted-heading" data-aos="fade-up">
-                    Sản phẩm nổi bật
-                </h2>
-                <div class="row">
-                    <!-- Các sản phẩm sẽ được thêm vào đây bởi JavaScript -->
-                </div>
-            
-        
+      <div class="sanpham">
+        <h2 class="highlighted-heading" data-aos="fade-up">Sản phẩm nổi bật</h2>
+        <div class="row">
+          <!-- Các sản phẩm sẽ được thêm vào đây bởi JavaScript -->
         </div>
+      </div>
 
-        <div class="thanhvien" >
-            <h2 class="highlighted-heading" data-aos="fade-up">
-                Thành viên tiêu biểu
-            </h2>
-            <div class="row">
-                <!-- Các thành viên sẽ được thêm vào đây bởi JavaScript -->
-            </div>
+      <div class="thanhvien">
+        <h2 class="highlighted-heading" data-aos="fade-up">
+          Thành viên tiêu biểu
+        </h2>
+        <div class="row">
+          <!-- Các thành viên sẽ được thêm vào đây bởi JavaScript -->
         </div>
-              
-      
-        <div class="footer bg-dark text-white py-4" data-aos="fade-up">
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-4">
-                        <h3>Thông tin liên hệ</h3>
-                        <p>Địa chỉ: CTU, đường 3/2, Xuân Khánh, Ninh Kiều, Cần Thơ</p>
-                        <p>Điện thoại: 0333351725</p>
-                        <p>Email: vthuan.dev@gmail.com</p>
-                    </div>
-                    <div class="col-md-4 d-none d-md-block">
-                        <h3>Về chúng tôi</h3>
-                        <p> Sản phẩm này được dùng để truy xuất nguồn gốc sản phẩm bưởi bằng công nghệ Blockchain.</p>
-                    </div>
-                    <div class="col-md-4 d-none d-md-block">
-                        <h3>Theo dõi chúng tôi</h3>
-                        <p>
-                            <a href="#" class="text-white">Facebook</a><br>
-                            <a href="#" class="text-white">Twitter</a><br>
-                            <a href="#" class="text-white">Instagram</a>
-                        </p>
-                    </div>
-                </div>
+      </div>
+
+      <div class="footer bg-dark text-white py-4" data-aos="fade-up">
+        <div class="container">
+          <div class="row">
+            <div class="col-md-4">
+              <h3>Thông tin liên hệ</h3>
+              <p>Địa chỉ: CTU, đường 3/2, Xuân Khánh, Ninh Kiều, Cần Thơ</p>
+              <p>Điện thoại: 0333351725</p>
+              <p>Email: vthuan.dev@gmail.com</p>
             </div>
+            <div class="col-md-4 d-none d-md-block">
+              <h3>Về chúng tôi</h3>
+              <p>
+                Sản phẩm này được dùng để truy xuất nguồn gốc sản phẩm bưởi bằng
+                công nghệ Blockchain.
+              </p>
+            </div>
+            <div class="col-md-4 d-none d-md-block">
+              <h3>Theo dõi chúng tôi</h3>
+              <p>
+                <a href="#" class="text-white">Facebook</a><br />
+                <a href="#" class="text-white">Twitter</a><br />
+                <a href="#" class="text-white">Instagram</a>
+              </p>
+            </div>
+          </div>
         </div>
+      </div>
     </div>
-
 
     <!-- Biểu tượng chat -->
-<div class="chat-icon" id="openChat" onclick="toggleChat()">
-    <i class="fas fa-comments"></i>
-    <div class="tooltip">Đặt câu hỏi cho chúng tôi</div>
-</div>
+    <div class="chat-icon" id="openChat" onclick="toggleChat()">
+      <i class="fas fa-comments"></i>
+      <div class="tooltip">Đặt câu hỏi cho chúng tôi</div>
+    </div>
 
-<!-- Khung chat -->
-<div id="chatbox" class="chatbox" style="display: block;">
-    <div class="chatbox-header">
+    <!-- Khung chat -->
+    <div id="chatbox" class="chatbox" style="display: block">
+      <div class="chatbox-header">
         <strong>Hỗ trợ</strong>
-        <button id="closeChat" class="btn-close" onclick="toggleChat()">x</button>
-    </div>
-    <div class="chatbox-body">
+        <button id="closeChat" class="btn-close" onclick="toggleChat()">
+          x
+        </button>
+      </div>
+      <div class="chatbox-body">
         <ul id="messages" class="list-group">
-            <li class="list-group-item system-message">Chào bạn, bạn cần hỗ trợ gì?</li>
+          <li class="list-group-item system-message">
+            Chào bạn, bạn cần hỗ trợ gì?
+          </li>
         </ul>
-    </div>
-    <div class="chatbox-footer">
+      </div>
+      <div class="chatbox-footer">
         <form id="messageForm" class="d-flex">
-            <input id="messageInput" type="text" class="form-control" placeholder="Nhập tin nhắn..." autocomplete="off">
-            <button type="submit" class="btn btn-primary">Gửi</button>
+          <input
+            id="messageInput"
+            type="text"
+            class="form-control"
+            placeholder="Nhập tin nhắn..."
+            autocomplete="off"
+          />
+          <button type="submit" class="btn btn-primary">Gửi</button>
         </form>
+      </div>
     </div>
-</div>
-
 
     <!-- Thêm các script cần thiết -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
     <script>
-    AOS.init();
+      AOS.init();
     </script>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/babel-standalone/babel.min.js"></script>
-    <script src="../../components/tieu-dung/trang-chu.js"></script> 
+    <script src="../../components/tieu-dung/trang-chu.js"></script>
     <script src="../chatbox/chatbox.js"></script>
 
     <script>
-       function toggleChat() {
-            var chatbox = document.getElementById("chatbox");
-            if (chatbox.classList.contains("show")) {
-                chatbox.classList.remove("show");
-                chatbox.classList.add("hide");
-                setTimeout(() => {
-                    chatbox.style.display = "none";
-                    chatbox.classList.remove("hide");
-                }, 300); // Match this to the animation duration
-            } else {
-                chatbox.style.display = "block";
-                // Force a reflow before adding the 'show' class
-                chatbox.offsetHeight;
-                chatbox.classList.add("show");
-            }
+      function toggleChat() {
+        var chatbox = document.getElementById("chatbox");
+        if (chatbox.classList.contains("show")) {
+          chatbox.classList.remove("show");
+          chatbox.classList.add("hide");
+          setTimeout(() => {
+            chatbox.style.display = "none";
+            chatbox.classList.remove("hide");
+          }, 300); // Match this to the animation duration
+        } else {
+          chatbox.style.display = "block";
+          // Force a reflow before adding the 'show' class
+          chatbox.offsetHeight;
+          chatbox.classList.add("show");
         }
+      }
     </script>
-<script>
-    // lấy danh sách sản phẩm để hiển thị trên trang chủ
-    document.addEventListener('DOMContentLoaded', async () => {
+    <script>
+      // lấy danh sách sản phẩm để hiển thị trên trang chủ
+      document.addEventListener("DOMContentLoaded", async () => {
         try {
-            const response = await fetch('/api/products-home');
-            const products = await response.json();
+          const response = await fetch("/api/products-home");
+          const products = await response.json();
 
-            const productContainer = document.querySelector('.sanpham .row');
-            products.forEach(product => {
-                const productCard = `
+          const productContainer = document.querySelector(".sanpham .row");
+          products.forEach((product) => {
+            const productCard = `
                     <div class="col-md-3 col-6 mb-4" data-aos="fade-up">
                         <a href="sanpham.html?id=${product.product_id}" class="text-decoration-none">
                             <div class="card">
@@ -178,89 +211,95 @@
                         </a>
                     </div>
                 `;
-                productContainer.innerHTML += productCard;
-            });
+            productContainer.innerHTML += productCard;
+          });
         } catch (error) {
-            console.error('Lỗi khi lấy danh sách sản phẩm:', error);
+          console.error("Lỗi khi lấy danh sách sản phẩm:", error);
         }
-    });
-</script>
+      });
+    </script>
     <script>
-       // lấy danh sách người dùng để hiển thị trên trang chủ
-document.addEventListener('DOMContentLoaded', async () => {
-try {
-    const response = await fetch('/api/users-home');
-    const users = await response.json();
+      // lấy danh sách người dùng để hiển thị trên trang chủ
+      document.addEventListener("DOMContentLoaded", async () => {
+        try {
+          const response = await fetch("/api/users-home");
+          const users = await response.json();
 
-    const userContainer = document.querySelector('.thanhvien .row');
-    users.forEach(user => {
-        const userCard = `
+          const userContainer = document.querySelector(".thanhvien .row");
+          users.forEach((user) => {
+            const userCard = `
             <div class="col-md-3 col-6 mb-4" data-aos="fade-up">
                 <div class="card user-card" data-uid="${user.uid}">
-                    <img src="${user.avatar}" class="card-img-top" alt="${user.name}">
+                    <img src="${user.avatar}" class="card-img-top" alt="${
+              user.name
+            }">
                     <div class="card-body">
                         <h5 class="card-title">${user.name}</h5>
                         <div class="chucdanh">${user.role_name}</div>
-                        <div class="vung">${user.region_name || 'Không xác định'}</div>
+                        <div class="vung">${
+                          user.region_name || "Không xác định"
+                        }</div>
                     </div>
                 </div>
             </div>
         `;
-        userContainer.innerHTML += userCard;
-    });
+            userContainer.innerHTML += userCard;
+          });
 
-    // Thêm sự kiện click vào mỗi thẻ người dùng
-    document.querySelectorAll('.user-card').forEach(card => {
-        card.addEventListener('click', () => {
-            const userId = card.getAttribute('data-uid');
-            window.location.href = `trangcanhan.html?uid=${userId}`;
-        });
-    });
-} catch (error) {
-    console.error('Lỗi khi lấy danh sách người dùng:', error);
-}
-});
-
-document.addEventListener('DOMContentLoaded', async () => {
-    const userId = getUserIdFromURL(); // Hàm để lấy userId từ URL hoặc session
-
-    try {
-        const response = await fetch(`/api/user/${userId}`);
-        const user = await response.json();
-
-        if (response.status !== 200) {
-            throw new Error(user.error || 'Lỗi không xác định');
+          // Thêm sự kiện click vào mỗi thẻ người dùng
+          document.querySelectorAll(".user-card").forEach((card) => {
+            card.addEventListener("click", () => {
+              const userId = card.getAttribute("data-uid");
+              window.location.href = `trangcanhan.html?uid=${userId}`;
+            });
+          });
+        } catch (error) {
+          console.error("Lỗi khi lấy danh sách người dùng:", error);
         }
+      });
 
-        document.querySelector('.profile-img').src = user.avatar;
-        document.querySelector('.profile-name').textContent = user.name;
-        document.querySelector('.profile-phone').textContent = user.phone;
-        document.querySelector('.profile-address').textContent = user.address;
-        document.querySelector('.profile-region').textContent = user.region_name || 'Không xác định';
-    } catch (error) {
-        console.error('Lỗi khi lấy thông tin chi tiết người dùng:', error);
-    }
-});
+      document.addEventListener("DOMContentLoaded", async () => {
+        const userId = getUserIdFromURL(); // Hàm để lấy userId từ URL hoặc session
 
-function getUserIdFromURL() {
-    // Hàm để lấy userId từ URL hoặc session
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('uid') || sessionStorage.getItem('userId');
-}
+        try {
+          const response = await fetch(`/api/user/${userId}`);
+          const user = await response.json();
 
+          if (response.status !== 200) {
+            throw new Error(user.error || "Lỗi không xác định");
+          }
+
+          document.querySelector(".profile-img").src = user.avatar;
+          document.querySelector(".profile-name").textContent = user.name;
+          document.querySelector(".profile-phone").textContent = user.phone;
+          document.querySelector(".profile-address").textContent = user.address;
+          document.querySelector(".profile-region").textContent =
+            user.region_name || "Không xác định";
+        } catch (error) {
+          console.error("Lỗi khi lấy thông tin chi tiết người dùng:", error);
+        }
+      });
+
+      function getUserIdFromURL() {
+        // Hàm để lấy userId từ URL hoặc session
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get("uid") || sessionStorage.getItem("userId");
+      }
     </script>
 
-<script>
-    document.addEventListener('click', function(event) {
-        var isClickInside = document.querySelector('.navbar').contains(event.target);
+    <script>
+      document.addEventListener("click", function (event) {
+        var isClickInside = document
+          .querySelector(".navbar")
+          .contains(event.target);
 
         if (!isClickInside) {
-            var navbarCollapse = document.querySelector('.navbar-collapse');
-            if (navbarCollapse.classList.contains('show')) {
-                navbarCollapse.classList.remove('show');
-            }
+          var navbarCollapse = document.querySelector(".navbar-collapse");
+          if (navbarCollapse.classList.contains("show")) {
+            navbarCollapse.classList.remove("show");
+          }
         }
-    });
-</script>
-</body>
+      });
+    </script>
+  </body>
 </html>

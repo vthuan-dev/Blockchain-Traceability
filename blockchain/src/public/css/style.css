@@ -9,13 +9,17 @@ body {
   background-color: #f4f4f4;
   color: #333;
   display: flex;
-  flex-direction: column; /* Thay đổi hướng của flex container */
+  flex-direction: column;
+  /* Thay đổi hướng của flex container */
 }
 
 body {
-  background-color: #ecf0f1; /* Màu xanh lá cây nhạt */
-  color: #333; /* Màu chữ */
-  font-family: Arial, sans-serif; /* Font chữ */
+  background-color: #ecf0f1;
+  /* Màu xanh lá cây nhạt */
+  color: #333;
+  /* Màu chữ */
+  font-family: Arial, sans-serif;
+  /* Font chữ */
   margin: 0;
   padding: 0;
 }
@@ -24,10 +28,12 @@ header {
   background-color: #6ab04c;
   color: #fff;
   padding: 20px 40px;
-  width: 100%; /* Điều chỉnh chiều rộng của header */
+  width: 100%;
+  /* Điều chỉnh chiều rộng của header */
   /* Loại bỏ margin-left */
   height: 90px;
-  display: flex; /* Sử dụng flexbox để căn giữa */
+  display: flex;
+  /* Sử dụng flexbox để căn giữa */
   align-items: center;
   position: fixed;
   z-index: 2;
@@ -65,7 +71,7 @@ header {
 }
 
 .notifications .fas {
-  font-size: 28px; 
+  font-size: 28px;
 }
 
 .notifications i {
@@ -97,46 +103,68 @@ header {
   display: none;
   position: absolute;
   right: 20px;
-  background-color: #f8f8f8; /* Màu nền mới */
-  box-shadow: 0 5px 15px rgba(0,0,0,0.2); /* Đổ bóng mạnh hơn */
-  border-radius: 8px; /* Bo góc tròn hơn */
+  background-color: #f8f8f8;
+  /* Màu nền mới */
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  /* Đổ bóng mạnh hơn */
+  border-radius: 8px;
+  /* Bo góc tròn hơn */
   overflow: hidden;
-  transition: all 0.3s ease; /* Hiệu ứng chuyển đổi mượt mà */
+  transition: all 0.3s ease;
+  /* Hiệu ứng chuyển đổi mượt mà */
 }
 
 .profile:hover .dropdown {
   display: block;
-  opacity: 1; /* Đảm bảo dropdown hoàn toàn hiển thị */
+  opacity: 1;
+  /* Đảm bảo dropdown hoàn toàn hiển thị */
 }
 
 .dropdown-content a {
   display: block;
-  padding: 12px 20px; /* Đệm rộng hơn */
-  color: #555; /* Màu chữ tối hơn */
+  padding: 12px 20px;
+  /* Đệm rộng hơn */
+  color: #555;
+  /* Màu chữ tối hơn */
   text-decoration: none;
-  font-size: 16px; /* Kích thước chữ lớn hơn */
-  transition: background-color 0.2s ease-in-out; /* Hiệu ứng mượt mà khi hover */
+  font-size: 16px;
+  /* Kích thước chữ lớn hơn */
+  transition: background-color 0.2s ease-in-out;
+  /* Hiệu ứng mượt mà khi hover */
 }
 
 .dropdown-content a:hover {
-  background-color: #eaeaea; /* Màu nền khi hover */
-  color: #333; /* Màu chữ khi hover */
+  background-color: #eaeaea;
+  /* Màu nền khi hover */
+  color: #333;
+  /* Màu chữ khi hover */
 }
 
 /* Chỉnh navigation */
 nav {
-  width: 17%; /* Điều chỉnh chiều rộng của nav */
-  height: calc(100vh - 80px); /* Điều chỉnh chiều cao trừ đi chiều cao của header */
-  background-color: #343a40; /* Màu nền */
-  color: #fff; /* Màu chữ */
-  padding: 20px; /* Khoảng cách bên trong */
-  left: 0; /* Đặt nav bên trái */
-  top: 90px; /* Đặt nav dưới header, giả sử header cao 90px */
-  overflow-y: auto; /* Cho phép cuộn nếu nội dung dài */
+  width: 17%;
+  /* Điều chỉnh chiều rộng của nav */
+  height: calc(100vh - 80px);
+  /* Điều chỉnh chiều cao trừ đi chiều cao của header */
+  background-color: #343a40;
+  /* Màu nền */
+  color: #fff;
+  /* Màu chữ */
+  padding: 20px;
+  /* Khoảng cách bên trong */
+  left: 0;
+  /* Đặt nav bên trái */
+  top: 90px;
+  /* Đặt nav dưới header, giả sử header cao 90px */
+  overflow-y: auto;
+  /* Cho phép cuộn nếu nội dung dài */
   display: block;
-  position: fixed; /* Cố định nav */
-  float: left; /* Căn trái nav */
-  z-index: 1; /* Cho nav đè lên phần tử khác */
+  position: fixed;
+  /* Cố định nav */
+  float: left;
+  /* Căn trái nav */
+  z-index: 1;
+  /* Cho nav đè lên phần tử khác */
 }
 
 nav ul {
@@ -144,7 +172,8 @@ nav ul {
   padding: 0;
 }
 
-.welcome p, .inner-nav p {
+.welcome p,
+.inner-nav p {
   margin: 10px 0;
   font-weight: bold;
 }
@@ -163,9 +192,12 @@ nav ul {
 
 .inner-nav {
   /* Add a bottom border */
-  border-bottom: 2px solid #ccc; /* Light gray border */
-  padding-bottom: 20px; /* Add some space at the bottom inside the section */
-  margin-bottom: 20px; /* Add some space at the bottom outside the section */
+  border-bottom: 2px solid #ccc;
+  /* Light gray border */
+  padding-bottom: 20px;
+  /* Add some space at the bottom inside the section */
+  margin-bottom: 20px;
+  /* Add some space at the bottom outside the section */
 
   /* Add a shadow for a more modern look */
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
@@ -173,9 +205,12 @@ nav ul {
 
 .inner-nav:not(:last-child) {
   /* Add a bottom border */
-  border-bottom: 2px solid #ccc; /* Light gray border */
-  padding-bottom: 20px; /* Add some space at the bottom inside the section */
-  margin-bottom: 20px; /* Add some space at the bottom outside the section */
+  border-bottom: 2px solid #ccc;
+  /* Light gray border */
+  padding-bottom: 20px;
+  /* Add some space at the bottom inside the section */
+  margin-bottom: 20px;
+  /* Add some space at the bottom outside the section */
 
   /* Add a shadow for a more modern look */
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
@@ -232,9 +267,9 @@ footer {
   }
 
   .notifications .fas {
-    font-size: 24px; 
+    font-size: 24px;
   }
-  
+
   .profile .fas {
     font-size: 24px;
   }
@@ -244,7 +279,9 @@ footer {
   }
 }
 
-.dashboard-table table, td, th {
+.dashboard-table table,
+td,
+th {
   border: 1px solid black;
   border-collapse: collapse;
   text-align: center;

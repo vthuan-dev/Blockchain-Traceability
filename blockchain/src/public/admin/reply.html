@@ -1,138 +1,196 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Phản hồi người dùng</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <link rel="stylesheet" href="./css/style.css">
-    <link rel="stylesheet" href="./css/responsive.css">
-    <link rel="stylesheet" href="./css/animation.css">  
-    <link rel="stylesheet" href="./css/theme.css">
-    <link rel="stylesheet" href="./css/reply.css">
-   
-</head>
-<body onload="time()">
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
+    <link rel="stylesheet" href="./css/style.css" />
+    <link rel="stylesheet" href="./css/responsive.css" />
+    <link rel="stylesheet" href="./css/animation.css" />
+    <link rel="stylesheet" href="./css/theme.css" />
+    <link rel="stylesheet" href="./css/reply.css" />
+  </head>
+  <body onload="time()">
     <div id="messageContainer"></div>
     <header class="text-white py-2">
-        <div class="container-fluid">
-            <div class="row align-items-center">
-                <div class="col-3 col-md-3 header-logo">
-                    <a href="#"><img src="..\hinhanh\Bitcoin-Blockchain-Network-icon-on-transparent-background-PNG.png" alt="Logo" class="img-fluid" style="max-height: 50px;"></a>
-                </div>
-                <div class="col-6 col-md-5 text-center header-title">
-                    <h2 class="mb-0 h4">PHẢN HỒI NGƯỜI DÙNG</h2>
-                </div>
-                <div class="col-3 col-md-3 text-right header-icons">
-                    <div class="d-inline-block position-relative mr-3">
-                        <i class="fas fa-bell" id="notificationIcon"></i>
-                        <span class="badge badge-danger noti_count"></span>
-                    </div>
-                    <div class="d-inline-block position-relative ml-auto text-right">
-                        <i class="fas fa-user profile-pic" id="profileIcon"></i>
-                        <div class="dropdown-menu dropdown-menu-right fade-in" style="display: none;">
-                            <div class="dropdown-header">
-                                <i class="fas fa-user-circle"></i>
-                                <span class="section-title" id="section-title-red">XIN CHÀO</span>
-                            </div>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="./caidat.html">
-                                <i class="fas fa-cog"></i> Cài đặt
-                            </a>
-                            <a class="dropdown-item" href="../account/dangnhap.html">
-                                <i class="fas fa-sign-out-alt"></i> Đăng xuất
-                            </a>
-                        </div>
-                    </div>
-                </div>
+      <div class="container-fluid">
+        <div class="row align-items-center">
+          <div class="col-3 col-md-3 header-logo">
+            <a href="#"
+              ><img
+                src="..\hinhanh\Bitcoin-Blockchain-Network-icon-on-transparent-background-PNG.png"
+                alt="Logo"
+                class="img-fluid"
+                style="max-height: 50px"
+            /></a>
+          </div>
+          <div class="col-6 col-md-5 text-center header-title">
+            <h2 class="mb-0 h4">PHẢN HỒI NGƯỜI DÙNG</h2>
+          </div>
+          <div class="col-3 col-md-3 text-right header-icons">
+            <div class="d-inline-block position-relative mr-3">
+              <i class="fas fa-bell" id="notificationIcon"></i>
+              <span class="badge badge-danger noti_count"></span>
             </div>
+            <div class="d-inline-block position-relative ml-auto text-right">
+              <i class="fas fa-user profile-pic" id="profileIcon"></i>
+              <div
+                class="dropdown-menu dropdown-menu-right fade-in"
+                style="display: none"
+              >
+                <div class="dropdown-header">
+                  <i class="fas fa-user-circle"></i>
+                  <span class="section-title" id="section-title-red"
+                    >XIN CHÀO</span
+                  >
+                </div>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="./caidat.html">
+                  <i class="fas fa-cog"></i> Cài đặt
+                </a>
+                <a class="dropdown-item" href="../account/dangnhap.html">
+                  <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
     </header>
 
     <button class="sidebar-toggle">☰</button>
 
     <div class="container-fluid">
-        <div class="row">
-            <nav class="col-md-2 d-md-block sidebar">
-                
-                <a href="admintest.html" class="menu-item rounded"><i class="fas fa-home"></i> Trang chủ</a>
-                <div class="divider"></div>
-                <div class="section-title">CHỨC NĂNG</div>
-                <a href="user.html" class="menu-item rounded"><i class="fas fa-users"></i> Quản lý người dùng</a>
-                <!-- <a href="#" class="menu-item"><i class="fas fa-exchange-alt"></i> Quản lý giao dịch</a> -->
-                <!-- <a href="#" class="menu-item"><i class="fas fa-cogs"></i> Quy trình</a> -->
-                <a href="product.html" class="menu-item rounded"><i class="fas fa-box"></i> Sản phẩm</a>
-                <a href="region.html" class="menu-item rounded"><i class="fas fa-map-marker-alt"></i> Vùng sản xuất</a>                <div class="divider"></div>
-                <div class="section-title">TIỆN ÍCH</div>
-                <a href="#" class="menu-item rounded"><i class="fas fa-chart-bar"></i> Báo cáo và thống kê</a>
-                <a href="reply.html" class="menu-item rounded"><i class="fas fa-comments"></i> Phản hồi
-                    <span class="badge badge-danger ml-2 reply-count" style="display: none;">0</span>
-                </a>
-            </nav>
+      <div class="row">
+        <nav class="col-md-2 d-md-block sidebar">
+          <a href="admintest.html" class="menu-item rounded"
+            ><i class="fas fa-home"></i> Trang chủ</a
+          >
+          <div class="divider"></div>
+          <div class="section-title">CHỨC NĂNG</div>
+          <a href="user.html" class="menu-item rounded"
+            ><i class="fas fa-users"></i> Quản lý người dùng</a
+          >
+          <!-- <a href="#" class="menu-item"><i class="fas fa-exchange-alt"></i> Quản lý giao dịch</a> -->
+          <!-- <a href="#" class="menu-item"><i class="fas fa-cogs"></i> Quy trình</a> -->
+          <a href="product.html" class="menu-item rounded"
+            ><i class="fas fa-box"></i> Sản phẩm</a
+          >
+          <a href="region.html" class="menu-item rounded"
+            ><i class="fas fa-map-marker-alt"></i> Vùng sản xuất</a
+          >
+          <div class="divider"></div>
+          <div class="section-title">TIỆN ÍCH</div>
+          <a href="#" class="menu-item rounded"
+            ><i class="fas fa-chart-bar"></i> Báo cáo và thống kê</a
+          >
+          <a href="reply.html" class="menu-item rounded"
+            ><i class="fas fa-comments"></i> Phản hồi
+            <span
+              class="badge badge-danger ml-2 reply-count"
+              style="display: none"
+              >0</span
+            >
+          </a>
+        </nav>
 
-            <main class="col-md-10 col-12 px-2 offset-md-2 pt-5">
-                <div class="row mt-3">
-                    <div class="col-12">
-                        <div class="card card-custom">
-                            <div class="card-body d-flex justify-content-between align-items-center" style="padding: 10px;">
-                                <h5 class="card-title" style="border-left: 5px solid yellow; padding-left: 10px; margin-bottom: 0;">Phản hồi người dùng</h5>
-                                <div id="clock" class="text-right" style="font-size: 0.9rem;"></div>
-                            </div>
-                        </div>
-                    </div>
+        <main class="col-md-10 col-12 px-2 offset-md-2 pt-5">
+          <div class="row mt-3">
+            <div class="col-12">
+              <div class="card card-custom">
+                <div
+                  class="card-body d-flex justify-content-between align-items-center"
+                  style="padding: 10px"
+                >
+                  <h5
+                    class="card-title"
+                    style="
+                      border-left: 5px solid yellow;
+                      padding-left: 10px;
+                      margin-bottom: 0;
+                    "
+                  >
+                    Phản hồi người dùng
+                  </h5>
+                  <div
+                    id="clock"
+                    class="text-right"
+                    style="font-size: 0.9rem"
+                  ></div>
                 </div>
-                <div class="row mt-3">
-                    <div class="col-md-4 col-12 mb-3">
-                        <h5 class="card-title">Người dùng đang online</h5>
-                        <ul class="list-group" id="userList"></ul>
-                    </div>
+              </div>
+            </div>
+          </div>
+          <div class="row mt-3">
+            <div class="col-md-4 col-12 mb-3">
+              <h5 class="card-title">Người dùng đang online</h5>
+              <ul class="list-group" id="userList"></ul>
+            </div>
 
-                <!-- ... (giữ nguyên phần đầu) ... -->
+            <!-- ... (giữ nguyên phần đầu) ... -->
 
-                <div class="col-md-8 col-12">
-                    <div class="card chat-box">
-                        <div class="card-header bg-primary text-white">
-                            <h5 class="mb-0">Chat với người dùng</h5>
-                        </div>
-                        <div class="card-body">
-                            <ul class="list-group" id="messageList"></ul>
-                            <form id="messageForm">
-                                <input type="text" id="messageInput" class="form-control" placeholder="Nhập tin nhắn..." autocomplete="off">
-                                <button class="btn" type="submit"><i class="fas fa-paper-plane"></i></button>
-                            </form>
-                        </div>
-                    </div>
+            <div class="col-md-8 col-12">
+              <div class="card chat-box">
+                <div class="card-header bg-primary text-white">
+                  <h5 class="mb-0">Chat với người dùng</h5>
                 </div>
-
-<!-- ... (giữ nguyên phần còn lại) ... -->
+                <div class="card-body">
+                  <ul class="list-group" id="messageList"></ul>
+                  <form id="messageForm">
+                    <input
+                      type="text"
+                      id="messageInput"
+                      class="form-control"
+                      placeholder="Nhập tin nhắn..."
+                      autocomplete="off"
+                    />
+                    <button class="btn" type="submit">
+                      <i class="fas fa-paper-plane"></i>
+                    </button>
+                  </form>
                 </div>
-            </main>
-        </div>
+              </div>
+            </div>
+
+            <!-- ... (giữ nguyên phần còn lại) ... -->
+          </div>
+        </main>
+      </div>
     </div>
 
     <!-- Thêm Remove Panel -->
     <section class="remove">
-        <h1 class="remove-header">Cảnh báo</h1>
-        <p class="remove-warning">Bạn có chắc chắn muốn xóa người dùng này?</p>
+      <h1 class="remove-header">Cảnh báo</h1>
+      <p class="remove-warning">Bạn có chắc chắn muốn xóa người dùng này?</p>
 
-        <div class="action-buttons btn-center">
-          <button class="btn btn-cancel mr-2" id="cancel-remove">Hủy bỏ</button>
-          <button class="btn btn-save" id="accept-remove">Đồng ý</button>
-        </div>
-    </section>        
+      <div class="action-buttons btn-center">
+        <button class="btn btn-cancel mr-2" id="cancel-remove">Hủy bỏ</button>
+        <button class="btn btn-save" id="accept-remove">Đồng ý</button>
+      </div>
+    </section>
 
-    <div class="notification-panel col-10 col-md-3 col-sm-10 offset-md-7 offset-1 offset-sm-1" id="notificationPanel">
-        <div class="notification-header">
-            <h5 class="notification-title">Thông báo</h5>
+    <div
+      class="notification-panel col-10 col-md-3 col-sm-10 offset-md-7 offset-1 offset-sm-1"
+      id="notificationPanel"
+    >
+      <div class="notification-header">
+        <h5 class="notification-title">Thông báo</h5>
 
-            <button id="confirmRead" class="btn-mark-read btn-sm">
-                <i class="fas fa-check-double"></i> Đánh dấu tất cả đã đọc
-            </button>
-        </div>
-        <ul id="notificationList">
-            <!-- Thông báo sẽ được thêm vào đây -->
-        </ul>
+        <button id="confirmRead" class="btn-mark-read btn-sm">
+          <i class="fas fa-check-double"></i> Đánh dấu tất cả đã đọc
+        </button>
+      </div>
+      <ul id="notificationList">
+        <!-- Thông báo sẽ được thêm vào đây -->
+      </ul>
     </div>
 
     <div id="overlay"></div>
@@ -143,65 +201,72 @@
     <script src="./js/unread-count.js"></script>
     <script src="./js/feature.js"></script>
     <script src="./js/settings.js"></script>
-    
+
     <script>
-        document.addEventListener('DOMContentLoaded', applySettings);
-        
-        function updateUserList(users) {
-            const userList = document.getElementById('userList');
-            userList.innerHTML = '';
-            users.forEach(user => {
-                const li = document.createElement('li');
-                li.className = 'list-group-item d-flex justify-content-between align-items-center';
-                li.setAttribute('data-user-id', user.id);
-                
-                // Kiểm tra xem tên người dùng có bắt đầu bằng "Người dùng vãng lai" không
-                const displayName = user.name.startsWith("Người dùng vãng lai") ? user.name : `${user.name} (${user.role})`;
-                
-                li.innerHTML = `
+      document.addEventListener("DOMContentLoaded", applySettings);
+
+      function updateUserList(users) {
+        const userList = document.getElementById("userList");
+        userList.innerHTML = "";
+        users.forEach((user) => {
+          const li = document.createElement("li");
+          li.className =
+            "list-group-item d-flex justify-content-between align-items-center";
+          li.setAttribute("data-user-id", user.id);
+
+          // Kiểm tra xem tên người dùng có bắt đầu bằng "Người dùng vãng lai" không
+          const displayName = user.name.startsWith("Người dùng vãng lai")
+            ? user.name
+            : `${user.name} (${user.role})`;
+
+          li.innerHTML = `
                     ${displayName}
                     <span class="badge badge-primary badge-pill">${user.unreadCount}</span>
                 `;
-                li.addEventListener('click', () => selectUser(user));
-                userList.appendChild(li);
-            });
-        }
+          li.addEventListener("click", () => selectUser(user));
+          userList.appendChild(li);
+        });
+      }
     </script>
-   <script>
-    function addMessageToList(message) {
-        const li = document.createElement('li');
-        li.className = `list-group-item ${message.from === 'Admin' ? 'admin' : 'user'}`;
-        
+    <script>
+      function addMessageToList(message) {
+        const li = document.createElement("li");
+        li.className = `list-group-item ${
+          message.from === "Admin" ? "admin" : "user"
+        }`;
+
         let messageContent;
-        if (message.from === 'Admin') {
-            messageContent = `<strong>Admin</strong>${message.body}`;
+        if (message.from === "Admin") {
+          messageContent = `<strong>Admin</strong>${message.body}`;
         } else {
-            messageContent = `<strong>${message.from}</strong>${message.body}`;
+          messageContent = `<strong>${message.from}</strong>${message.body}`;
         }
-        
+
         li.innerHTML = messageContent;
-        document.getElementById('messageList').appendChild(li);
-        
+        document.getElementById("messageList").appendChild(li);
+
         // Scroll to bottom
-        const messageList = document.getElementById('messageList');
+        const messageList = document.getElementById("messageList");
         messageList.scrollTop = messageList.scrollHeight;
-    }
+      }
 
-    document.getElementById('messageForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const messageInput = document.getElementById('messageInput');
-        const message = messageInput.value.trim();
-        if (message) {
-            addMessageToList({from: 'Admin', body: message});
-            messageInput.value = '';
+      document
+        .getElementById("messageForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+          const messageInput = document.getElementById("messageInput");
+          const message = messageInput.value.trim();
+          if (message) {
+            addMessageToList({ from: "Admin", body: message });
+            messageInput.value = "";
             // Gửi tin nhắn đến server ở đây (nếu cần)
-        }
-    });
+          }
+        });
 
-    // Thêm hàm này để xử lý tin nhắn từ người dùng
-    function handleUserMessage(userId, message) {
-        addMessageToList({from: userId, body: message});
-    }
-</script>
-</body>
+      // Thêm hàm này để xử lý tin nhắn từ người dùng
+      function handleUserMessage(userId, message) {
+        addMessageToList({ from: userId, body: message });
+      }
+    </script>
+  </body>
 </html>

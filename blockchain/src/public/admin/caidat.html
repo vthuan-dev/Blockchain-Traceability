@@ -1,112 +1,160 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cài đặt</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <link rel="stylesheet" href="./css/style.css">
-    <link rel="stylesheet" href="./css/responsive.css">
-    <link rel="stylesheet" href="./css/animation.css">
-    <link rel="stylesheet" href="./css/theme.css">
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
+    <link rel="stylesheet" href="./css/style.css" />
+    <link rel="stylesheet" href="./css/responsive.css" />
+    <link rel="stylesheet" href="./css/animation.css" />
+    <link rel="stylesheet" href="./css/theme.css" />
 
     <style>
-        /* Custom CSS for responsive design */
-        @media (max-width: 768px) {
-            .form-row {
-                flex-direction: column;
-            }
-            .form-field {
-                margin-right: 0;
-                margin-bottom: 15px;
-            }
-            .btn-center {
-                display: flex;
-                flex-direction: column;
-            }
-            .btn-center .btn {
-                margin-bottom: 10px;
-                width: 100%;
-            }
+      /* Custom CSS for responsive design */
+      @media (max-width: 768px) {
+        .form-row {
+          flex-direction: column;
         }
+        .form-field {
+          margin-right: 0;
+          margin-bottom: 15px;
+        }
+        .btn-center {
+          display: flex;
+          flex-direction: column;
+        }
+        .btn-center .btn {
+          margin-bottom: 10px;
+          width: 100%;
+        }
+      }
     </style>
-</head>
-<body onload="time()">
+  </head>
+  <body onload="time()">
     <div id="messageContainer"></div>
     <header class="text-white py-2">
-        <div class="container-fluid">
-            <div class="row align-items-center">
-                <div class="col-3 col-md-3 header-logo">
-                    <a href="#"><img src="..\hinhanh\Bitcoin-Blockchain-Network-icon-on-transparent-background-PNG.png" alt="Logo" class="img-fluid" style="max-height: 50px;"></a>
-                </div>
-                <div class="col-6 col-md-5 text-center header-title">
-                    <h2 class="mb-0 h4">CÀI ĐẶT</h2>
-                </div>
-                <div class="col-3 col-md-3 text-right header-icons">
-                    <div class="d-inline-block position-relative mr-3">
-                        <i class="fas fa-bell" id="notificationIcon"></i>
-                        <span class="badge badge-danger noti_count"></span>
-                    </div>
-                    <div class="d-inline-block position-relative ml-auto text-right">
-                        <i class="fas fa-user profile-pic" id="profileIcon"></i>
-                        <div class="dropdown-menu dropdown-menu-right fade-in" style="display: none;">
-                            <div class="dropdown-header">
-                                <i class="fas fa-user-circle"></i>
-                                <span class="section-title" id="section-title-red">XIN CHÀO</span>
-                            </div>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="./caidat.html">
-                                <i class="fas fa-cog"></i> Cài đặt
-                            </a>
-                            <a class="dropdown-item" href="../account/dangnhap.html">
-                                <i class="fas fa-sign-out-alt"></i> Đăng xuất
-                            </a>
-                        </div>
-                    </div>
-                </div>
+      <div class="container-fluid">
+        <div class="row align-items-center">
+          <div class="col-3 col-md-3 header-logo">
+            <a href="#"
+              ><img
+                src="..\hinhanh\Bitcoin-Blockchain-Network-icon-on-transparent-background-PNG.png"
+                alt="Logo"
+                class="img-fluid"
+                style="max-height: 50px"
+            /></a>
+          </div>
+          <div class="col-6 col-md-5 text-center header-title">
+            <h2 class="mb-0 h4">CÀI ĐẶT</h2>
+          </div>
+          <div class="col-3 col-md-3 text-right header-icons">
+            <div class="d-inline-block position-relative mr-3">
+              <i class="fas fa-bell" id="notificationIcon"></i>
+              <span class="badge badge-danger noti_count"></span>
             </div>
+            <div class="d-inline-block position-relative ml-auto text-right">
+              <i class="fas fa-user profile-pic" id="profileIcon"></i>
+              <div
+                class="dropdown-menu dropdown-menu-right fade-in"
+                style="display: none"
+              >
+                <div class="dropdown-header">
+                  <i class="fas fa-user-circle"></i>
+                  <span class="section-title" id="section-title-red"
+                    >XIN CHÀO</span
+                  >
+                </div>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="./caidat.html">
+                  <i class="fas fa-cog"></i> Cài đặt
+                </a>
+                <a class="dropdown-item" href="../account/dangnhap.html">
+                  <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
     </header>
 
     <button class="sidebar-toggle">☰</button>
 
     <div class="container-fluid">
-        <div class="row">
-            <nav class="col-md-2 sidebar">
-                
-                <a href="admintest.html" class="menu-item rounded"><i class="fas fa-home"></i> Trang chủ</a>
-                <div class="divider"></div>
-                <div class="section-title">CHỨC NĂNG</div>
-                <a href="user.html" class="menu-item rounded"><i class="fas fa-users"></i> Quản lý người dùng</a>
-                <!-- <a href="#" class="menu-item"><i class="fas fa-exchange-alt"></i> Quản lý giao dịch</a> -->
-                <!-- <a href="#" class="menu-item"><i class="fas fa-cogs"></i> Quy trình</a> -->
-                <a href="product.html" class="menu-item rounded"><i class="fas fa-box"></i> Sản phẩm</a>
-                <a href="region.html" class="menu-item rounded"><i class="fas fa-map-marker-alt"></i> Vùng sản xuất</a>                <div class="divider"></div>
-                <div class="section-title">TIỆN ÍCH</div>
-                <a href="#" class="menu-item rounded"><i class="fas fa-chart-bar"></i> Báo cáo và thống kê</a>
-                <a href="reply.html" class="menu-item rounded"><i class="fas fa-comments"></i> Phản hồi
-                    <span class="badge badge-danger ml-2 reply-count" style="display: none;">0</span>
-                </a>
-            </nav>
+      <div class="row">
+        <nav class="col-md-2 sidebar">
+          <a href="admintest.html" class="menu-item rounded"
+            ><i class="fas fa-home"></i> Trang chủ</a
+          >
+          <div class="divider"></div>
+          <div class="section-title">CHỨC NĂNG</div>
+          <a href="user.html" class="menu-item rounded"
+            ><i class="fas fa-users"></i> Quản lý người dùng</a
+          >
+          <!-- <a href="#" class="menu-item"><i class="fas fa-exchange-alt"></i> Quản lý giao dịch</a> -->
+          <!-- <a href="#" class="menu-item"><i class="fas fa-cogs"></i> Quy trình</a> -->
+          <a href="product.html" class="menu-item rounded"
+            ><i class="fas fa-box"></i> Sản phẩm</a
+          >
+          <a href="region.html" class="menu-item rounded"
+            ><i class="fas fa-map-marker-alt"></i> Vùng sản xuất</a
+          >
+          <div class="divider"></div>
+          <div class="section-title">TIỆN ÍCH</div>
+          <a href="#" class="menu-item rounded"
+            ><i class="fas fa-chart-bar"></i> Báo cáo và thống kê</a
+          >
+          <a href="reply.html" class="menu-item rounded"
+            ><i class="fas fa-comments"></i> Phản hồi
+            <span
+              class="badge badge-danger ml-2 reply-count"
+              style="display: none"
+              >0</span
+            >
+          </a>
+        </nav>
 
-            <main class="col-md-10 col-12 px-2 offset-md-2 pt-5">
-                <div class="row mt-3">
-                    <div class="col-12">
-                        <div class="card card-custom">
-                            <div class="card-body d-flex justify-content-between align-items-center" style="padding: 10px;">
-                                <h5 class="card-title" style="border-left: 5px solid yellow; padding-left: 10px; margin-bottom: 0;">Cài đặt tài khoản</h5>
-                                <div id="clock" class="text-right" style="font-size: 0.9rem;"></div>
-                            </div>
-                        </div>
-                    </div>
+        <main class="col-md-10 col-12 px-2 offset-md-2 pt-5">
+          <div class="row mt-3">
+            <div class="col-12">
+              <div class="card card-custom">
+                <div
+                  class="card-body d-flex justify-content-between align-items-center"
+                  style="padding: 10px"
+                >
+                  <h5
+                    class="card-title"
+                    style="
+                      border-left: 5px solid yellow;
+                      padding-left: 10px;
+                      margin-bottom: 0;
+                    "
+                  >
+                    Cài đặt tài khoản
+                  </h5>
+                  <div
+                    id="clock"
+                    class="text-right"
+                    style="font-size: 0.9rem"
+                  ></div>
                 </div>
-                <div class="row mt-3">
-                    <div class="col-12">
-                        <div class="card card-custom">
-                            <div class="card-body">
-                                <form class="settings-form">
-                                    <!-- <div class="form-row">
+              </div>
+            </div>
+          </div>
+          <div class="row mt-3">
+            <div class="col-12">
+              <div class="card card-custom">
+                <div class="card-body">
+                  <form class="settings-form">
+                    <!-- <div class="form-row">
                                         <div class="col-md-6 col-12 form-field">
                                             <label for="username" class="form-label">Tên đăng nhập</label>
                                             <input id="username" name="username" type="text" class="form-input" required />
@@ -126,55 +174,78 @@
                                             <input id="confirm-password" name="confirm_password" type="password" class="form-input" required />
                                         </div>
                                     </div> -->
-                                    <div class="form-row">
-                                        <div class="col-md-6 col-12 form-field">
-                                            <label for="language" class="form-label">Ngôn ngữ</label>
-                                            <select id="language" name="language" class="form-input">
-                                                <option value="en">English</option>
-                                                <option value="vi">Tiếng Việt</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-6 col-12 form-field">
-                                            <label for="background-color" class="form-label">Chế độ màu</label>
-                                            <select id="background-color" name="background_color" class="form-input">
-                                                <option value="light-theme">Sáng</option>
-                                                <option value="dark-theme">Tối</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="form-actions btn-center">
-                                        <button type="submit" class="btn btn-primary btn-sm">Lưu thay đổi</button>
-                                        <button type="button" class="btn btn-secondary btn-sm" onclick="window.location.href='admintest.html'">Hủy bỏ</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
+                    <div class="form-row">
+                      <div class="col-md-6 col-12 form-field">
+                        <label for="language" class="form-label"
+                          >Ngôn ngữ</label
+                        >
+                        <select
+                          id="language"
+                          name="language"
+                          class="form-input"
+                        >
+                          <option value="en">English</option>
+                          <option value="vi">Tiếng Việt</option>
+                        </select>
+                      </div>
+                      <div class="col-md-6 col-12 form-field">
+                        <label for="background-color" class="form-label"
+                          >Chế độ màu</label
+                        >
+                        <select
+                          id="background-color"
+                          name="background_color"
+                          class="form-input"
+                        >
+                          <option value="light-theme">Sáng</option>
+                          <option value="dark-theme">Tối</option>
+                        </select>
+                      </div>
                     </div>
+                    <div class="form-actions btn-center">
+                      <button type="submit" class="btn btn-primary btn-sm">
+                        Lưu thay đổi
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn-secondary btn-sm"
+                        onclick="window.location.href='admintest.html'"
+                      >
+                        Hủy bỏ
+                      </button>
+                    </div>
+                  </form>
                 </div>
-            </main>
-        </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
     </div>
 
-    <div class="notification-panel col-10 col-md-3 col-sm-10 offset-md-7 offset-1 offset-sm-1" id="notificationPanel">
-        <div class="notification-header">
-            <h5 class="notification-title">Thông báo</h5>
+    <div
+      class="notification-panel col-10 col-md-3 col-sm-10 offset-md-7 offset-1 offset-sm-1"
+      id="notificationPanel"
+    >
+      <div class="notification-header">
+        <h5 class="notification-title">Thông báo</h5>
 
-            <button id="confirmRead" class="btn-mark-read btn-sm">
-                <i class="fas fa-check-double"></i> Đánh dấu tất cả đã đọc
-            </button>
-        </div>
-        <ul id="notificationList">
-            <!-- Thông báo sẽ được thêm vào đây -->
-        </ul>
+        <button id="confirmRead" class="btn-mark-read btn-sm">
+          <i class="fas fa-check-double"></i> Đánh dấu tất cả đã đọc
+        </button>
+      </div>
+      <ul id="notificationList">
+        <!-- Thông báo sẽ được thêm vào đây -->
+      </ul>
     </div>
 
     <div id="overlay"></div>
-    
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
     <script src="./js/admin-auth.js"></script>
     <script src="./js/unread-count.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="./js/feature.js"></script>
     <script src="./js/settings.js"></script>
-</body>
+  </body>
 </html>

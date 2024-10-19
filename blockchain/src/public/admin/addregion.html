@@ -1,140 +1,217 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Thêm Vùng Sản Xuất</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <link rel="stylesheet" href="./css/style.css">
-    <link rel="stylesheet" href="./css/responsive.css">
-    <link rel="stylesheet" href="./css/animation.css">
-    <link rel="stylesheet" href="./css/theme.css">
-</head>
-<body onload="time()">
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
+    <link rel="stylesheet" href="./css/style.css" />
+    <link rel="stylesheet" href="./css/responsive.css" />
+    <link rel="stylesheet" href="./css/animation.css" />
+    <link rel="stylesheet" href="./css/theme.css" />
+  </head>
+  <body onload="time()">
     <div id="messageContainer"></div>
     <header class="text-white py-2">
-        <div class="container-fluid">
-            <div class="row align-items-center">
-                <div class="col-3 col-md-3 header-logo">
-                    <a href="#"><img src="..\hinhanh\Bitcoin-Blockchain-Network-icon-on-transparent-background-PNG.png" alt="Logo" class="img-fluid" style="max-height: 50px;"></a>
-                </div>
-                <div class="col-6 col-md-5 text-center header-title">
-                    <h2 class="mb-0 h4">THÊM VÙNG SẢN XUẤT</h2>
-                </div>
-                <div class="col-3 col-md-3 text-right header-icons">
-                    <div class="d-inline-block position-relative mr-3">
-                        <i class="fas fa-bell" id="notificationIcon"></i>
-                        <span class="badge badge-danger noti_count"></span>
-                    </div>
-                    <div class="d-inline-block position-relative ml-auto text-right">
-                        <i class="fas fa-user profile-pic" id="profileIcon"></i>
-                        <div class="dropdown-menu dropdown-menu-right fade-in" style="display: none;">
-                            <div class="dropdown-header">
-                                <i class="fas fa-user-circle"></i>
-                                <span class="section-title" id="section-title-red">XIN CHÀO</span>
-                            </div>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="./caidat.html">
-                                <i class="fas fa-cog"></i> Cài đặt
-                            </a>
-                            <a class="dropdown-item" href="../account/dangnhap.html">
-                                <i class="fas fa-sign-out-alt"></i> Đăng xuất
-                            </a>
-                        </div>
-                    </div>
-                </div>
+      <div class="container-fluid">
+        <div class="row align-items-center">
+          <div class="col-3 col-md-3 header-logo">
+            <a href="#"
+              ><img
+                src="..\hinhanh\Bitcoin-Blockchain-Network-icon-on-transparent-background-PNG.png"
+                alt="Logo"
+                class="img-fluid"
+                style="max-height: 50px"
+            /></a>
+          </div>
+          <div class="col-6 col-md-5 text-center header-title">
+            <h2 class="mb-0 h4">THÊM VÙNG SẢN XUẤT</h2>
+          </div>
+          <div class="col-3 col-md-3 text-right header-icons">
+            <div class="d-inline-block position-relative mr-3">
+              <i class="fas fa-bell" id="notificationIcon"></i>
+              <span class="badge badge-danger noti_count"></span>
             </div>
+            <div class="d-inline-block position-relative ml-auto text-right">
+              <i class="fas fa-user profile-pic" id="profileIcon"></i>
+              <div
+                class="dropdown-menu dropdown-menu-right fade-in"
+                style="display: none"
+              >
+                <div class="dropdown-header">
+                  <i class="fas fa-user-circle"></i>
+                  <span class="section-title" id="section-title-red"
+                    >XIN CHÀO</span
+                  >
+                </div>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="./caidat.html">
+                  <i class="fas fa-cog"></i> Cài đặt
+                </a>
+                <a class="dropdown-item" href="../account/dangnhap.html">
+                  <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
     </header>
 
     <button class="sidebar-toggle">☰</button>
 
     <div class="container-fluid">
-        <div class="row">
-            <nav class="col-md-2 sidebar">
-                <a href="admintest.html" class="menu-item rounded"><i class="fas fa-home"></i> Trang chủ</a>
-                <div class="divider"></div>
-                <div class="section-title">CHỨC NĂNG</div>
-                <a href="user.html" class="menu-item rounded"><i class="fas fa-users"></i> Quản lý người dùng</a>
-                <a href="product.html" class="menu-item rounded"><i class="fas fa-box"></i> Sản phẩm</a>
-                <a href="region.html" class="menu-item rounded"><i class="fas fa-map-marker-alt"></i> Vùng sản xuất</a>
-                <div class="divider"></div>
-                <div class="section-title">TIỆN ÍCH</div>
-                <a href="#" class="menu-item rounded"><i class="fas fa-chart-bar"></i> Báo cáo và thống kê</a>
-                <a href="reply.html" class="menu-item rounded"><i class="fas fa-comments"></i> Phản hồi
-                    <span class="badge badge-danger ml-2 reply-count" style="display: none;">0</span>
-                </a>
-            </nav>
+      <div class="row">
+        <nav class="col-md-2 sidebar">
+          <a href="admintest.html" class="menu-item rounded"
+            ><i class="fas fa-home"></i> Trang chủ</a
+          >
+          <div class="divider"></div>
+          <div class="section-title">CHỨC NĂNG</div>
+          <a href="user.html" class="menu-item rounded"
+            ><i class="fas fa-users"></i> Quản lý người dùng</a
+          >
+          <a href="product.html" class="menu-item rounded"
+            ><i class="fas fa-box"></i> Sản phẩm</a
+          >
+          <a href="region.html" class="menu-item rounded"
+            ><i class="fas fa-map-marker-alt"></i> Vùng sản xuất</a
+          >
+          <div class="divider"></div>
+          <div class="section-title">TIỆN ÍCH</div>
+          <a href="#" class="menu-item rounded"
+            ><i class="fas fa-chart-bar"></i> Báo cáo và thống kê</a
+          >
+          <a href="reply.html" class="menu-item rounded"
+            ><i class="fas fa-comments"></i> Phản hồi
+            <span
+              class="badge badge-danger ml-2 reply-count"
+              style="display: none"
+              >0</span
+            >
+          </a>
+        </nav>
 
-            <main class="col-md-10 col-12 px-2 offset-md-2 pt-5">
-                <div class="row mt-3">
-                    <div class="col-12">
-                        <div class="card card-custom">
-                            <div class="card-body d-flex justify-content-between align-items-center" style="padding: 10px;">
-                                <h5 class="card-title" style="border-left: 5px solid yellow; padding-left: 10px; margin-bottom: 0;">Thêm vùng sản xuất mới</h5>
-                                <div id="clock" class="text-right" style="font-size: 0.9rem;"></div>
-                            </div>
-                        </div>
-                    </div>
+        <main class="col-md-10 col-12 px-2 offset-md-2 pt-5">
+          <div class="row mt-3">
+            <div class="col-12">
+              <div class="card card-custom">
+                <div
+                  class="card-body d-flex justify-content-between align-items-center"
+                  style="padding: 10px"
+                >
+                  <h5
+                    class="card-title"
+                    style="
+                      border-left: 5px solid yellow;
+                      padding-left: 10px;
+                      margin-bottom: 0;
+                    "
+                  >
+                    Thêm vùng sản xuất mới
+                  </h5>
+                  <div
+                    id="clock"
+                    class="text-right"
+                    style="font-size: 0.9rem"
+                  ></div>
                 </div>
-                <div class="row mt-3">
-                    <div class="col-12">
-                        <div class="card card-custom">
-                            <div class="card-body">
-                                <form class="add-region-form">
-                                    <div class="form-row">
-                                        <div class="col-md-6 form-group">
-                                            <label for="province">Tỉnh bạn đang làm việc</label>
-                                            <input id="province" name="province" type="text" class="form-control" value="" readonly data-province-id="" />
-                                        </div>
-                                    </div>
-                                    <div class="form-row">
-                                        <div class="col-md-6 form-group">
-                                            <label for="district">Chọn quận/huyện</label>
-                                            <select id="district" name="district" class="form-control">
-                                                <option value="">Chọn Quận/Huyện</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-6 form-group">
-                                            <label for="ward">Chọn phường/xã</label>
-                                            <select id="ward" name="ward" class="form-control">
-                                                <option value="">Chọn Xã/Phường</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="region-name">Tên vùng sản xuất</label>
-                                        <input id="region-name" name="region_name" type="text" class="form-control" required />
-                                    </div>
-                                    <div class="form-group text-center">
-                                        <button type="submit" class="btn btn-primary mr-2">Lưu vùng sản xuất</button>
-                                        <button type="button" class="btn btn-secondary" onclick="window.location.href='region.html'">Hủy bỏ</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
+              </div>
+            </div>
+          </div>
+          <div class="row mt-3">
+            <div class="col-12">
+              <div class="card card-custom">
+                <div class="card-body">
+                  <form class="add-region-form">
+                    <div class="form-row">
+                      <div class="col-md-6 form-group">
+                        <label for="province">Tỉnh bạn đang làm việc</label>
+                        <input
+                          id="province"
+                          name="province"
+                          type="text"
+                          class="form-control"
+                          value=""
+                          readonly
+                          data-province-id=""
+                        />
+                      </div>
                     </div>
+                    <div class="form-row">
+                      <div class="col-md-6 form-group">
+                        <label for="district">Chọn quận/huyện</label>
+                        <select
+                          id="district"
+                          name="district"
+                          class="form-control"
+                        >
+                          <option value="">Chọn Quận/Huyện</option>
+                        </select>
+                      </div>
+                      <div class="col-md-6 form-group">
+                        <label for="ward">Chọn phường/xã</label>
+                        <select id="ward" name="ward" class="form-control">
+                          <option value="">Chọn Xã/Phường</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label for="region-name">Tên vùng sản xuất</label>
+                      <input
+                        id="region-name"
+                        name="region_name"
+                        type="text"
+                        class="form-control"
+                        required
+                      />
+                    </div>
+                    <div class="form-group text-center">
+                      <button type="submit" class="btn btn-primary mr-2">
+                        Lưu vùng sản xuất
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn-secondary"
+                        onclick="window.location.href='region.html'"
+                      >
+                        Hủy bỏ
+                      </button>
+                    </div>
+                  </form>
                 </div>
-            </main>
-        </div>  
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
     </div>
 
-    <div class="notification-panel col-10 col-md-3 col-sm-10 offset-md-7 offset-1 offset-sm-1" id="notificationPanel">
-        <div class="notification-header">
-            <h5 class="notification-title">Thông báo</h5>
+    <div
+      class="notification-panel col-10 col-md-3 col-sm-10 offset-md-7 offset-1 offset-sm-1"
+      id="notificationPanel"
+    >
+      <div class="notification-header">
+        <h5 class="notification-title">Thông báo</h5>
 
-            <button id="confirmRead" class="btn-mark-read btn-sm">
-                <i class="fas fa-check-double"></i> Đánh dấu tất cả đã đọc
-            </button>
-        </div>
-        <ul id="notificationList">
-            <!-- Thông báo sẽ được thêm vào đây -->
-        </ul>
+        <button id="confirmRead" class="btn-mark-read btn-sm">
+          <i class="fas fa-check-double"></i> Đánh dấu tất cả đã đọc
+        </button>
+      </div>
+      <ul id="notificationList">
+        <!-- Thông báo sẽ được thêm vào đây -->
+      </ul>
     </div>
 
     <div id="overlay"></div>
-    
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
     <script src="./js/admin-auth.js"></script>
     <script src="./js/unread-count.js"></script>
@@ -143,7 +220,7 @@
     <script src="./js/settings.js"></script>
     <script src="./js/addregion.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', applySettings);
+      document.addEventListener("DOMContentLoaded", applySettings);
     </script>
-</body>
+  </body>
 </html>

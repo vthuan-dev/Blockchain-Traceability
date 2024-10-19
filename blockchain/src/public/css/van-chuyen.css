@@ -108,7 +108,8 @@ body {
     margin-bottom: 20px;
 }
 
-.batch-info-table th, .batch-info-table td {
+.batch-info-table th,
+.batch-info-table td {
     padding: 15px;
     text-align: left;
     border-bottom: 1px solid #e0e0e0;
@@ -147,7 +148,7 @@ body {
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: rgba(0,0,0,0.8);
+    background-color: rgba(0, 0, 0, 0.8);
 }
 
 .modal-overlay {
@@ -165,7 +166,7 @@ body {
     padding: 0;
     width: 80%;
     max-width: 700px;
-    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
 #modalImage {
@@ -173,7 +174,7 @@ body {
     max-height: 90vh;
     object-fit: contain;
     border-radius: 5px;
-    box-shadow: 0 0 20px rgba(255,255,255,0.2);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
 }
 
 .close {
@@ -217,7 +218,9 @@ body {
 
 /* Responsive Design */
 @media (max-width: 768px) {
-    .qr-scanner-container, #batchInfo {
+
+    .qr-scanner-container,
+    #batchInfo {
         padding: 20px;
     }
 
@@ -260,32 +263,35 @@ body {
 
 /* ... CSS hiện tại tiếp theo ... */
 
-    #logoutMessage {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        padding: 15px;
-        text-align: center;
-        font-size: 18px;
-        font-weight: bold;
-        z-index: 1000;
-        transition: opacity 0.5s ease-in-out;
-        background-color: #28a745;
-        color: #ffffff;
+#logoutMessage {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 15px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    z-index: 1000;
+    transition: opacity 0.5s ease-in-out;
+    background-color: #28a745;
+    color: #ffffff;
 }
+
 .action-message {
     display: none;
     position: fixed;
-    top: 70px; /* Điều chỉnh vị trí để không bị che bởi navbar */
+    top: 70px;
+    /* Điều chỉnh vị trí để không bị che bởi navbar */
     left: 50%;
     transform: translateX(-50%);
     padding: 15px 30px;
     border-radius: 8px;
     font-size: 16px;
     font-weight: 500;
-    z-index: 1100; /* Đảm bảo hiển thị trên các phần tử khác */
+    z-index: 1100;
+    /* Đảm bảo hiển thị trên các phần tử khác */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     max-width: 90%;
     width: auto;
@@ -313,11 +319,13 @@ body {
 }
 
 .action-message.success::before {
-    content: "\f00c"; /* Checkmark icon */
+    content: "\f00c";
+    /* Checkmark icon */
 }
 
 .action-message.error::before {
-    content: "\f071"; /* Warning icon */
+    content: "\f071";
+    /* Warning icon */
 }
 
 .action-message.show {
@@ -332,7 +340,8 @@ body {
         padding: 0 15px;
     }
 
-    .qr-scanner-container, #batchInfo {
+    .qr-scanner-container,
+    #batchInfo {
         padding: 15px;
         margin-bottom: 20px;
     }

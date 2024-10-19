@@ -1,11 +1,11 @@
+
+
 .chat-icon {
     position: fixed !important;
     bottom: 20px !important;
     right: 20px !important;
     width: 60px !important;
     height: 60px !important;
-    font-size: 30px !important;
-    color: white !important;
     background-color: #4CAF50 !important; 
     border-radius: 50% !important;
     display: flex !important;
@@ -15,6 +15,12 @@
     z-index: 1000 !important;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
     transition: transform 0.3s, box-shadow 0.3s !important;
+    overflow: hidden !important;
+}
+
+.chat-icon i {
+    font-size: 30px !important;
+    color: white !important;
 }
 
 .chat-icon:hover {
@@ -37,25 +43,22 @@
     padding: 8px;
     position: absolute;
     z-index: 1001;
-    bottom: 100%;
-    right: 100%;
-    margin-right: -10px;
-    margin-bottom: -10px;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -80px;
     opacity: 0;
-    transition: opacity 0.3s, visibility 0.3s;
+    transition: opacity 0.3s;
 }
 
 .tooltip::after {
     content: "";
     position: absolute;
     top: 100%;
-    left: 100%;
-    margin-left: -20px;
-    border-width: 10px;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
     border-style: solid;
-    border-color: #333 transparent transparent #333;
-    transform: rotate(-45deg);
-    margin-top: -10px;
+    border-color: #333 transparent transparent transparent;
 }
 
 .chatbox {

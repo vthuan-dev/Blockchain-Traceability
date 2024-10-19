@@ -1,21 +1,23 @@
-.phone a{
+.phone a {
     text-decoration: none;
     transform: translateY(50%) !important;
 }
-body{
+
+body {
     background-color: #f0f2f5;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
+
 .profile-img {
     width: 150px;
     height: 150px;
     border-radius: 50%;
     object-fit: cover;
     border: 4px solid #ffffff;
-    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
     transition: all 0.3s ease;
 
-    
+
 }
 
 .profile-img:hover {
@@ -26,6 +28,7 @@ body{
     width: 100px;
     height: 100px;
 }
+
 .social-icons i {
     font-size: 24px;
     margin: 0 10px;
@@ -37,6 +40,7 @@ body{
     border-radius: 50%;
     object-fit: cover;
 }
+
 .link-avatar {
     width: 40px;
     height: 40px;
@@ -62,13 +66,15 @@ body{
 
 @media (max-width: 768px) {
     .carousel-item .col-md-3 {
-        flex: 0 0 33.3333%; /* Hiển thị 3 ảnh trên mỗi slide trên thiết bị nhỏ */
+        flex: 0 0 33.3333%;
+        /* Hiển thị 3 ảnh trên mỗi slide trên thiết bị nhỏ */
     }
 }
 
 @media (min-width: 769px) {
     .carousel-item .col-md-3 {
-        flex: 0 0 25%; /* Hiển thị 4 ảnh trên mỗi slide trên thiết bị lớn */
+        flex: 0 0 25%;
+        /* Hiển thị 4 ảnh trên mỗi slide trên thiết bị lớn */
     }
 }
 
@@ -81,8 +87,10 @@ body{
     font-weight: 600;
     font-size: 1.8rem;
     margin-bottom: 15px;
-    text-align: center; /* Căn giữa text */
-    width: 100%; /* Đảm bảo tên chiếm toàn bộ chiều rộng */
+    text-align: center;
+    /* Căn giữa text */
+    width: 100%;
+    /* Đảm bảo tên chiếm toàn bộ chiều rộng */
 }
 
 .list-unstyled li {
@@ -107,7 +115,9 @@ body{
     font-weight: 600;
 }
 
-.profile-region, .profile-phone, .profile-address {
+.profile-region,
+.profile-phone,
+.profile-address {
     color: #202124;
 }
 
@@ -119,7 +129,7 @@ body{
     border-left: 4px solid #0bcf56;
     text-align: center;
     width: 100%;
-    
+
 }
 
 .address-container strong {
@@ -169,7 +179,8 @@ body{
 }
 
 .profile-phone::before {
-    content: '0'; /* Add default "0" */
+    content: '0';
+    /* Add default "0" */
     margin-right: 2px;
 }
 
@@ -193,7 +204,7 @@ body{
     background-color: #ffffff;
     border: 1px solid #e0e0e0;
     border-radius: 8px;
-    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
 }
 
 .contact-options-dropdown.show {
@@ -224,11 +235,11 @@ body{
 }
 
 
-.card-body{
+.card-body {
     background-color: #ced6e0;
-    }
+}
 
-#activityLogs{
+#activityLogs {
     background-color: #dcdde1;
 }
 
@@ -258,8 +269,8 @@ body{
 }
 
 .custom-navbar {
-    background-color: rgba(76, 209, 55,1.0);
-    
+    background-color: rgba(76, 209, 55, 1.0);
+
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     padding: 10px 20px;
     display: flex;
@@ -274,14 +285,16 @@ body{
 }
 
 h2.text-danger {
-    color: rgba(76, 209, 55, 1.0) !important; /* Sử dụng màu xanh lá cây thay vì đỏ */
+    color: rgba(76, 209, 55, 1.0) !important;
+    /* Sử dụng màu xanh lá cây thay vì đỏ */
     font-size: 1.8rem !important;
     font-weight: 600 !important;
     text-align: center !important;
     margin-top: 30px !important;
     margin-bottom: 20px !important;
     padding-bottom: 10px !important;
-    border-bottom: 2px solid #4cd137 !important; /* Đổi màu border thành xanh lá cây */
+    border-bottom: 2px solid #4cd137 !important;
+    /* Đổi màu border thành xanh lá cây */
     text-transform: uppercase !important;
     letter-spacing: 1px !important;
     position: relative !important;
@@ -292,7 +305,8 @@ h2.text-danger::after {
     display: block !important;
     width: 50px !important;
     height: 3px !important;
-    background-color: #4cd137 !important; /* Đổi màu thành xanh lá cây */
+    background-color: #4cd137 !important;
+    /* Đổi màu thành xanh lá cây */
     position: absolute !important;
     bottom: -2px !important;
     left: 50% !important;
@@ -300,7 +314,8 @@ h2.text-danger::after {
 }
 
 h2.text-danger:hover {
-    color: #45a049 !important; /* Màu xanh lá cây đậm hơn khi hover */
+    color: #45a049 !important;
+    /* Màu xanh lá cây đậm hơn khi hover */
     transition: color 0.3s ease !important;
 }
 
@@ -318,13 +333,13 @@ h2.text-danger:hover {
     align-items: center;
     margin: 20px auto;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 .load-more-btn:hover {
     background-color: #45a049;
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .load-more-btn i {
@@ -336,12 +351,19 @@ h2.text-danger:hover {
 }
 
 @keyframes bounce {
-    0%, 20%, 50%, 80%, 100% {
+
+    0%,
+    20%,
+    50%,
+    80%,
+    100% {
         transform: translateY(0);
     }
+
     40% {
         transform: translateY(-10px);
     }
+
     60% {
         transform: translateY(-5px);
     }
@@ -372,7 +394,8 @@ h2.text-danger:hover {
     color: #333;
     text-align: center;
     margin-bottom: 8px;
-    height: 40px; /* Giới hạn chiều cao của tên sản phẩm */
+    height: 40px;
+    /* Giới hạn chiều cao của tên sản phẩm */
     overflow: hidden;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -381,14 +404,16 @@ h2.text-danger:hover {
 
 .product-image {
     width: 100%;
-    height: 120px; /* Giảm chiều cao của ảnh */
+    height: 120px;
+    /* Giảm chiều cao của ảnh */
     object-fit: cover;
     border-radius: 6px;
     margin-top: 5px;
 }
 
 .carousel-item .col-md-6 {
-    padding: 8px; /* Giảm padding để các sản phẩm gần nhau hơn */
+    padding: 8px;
+    /* Giảm padding để các sản phẩm gần nhau hơn */
 }
 
 #carouselProducts .carousel-inner {
@@ -404,7 +429,8 @@ h2.text-danger:hover {
 /* Thêm style cho container của carousel */
 .carousel-container {
     width: 100%;
-    max-width: 100%; /* Sử dụng toàn bộ chiều rộng có sẵn */
+    max-width: 100%;
+    /* Sử dụng toàn bộ chiều rộng có sẵn */
     margin: 0 auto;
 }
 

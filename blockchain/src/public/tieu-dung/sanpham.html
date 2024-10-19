@@ -1,205 +1,242 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Trang sản phẩm</title>
     <!-- Bootstrap CSS -->
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../css/trangchu.css">
-    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
-    <link rel="stylesheet" href="../css/sanpham.css">
-    <link rel="stylesheet" href="../css/chatbox.css">
-    <link rel="stylesheet" href="../css/trangcanhan.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../css/trangchu.css" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../css/sanpham.css" />
+    <link rel="stylesheet" href="../css/chatbox.css" />
+    <link rel="stylesheet" href="../css/trangcanhan.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
 
     <style>
-        .product-card {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background-color: #ffffff;
-            border-radius: 10px;
-            padding: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-            height: 100%;
-            width: 100%;
-        }
+      .product-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: #ffffff;
+        border-radius: 10px;
+        padding: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        height: 100%;
+        width: 100%;
+      }
 
-        .product-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-        }
+      .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+      }
 
-        .product-name {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #333;
-            text-align: center;
-            margin-bottom: 15px;
-            height: auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+      .product-name {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #333;
+        text-align: center;
+        margin-bottom: 15px;
+        height: auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
 
-        .product-image {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 8px;
-            margin-top: 10px;
-        }
+      .product-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 8px;
+        margin-top: 10px;
+      }
 
-        .carousel-item .col-md-3 {
-            padding: 15px;
-        }
+      .carousel-item .col-md-3 {
+        padding: 15px;
+      }
 
-        #carouselProducts .carousel-inner {
-            padding: 20px 0;
-        }
+      #carouselProducts .carousel-inner {
+        padding: 20px 0;
+      }
 
-        .carousel-container {
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+      .carousel-container {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
 
-        .card-subtitle.mb-2.mt-4.text-muted {
-            font-size: 1.2rem;
-            color: #4CAF50 !important;
-            margin-bottom: 15px !important;
-        }
+      .card-subtitle.mb-2.mt-4.text-muted {
+        font-size: 1.2rem;
+        color: #4caf50 !important;
+        margin-bottom: 15px !important;
+      }
     </style>
-</head>
-<body>
-    <nav class="navbar custom-navbar navbar-expand-lg navbar-light bg-light custom-navbar-height">
-        <div class="logo-home">
-            <a href="trangchu.html">
-                <img src="\hinhanh\Bitcoin-Blockchain-Network-icon-on-transparent-background-PNG.png" alt="logo" class="logo">
-            </a>
-        </div>
-        <a class="navbar-brand" href="#"> Sản phẩm</a>
-        <button class="navbar-toggler ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ml-auto"> 
-                <li class="nav-item active">
-                    <a class="nav-link" href="allsanpham.html">Sản phẩm</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="allnongdan.html">Nhà sản xuất</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="allnhakiemduyet.html">Nhà kiểm duyệt</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Vùng sản xuất</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Tin tức</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="./account/dangnhap.html">Đăng nhập</a>
-                </li>
-            </ul>
-        </div>
+  </head>
+  <body>
+    <nav
+      class="navbar custom-navbar navbar-expand-lg navbar-light bg-light custom-navbar-height"
+    >
+      <div class="logo-home">
+        <a href="trangchu.html">
+          <img
+            src="\hinhanh\Bitcoin-Blockchain-Network-icon-on-transparent-background-PNG.png"
+            alt="logo"
+            class="logo"
+          />
+        </a>
+      </div>
+      <a class="navbar-brand" href="#"> Sản phẩm</a>
+      <button
+        class="navbar-toggler ml-auto"
+        type="button"
+        data-toggle="collapse"
+        data-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item active">
+            <a class="nav-link" href="allsanpham.html">Sản phẩm</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="allnongdan.html">Nhà sản xuất</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="allnhakiemduyet.html">Nhà kiểm duyệt</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Vùng sản xuất</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Tin tức</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="./account/dangnhap.html">Đăng nhập</a>
+          </li>
+        </ul>
+      </div>
     </nav>
     <div class="container">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="#">Trang chủ</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Bưởi da xanh</li>
-            </ol>
-        </nav>
-        <div class="sanpham">
-            <div class="row justify-content-center">
-                <div class="col-md-8">
-                            <div class="tieude text-center">
-                                <div class="row no-gutters justify-content-center">
-                                    <div class="col-md-6 col-12 mb-3 d-flex justify-content-center">
-                                        <img src="./hinhanh/buoi-dien-222.jpg" alt="" class="img-fluid custom-img" onclick="showImage(this)">
-                                    </div>
-                                </div>
-                        <div class="ten_sanpham mb-3">
-                            <h3 class="font-weight-bold"></h3>
-                        </div>
-                        <div class="ma_sanpham">
-                            <h5 class="font-weight-bold">MÃ SẢN PHẨM</h5>
-                            <p></p>
-                            <p>Nơi trồng: <span id="noiTrong"></span></p>
-                            <p></p>
-                        </div>
-                    </div>
-                            
-                                <div class="tab-content active" id="thongtin">
-                                  <div class="chitiet">
-                                    <h2 class="product-title">Thông tin sản phẩm</h2>                                   
-                                     <div class="mota">
-                                        <h5 class="description-title">Mô tả</h5>                                                                               <p></p>
-                                    </div>
-                                    <hr>
-                                    <div class="congdung">
-                                        <h5 class="description-title">Công dụng</h5>
-                                        <ul></ul>
-                                    </div>
-                                    <hr>
-                                    <div class="quytrinh">
-                                        <h5 class="description-title">Quy trình trồng trọt</h5>
-                                        <ul></ul>
-                                    </div>
-                                  
-                                  <hr>
-
-                                </div>
-                                <div class="tab-content" id="lienket">
-                                    <h2>Các bên có liên quan</h2>
-                                    <p>Đây là thông tin về các bên có liên quan.</p>
-                                </div>
-                                <div class="tab-content" id="xacthuc">
-                                    <h2>Thông tin xác thực</h2>
-                                    <p>Đây là thông tin xác thực.</p>
-                                </div>
-                                <div class="tab-content" id="lohang">
-                                    <h2>Lô hàng</h2>
-                                    <p>Đây là thông tin về lô hàng.</p>
-                                </div>
-
-                            </div>
-
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="#">Trang chủ</a></li>
+          <li class="breadcrumb-item active" aria-current="page">
+            Bưởi da xanh
+          </li>
+        </ol>
+      </nav>
+      <div class="sanpham">
+        <div class="row justify-content-center">
+          <div class="col-md-8">
+            <div class="tieude text-center">
+              <div class="row no-gutters justify-content-center">
+                <div class="col-md-6 col-12 mb-3 d-flex justify-content-center">
+                  <img
+                    src="./hinhanh/buoi-dien-222.jpg"
+                    alt=""
+                    class="img-fluid custom-img"
+                    onclick="showImage(this)"
+                  />
                 </div>
+              </div>
+              <div class="ten_sanpham mb-3">
+                <h3 class="font-weight-bold"></h3>
+              </div>
+              <div class="ma_sanpham">
+                <h5 class="font-weight-bold">MÃ SẢN PHẨM</h5>
+                <p></p>
+                <p>Nơi trồng: <span id="noiTrong"></span></p>
+                <p></p>
+              </div>
             </div>
+
+            <div class="tab-content active" id="thongtin">
+              <div class="chitiet">
+                <h2 class="product-title">Thông tin sản phẩm</h2>
+                <div class="mota">
+                  <h5 class="description-title">Mô tả</h5>
+                  <p></p>
+                </div>
+                <hr />
+                <div class="congdung">
+                  <h5 class="description-title">Công dụng</h5>
+                  <ul></ul>
+                </div>
+                <hr />
+                <div class="quytrinh">
+                  <h5 class="description-title">Quy trình trồng trọt</h5>
+                  <ul></ul>
+                </div>
+
+                <hr />
+              </div>
+              <div class="tab-content" id="lienket">
+                <h2>Các bên có liên quan</h2>
+                <p>Đây là thông tin về các bên có liên quan.</p>
+              </div>
+              <div class="tab-content" id="xacthuc">
+                <h2>Thông tin xác thực</h2>
+                <p>Đây là thông tin xác thực.</p>
+              </div>
+              <div class="tab-content" id="lohang">
+                <h2>Lô hàng</h2>
+                <p>Đây là thông tin về lô hàng.</p>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
     </div>
 
     <div class="chat-icon" id="openChat" onclick="toggleChat()">
-        <i class="fas fa-comments"></i>
-        <div class="tooltip">Đặt câu hỏi cho chúng tôi</div>
+      <i class="fas fa-comments"></i>
+      <div class="tooltip">Đặt câu hỏi cho chúng tôi</div>
     </div>
 
     <!-- Khung chat -->
     <div id="chatbox" class="chatbox">
-        <div class="chatbox-header">
-            <strong>Hỗ trợ</strong>
-            <button id="closeChat" class="btn-close" onclick="toggleChat()">x</button>
-        </div>
-        <div class="chatbox-body">
-            <ul id="messages" class="list-group">
-                <li class="list-group-item system-message"><strong>Hệ thống: </strong> Chào bạn, hãy đặt câu hỏi của bạn.</li>
-            </ul>
-        </div>
-        <div class="chatbox-footer">
-            <form id="messageForm" class="d-flex">
-                <input id="messageInput" type="text" class="form-control" placeholder="type message">
-                <button type="submit" class="btn btn-primary">Send</button>
-            </form>
-        </div>
+      <div class="chatbox-header">
+        <strong>Hỗ trợ</strong>
+        <button id="closeChat" class="btn-close" onclick="toggleChat()">
+          x
+        </button>
+      </div>
+      <div class="chatbox-body">
+        <ul id="messages" class="list-group">
+          <li class="list-group-item system-message">
+            <strong>Hệ thống: </strong> Chào bạn, hãy đặt câu hỏi của bạn.
+          </li>
+        </ul>
+      </div>
+      <div class="chatbox-footer">
+        <form id="messageForm" class="d-flex">
+          <input
+            id="messageInput"
+            type="text"
+            class="form-control"
+            placeholder="type message"
+          />
+          <button type="submit" class="btn btn-primary">Send</button>
+        </form>
+      </div>
     </div>
 
     <div class="overlay" id="overlay" onclick="hideImage()">
-        <img id="overlay-img" src="" alt="">
+      <img id="overlay-img" src="" alt="" />
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
@@ -212,52 +249,62 @@
     <script src="../chatbox/chatbox.js"></script>
 
     <script>
-       function toggleChat() {
-            var chatbox = document.getElementById("chatbox");
-            if (chatbox.classList.contains("show")) {
-                chatbox.classList.remove("show");
-                chatbox.classList.add("hide");
-                setTimeout(() => {
-                    chatbox.style.display = "none";
-                    chatbox.classList.remove("hide");
-                }, 300); // Match this to the animation duration
-            } else {
-                chatbox.style.display = "block";
-                // Force a reflow before adding the 'show' class
-                chatbox.offsetHeight;
-                chatbox.classList.add("show");
-            }
+      function toggleChat() {
+        var chatbox = document.getElementById("chatbox");
+        if (chatbox.classList.contains("show")) {
+          chatbox.classList.remove("show");
+          chatbox.classList.add("hide");
+          setTimeout(() => {
+            chatbox.style.display = "none";
+            chatbox.classList.remove("hide");
+          }, 300); // Match this to the animation duration
+        } else {
+          chatbox.style.display = "block";
+          // Force a reflow before adding the 'show' class
+          chatbox.offsetHeight;
+          chatbox.classList.add("show");
         }
+      }
     </script>
 
     <script>
-    document.addEventListener('DOMContentLoaded', async () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const productId = urlParams.get('id');
+      document.addEventListener("DOMContentLoaded", async () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const productId = urlParams.get("id");
 
-      if (productId) {
-        try {
-          const response = await fetch(`/api/product/${productId}`);
-          const product = await response.json();
+        if (productId) {
+          try {
+            const response = await fetch(`/api/product/${productId}`);
+            const product = await response.json();
 
-          if (response.ok) {
-            // Cập nhật các phần tử HTML với thông tin sản phẩm
-            document.querySelector('.ten_sanpham h3').textContent = product.product_name;
-            document.querySelector('.ma_sanpham p:nth-child(2)').textContent = product.product_id;
-            document.querySelector('.ma_sanpham p:nth-child(4)').textContent = `Gía bán hiện tại: ${product.price}đ/kg`;
-            document.querySelector('.mota p').textContent = product.description;
-            document.querySelector('.congdung ul').innerHTML = product.uses.split('\n').map(use => `<li>${use}</li>`).join('');
-            document.querySelector('.quytrinh ul').innerHTML = product.process.split('\n').map(step => `<li>${step}</li>`).join('');
-            document.querySelector('.custom-img').src = product.img;
-          } else {
-            console.error('Lỗi khi lấy thông tin sản phẩm:', product.error);
+            if (response.ok) {
+              // Cập nhật các phần tử HTML với thông tin sản phẩm
+              document.querySelector(".ten_sanpham h3").textContent =
+                product.product_name;
+              document.querySelector(".ma_sanpham p:nth-child(2)").textContent =
+                product.product_id;
+              document.querySelector(
+                ".ma_sanpham p:nth-child(4)"
+              ).textContent = `Gía bán hiện tại: ${product.price}đ/kg`;
+              document.querySelector(".mota p").textContent =
+                product.description;
+              document.querySelector(".congdung ul").innerHTML = product.uses
+                .split("\n")
+                .map((use) => `<li>${use}</li>`)
+                .join("");
+              document.querySelector(".quytrinh ul").innerHTML = product.process
+                .split("\n")
+                .map((step) => `<li>${step}</li>`)
+                .join("");
+              document.querySelector(".custom-img").src = product.img;
+            } else {
+              console.error("Lỗi khi lấy thông tin sản phẩm:", product.error);
+            }
+          } catch (error) {
+            console.error("Lỗi khi gọi API:", error);
           }
-        } catch (error) {
-          console.error('Lỗi khi gọi API:', error);
         }
-      }
-    });
+      });
     </script>
-
-</body>
+  </body>
 </html>
