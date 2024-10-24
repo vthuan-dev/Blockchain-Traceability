@@ -8,22 +8,18 @@ const db = mysql.createPool({
   connectTimeout: 10000
 });
 
-async function saveNotification(db, actorId, message, type) {
-  const connection = await db.getConnection();
+async function saveNotification(connection, actorId, message, type) {
   try {
-    await connection.beginTransaction();
-
-    // Lưu vào bảng register
+    // Không cần getConnection vì đã có connection từ transaction
     const [registerResult] = await connection.query(
       'INSERT INTO register (actor_id, created_on, content) VALUES (?, NOW(), ?)',
       [actorId, message]
     );
-    const registerId = registerResult.insertId;
-
+    
     // Lưu vào bảng notification_object
     const [notificationObjectResult] = await connection.query(
       'INSERT INTO notification_object (entity_type_id, entity_id, created_on) VALUES (?, ?, NOW())',
-      [type, registerId]
+      [type, registerResult.insertId]
     );
     const notificationObjectId = notificationObjectResult.insertId;
 
@@ -48,10 +44,8 @@ async function saveNotification(db, actorId, message, type) {
 
     await connection.commit();
   } catch (error) {
-    await connection.rollback();
+    console.error("Lỗi khi lưu thông báo:", error);
     throw error;
-  } finally {
-    connection.release();
   }
 }
 
