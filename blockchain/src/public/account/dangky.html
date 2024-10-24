@@ -155,11 +155,11 @@
 
             <div class="form-group">
                 <label for="specific_address">Địa chỉ cụ thể:</label>
-                <input type="text" class="form-control" id="specific_address" name="specific_address" required placeholder="Số nhà, tên đường, thôn/ấp">
+                <input type="text" class="form-control" id="specific_address" name="specific_address">
             </div>
-
+            
             <div class="form-group">
-                <label for="full_address">Địa chỉ đầy đủ:</label>
+                <label for="fullAddress">Địa chỉ đầy đủ:</label>
                 <input type="text" class="form-control" id="full_address" name="address" readonly>
             </div>
 
@@ -218,26 +218,45 @@
         </div>
     </div>
 
-    <!-- Modal Thông báo thành công -->
-  <!-- Modal Thông báo thành công -->
-<div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Đăng ký thành công</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p>Tài khoản của bạn đã được đăng ký thành công. Vui lòng kiểm tra email để xác thực tài khoản.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" id="closeSuccessModal" data-dismiss="modal">Đóng</button>
+    <!-- Modal Success -->
+    <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Đăng ký thành công</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Tài khoản của bạn đã được đăng ký thành công. Vui lòng kiểm tra email để xác thực tài khoản.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="closeSuccessModal" data-dismiss="modal">Đóng</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
+
+    <!-- Modal Error -->
+    <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger">Đăng ký thất bại</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p id="errorMessage"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Bootstrap JS và các thư viện phụ thuộc -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
@@ -260,8 +279,7 @@
                     regionSelect.appendChild(option);
                 });
             } catch (error) {
-                console.error('Lỗi khi lấy danh s��ch vùng sản xuất:', error);
-                // Hiển thị thông báo lỗi cho người dùng
+                console.error('Lỗi khi lấy danh sách vùng sản xuất:', error);
             }
         });
         document.addEventListener('DOMContentLoaded', function() {
@@ -269,6 +287,8 @@
     const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
     const successModal = new bootstrap.Modal(document.getElementById('successModal'));
     const closeSuccessModalButton = document.getElementById('closeSuccessModal');
+    const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+    
 
     form.addEventListener('submit', async function(event) {
         event.preventDefault();
@@ -286,17 +306,18 @@
 
             if (!response.ok) {
                 const errorData = await response.json();
-                alert('Lỗi: ' + errorData.message);
+                document.getElementById('errorMessage').textContent = errorData.message || errorData.error;
+                errorModal.show();
                 return;
             }
 
             const data = await response.json();
-            successModal.show(); // Hiển thị modal thành công
-            form.reset(); // Reset form sau khi đăng ký thành công
+            successModal.show(); 
+            form.reset(); 
         } catch (error) {
             loadingModal.hide(); // Ẩn modal loading nếu có lỗi
-            console.error('Lỗi khi gửi form đăng ký:', error);
-            alert('Lỗi khi đăng ký: ' + error.message);
+            document.getElementById('errorMessage').textContent = 'Đã xảy ra lỗi trong quá trình đăng ký. Vui lòng thử lại sau.';
+            errorModal.show();
         }
     });
 
@@ -308,7 +329,7 @@
 
     // Xử lý sự kiện khi modal được ẩn đi (để đảm bảo chuyển hướng ngay cả khi người dùng nhấn nút X hoặc click bên ngoài modal)
     document.getElementById('successModal').addEventListener('hidden.bs.modal', function () {
-        window.location.href = '/api/dangnhap'; // Chuyển hướng đến trang đăng nhập
+        window.location.href = '/api/dangnhap'; 
     });
 });
     </script>
@@ -330,7 +351,7 @@
 });
     </script>
 
-<script>
+<!-- <script>
     document.addEventListener('DOMContentLoaded', function() {
         const roleSelect = document.getElementById('role');
         const regionGroup = document.getElementById('regionGroup');
@@ -380,7 +401,7 @@
         // Gọi toggleInputs(true) một lần nữa để đảm bảo tất cả các trường đều bị vô hiệu hóa khi trang tải xong
         toggleInputs(true);
     });
-</script>
+</script> -->
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {

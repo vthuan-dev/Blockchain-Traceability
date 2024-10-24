@@ -1,0 +1,146 @@
+.stat-card-custom {
+    padding: 25px;
+    border-radius: 12px;
+    color: white;
+    transition: transform 0.3s ease;
+    height: 115px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.stat-card-custom:hover {
+    transform: translateY(-3px);
+}
+
+.stat-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    text-align: center;
+    gap: 10px;
+}
+
+.stat-info h3 {
+    font-size: 18px !important; 
+    margin-bottom: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 500;
+}
+
+.stat-info p {
+    font-size: 22px !important; 
+    font-weight: bold;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: 0.5px;
+}
+
+/* Styles cho container */
+.stats-container {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    justify-content: flex-start;
+    width: 100%;
+    padding: 15px;
+}
+
+.stats-cards {
+    width: 70%;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    height: 250px;
+}
+
+.chart-section {
+    width: 30%;
+    height: 250px;
+}
+
+.chart-container {
+    height: 250px !important;
+    width: 100%;
+}
+
+/* Gradients */
+.bg-blue-gradient {
+    background: linear-gradient(45deg, #2196F3, #4CAF50);
+}
+
+.bg-green-gradient {
+    background: linear-gradient(45deg, #4CAF50, #8BC34A);
+}
+
+.bg-orange-gradient {
+    background: linear-gradient(45deg, #FF9800, #FF5722);
+}
+
+.bg-purple-gradient {
+    background: linear-gradient(45deg, #9C27B0, #E91E63);
+}
+
+/* Media queries cho màn hình nhỏ */
+@media screen and (max-width: 768px) {
+    .stats-container {
+        flex-direction: column;
+        padding: 10px;
+    }
+
+    .stats-cards {
+        width: 100%;
+        grid-template-columns: 1fr; /* Chuyển thành 1 cột */
+        height: auto;
+        gap: 10px;
+    }
+
+    .stat-card-custom {
+        height: 90px; /* Giảm chiều cao của card */
+        padding: 15px;
+    }
+
+    .stat-info h3 {
+        font-size: 14px; /* Giảm kích thước font */
+    }
+
+    .stat-info p {
+        font-size: 18px; /* Giảm kích thước font */
+    }
+
+    .chart-section {
+        width: 100%;
+        margin-top: 15px;
+    }
+
+    .chart-container {
+        height: 200px !important; /* Giảm chiều cao biểu đồ */
+    }
+}
+
+/* Media queries cho màn hình rất nhỏ */
+@media screen and (max-width: 480px) {
+    .stat-card-custom {
+        height: 80px;
+        padding: 10px;
+    }
+
+    .stat-info h3 {
+        font-size: 12px;
+    }
+
+    .stat-info p {
+        font-size: 16px;
+    }
+
+    .chart-container {
+        height: 180px !important;
+    }
+}

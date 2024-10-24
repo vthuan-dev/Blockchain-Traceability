@@ -10,6 +10,7 @@
         <link rel="stylesheet" href="./css/responsive.css">
         <link rel="stylesheet" href="./css/animation.css">
         <link rel="stylesheet" href="./css/theme.css">
+        <link rel="stylesheet" href="./css/stat.css">
         <script>
         (function() {
             const theme = localStorage.getItem('theme') || 'light-theme';
@@ -68,7 +69,7 @@
                 <a href="region.html" class="menu-item rounded"><i class="fas fa-map-marker-alt"></i> Vùng sản xuất</a>                    
                 <div class="divider"></div>
                 <div class="section-title">TIỆN ÍCH</div>
-                <a href="" class="menu-item rounded"><i class="fas fa-chart-bar"></i> Báo cáo và thống kê</a>
+                <a href="#" class="menu-item rounded"><i class="fas fa-chart-bar"></i> Báo cáo và thống kê</a>
                 <a href="reply.html" class="menu-item rounded"><i class="fas fa-comments"></i> Phản hồi
                     <span class="badge badge-danger ml-2 reply-count" style="display: none;">0</span>
                 </a>
@@ -92,17 +93,17 @@
                             <div class="card-body">
                                 <ul class="nav nav-tabs" id="statsTabs" role="tablist">
                                     <li class="nav-item" role="presentation">
-                                        <a class="nav-link" id="users-tab" data-toggle="tab" href="#users" role="tab" aria-controls="users" aria-selected="false">Người dùng</a>
+                                        <a class="nav-link active" id="users-tab" data-toggle="tab" href="#users" role="tab" aria-controls="users" aria-selected="true">Người dùng</a>
                                     </li>
                                     <li class="nav-item" role="presentation">
                                         <a class="nav-link" id="products-tab" data-toggle="tab" href="#products" role="tab" aria-controls="products" aria-selected="false">Sản phẩm</a>
                                     </li>
                                 </ul>
                                 <div class="tab-content mt-3" id="statsTabContent">
-                                    <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
+                                    <div class="tab-pane fade" id="overview" role="tabpanel" aria-labelledby="overview-tab">
                                         <!-- Nội dung tổng quan báo cáo và thống kê sẽ được thêm vào đây -->
                                     </div>
-                                    <div class="tab-pane fade" id="users" role="tabpanel" aria-labelledby="users-tab">
+                                    <div class="tab-pane fade show active" id="users" role="tabpanel" aria-labelledby="users-tab">
                                         <!-- Nội dung thống kê người dùng sẽ được thêm vào đây -->
                                     </div>
                                     <div class="tab-pane fade" id="products" role="tabpanel" aria-labelledby="products-tab">

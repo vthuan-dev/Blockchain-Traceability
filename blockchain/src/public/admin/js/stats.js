@@ -375,30 +375,41 @@ window.StatManager = {
 
   async renderProductStats() {
     const productContent = `
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="stat-card-custom bg-blue">
-                        <div class="stat-info">
-                            <h3>Tổng số sản phẩm</h3>
-                            <p id="totalProducts">Đang tải...</p>
-                        </div>
+        <div class="stats-container">
+            <div class="stats-cards">
+                <div class="stat-card-custom bg-blue-gradient">
+                    <div class="stat-info">
+                        <h3>Tổng số sản phẩm</h3>
+                        <p id="totalProducts">Đang tải...</p>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <div class="stat-card-custom bg-green">
-                        <div class="stat-info">
-                            <h3>Giá trung bình</h3>
-                            <p id="averagePrice">Đang tải...</p>
-                        </div>
+                <div class="stat-card-custom bg-orange-gradient">
+                    <div class="stat-info">
+                        <h3>Sản phẩm mới nhất</h3>
+                        <p id="newProducts">Đang tải...</p>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <div class="chart-container" style="position: relative; height:250px; width:100%">
-                        <canvas id="priceRangeChart"></canvas>
+                <div class="stat-card-custom bg-green-gradient">
+                    <div class="stat-info">
+                        <h3>Giá trung bình</h3>
+                        <p id="averagePrice">Đang tải...</p>
+                    </div>
+                </div>
+                <div class="stat-card-custom bg-purple-gradient">
+                    <div class="stat-info">
+                        <h3>Giá cao nhất</h3>
+                        <p id="maxPrice">Đang tải...</p>
                     </div>
                 </div>
             </div>
-        `;
+            
+            <div class="chart-section">
+                <div class="chart-container" style="position: relative; height:400px;">
+                    <canvas id="priceRangeChart"></canvas>
+                </div>
+            </div>
+        </div>
+    `;
     document.getElementById("products").innerHTML = productContent;
     await this.updateProductStats();
   },
@@ -421,6 +432,20 @@ window.StatManager = {
       document.getElementById(
         "averagePrice"
       ).textContent = `${averagePrice.toLocaleString("vi-VN")} VNĐ`;
+
+      // Sản phẩm mới nhất
+      const latestProduct = products.sort((a, b) => 
+        new Date(b.created_at) - new Date(a.created_at)
+      )[0];
+      document.getElementById(
+        "newProducts"
+      ).textContent = `${latestProduct.product_name}`;
+
+      // Giá cao nhất
+      const maxPrice = Math.max(...products.map(product => parseFloat(product.price)));
+      document.getElementById(
+        "maxPrice"
+      ).textContent = `${maxPrice.toLocaleString("vi-VN")} VNĐ`;
 
       // Thống kê theo khoảng giá
       const priceRanges = {
@@ -448,6 +473,8 @@ window.StatManager = {
 
   createPriceRangeChart(data) {
     const ctx = document.getElementById("priceRangeChart").getContext("2d");
+    const isMobile = window.innerWidth <= 768;
+    
     new Chart(ctx, {
       type: "pie",
       data: {
@@ -466,11 +493,22 @@ window.StatManager = {
           title: {
             display: true,
             text: "Phân bố giá sản phẩm",
+            font: {
+              size: isMobile ? 12 : 14
+            }
           },
           legend: {
-            position: "right",
-          },
-        },
+            position: isMobile ? "bottom" : "right",
+            align: "center",
+            labels: {
+              boxWidth: isMobile ? 10 : 15,
+              padding: isMobile ? 8 : 10,
+              font: {
+                size: isMobile ? 10 : 11
+              }
+            }
+          }
+        }
       },
     });
   },

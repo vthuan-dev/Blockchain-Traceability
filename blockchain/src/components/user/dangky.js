@@ -48,11 +48,21 @@ function validateInput(data) {
   return requiredFields.filter((field) => !data[field]);
 }
 
+function getRoleName(roleId) {
+  const roles = {
+    1: "Nhà Sản Xuất",
+    2: "Kiểm Duyệt", 
+    6: "Vận Chuyển",
+    8: "Nhà Kho"
+  };
+  return roles[roleId] || "Không xác định";
+}
+
 async function fetchDataFromJson() {
   try {
     const data = await fs.readFile(path.join(__dirname, "data.json"), "utf8");
     const parsedData = JSON.parse(data);
-    console.log("Dữ liệu từ file JSON:", parsedData);
+    // console.log("Dữ liệu từ file JSON:", parsedData);
     return parsedData.data; // Trả về mảng data thay vì toàn bộ object
   } catch (error) {
     console.error("Lỗi khi đọc dữ liệu từ file JSON:", error);
@@ -129,7 +139,6 @@ async function checkDatabaseProvinces() {
   const connection = await db.getConnection();
   try {
     const [rows] = await connection.query("SELECT * FROM provinces");
-    console.log("Database provinces:", rows);
   } finally {
     connection.release();
   }
@@ -148,7 +157,6 @@ module.exports = function (db) {
     } catch (error) {
       if (error.code === "ECONNRESET") {
         console.error("Connection was reset. Retrying...");
-        // Retry logic or handle the error appropriately
       } else {
         throw error;
       }
@@ -171,13 +179,11 @@ module.exports = function (db) {
     }
   }
   router.get("/provinces", (req, res) => {
-    console.log("Route /api/provinces được gọi");
     try {
       const provinces = jsonData.data.map((province) => ({
         id: province.id,
         name: province.name,
       }));
-      console.log("Provinces data:", provinces);
       res.json(provinces);
     } catch (error) {
       console.error("Lỗi khi lấy danh sách tỉnh:", error);
@@ -193,7 +199,6 @@ module.exports = function (db) {
       const province = provincesData.find((p) => p.id === provinceId);
 
       if (province && province.data2) {
-        console.log("Dữ liệu huyện:", province.data2);
         res.json(province.data2);
       } else {
         console.log(
@@ -280,6 +285,7 @@ module.exports = function (db) {
         email,
         password,
         phone,
+        address,
         dob,
         gender,
         role_id,
@@ -287,7 +293,6 @@ module.exports = function (db) {
         province_id,
         district_id,
         ward_id,
-        specific_address,
       } = req.body;
       const avatar = req.file;
       console.log("Dữ liệu nhận được từ client:", req.body, req.file);
@@ -303,6 +308,21 @@ module.exports = function (db) {
             )}`,
           });
       }
+
+      if (await emailExists(email)) {
+        return res.status(400).json({
+          message: "Email này đã được sử dụng. Vui lòng chọn email khác."
+        });
+      }
+    
+      // Kiểm tra số điện thoại đã tồn tại
+      const phoneExistsQuery = "SELECT * FROM users WHERE phone = ?";
+      if (await recordExists(phoneExistsQuery, [phone])) {
+        return res.status(400).json({
+          message: "Số điện thoại này đã được sử dụng. Vui lòng chọn số khác."
+        });
+      }
+    
 
       console.log("Checking IDs:", { province_id, district_id, ward_id });
 
@@ -352,12 +372,12 @@ module.exports = function (db) {
       }
 
       // Tạo fullAddress từ các thành phần địa ch
-      const fullAddress = `${specific_address}, ${ward_id}, ${district_id}, ${province_id}`;
+      // const fullAddress = `${specific_address}, ${ward_id}, ${district_id}, ${province_id}`;
 
       const hashedPassword = await bcrypt.hash(password, 10);
       const verificationToken = crypto.randomBytes(20).toString("hex");
 
-      // Cập nhật câu lệnh SQL để bao gồm avatar URL và fullAddress
+      
       const sql =
         "INSERT INTO users (name, email, passwd, phone, address, dob, gender, role_id, region_id, province_id, district_id, ward_id, avatar, verificationToken) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
       const values = [
@@ -365,7 +385,7 @@ module.exports = function (db) {
         email,
         hashedPassword,
         phone,
-        fullAddress,
+        address,
         dob,
         gender,
         parseInt(role_id, 10),
@@ -389,7 +409,11 @@ module.exports = function (db) {
         "Xác thực tài khoản của bạn",
         path.join(__dirname, "../../public/account/xacthuc.html")
       );
-      console.log("Email xác thực đã được gửi thành công");
+
+      const message = `Người dùng mới ${name} đã đăng ký với vai trò ${getRoleName(role_id)}`;
+      await saveNotification(connection, userId, message, 1);
+
+        
 
       await connection.commit();
       res.status(201).json({
@@ -455,3 +479,4 @@ module.exports = function (db) {
 
   return router;
 };
+

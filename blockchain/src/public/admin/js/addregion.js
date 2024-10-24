@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const adminProvinceId = sessionData.province_id;
 
       // Fetch province_name từ province_id
-      return fetch(`/api/province/${adminProvinceId}`)
+      return fetch(`/province/${adminProvinceId}`)
         .then((response) => response.json())
         .then((data) => {
           if (data.province_name) {
@@ -22,11 +22,15 @@ document.addEventListener("DOMContentLoaded", function () {
           }
 
           // Fetch districts based on province_id
-          return fetch(`/api/districts/${adminProvinceId}`);
+          return fetch(`/districts/${adminProvinceId}`);
         });
     })
     .then((response) => response.json())
     .then((districts) => {
+      if (!districts || districts.error) {
+        throw new Error(districts.error || "Không thể lấy dữ liệu quận/huyện");
+      }
+      
       // Thêm tùy chọn mặc định
       districtSelect.innerHTML = '<option value="">Chọn Quận/Huyện</option>';
       // Thêm các quận/huyện vào danh sách
@@ -38,15 +42,20 @@ document.addEventListener("DOMContentLoaded", function () {
     })
     .catch((error) => {
       console.error("Lỗi khi lấy thông tin tỉnh hoặc quận/huyện:", error);
+      showMessage("Không thể lấy danh sách quận/huyện", "error");
     });
 
   // Fetch wards based on selected district
   districtSelect.addEventListener("change", function () {
     const districtId = districtSelect.value;
     if (districtId) {
-      fetch(`/api/wards/${districtId}`)
+      fetch(`/wards/${districtId}`)
         .then((response) => response.json())
         .then((wards) => {
+          if (!wards || wards.error) {
+            throw new Error(wards.error || "Không thể lấy dữ liệu xã/phường");
+          }
+          
           // Thêm tùy chọn mặc định
           wardSelect.innerHTML = '<option value="">Chọn Xã/Phường</option>';
           // Thêm các xã/phường vào danh sách
@@ -56,6 +65,7 @@ document.addEventListener("DOMContentLoaded", function () {
         })
         .catch((error) => {
           console.error("Lỗi khi lấy danh sách xã/phường:", error);
+          showMessage("Không thể lấy danh sách xã/phường", "error");
         });
     } else {
       // Nếu không có quận/huyện nào được chọn, đặt lại danh sách xã/phường
