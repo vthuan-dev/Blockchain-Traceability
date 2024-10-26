@@ -133,16 +133,22 @@ function displayBatchInfo(info) {
 
   // Thêm nút cập nhật trạng thái vận chuyển
   let transportButton = "";
-  if (
-    info.detailedTransportStatus === "Chưa bắt đầu" ||
-    info.detailedTransportStatus === "Tạm dừng"
-  ) {
-    transportButton = `<button onclick="updateTransportStatus('${info.sscc}', 'Bat dau van chuyen')" class="btn btn-success mt-3">Bắt đầu vận chuyển</button>`;
+  if (info.detailedTransportStatus === "Chưa bắt đầu" || info.detailedTransportStatus === "Tạm dừng") {
+    transportButton = `
+      <button onclick="updateTransportStatus('${info.sscc}', 'Bat dau van chuyen')" class="btn btn-success mt-3">
+        <span class="button-text">Bắt đầu vận chuyển</span>
+        <div class="loading-spinner"></div>
+      </button>`;
   } else if (info.detailedTransportStatus === "Đang vận chuyển") {
     transportButton = `
-            <button onclick="updateTransportStatus('${info.sscc}', 'Tam dung van chuyen')" class="btn btn-warning mt-3">Tạm dừng vận chuyển</button>
-            <button onclick="updateTransportStatus('${info.sscc}', 'Hoan thanh van chuyen')" class="btn btn-success mt-3">Hoàn thành vận chuyển</button>
-        `;
+      <button onclick="updateTransportStatus('${info.sscc}', 'Tam dung van chuyen')" class="btn btn-warning mt-3">
+        <span class="button-text">Tạm dừng vận chuyển</span>
+        <div class="loading-spinner"></div>
+      </button>
+      <button onclick="updateTransportStatus('${info.sscc}', 'Hoan thanh van chuyen')" class="btn btn-success mt-3">
+        <span class="button-text">Hoàn thành vận chuyển</span>
+        <div class="loading-spinner"></div>
+      </button>`;
   } else if (info.detailedTransportStatus === "Đã giao") {
     //khi đã giao thì không thể bắt đầu vận chuyển mới
     transportButton = `<button onclick="updateTransportStatus('${info.sscc}', 'Bat dau van chuyen')" class="btn btn-success mt-3">Bắt đầu vận chuyển mới</button>`;
@@ -183,9 +189,12 @@ function closeCompletionModalAndRefresh() {
 
 async function updateTransportStatus(sscc, action) {
   console.log("Updating transport status:", { sscc, action });
+  
+  // Tìm và thêm loading state cho nút được click
+  const clickedButton = event.target.closest('button');
+  clickedButton.classList.add('btn-loading');
+  
   try {
-    console.log("Current roleId:", sessionStorage.getItem("roleId"));
-
     const response = await fetch("/api/accept-transport", {
       method: "POST",
       headers: {
@@ -200,18 +209,17 @@ async function updateTransportStatus(sscc, action) {
       throw new Error(data.error || "Không thể cập nhật trạng thái vận chuyển");
     }
 
-    if (action === "Hoan thanh van chuyen") {
-      showTransportCompletionMessage();
-    } else {
-      alert(data.message);
-      await fetchBatchInfoBySSCC(sscc);
-    }
-
-    // Lấy thông tin lô hàng mới sau khi cập nhật trạng thái
+    showActionMessage(data.message, "success");
     await fetchBatchInfoBySSCC(sscc);
   } catch (error) {
     console.error("Error:", error);
-    alert("Có lỗi xảy ra khi cập nhật trạng thái vận chuyển: " + error.message);
+    showActionMessage(
+      "Có lỗi xảy ra khi cập nhật trạng thái vận chuyển: " + error.message,
+      "error"
+    );
+  } finally {
+    // Xóa loading state
+    clickedButton.classList.remove('btn-loading');
   }
 }
 
@@ -470,6 +478,11 @@ window.closeModal = closeModal;
 
 async function updateTransportStatus(sscc, action) {
   console.log("Updating transport status:", { sscc, action });
+  
+  // Tìm và thêm loading state cho nút được click
+  const clickedButton = event.target.closest('button');
+  clickedButton.classList.add('btn-loading');
+  
   try {
     const response = await fetch("/api/accept-transport", {
       method: "POST",
@@ -493,6 +506,9 @@ async function updateTransportStatus(sscc, action) {
       "Có lỗi xảy ra khi cập nhật trạng thái vận chuyển: " + error.message,
       "error"
     );
+  } finally {
+    // Xóa loading state
+    clickedButton.classList.remove('btn-loading');
   }
 }
 
@@ -514,3 +530,4 @@ function showActionMessage(message, type) {
     }, 300); // Đợi cho animation kết thúc
   }, 3000);
 }
+

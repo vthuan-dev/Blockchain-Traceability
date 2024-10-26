@@ -58,7 +58,7 @@
         </div>
     </nav>
     
-    <!-- Thêm div overlay ngay sau nav -->
+    <!-- Thm div overlay ngay sau nav -->
     <div class="menu-overlay"></div>
 
     <main>
@@ -93,10 +93,22 @@
             
             <!-- Thêm các nút mới vào phần hiển thị thông tin lô hàng -->
             <div id="transportActions" style="display: none;">
-                <button id="start-transport" class="btn btn-primary">Bắt đầu vận chuyển</button>
-                <button id="pause-transport" class="btn btn-warning" style="display: none;">Tạm dừng vận chuyển</button>
-                <button id="resume-transport" class="btn btn-info" style="display: none;">Tiếp tục vận chuyển</button>
-                <button id="complete-transport" class="btn btn-success" style="display: none;">Hoàn thành vận chuyển</button>
+                <button id="start-transport" class="btn btn-primary">
+                    <span class="button-text">Bắt đầu vận chuyển</span>
+                    <div class="loading-spinner"></div>
+                </button>
+                <button id="pause-transport" class="btn btn-warning" style="display: none;">
+                    <span class="button-text">Tạm dừng vận chuyển</span>
+                    <div class="loading-spinner"></div>
+                </button>
+                <button id="resume-transport" class="btn btn-info" style="display: none;">
+                    <span class="button-text">Tiếp tục vận chuyển</span>
+                    <div class="loading-spinner"></div>
+                </button>
+                <button id="complete-transport" class="btn btn-success" style="display: none;">
+                    <span class="button-text">Hoàn thành vận chuyển</span>
+                    <div class="loading-spinner"></div>
+                </button>
             </div>
         </div>
     </main>
@@ -250,6 +262,30 @@
             <button id="closeCompletionModal" class="btn btn-primary">Đóng</button>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const transportButtons = document.querySelectorAll('#transportActions button');
+
+            transportButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Thêm class loading
+                    this.classList.add('btn-loading');
+                    
+                    // Vô hiệu hóa nút
+                    this.disabled = true;
+
+                    // Giả lập một thao tác bất đồng bộ
+                    setTimeout(() => {
+                        // Xóa class loading
+                        this.classList.remove('btn-loading');
+                        // Kích hoạt lại nút
+                        this.disabled = false;
+                    }, 2000);
+                });
+            });
+        });
+    </script>
 </body>
 
 
