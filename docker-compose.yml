@@ -6,27 +6,33 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
+      - ALCHEMY_API_KEY=${ALCHEMY_API_KEY}
+      - PRIVATE_KEY=${PRIVATE_KEY}
+      - TRACEABILITY_CONTRACT_ADDRESS=${TRACEABILITY_CONTRACT_ADDRESS}
+      - ACTIVITY_LOG_CONTRACT_ADDRESS=${ACTIVITY_LOG_CONTRACT_ADDRESS}
       - DB_HOST=${DB_HOST}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
-      - DB_NAME=${DB_NAME}
-      - BLOCKCHAIN_ENDPOINT=${BLOCKCHAIN_ENDPOINT}
       - DB_DATABASE=${DB_DATABASE}
       - DB_PORT=${DB_PORT}
       - S3_ACCESS_KEY=${S3_ACCESS_KEY}
       - S3_SECRET_KEY=${S3_SECRET_KEY}
       - FIREBASE_API_KEY=${FIREBASE_API_KEY}
-      - PRIVATE_KEY=${PRIVATE_KEY}
-      - INFURA_PROJECT_ID=${INFURA_PROJECT_ID}
-      - GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
+      - FIREBASE_AUTH_DOMAIN=${FIREBASE_AUTH_DOMAIN}
+      - FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}
+      - FIREBASE_STORAGE_BUCKET=${FIREBASE_STORAGE_BUCKET}
+      - FIREBASE_MESSAGING_SENDER_ID=${FIREBASE_MESSAGING_SENDER_ID}
+      - FIREBASE_APP_ID=${FIREBASE_APP_ID}
+      - FIREBASE_MEASUREMENT_ID=${FIREBASE_MEASUREMENT_ID}
+      - SESSION_SECRET=${SESSION_SECRET}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - redis
     volumes:
       - .:/app
       - /app/node_modules
-
-  blockchain:
-    image: trufflesuite/ganache-cli
-    ports:
-      - "8545:8545"
+    command: npm run start
 
   websocket:
     build: .
@@ -35,7 +41,14 @@ services:
     command: node blockchain/src/websocket.js
     environment:
       - NODE_ENV=production
+      - ALCHEMY_API_KEY=${ALCHEMY_API_KEY}
       - DB_HOST=${DB_HOST}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
-      - DB_NAME=${DB_NAME}
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_PORT=${DB_PORT}
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"

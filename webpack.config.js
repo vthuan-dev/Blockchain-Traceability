@@ -1,7 +1,7 @@
 const path = require("path");
 
 module.exports = {
-  entry: "./blockchain/src/components/chatbox/chat.js", // Điểm vào ứng dụng React từ thư mục src
+  entry: "./blockchain/src/public/chatbox/chat.bundle.js", // Điểm vào ứng dụng React từ thư mục src
   output: {
     path: path.resolve(__dirname, "./blockchain/src/public/chatbox"), // Nơi chứa file sau khi bundling
     filename: "chat.bundle.js", // Tên file sau khi bundling

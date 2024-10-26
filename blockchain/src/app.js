@@ -19,7 +19,7 @@ const { storage } = require("./firebase.js");
 const { signInWithEmailAndPassword } = require("firebase/auth");
 
 const { uploadFile: uploadFileFirebase, deleteFile } = require("./firebase.js");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const nodemailer = require("nodemailer");
 require("dotenv").config({ path: path.resolve(__dirname, "../../.env") });
 const session = require("express-session");
@@ -33,7 +33,7 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: "http://localhost:3000", // Thay đổi nếu bạn chạy ở một domain kh��c
+    origin: "http://localhost:3000", // Thay đổi nếu bạn chạy ở một domain khc
     methods: ["GET", "POST"],
     credentials: true,
   },
@@ -42,15 +42,26 @@ const io = socketIo(server, {
 app.use(cors());
 app.use(bodyParser.json());
 
+const Redis = require('ioredis');
+const connectRedis = require('connect-redis');
+const RedisStore = connectRedis(session);
+
+const redisClient = new Redis({
+  host: process.env.REDIS_HOST || 'redis', // 'redis' là tên service trong docker-compose
+  port: process.env.REDIS_PORT || 6379
+});
+
 app.use(
   session({
-    secret: process.env.SESSION_SECRET,
+    store: new RedisStore({ client: redisClient }),
+    secret: process.env.SESSION_SECRET || 'fallback_secret',
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 24 * 60 * 60 * 1000, // 24 giờ
-    },
+      secure: false,
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000
+    }
   })
 );
 
@@ -89,7 +100,7 @@ const {
 
 app.use((req, res, next) => {
   if (req.session.userId) {
-    req.session.touch(); // Cập nhật thời gian hoạt động c��a session
+    req.session.touch(); // Cập nhật thời gian hoạt động ca session
   }
   next();
 });

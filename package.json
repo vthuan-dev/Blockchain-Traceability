@@ -5,7 +5,7 @@
   "scripts": {
     "test": "mocha --require @babel/register src/test/*.test.js",
     "start": "node blockchain/src/app.js",
-    "build": "webpack",
+    "build": "webpack --config webpack.config.js",
     "dev": "nodemon blockchain/src/app.js"
   },
   "keywords": [],
@@ -24,6 +24,7 @@
     "alchemy-sdk": "^3.4.3",
     "axios": "^1.7.7",
     "bcrypt": "^5.1.1",
+    "bcryptjs": "^2.4.3",
     "bip39": "^3.1.0",
     "bn.js": "^5.2.1",
     "body-parser": "^1.20.2",
@@ -58,7 +59,9 @@
     "truffle-contract-size": "^2.0.1",
     "twilio": "^5.2.2",
     "web3": "^4.13.0",
-    "ws": "^8.18.0"
+    "ws": "^8.18.0",
+    "connect-redis": "^6.0.0",
+    "ioredis": "^4.27.7"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

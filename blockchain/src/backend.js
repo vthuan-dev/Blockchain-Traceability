@@ -84,6 +84,10 @@ web3.eth.defaultAccount = account.address;
 web3.eth.accounts.wallet.add(account);
 web3.eth.defaultAccount = account.address;
 
+web3.eth.net.isListening()
+.then(() => console.log('Web3 is connected'))
+.catch(e => console.log('Wow. Something went wrong: ' + e));
+
 const adminAddress = account.address;
 
 web3.eth.net

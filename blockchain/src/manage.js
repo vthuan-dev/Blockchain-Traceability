@@ -4,7 +4,7 @@ const cors = require("cors");
 const path = require("path");
 const bodyParser = require("body-parser");
 const multer = require("multer");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const axios = require("axios");
 const {
   storage,
