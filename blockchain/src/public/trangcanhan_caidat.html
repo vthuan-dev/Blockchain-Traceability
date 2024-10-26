@@ -71,7 +71,7 @@
                                         <strong>Ảnh đại diện</strong>
                                     </div>
                                     <div class="avatar-edit">
-                                        <input type='file' id="imageUpload" accept=".png, .jpg, .jpeg" />
+                                        <input type='file' id="imageUpload" name="avatar" accept=".png, .jpg, .jpeg" />
                                         <label for="imageUpload" title="Tải lên ảnh mới">
                                             <i class="fas fa-camera"></i>
                                    
@@ -157,7 +157,7 @@
                                     <button class="btn btn-danger btn-lg mx-3" id="cancelButton">
                                         <i class="fas fa-times-circle"></i> 
                                     </button>
-                                    <button class="btn btn-success btn-lg mx-3" data-toggle="modal" data-target="#confirmModal" id="saveButton">
+                                    <button class="btn btn-success btn-lg mx-3" id="saveButton">
                                         <i class="fas fa-check-circle"></i> 
                                     </button>
                                 </div>
@@ -231,30 +231,30 @@
                 <div class="modal-body">
                     <form id="addressForm">
                         <div class="form-group">
-                            <label for="modalProvince">Tỉnh/Thành phố:</label>
-                            <select class="form-control" id="modalProvince" name="province_id" required>
+                            <label for="province">Tỉnh/Thành phố:</label>
+                            <select class="form-control" id="province" name="province_id" required>
                                 <option value="">Chọn Tỉnh/Thành phố</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="modalDistrict">Quận/Huyện:</label>
-                            <select class="form-control" id="modalDistrict" name="district_id" required>
+                            <label for="district">Quận/Huyện:</label>
+                            <select class="form-control" id="district" name="district_id" required disabled>
                                 <option value="">Chọn Quận/Huyện</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="modalWard">Xã/Phường:</label>
-                            <select class="form-control" id="modalWard" name="ward_id" required>
+                            <label for="ward">Xã/Phường:</label>
+                            <select class="form-control" id="ward" name="ward_id" required disabled>
                                 <option value="">Chọn Xã/Phường</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="modalSpecificAddress">Địa chỉ cụ thể:</label>
-                            <input type="text" class="form-control" id="modalSpecificAddress" name="specific_address" required placeholder="Số nhà, tên đường, thôn/ấp">
+                            <label for="specific_address">Địa chỉ cụ thể:</label>
+                            <input type="text" class="form-control" id="specific_address" name="specific_address">
                         </div>
                         <div class="form-group">
-                            <label for="modalFullAddress">Địa chỉ đầy đủ:</label>
-                            <input type="text" class="form-control" id="modalFullAddress" name="address" readonly>
+                            <label for="full_address">Địa chỉ đầy đủ:</label>
+                            <input type="text" class="form-control" id="full_address" name="address" readonly>
                         </div>
                     </form>
                 </div>
@@ -269,7 +269,7 @@
     <!-- jQuery và Bootstrap JavaScript -->
     <!-- AOS JavaScript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script> <!-- Sử dụng phiên bản đầy đủ -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script> <!-- Sử dng phiên bản đầy đủ -->
     <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
     <script>AOS.init();</script>
@@ -299,11 +299,11 @@
     </script>
     <script>
         document.addEventListener('DOMContentLoaded', function(){
-            const provinceSelect = document.getElementById('modalProvince');
-            const districtSelect = document.getElementById('modalDistrict');
-            const wardSelect = document.getElementById('modalWard');
-            const specificAddressInput = document.getElementById('modalSpecificAddress');
-            const fullAddressInput = document.getElementById('modalFullAddress');
+            const provinceSelect = document.getElementById('province');
+            const districtSelect = document.getElementById('district');
+            const wardSelect = document.getElementById('ward');
+            const specificAddressInput = document.getElementById('specific_address');
+            const fullAddressInput = document.getElementById('full_address');
             const addressDisplayInput = document.getElementById('addressInput');
             const saveAddressButton = document.getElementById('saveAddressButton');
 
@@ -312,20 +312,21 @@
             let currentWard = '';
 
             function loadAddressData() {
-                // Lấy thông tin người dùng hiện tại
                 fetch('/api/user-info')
                     .then(response => response.json())
                     .then(userData => {
                         console.log('User info:', userData);
-                        currentProvince = userData.province || '';
-                        currentDistrict = userData.district || '';
-                        currentWard = userData.ward || '';
+                        currentProvince = userData.province_id || '';
+                        currentDistrict = userData.district_id || '';
+                        currentWard = userData.ward_id || '';
 
                         // Xử lý địa chỉ cụ thể
                         const fullAddress = userData.address || '';
                         const addressParts = fullAddress.split(',').map(part => part.trim());
 
                         specificAddressInput.value = addressParts[0] || '';
+                        fullAddressInput.value = fullAddress;
+                        addressDisplayInput.value = fullAddress;
 
                         // Sau khi có thông tin người dùng, tải danh sách tỉnh
                         loadProvinces();
@@ -337,63 +338,65 @@
                 fetch('/api/provinces')
                     .then(response => response.json())
                     .then(provinces => {
+                        console.log('Provinces:', provinces);
                         provinceSelect.innerHTML = '<option value="">Chọn Tỉnh/Thành phố</option>';
                         provinces.forEach(province => {
                             const option = document.createElement('option');
-                            option.value = province.province_id;
-                            option.textContent = province.province_name;
-                            if (province.province_name === currentProvince) {
+                            option.value = province.id;
+                            option.textContent = province.name;
+                            if (province.id == currentProvince) {
                                 option.selected = true;
                             }
                             provinceSelect.appendChild(option);
                         });
-                        // Sau khi tải xong tỉnh, tải huyện của tỉnh đã chọn
-                        if (provinceSelect.value) {
-                            loadDistricts(provinceSelect.value);
+                        if (currentProvince) {
+                            loadDistricts(currentProvince);
                         }
                     })
                     .catch(error => console.error('Error fetching provinces:', error));
             }
 
             function loadDistricts(provinceId) {
+                console.log('Loading districts for province:', provinceId);
                 fetch(`/api/districts/${provinceId}`)
                     .then(response => response.json())
                     .then(districts => {
+                        console.log('Districts:', districts);
                         districtSelect.innerHTML = '<option value="">Chọn Quận/Huyện</option>';
                         districts.forEach(district => {
                             const option = document.createElement('option');
-                            option.value = district.district_id;
-                            option.textContent = district.district_name;
-                            if (district.district_name === currentDistrict) {
+                            option.value = district.id;
+                            option.textContent = district.name;
+                            if (district.id == currentDistrict) {
                                 option.selected = true;
                             }
                             districtSelect.appendChild(option);
                         });
                         districtSelect.disabled = false;
-                        // Sau khi tải xong huyện, tải xã của huyện đã chọn
-                        if (districtSelect.value) {
-                            loadWards(districtSelect.value);
+                        if (currentDistrict) {
+                            loadWards(currentDistrict);
                         }
                     })
                     .catch(error => console.error('Error fetching districts:', error));
             }
 
             function loadWards(districtId) {
+                console.log('Loading wards for district:', districtId);
                 fetch(`/api/wards/${districtId}`)
                     .then(response => response.json())
                     .then(wards => {
+                        console.log('Wards:', wards);
                         wardSelect.innerHTML = '<option value="">Chọn Xã/Phường</option>';
                         wards.forEach(ward => {
                             const option = document.createElement('option');
-                            option.value = ward.ward_id;
-                            option.textContent = ward.ward_name;
-                            if (ward.ward_name === currentWard) {
+                            option.value = ward.id;
+                            option.textContent = ward.name;
+                            if (ward.id == currentWard) {
                                 option.selected = true;
                             }
                             wardSelect.appendChild(option);
                         });
                         wardSelect.disabled = false;
-                        updateFullAddress();
                     })
                     .catch(error => console.error('Error fetching wards:', error));
             }
@@ -409,26 +412,39 @@
             }
 
             provinceSelect.addEventListener('change', function() {
-                districtSelect.innerHTML = '<option value="">Chọn Quận/Huyện</option>';
-                wardSelect.innerHTML = '<option value="">Chọn Xã/Phường</option>';
-                districtSelect.disabled = !this.value;
-                wardSelect.disabled = true;
-                if (this.value) {
-                    loadDistricts(this.value);
+                const selectedProvinceId = this.value;
+                currentProvince = selectedProvinceId;
+                currentDistrict = '';
+                currentWard = '';
+                if (selectedProvinceId) {
+                    loadDistricts(selectedProvinceId);
+                } else {
+                    districtSelect.innerHTML = '<option value="">Chọn Quận/Huyện</option>';
+                    wardSelect.innerHTML = '<option value="">Chọn Xã/Phường</option>';
+                    districtSelect.disabled = true;
+                    wardSelect.disabled = true;
                 }
                 updateFullAddress();
             });
 
             districtSelect.addEventListener('change', function() {
-                wardSelect.innerHTML = '<option value="">Chọn Xã/Phường</option>';
-                wardSelect.disabled = !this.value;
-                if (this.value) {
-                    loadWards(this.value);
+                const selectedDistrictId = this.value;
+                currentDistrict = selectedDistrictId;
+                currentWard = '';
+                if (selectedDistrictId) {
+                    loadWards(selectedDistrictId);
+                } else {
+                    wardSelect.innerHTML = '<option value="">Chọn Xã/Phường</option>';
+                    wardSelect.disabled = true;
                 }
                 updateFullAddress();
             });
 
-            wardSelect.addEventListener('change', updateFullAddress);
+            wardSelect.addEventListener('change', function() {
+                currentWard = this.value;
+                updateFullAddress();
+            });
+
             specificAddressInput.addEventListener('input', updateFullAddress);
 
             // Tải dữ liệu khi modal được mở
@@ -441,14 +457,14 @@
                 // Cập nhật giá trị hiển thị trên trang
                 addressDisplayInput.value = newAddress;
                 
-                // Cập nhật giá trị trong session (nếu cần)
+                // Cập nhật giá trỉ trong session (nếu cần)
                 sessionStorage.setItem('userAddress', newAddress);
                 
                 // Đóng modal
                 $('#editAddressModal').modal('hide');
                 
                 // Thông báo cập nhật thành công
-                alert('Địa chỉ đã được cập nhật thành công!');
+                alert('Địa chỉ đã đưc cập nhật thành công!');
             });
 
             window.addEventListener('load', function() {
@@ -587,100 +603,87 @@
         notification.className = `notification ${type}`;
         notification.style.display = 'block';
         setTimeout(() => {
-            notification.classList.add('show');
-        }, 10);
-        setTimeout(() => {
-            notification.classList.remove('show');
-            setTimeout(() => {
-                notification.style.display = 'none';
-            }, 300);
+            notification.style.display = 'none';
         }, 3000);
     }
 
 
 
     document.addEventListener('DOMContentLoaded', function() {
-  const form = document.getElementById('profile-form');
   const saveButton = document.getElementById('saveButton');
-
-  saveButton.addEventListener('click', async function(e) {
+  
+  saveButton.addEventListener('click', function(e) {
     e.preventDefault();
+    console.log('Nút lưu được nhấn');
+    
     if (!hasDataChanged()) {
-        showNotification('Không có thay đổi nào để lưu.', 'error');
-        return;
+      console.log('Không có thay đổi');
+      showNotification('Không có thay đổi nào để lưu.', 'info');
+      return;
     }
+    
+    console.log('Có thay đổi, chuẩn bị xử lý');
+    
+    const formData = new FormData(document.getElementById('profile-form'));
+    
+    // Gọi hàm để gửi dữ liệu đến server
+    saveProfileData(formData);
+  });
 
-    const formData = new FormData();
+  function hasDataChanged() {
+    const inputs = document.querySelectorAll('#profile-form input, #profile-form select, #profile-form textarea');
+    return Array.from(inputs).some(input => input.value !== input.defaultValue);
+  }
 
-    // Chỉ thêm các trường đã thay đổi vào formData
-    const name = document.getElementById('userNameInput');
-    if (!name.readOnly && name.value !== name.defaultValue) {
-      formData.append('name', name.value);
-    }
+  function updateDefaultValues() {
+    const inputs = document.querySelectorAll('#profile-form input, #profile-form select, #profile-form textarea');
+    inputs.forEach(input => {
+      input.defaultValue = input.value;
+    });
+  }
 
-    const phone = document.getElementById('phoneInput');
-    if (!phone.readOnly && phone.value !== phone.defaultValue) {
-      formData.append('phone', phone.value);
-    }
+  function updateDisplayInfo(formData) {
+    document.getElementById('userName').textContent = formData.get('name') || document.getElementById('userName').textContent;
+    document.getElementById('userRegion').textContent = `Khu vực: ${userInfo.region_name}`;
+    
+    // Cập nhật các thông tin khác nếu cần
+  }
 
-    const address = document.getElementById('addressInput');
-    if (address.value !== address.defaultValue) {
-      formData.append('address', address.value);
-    }
-
-    const dob = document.getElementById('dobInput');
-    if (dob.value !== dob.defaultValue) {
-      formData.append('dob', dob.value);
-    }
-
-    const gender = document.getElementById('genderInput');
-    if (gender.value !== gender.defaultValue) {
-      formData.append('gender', gender.value);
-    }
-
-    // Thêm avatar nếu có
-    const avatarInput = document.getElementById('imageUpload');
-    if (avatarInput.files.length > 0) {
-      formData.append('avatar', avatarInput.files[0]);
-    }
-
+  // Thêm hàm mới để gửi dữ liệu đến server
+  async function saveProfileData(formData) {
     try {
+      const avatarInput = document.getElementById('imageUpload');
+      if (avatarInput.files.length > 0) {
+        formData.append('avatar', avatarInput.files[0]);
+      }
+
       const response = await fetch('/api/capnhatthongtin', {
-        method: 'POST',
+        method: 'PUT',
         body: formData
       });
 
       if (response.ok) {
         const result = await response.json();
         if (result.updated) {
-                showNotification('Thông tin người dùng đã được cập nhật thành công.');
-                window.history.back();
+          showNotification(result.message, 'success'); // Hiển thị thông báo thành công
+          updateDefaultValues();
+          updateDisplayInfo(formData);
+          
           if (result.avatarUrl) {
             document.getElementById('avatarImage').src = result.avatarUrl;
-            // Cập nhật giá trị mặc định cho avatar
-            document.getElementById('avatarImage').dataset.defaultSrc = result.avatarUrl;
           }
-          // Cập nhật giá trị mặc định cho các trường input
-          name.defaultValue = name.value;
-          phone.defaultValue = phone.value;
-          address.defaultValue = address.value;
-          dob.defaultValue = dob.value;
-          gender.defaultValue = gender.value;
-
-          // Refresh trang để cập nhật thông tin mới
-          window.location.reload();
         } else {
-          showNotification(result.message || 'Có lỗi xảy ra khi cập nhật thông tin.', 'error');
+          showNotification(result.message, 'info');
         }
       } else {
-        const errorData = await response.json();
-        showNotification(result.message || 'Có lỗi xảy ra khi cập nhật thông tin.', 'error');
-    }
+        const error = await response.json();
+        throw new Error(error.error || 'Có lỗi xảy ra khi cập nhật thông tin.');
+      }
     } catch (error) {
       console.error('Lỗi:', error);
-      showNotification('Có lỗi xảy ra khi gửi yêu cầu', 'error');
+      showNotification(error.message, 'error');
     }
-  });
+  }
 });
 
     document.getElementById('imageUpload').addEventListener('change', function(e) {
@@ -702,7 +705,7 @@
 
 <script>
     document.getElementById('cancelButton').addEventListener('click', function(e) {
-        e.preventDefault(); // Ngăn chặn hành vi mặc định của nút
+        e.preventDefault(); // Ngăn chn hành vi mặc định của nút
         window.history.back(); // Quay lại trang trước đó
     });
 </script>

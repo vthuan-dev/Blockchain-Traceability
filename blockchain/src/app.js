@@ -33,7 +33,7 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: "http://localhost:3000", // Thay đổi nếu bạn chạy ở một domain khác
+    origin: "http://localhost:3000", // Thay đổi nếu bạn chạy ở một domain kh��c
     methods: ["GET", "POST"],
     credentials: true,
   },
@@ -89,7 +89,7 @@ const {
 
 app.use((req, res, next) => {
   if (req.session.userId) {
-    req.session.touch(); // Cập nhật thời gian hoạt động của session
+    req.session.touch(); // Cập nhật thời gian hoạt động c��a session
   }
   next();
 });
@@ -133,6 +133,9 @@ app.get("/sanpham.html", (req, res) => {
 //app.post('/api/register', upload.single('avatar'), (req, res) => {
 // Xử lý logic đăng ký ở đây
 //});
+
+
+
 
 app.get("/api/products", async (req, res) => {
   try {
@@ -335,7 +338,7 @@ app.get("/api/region", async (req, res) => {
   res.json(regions);
 });
 
-app.post("/api/capnhatthongtin", upload.single("avatar"), async (req, res) => {
+app.put("/api/capnhatthongtin", upload.single("avatar"), async (req, res) => {
   let connection;
   let tempAvatarUrl = null;
   try {
@@ -455,7 +458,7 @@ app.post("/api/capnhatthongtin", upload.single("avatar"), async (req, res) => {
       await connection.commit();
       res.json({
         updated: true,
-        message: "Thông tin đã được cập nhật",
+        message: "Thông tin đã được cập nhật thành công", // Thêm thông báo này
         avatarUrl: tempAvatarUrl,
       });
     } else {
@@ -749,7 +752,7 @@ io.on("connection", (socket) => {
         io.to(socket.id).emit("message", {
           from: "Hệ thống",
           to: message.from,
-          body: "Xin lỗi. Không có admin nào đang online",
+          body: "Xin lỗi. Khng có admin nào đang online",
         });
       }
     }
@@ -792,3 +795,4 @@ io.on("connection", (socket) => {
 server.listen(3000, () => {
   console.log("Server đang chạy trên cổng 3000");
 });
+
