@@ -65,8 +65,15 @@ function displayBatchInfo(info) {
     const confirmButton = `<button onclick="confirmReceipt('${info.sscc}')" class="btn btn-primary mt-3">Xác nhận nhận hàng</button>`;
     tableHTML += `<tr><td colspan="2">${confirmButton}</td></tr>`;
   } else if (info.warehouseConfirmed === true) {
-    tableHTML +=
-      '<tr><td colspan="2"><p class="mt-3">Lô hàng đã được xác nhận</p></td></tr>';
+    tableHTML += `
+      <tr>
+        <td colspan="2">
+          <div class="confirmation-status">
+            <i class="fas fa-check-circle"></i>
+            Lô hàng đã được xác nhận
+          </div>
+        </td>
+      </tr>`;
   } else {
     tableHTML +=
       '<tr><td colspan="2"><p class="mt-3">Lô hàng chưa sẵn sàng để xác nhận</p></td></tr>';
@@ -201,7 +208,7 @@ function openImageGallery(type) {
   modalContent.innerHTML = galleryHTML;
   modalContent.style.display = "block";
 
-  // Đóng modal khi nhấp vào bất kỳ đâu trên modal
+  // Đóng modal khi nhấp vào b���t kỳ đâu trên modal
   modal.onclick = function (event) {
     if (event.target === modal || event.target.className === "modal-overlay") {
       closeModal();
@@ -431,3 +438,4 @@ window.openImageGallery = openImageGallery;
 window.expandImage = expandImage;
 window.closeModal = closeModal;
 window.confirmReceipt = confirmReceipt;
+

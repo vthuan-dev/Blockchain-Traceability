@@ -507,3 +507,23 @@ body {
         transform: rotate(360deg);
     }
 }
+
+/* Style cho thông báo xác nhận lô hàng */
+.confirmation-status {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin: 15px 0;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-left: 4px solid #43a047;
+    font-weight: 500;
+}
+
+.confirmation-status i {
+    margin-right: 10px;
+    font-size: 1.2em;
+    color: #43a047;
+}
