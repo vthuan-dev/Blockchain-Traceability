@@ -12,7 +12,7 @@ body {
 }
 
 header {
-    /* background-color: #218838; */
+     background-color: #218838; 
     position: fixed;
     top: 0;
     width: 100%;
