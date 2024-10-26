@@ -16,7 +16,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <meta charset="UTF-8">
-   
+    <!-- Thêm Font Awesome từ Cloudflare CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <nav class="navbar custom-navbar navbar-expand-lg navbar-light bg-light custom-navbar-height">
@@ -207,7 +208,8 @@
             // Cập nhật tên sản phẩm, hình ảnh và giá
             document.querySelector('.ten_sanpham h3').textContent = productInfo.product_name;
             document.querySelector('.custom-img').src = productInfo.img || '';
-            document.querySelector('.price h3').innerHTML = `Giá: <span>${productInfo.price.toLocaleString('vi-VN')} đ</span>`;        } else {
+            document.querySelector('.price h3').innerHTML = `Giá: <span>${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(productInfo.price)}</span>`;
+             } else {
             console.error('Không thể lấy thông tin sản phẩm');
         }
     } catch (error) {
@@ -268,7 +270,7 @@
         <div id="activityLogs">Đang tải...</div>
         `;
 
-        // Phần còn lại của hàm giữ nguyên
+        // Phần còn lại của hàm giữ nguy
         try {
             const response = await fetch(`/api/system-activity-logs/${batchInfo.sscc}`);
             if (response.ok) {
@@ -306,12 +308,41 @@ function displayActivityLogs(logs) {
     const displayLogs = (start, end) => {
         const logsHtml = logs.slice(start, end).map(log => {
             const participant = log.participantInfo;
+            let roleClass = '';
+            let showDescription = true;
+            
+            if (participant) {
+                switch(participant.role.toLowerCase()) {
+                    case 'producer':
+                    case 'nhà sản xuất':
+                    case 'approver':
+                    case 'kiểm định':
+                    case 'người kiểm định':
+                        roleClass = participant.role.toLowerCase().includes('sản xuất') ? 'producer' : 'approver';
+                        showDescription = false;
+                        break;
+                    case 'warehouse':
+                    case 'nhà kho':
+                        roleClass = 'warehouse';
+                        break;
+                    case 'transporter':
+                    case 'vận chuyển':
+                        roleClass = 'transporter';
+                        break;
+                    default:
+                        roleClass = '';
+                }
+            }
+
             const participantInfo = participant ? 
                 `
                 <div class="participant-info">
-                    <img src="${participant.avatar || '/images/default-avatar.png'}" alt="${participant.name}" class="participant-avatar">
+                    <img src="${participant.avatar || '/images/default-avatar.png'}" 
+                         alt="${participant.name}" 
+                         class="participant-avatar">
                     <div class="participant-details">
-                        <a href="${BASE_URL}/trangcanhan.html?uid=${participant.id}" class="participant-link">
+                        <a href="${BASE_URL}/trangcanhan.html?uid=${participant.id}" 
+                           class="participant-link">
                             <p class="participant-name">${participant.name}</p>
                             <p class="participant-role">${participant.role}</p>
                         </a>
@@ -321,12 +352,27 @@ function displayActivityLogs(logs) {
                 `<p><strong>Người thực hiện ID:</strong> ${log.participantId}</p>`;
 
             return `
-            <div class="activity-log ${getActivityClass(log.activityName)}">
-                <p class="timestamp"><strong>Thời gian:</strong> ${new Date(log.timestamp).toLocaleString('vi-VN')}</p>
-                <p class="activity-name"><strong>Hoạt động:</strong> ${getActivityIcon(log.activityName)} ${translateActivityName(log.activityName)}</p>
+            <div class="activity-log ${roleClass} ${getActivityClass(log.activityName)}">
+                <p class="timestamp">
+                    <strong>Thời gian:</strong> ${new Date(log.timestamp).toLocaleString('vi-VN')}
+                </p>
+                <p class="activity-name">
+                    <strong>Hoạt động:</strong> ${getActivityIcon(log.activityName)} 
+                    ${translateActivityName(log.activityName)}
+                </p>
                 ${participantInfo}
-                <p class="description"><strong>Mô tả:</strong> ${decodeAndTranslateDescription(log.description)}</p>
-                ${log.imageUrls && log.imageUrls.length > 0 ? `<p><strong>Hình ảnh:</strong> <a href="${log.imageUrls[0]}" target="_blank" class="image-link">Xem hình ảnh</a></p>` : ''}
+                ${showDescription ? `
+                    <p class="description">
+                        <strong>Mô tả:</strong> ${decodeAndTranslateDescription(log.description)}
+                    </p>
+                ` : ''}
+                ${log.imageUrls && log.imageUrls.length > 0 ? `
+                    <p><strong>Hình ảnh:</strong> 
+                        <a href="${log.imageUrls[0]}" target="_blank" class="image-link">
+                            Xem hình ảnh
+                        </a>
+                    </p>
+                ` : ''}
             </div>
             `;
         }).join('');
@@ -360,16 +406,36 @@ function decodeHTMLEntities(text) {
 
 function translateDescription(description) {
     const translations = {
+        // Vận chuyển
+        "Transport status updated to": "Trạng thái vận chuyển được cập nhật thành",
         "Bat dau van chuyen": "Bắt đầu vận chuyển",
-        "Warehouse has confirmed receipt of batch": "Nhà kho đã xác nhận nhận lô hàng",
-        "Hoan thanh van chuyen": "Hoàn thành vận chuyển",
+        "Hoan thanh van chuyen": "Hoàn thành vận chuyển", 
         "Tam dung van chuyen": "Tạm dừng vận chuyển",
-        "Batch has been approved by the approver": "Lô hàng đã được nhà kiểm duyệt chấp thuận",
-        "Transport status updated to 'Hoan thanh van chuyen'": "Trạng thái vận chuyển được cập nhật thành 'Hoàn thành vận chuyển'",
         "Transport status updated to 'Bat dau van chuyen'": "Trạng thái vận chuyển được cập nhật thành 'Bắt đầu vận chuyển'",
+        "Transport status updated to 'Hoan thanh van chuyen'": "Trạng thái vận chuyển được cập nhật thành 'Hoàn thành vận chuyển'",
         "Transport status updated to 'Tam dung van chuyen'": "Trạng thái vận chuyển được cập nhật thành 'Tạm dừng vận chuyển'",
+
+        // Nhà kho
+        "Warehouse has confirmed receipt of batch": "Nhà kho đã xác nhận nhận lô hàng",
+        "Update inventory status": "Cập nhật trạng thái kho",
+        "Confirm receipt of goods": "Xác nhận nhận hàng",
+        "Inventory updated": "Đã cập nhật kho hàng",
+
+        // Kiểm định
+        "Batch has been approved by the approver": "Lô hàng đã được kiểm định viên phê duyệt",
+        "Batch has been rejected": "Lô hàng đã bị từ chối",
+        "Quality check completed": "Hoàn thành kiểm tra chất lượng",
+        "Document verification completed": "Hoàn thành xác minh tài liệu",
+        "Batch review in progress": "Đang tiến hành xem xét lô hàng",
+        "Quality inspection passed": "Đã vượt qua kiểm tra chất lượng",
+
+        // Nhà sản xuất
         "A new batch has been created": "Một lô hàng mới đã được tạo",
-        "Batch has been approved": "Lô hàng đã được chấp thuận"
+        "Product information updated": "Thông tin sản phẩm đã được cập nhật",
+        "Batch has been approved": "Lô hàng đã được phê duyệt",
+        "Create new production batch": "Tạo lô sản xuất mới",
+        "Update batch information": "Cập nhật thông tin lô hàng",
+        "Production completed": "Hoàn thành sản xuất"
     };
 
     // Tìm và thay thế các phần của mô tả
@@ -378,20 +444,38 @@ function translateDescription(description) {
             description = description.replace(key, value);
         }
     }
-
     return description;
 }
 
 function translateActivityName(activityName) {
     const translations = {
+        // Vận chuyển
         "Transport Status Updated": "Cập nhật trạng thái vận chuyển",
-        "Warehouse Confirmation": "Nhà kho xác nhận nhận lô hàng",
-        "Create Batch": "Tạo lô hàng",
         "Start Transport": "Bắt đầu vận chuyển",
-        "Stop Transport": "Tạm dừng vận chuyển",
+        "Stop Transport": "Tạm dừng vận chuyển", 
         "Finish Transport": "Hoàn thành vận chuyển",
+        "Transport in progress": "Đang vận chuyển",
+
+        // Nhà kho
+        "Warehouse Confirmation": "Xác nhận từ nhà kho",
+        "Update Inventory": "Cập nhật kho hàng",
+        "Confirm Receipt": "Xác nhận nhận hàng",
+        "Stock check": "Kiểm tra kho",
+
+        // Kiểm định
         "Batch Approved": "Lô hàng được phê duyệt",
-        "Batch Created": "Tạo lô hàng"
+        "Reject Batch": "Từ chối lô hàng",
+        "Review Batch": "Xem xét lô hàng",
+        "Quality Check": "Kiểm tra chất lượng",
+        "Verify Documents": "Xác minh tài liệu",
+        "Quality Control": "Kiểm soát chất lượng",
+
+        // Nhà sản xuất
+        "Create Batch": "Tạo lô hàng",
+        "Batch Created": "Đã tạo lô hàng",
+        "Update Product Info": "Cập nhật thông tin sản phẩm",
+        "Production Started": "Bắt đầu sản xuất",
+        "Production Completed": "Hoàn thành sản xuất"
     };
 
     return translations[activityName] || activityName;
@@ -489,12 +573,55 @@ function getActivityClass(activityName) {
 }
 
 function getActivityIcon(activityName) {
-    // Thêm biểu tượng dựa trên loại hoạt động
-    switch(activityName.toLowerCase()) {
-        case 'transport status updated': return '🚚';
-        case 'warehouse confirmation': return '✅';
-        default: return '📝';
+    // Chuyển đổi activityName sang chữ thường để so sánh
+    const activity = activityName.toLowerCase();
+    
+    // Nhà sản xuất
+    if (activity.includes('create batch') || activity.includes('batch created')) {
+        return '<i class="fas fa-seedling text-success"></i>'; // Icon cây mầm
     }
+    if (activity.includes('update product info')) {
+        return '<i class="fas fa-file-pen text-success"></i>'; // Icon file chỉnh sửa
+    }
+    
+    // Nhà kiểm duyệt
+    if (activity.includes('batch approved') || activity.includes('approve batch')) {
+        return '<i class="fas fa-clipboard-check text-primary"></i>'; // Icon clipboard check
+    }
+    if (activity.includes('reject batch')) {
+        return '<i class="fas fa-clipboard-xmark text-danger"></i>'; // Icon clipboard X
+    }
+    if (activity.includes('review batch')) {
+        return '<i class="fas fa-magnifying-glass text-primary"></i>'; // Icon kính lúp
+    }
+    if (activity.includes('verify documents')) {
+        return '<i class="fas fa-file-contract text-primary"></i>'; // Icon hợp đồng
+    }
+    if (activity.includes('quality check')) {
+        return '<i class="fas fa-vial text-primary"></i>'; // Icon ống nghiệm
+    }
+    
+    // Nhà kho
+    if (activity.includes('warehouse confirmation') || activity.includes('confirm receipt')) {
+        return '<i class="fas fa-warehouse text-warning"></i>'; // Icon nhà kho
+    }
+    if (activity.includes('update inventory')) {
+        return '<i class="fas fa-box-archive text-warning"></i>'; // Icon hộp lưu trữ
+    }
+    
+    // Vận chuyển
+    if (activity.includes('transport status') || activity.includes('start transport')) {
+        return '<i class="fas fa-truck-fast text-purple"></i>'; // Icon xe tải nhanh
+    }
+    if (activity.includes('finish transport')) {
+        return '<i class="fas fa-truck-ramp-box text-purple"></i>'; // Icon xe tải dỡ hàng
+    }
+    if (activity.includes('stop transport')) {
+        return '<i class="fas fa-truck-medical text-danger"></i>'; // Icon xe tải cứu hộ
+    }
+    
+    // Mặc định nếu không khớp với bất kỳ điều kiện nào
+    return '<i class="fas fa-circle-info text-secondary"></i>'; // Icon thông tin
 }
     </script>
 
