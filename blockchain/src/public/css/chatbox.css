@@ -1,64 +1,77 @@
-
-
 .chat-icon {
     position: fixed !important;
     bottom: 20px !important;
     right: 20px !important;
     width: 60px !important;
     height: 60px !important;
-    background-color: #4CAF50 !important; 
+    background: linear-gradient(145deg, #4CAF50, #45a049) !important;
     border-radius: 50% !important;
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
     cursor: pointer !important;
     z-index: 1000 !important;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
-    transition: transform 0.3s, box-shadow 0.3s !important;
-    overflow: hidden !important;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 .chat-icon i {
-    font-size: 30px !important;
+    font-size: 28px !important;
     color: white !important;
+    transition: transform 0.3s ease !important;
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2)) !important;
 }
 
 .chat-icon:hover {
-    transform: scale(1.1);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
 }
 
 .chat-icon:hover .tooltip {
     visibility: visible;
     opacity: 1;
+    transform: translateX(0);
+}
+
+/* Animation khi hover */
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(76, 175, 80, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
+}
+
+.chat-icon:hover {
+    animation: pulse 1.5s infinite;
 }
 
 .tooltip {
-    visibility: hidden;
-    width: 160px;
-    background-color: #333;
-    color: #fff;
-    text-align: center;
-    border-radius: 6px;
-    padding: 8px;
     position: absolute;
-    z-index: 1001;
-    bottom: 125%;
-    left: 50%;
-    margin-left: -80px;
+    background: #2c3e50;
+    color: white;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    right: 70px;
+    bottom: 10px;
+    visibility: hidden;
     opacity: 0;
-    transition: opacity 0.3s;
+    transform: translateX(10px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    border: 1px solid rgba(255,255,255,0.1);
 }
 
 .tooltip::after {
-    content: "";
+    content: '';
     position: absolute;
-    top: 100%;
-    left: 50%;
-    margin-left: -5px;
-    border-width: 5px;
+    right: -6px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-width: 6px;
     border-style: solid;
-    border-color: #333 transparent transparent transparent;
+    border-color: transparent transparent transparent #2c3e50;
 }
 
 .chatbox {
