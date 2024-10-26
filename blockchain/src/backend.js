@@ -95,8 +95,7 @@ console.log("Admin address:", adminAddress);
 
 const traceabilityContractABI =
   require("../build/contracts/TraceabilityContract.json").abi;
-const traceabilityContractAddress =
-  "0x0d8198B9362BC0fd21895f9dB64eb81528255F40";
+const traceabilityContractAddress = process.env.TRACEABILITY_CONTRACT_ADDRESS;
 const traceabilityContract = new web3.eth.Contract(
   traceabilityContractABI,
   traceabilityContractAddress
@@ -104,7 +103,7 @@ const traceabilityContract = new web3.eth.Contract(
 
 // ABI và địa chỉ của contract ActivityLog
 const activityLogABI = require("../build/contracts/ActivityLog.json").abi;
-const activityLogAddress = "0x05952dfAe4906cFC689a6cffA56EEc518d791A8B";
+const activityLogAddress = process.env.ACTIVITY_LOG_CONTRACT_ADDRESS;
 const activityLogContract = new web3.eth.Contract(
   activityLogABI,
   activityLogAddress
