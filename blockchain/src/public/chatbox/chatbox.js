@@ -11,7 +11,7 @@ function initializeSocket() {
         if (!userName || !userRoleId) {
             // Tạo một ID ngẫu nhiên cho người dùng ẩn danh
             const randomId = Math.random().toString(36).substr(2, 6);
-            userName = `Người dùng vãng lai ${randomId}`;
+            userName = `Người tiêu dùng ${randomId}`;
             userRoleId = 0;
         }
         socket.emit("onLogin", { name: userName, roleId: userRoleId });
@@ -60,7 +60,7 @@ fetch('/user-info')
         } else {
             // Tạo một ID ngẫu nhiên cho người dùng ẩn danh
             const randomId = Math.random().toString(36).substr(2, 6);
-            userName = `Người dùng vãng lai ${randomId}`;
+            userName = `Người tiêu dùng ${randomId}`;
             userRoleId = 0;
         }
         console.log("Thông tin người dùng:", { userName, userRoleId });
@@ -69,7 +69,7 @@ fetch('/user-info')
     .catch(error => {
         console.error('Lỗi khi lấy thông tin người dùng:', error);
         const randomId = Math.random().toString(36).substr(2, 6);
-        userName = `Người dùng vãng lai ${randomId}`;
+        userName = `Người tiêu dùng ${randomId}`;
         userRoleId = 0;
         initializeSocket();
     });

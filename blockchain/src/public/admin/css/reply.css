@@ -58,101 +58,104 @@
     background-color: #f8f9fa;
 }
 
+/* Style cho message list */
 #messageList {
     height: 400px;
     overflow-y: auto;
-    padding: 20px;
-    background: linear-gradient(to bottom right, #f0f4f8, #e9ecef);
-    display: flex;
-    flex-direction: column;
+    padding: 15px;
+    background-color: #f0f2f5;
 }
 
 #messageList .list-group-item {
     border: none;
-    border-radius: 18px;
-    margin-bottom: 12px;
-    padding: 10px 15px;
-    max-width: 75%;
-    width: fit-content;
+    border-radius: 20px;
+    padding: 8px 12px;
+    margin-bottom: 10px;
+    max-width: 70%;
     position: relative;
+    word-wrap: break-word;
     font-size: 14px;
-    line-height: 1.5;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-    animation: fadeIn 0.3s ease-out;
+    line-height: 1.4;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-#messageList .list-group-item.sent {
-    background-color: #007bff;
-    color: white;
-    align-self: flex-end;
-    margin-left: auto;
-    border-bottom-right-radius: 4px;
-}
-
-#messageList .list-group-item.received {
-    background-color: white;
-    color: #343a40;
-    align-self: flex-start;
+/* Tin nhắn từ người dùng (bên trái) */
+#messageList .list-group-item:not(.admin-message) {
+    background-color: #ffffff;
+    color: #050505;
     margin-right: auto;
-    border-bottom-left-radius: 4px;
+    margin-left: 0;
 }
 
+/* Tin nhắn từ admin (bên phải) */
+#messageList .list-group-item.admin-message {
+    background-color: #e5f7e5;
+    color: rgb(0, 0, 0);
+    margin-left: auto;
+    margin-right: 0;
+}
+
+/* Ẩn strong tag cho tên người gửi */
 #messageList .list-group-item strong {
-    display: block;
-    font-size: 12px;
-    margin-bottom: 4px;
-    opacity: 0.7;
+    display: none;
 }
 
-#messageList .list-group-item.sent strong {
-    text-align: right;
-}
-
+/* Style cho input chat */
 #messageForm {
+    background-color: #f0f2f5;
+    padding: 15px;
+    border-top: 1px solid #e4e6eb;
     display: flex;
     align-items: center;
-    background-color: white;
-    padding: 10px 15px;
-    border-top: 1px solid #e9ecef;
+    gap: 10px;
 }
 
 #messageInput {
-    border: 1px solid #e0e0e0;
-    border-radius: 20px;
-    padding: 10px 15px;
     flex-grow: 1;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 16px;
+    background-color: #ffffff;
     font-size: 14px;
-    transition: all 0.3s ease;
 }
 
 #messageInput:focus {
     outline: none;
-    border-color: #07e451;
-    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+    box-shadow: 0 0 0 2px rgba(0, 132, 255, 0.2);
 }
 
-#messageForm .btn {
-    background-color: #07c71a;
+/* Style cho nút gửi */
+#messageForm button {
+    background-color: #0084ff;
     color: white;
     border: none;
     border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    padding: 0;
+    width: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-left: 10px;
-    transition: all 0.3s ease;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
-#messageForm .btn:hover {
-    background-color: #0056b3;
-    transform: scale(1.05);
+#messageForm button:hover {
+    background-color: #0073e6;
 }
 
-#messageForm .btn i {
-    font-size: 18px;
+/* Thêm thời gian gửi tin nhắn */
+.message-time {
+    font-size: 11px;
+    margin-top: 4px;
+    opacity: 0.7;
+}
+
+/* Style cho tin nhắn trống */
+#messageList .no-messages {
+    text-align: center;
+    color: #65676b;
+    padding: 20px;
+    font-style: italic;
 }
 
 /* Responsive design */
@@ -227,4 +230,3 @@
         font-size: 1rem;
     }
 }
-

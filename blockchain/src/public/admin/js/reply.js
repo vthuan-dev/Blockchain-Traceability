@@ -148,22 +148,33 @@ function renderMessages() {
 
   if (messages.length === 0) {
     const noMessageItem = document.createElement("li");
-    noMessageItem.textContent = "No messages";
-    noMessageItem.classList.add("list-group-item");
+    noMessageItem.textContent = "Chưa có tin nhắn";
+    noMessageItem.classList.add("list-group-item", "no-messages");
     messageListElement.appendChild(noMessageItem);
   } else {
     messages.forEach((msg) => {
       const messageItem = document.createElement("li");
       messageItem.classList.add("list-group-item");
-      // Hiển thị "Người dùng ẩn danh" cho tin nhắn từ người dùng
-      const displayName =
-        msg.from === selectedUser.name ? selectedUser.name : msg.from;
-      messageItem.innerHTML = `<strong>${displayName}:</strong> ${msg.body}`;
+      
+      // Thêm class admin-message nếu tin nhắn từ admin
+      if (msg.from === "Admin") {
+        messageItem.classList.add("admin-message");
+      }
+
+      // Tạo thời gian gửi tin nhắn
+      const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      
+      // HTML cho tin nhắn
+      messageItem.innerHTML = `
+        ${msg.body}
+        <div class="message-time">${time}</div>
+      `;
+      
       messageListElement.appendChild(messageItem);
     });
   }
 
-  // Cuộn xuống cuối khi có tin nhắn mới
+  // Cuộn xuống tin nhắn mới nhất
   messageListElement.scrollTop = messageListElement.scrollHeight;
 }
 
