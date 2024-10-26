@@ -264,13 +264,17 @@
         lienketContent.innerHTML = `
         <h2>Các bên có liên quan</h2>
         <p><strong>Nhà sản xuất:</strong> <a href="/trangcanhan.html?uid=${producerId}" class="producer-link">${producerName}</a></p>
-        <p><strong>Địa chỉ:</strong> ${producerAddress}</p>
+        <p><strong>Địa chỉ:</strong> 
+            <a href="#" onclick="openGoogleMaps('${producerAddress}')" class="address-link">
+                ${producerAddress}
+            </a>
+        </p>
         <p><strong>Số điện thoại:</strong> ${producerPhone}</p>
         <h5 class="activity-log-title">Nhật ký lô hàng</h5>
         <div id="activityLogs">Đang tải...</div>
         `;
 
-        // Phần còn lại của hàm giữ nguy
+        // Phần còn lại của hàm giữ nguyên
         try {
             const response = await fetch(`/api/system-activity-logs/${batchInfo.sscc}`);
             if (response.ok) {
@@ -518,17 +522,21 @@ function translateActivityName(activityName) {
                 </tr>
                 <tr>
                     <th>Địa chỉ</th>
-                    <td>${batchInfo.producer.address || 'Không có thông tin'}</td>
+                    <td>
+                        <a href="#" onclick="openGoogleMaps('${batchInfo.producer.address}')" class="address-link">
+                            ${batchInfo.producer.address || 'Không có thông tin'}
+                        </a>
+                    </td>
                 </tr>
                 <tr>
                     <th>Số điện thoại</th>
                     <td>${batchInfo.producer.phone || 'Không có thông tin'}</td>
                 </tr>
             </table>
-          <div class="text-center mt-4">
-            <button class="btn-view-image" onclick="showProductImages('${batchInfo.productImageUrls.join(',')}')">
-                <i class="fas fa-camera mr-2"></i> Xem ảnh sản phẩm
-            </button>
+            <div class="text-center mt-4">
+                <button class="btn-view-image" onclick="showProductImages('${batchInfo.productImageUrls.join(',')}')">
+                    <i class="fas fa-camera mr-2"></i> Xem ảnh sản phẩm
+                </button>
             </div>
         </div>
     `;
@@ -622,6 +630,16 @@ function getActivityIcon(activityName) {
     
     // Mặc định nếu không khớp với bất kỳ điều kiện nào
     return '<i class="fas fa-circle-info text-secondary"></i>'; // Icon thông tin
+}
+
+// Thêm hàm mới để mở Google Maps
+function openGoogleMaps(address) {
+    if (address && address !== 'Không có thông tin') {
+        const encodedAddress = encodeURIComponent(address);
+        window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank');
+    } else {
+        alert('Không có thông tin địa chỉ để hiển thị trên bản đồ.');
+    }
 }
     </script>
 

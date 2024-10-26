@@ -874,3 +874,11 @@
         transition: all 0.3s ease;
     }
 
+    .address-link {
+        color: #007bff;
+        text-decoration: underline;
+        cursor: pointer;
+    }
+    .address-link:hover {
+        color: #0056b3;
+    }
