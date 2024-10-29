@@ -1,4 +1,4 @@
-version: '3'
+# version: '3'
 services:
   app:
     build: .
@@ -27,6 +27,7 @@ services:
       - SESSION_SECRET=${SESSION_SECRET}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - BASE_URL=http://192.168.1.19
     depends_on:
       - redis
     volumes:

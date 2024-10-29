@@ -292,31 +292,38 @@
 
     form.addEventListener('submit', async function(event) {
         event.preventDefault();
-        loadingModal.show(); // Hiển thị modal loading
+        loadingModal.show();
 
         const formData = new FormData(this);
 
         try {
             const response = await fetch('/api/register', {
                 method: 'POST',
-                body: formData
+                body: formData,
+                headers: {
+                    'Accept': 'application/json',
+                },
+                credentials: 'include'
             });
 
-            loadingModal.hide(); // Ẩn modal loading
+            loadingModal.hide();
 
             if (!response.ok) {
                 const errorData = await response.json();
-                document.getElementById('errorMessage').textContent = errorData.message || errorData.error;
+                document.getElementById('errorMessage').textContent = 
+                    errorData.message || errorData.error || 'Đăng ký thất bại';
                 errorModal.show();
                 return;
             }
 
             const data = await response.json();
-            successModal.show(); 
-            form.reset(); 
+            successModal.show();
+            form.reset();
         } catch (error) {
-            loadingModal.hide(); // Ẩn modal loading nếu có lỗi
-            document.getElementById('errorMessage').textContent = 'Đã xảy ra lỗi trong quá trình đăng ký. Vui lòng thử lại sau.';
+            console.error('Error:', error);
+            loadingModal.hide();
+            document.getElementById('errorMessage').textContent = 
+                'Lỗi kết nối. Vui lòng thử lại sau.';
             errorModal.show();
         }
     });

@@ -176,6 +176,7 @@
    
    <script>
     document.addEventListener('DOMContentLoaded', async function() {
+        await initializeBaseUrl();
         try {
             const response = await fetch('/api/user-info', {
                 credentials: 'include'
@@ -750,9 +751,22 @@ function showLargeQRCode(sscc, batchId) {
 
     document.body.appendChild(modal);
 }
+async function initializeBaseUrl() {
+    try {
+        const response = await fetch('/api/config');
+        const config = await response.json();
+        baseUrl = config.baseUrl;
+    } catch (error) {
+        console.error('Error fetching base URL:', error);
+        // Fallback to window.location if API fails
+        baseUrl = `${window.location.protocol}//${window.location.host}`;
+    }
+}
+
+
 function generateQRUrl(sscc) {
     // Tạo URL cho mã QR với định dạng mong muốn
-    return `${window.location.origin}/tieu-dung/lo-hang.html?sscc=${sscc}`;
+    return `${baseUrl}/tieu-dung/lo-hang.html?sscc=${sscc}`;
 }
 
 function generateQRCodeWithLogo(canvas, sscc, size, showLogo, callback) {
@@ -792,6 +806,7 @@ function generateQRCodeWithLogo(canvas, sscc, size, showLogo, callback) {
 }
 document.addEventListener('DOMContentLoaded', function() {
     const statusFilter = document.getElementById('statusFilter');
+    
     statusFilter.addEventListener('change', function() {
         const selectedStatus = this.value;
         document.getElementById('pendingBatchesList').style.display = 'none';

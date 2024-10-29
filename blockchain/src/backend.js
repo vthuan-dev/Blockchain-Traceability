@@ -20,6 +20,17 @@ const sharp = require("sharp");
 const QrCode = require("qrcode-reader");
 const { Network, Alchemy } = require("alchemy-sdk");
 
+// Thêm middleware CORS vào đầu file sau phần import
+const cors = require('cors');
+
+app.use(cors());
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    next();
+});
+
 require("dotenv").config({ path: path.resolve(__dirname, "../../.env") });
 
 const storage = multer.memoryStorage();
@@ -657,7 +668,7 @@ function setupRoutes(app, db) {
   app.get("/api/pending-batches", async (req, res) => {
     try {
       if (!req.session.userId) {
-        return res.status(401).json({ error: "Người dùng chưa đăng nhập" });
+        return res.status(401).json({ error: "Người dùng chưa đ��ng nhập" });
       }
 
       const producerId = req.session.userId;
@@ -827,7 +838,7 @@ function setupRoutes(app, db) {
     } catch (error) {
       res
         .status(500)
-        .json({ error: "Không thể lấy SSCC của lô hàng: " + error.message });
+        .json({ error: "Không thể lấy SSCC của l�� hàng: " + error.message });
     }
   });
 
@@ -2583,6 +2594,11 @@ function setupRoutes(app, db) {
         .status(500)
         .json({ error: "Không thể lấy thông tin sản phẩm: " + error.message });
     }
+  });
+
+  app.get('/api/config', (req, res) => {
+    const baseUrl = process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
+    res.json({ baseUrl });
   });
 }
 
