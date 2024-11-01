@@ -6,7 +6,8 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <title>Trang chủ - Vận chuyển</title>
-    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval'; script-src * 'unsafe-inline' 'unsafe-eval'; connect-src * 'unsafe-inline'; img-src * data: blob: 'unsafe-inline'; frame-src *; style-src * 'unsafe-inline';">
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src * 'self' 'unsafe-inline'; img-src * 'self' data: blob:; frame-src *; style-src * 'self' 'unsafe-inline'; media-src * 'self' blob:; script-src * 'self' 'unsafe-inline' 'unsafe-eval';">
+    <meta http-equiv="Permissions-Policy" content="camera=self">
 
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
@@ -26,10 +27,28 @@
         width: 100%;
         max-width: 640px;
         margin: 0 auto;
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 8px;
     }
+    
     #qr-reader video {
-        width: 100%;
-        height: auto;
+        width: 100% !important;
+        height: auto !important;
+        border-radius: 4px;
+        transform: scaleX(-1); /* Flip camera if needed */
+    }
+    
+    #qr-reader__scan_region {
+        min-height: 300px;
+    }
+    
+    /* Mobile optimizations */
+    @media (max-width: 768px) {
+        #qr-reader {
+            max-width: 100%;
+            margin: 0;
+        }
     }
     .qr-scanner-container {
         margin-bottom: 20px;
@@ -87,7 +106,7 @@
             <br>
             
             <div class="qr-scanner-container">
-                <h5>Quét mã QR</h5>
+                <button id="request-camera" class="btn btn-info mb-2">Cấp quyền Camera</button>
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <button id="start-camera" class="btn btn-primary btn-block">Quét QR bằng camera</button>
@@ -99,7 +118,7 @@
                         <input type="file" id="qr-input" accept="image/*" style="display: none;">
                     </div>
                 </div>
-                <div id="qr-reader" style="width: 100%; display: none;"></div>
+                <div id="qr-reader" style="display: none; width: 100%; max-width: 600px; margin: 0 auto;"></div>
                 <div id="file-selected" class="mt-2 mb-2" style="display: none;">Đã chọn 1 hình ảnh</div>
                 <button id="scan-button" class="btn btn-success btn-block mt-3" disabled>Quét mã QR</button>
             </div>
@@ -305,6 +324,7 @@
             });
         });
     </script>
+
 </body>
 
 

@@ -27,7 +27,7 @@ services:
       - SESSION_SECRET=${SESSION_SECRET}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - BASE_URL=http://103.186.146.135
+      - BASE_URL=http://www.tstoreee.online
     depends_on:
       - redis
     volumes:

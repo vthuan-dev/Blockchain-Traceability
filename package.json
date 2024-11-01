@@ -29,6 +29,7 @@
     "bn.js": "^5.2.1",
     "body-parser": "^1.20.2",
     "bootstrap": "^5.3.3",
+    "connect-redis": "^6.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "ethers": "^6.13.2",
@@ -38,6 +39,7 @@
     "firebase": "^10.14.1",
     "firebase-admin": "^12.6.0",
     "form-data": "^4.0.0",
+    "ioredis": "^4.28.5",
     "ipfs": "^0.66.1",
     "ipfs-cli": "^0.16.1",
     "ipfs-http-client": "^60.0.1",
@@ -59,9 +61,7 @@
     "truffle-contract-size": "^2.0.1",
     "twilio": "^5.2.2",
     "web3": "^4.13.0",
-    "ws": "^8.18.0",
-    "connect-redis": "^6.0.0",
-    "ioredis": "^4.27.7"
+    "ws": "^8.18.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
