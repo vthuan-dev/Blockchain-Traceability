@@ -19,6 +19,7 @@ const path = require("path");
 const sharp = require("sharp");
 const QrCode = require("qrcode-reader");
 const { Network, Alchemy } = require("alchemy-sdk");
+const util = require('util'); // Thêm dòng này
 
 // Thêm middleware CORS vào đầu file sau phần import
 const cors = require('cors');
@@ -50,8 +51,23 @@ const db = mysql.createConnection({
   port: process.env.DB_PORT,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+  multipleStatements: true,
+  keepAliveInitialDelay: 10000,
   connectTimeout: 10000,
 });
+
+const query = util.promisify(db.query).bind(db);
+
+db.on('error', (err) => {
+  console.error('Lỗi kết nối database:', err);
+  if (err.code === 'PROTOCOL_CONNECTION_LOST') {
+    console.log('Kết nối database bị mất, đang thử kết nối lại...');
+  }
+});
+
 db.connect((err) => {
   if (err) {
     console.error("Lỗi kết nối cơ sở dữ liệu:", err.message);
@@ -62,8 +78,9 @@ db.connect((err) => {
 
 const uploadQR = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  limits: { fileSize: 100 * 1024 * 1024 }, // 100MB limit
 });
+
 const settings = {
   apiKey: process.env.ALCHEMY_API_KEY,
   network: Network.ETH_SEPOLIA,
@@ -127,7 +144,7 @@ const activityLogContract = new web3.eth.Contract(
 // tạo biến lưu trữ file, giới hạn số lượng file và tên file, maxCount: số lượng file, name: tên file
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+  limits: { fileSize: 100 * 1024 * 1024 }, // 100MB limit
 }).fields([
   { name: "productImages", maxCount: 10 },
   { name: "certificateImage", maxCount: 1 },
@@ -302,17 +319,25 @@ function convertBigIntToString(obj) {
 app.use(express.urlencoded({ extended: true }));
 
 async function checkUserExists(userId) {
-  return new Promise((resolve, reject) => {
-    db.query(
-      "SELECT * FROM users WHERE uid = ?",
-      [userId],
-      (error, results) => {
-        if (error) return reject(error);
-        resolve(results.length > 0);
-      }
-    );
-  });
+  try {
+    const rows = await query("SELECT * FROM users WHERE uid = ?", [userId]);
+    return rows.length > 0;
+  } catch (error) {
+    console.error("Lỗi khi kiểm tra người dùng:", error);
+    throw new Error("Không thể kiểm tra thông tin người dùng: " + error.message);
+  }
 }
+async function testDatabaseConnection() {
+  try {
+    await query('SELECT 1');
+    console.log('Kết nối database thành công');
+  } catch (error) {
+    console.error('Lỗi kết nối database:', error);
+    throw error;
+  }
+}
+
+testDatabaseConnection();
 
 async function checkProductExists(productId) {
   return new Promise((resolve, reject) => {

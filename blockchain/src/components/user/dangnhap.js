@@ -213,7 +213,7 @@ module.exports = function (db) {
         return res.status(500).json({ message: "Lỗi khi lấy token" });
       }
 
-      const resetLink = `http://localhost:3000/api/reset-password/${token}`;
+      const resetLink = `http://www.tsroreee.com/api/reset-password/${token}`;
       const templatePath = path.join(
         __dirname,
         "../../public/account/xacthuc.html"

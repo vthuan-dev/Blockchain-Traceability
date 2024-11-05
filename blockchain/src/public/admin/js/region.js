@@ -91,7 +91,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // Lấy dữ liệu regions
         // Đảm bảo đường dẫn API này chính xác
         const regionsResponse = await fetch(
-          `http://localhost:3000/api/regions?province_id=${adminProvinceId}`
+          `http://www.tsroreee.com/api/regions?province_id=${adminProvinceId}`
         );
         if (!regionsResponse.ok) {
           throw new Error(`HTTP error! status: ${regionsResponse.status}`);

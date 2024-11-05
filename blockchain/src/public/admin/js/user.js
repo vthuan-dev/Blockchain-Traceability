@@ -109,7 +109,7 @@ window.UserManager = {
 
   fetchUserData: async function () {
     try {
-      const response = await fetch("http://localhost:3000/api/users");
+      const response = await fetch("http://www.tsroreee.com/api/users");
       if (!response.ok) {
         throw new Error("Lỗi khi tải dữ liệu");
       }
@@ -136,7 +136,7 @@ window.UserManager = {
   deleteUser: async function (userId) {
     try {
       const response = await fetch(
-        `http://localhost:3000/api/users/${userId}`,
+        `http://www.tsroreee.com/api/users/${userId}`,
         {
           method: "DELETE",
         }
@@ -269,12 +269,12 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       // Lấy province_id từ session
-      fetch("http://localhost:3000/api/user-info")
+      fetch("http://www.tsroreee.com/api/user-info")
         .then((response) => response.json())
         .then((data) => {
           const province_id = data.province_id;
 
-          fetch("http://localhost:3000/api/admin", {
+          fetch("http://www.tsroreee.com/api/admin", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",

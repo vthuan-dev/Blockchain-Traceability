@@ -95,7 +95,7 @@ window.ProductManager = {
   },
 
   fetchProductData: function () {
-    fetch("http://localhost:3000/api/theproducts")
+    fetch("http://www.tsroreee.com/api/theproducts")
       .then((response) => {
         if (!response.ok) {
           throw new Error("Lỗi khi tải dữ liệu");
@@ -165,7 +165,7 @@ window.ProductManager = {
   },
 
   updateProduct: function (productData) {
-    fetch("http://localhost:3000/api/products/update", {
+    fetch("http://www.tsroreee.com/api/products/update", {
       method: "POST",
       body: JSON.stringify(productData),
       headers: {
@@ -366,7 +366,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }
 
-    fetch("http://localhost:3000/api/products", {
+    fetch("http://www.tsroreee.com/api/products", {
       method: "POST",
       body: formData,
     })

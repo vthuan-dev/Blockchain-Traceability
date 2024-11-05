@@ -326,7 +326,7 @@ async function deleteItem(url, id) {
 }
 
 function deleteProduct(productId) {
-  fetch(`http://localhost:3000/api/products/${productId}`, { method: "DELETE" })
+  fetch(`http://www.tsroreee.com/api/products/${productId}`, { method: "DELETE" })
     .then((response) => {
       if (!response.ok) {
         throw new Error("Xóa thất bại");
@@ -353,7 +353,7 @@ function showMessage(message, type) {
 }
 
 function deleteUser(userId) {
-  deleteItem("http://localhost:3000/api/users", userId);
+  deleteItem("http://www.tsroreee.com/api/users", userId);
 }
 
 function formatDate(dateString) {

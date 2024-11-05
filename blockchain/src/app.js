@@ -33,7 +33,7 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: "http://localhost:3000", // Thay đổi nếu bạn chạy ở một domain khc
+    origin: "http://www.tsroreee.com", // Thay đổi nếu bạn chạy ở một domain khc
     methods: ["GET", "POST"],
     credentials: true,
   },
@@ -139,6 +139,15 @@ app.get("/lo-hang.html", (req, res) => {
 });
 app.get("/sanpham.html", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "tieu-dung", "sanpham.html"));
+});
+app.get("/allsanpham.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "tieu-dung", "allsanpham.html"));
+});
+app.get("/allnongdan.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "tieu-dung", "allnongdan.html"));
+});
+app.get("/allnhakiemduyet.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "tieu-dung", "allnhakiemduyet.html"));
 });
 
 //app.post('/api/register', upload.single('avatar'), (req, res) => {
