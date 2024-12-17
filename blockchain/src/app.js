@@ -47,8 +47,21 @@ const connectRedis = require('connect-redis');
 const RedisStore = connectRedis(session);
 
 const redisClient = new Redis({
-  host: process.env.REDIS_HOST || 'redis', // 'redis' là tên service trong docker-compose
-  port: process.env.REDIS_PORT || 6379
+  host: 'localhost',  // Thay đổi từ 'redis' thành 'localhost'
+  port: 6379,
+  retryStrategy: function(times) {
+    const delay = Math.min(times * 50, 2000);
+    return delay;
+  }
+});
+
+// Thêm error handling
+redisClient.on('error', (err) => {
+  console.error('Redis connection error:', err);
+});
+
+redisClient.on('connect', () => {
+  console.log('Connected to Redis successfully');
 });
 
 app.use(
