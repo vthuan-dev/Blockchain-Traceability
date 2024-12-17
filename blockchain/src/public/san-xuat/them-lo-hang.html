@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="../css/them-lo-hang.css">
     <link rel="stylesheet" href="../css/nav-bar.css">
     <link rel="stylesheet" href="../css/chatbox.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
     <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
@@ -52,10 +54,11 @@
         </div>
     </nav>
     
-    <div class="chat-icon" id="openChat" onclick="toggleChat()"></div>
-        <i class="fas fa-comments"></i>
-        <div class="tooltip">Đặt câu hỏi cho chúng tôi</div>
-    </div>
+    <!-- Sửa phần chat icon -->
+<div class="chat-icon" id="openChat" onclick="toggleChat()">
+    <i class="fas fa-comments"></i>
+    <div class="tooltip">Đặt câu hỏi cho chúng tôi</div>
+</div>
 
     <!-- Khung chat -->
     <div id="chatbox" class="chatbox">
@@ -395,7 +398,7 @@
             e.preventDefault();
             try {
                 const response = await fetch('/api/dangxuat', { method: 'POST' });
-                if (response.ok) {
+                if (response.ok) {Hey, Cortana. 
                     window.location.href = '/dangnhap.html'; // Chuyển hướng về trang đăng nhập
                 } else {
                     console.error('Không thể đăng xuất');

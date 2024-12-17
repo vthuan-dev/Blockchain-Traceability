@@ -20,6 +20,10 @@ const sharp = require("sharp");
 const QrCode = require("qrcode-reader");
 const { Network, Alchemy } = require("alchemy-sdk");
 const util = require('util'); // Thêm dòng này
+const bodyParser = require('body-parser');
+
+app.use(bodyParser.json({limit: '100mb'}));
+app.use(bodyParser.urlencoded({limit: '100mb', extended: true}));
 
 // Thêm middleware CORS vào đầu file sau phần import
 const cors = require('cors');
@@ -144,7 +148,10 @@ const activityLogContract = new web3.eth.Contract(
 // tạo biến lưu trữ file, giới hạn số lượng file và tên file, maxCount: số lượng file, name: tên file
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 100 * 1024 * 1024 }, // 100MB limit
+  limits: { fileSize: 100 * 1024 * 1024,
+    files: 10
+
+  } // 100MB limit
 }).fields([
   { name: "productImages", maxCount: 10 },
   { name: "certificateImage", maxCount: 1 },
