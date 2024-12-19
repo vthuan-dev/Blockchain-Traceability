@@ -221,6 +221,7 @@
                 event.preventDefault();
 
                 const formData = new FormData(this);
+                const baseUrl = window.location.hostname === 'localhost' ? 'http://localhost:3000' : 'http://www.tsroreee.com';
                 
                 // Thêm các trường original vào formData
                 formData.append('original_product_id', document.getElementById('product-id').getAttribute('data-original'));
@@ -230,7 +231,7 @@
                 formData.append('original_uses', document.getElementById('product-uses').getAttribute('data-original'));
                 formData.append('original_process', document.getElementById('product-process').getAttribute('data-original'));
 
-                fetch('http://www.tsroreee.com/api/products/update', {
+                fetch(`${baseUrl}/api/products/update`, {
                     method: 'POST',
                     body: formData
                 })

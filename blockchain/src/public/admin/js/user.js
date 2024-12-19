@@ -1,3 +1,4 @@
+const baseUrl = window.location.hostname === 'localhost' ? 'http://localhost:3000/api' : 'http://www.tsroreee.com/api';
 // Tạo một đối tượng toàn cục để chứa các hàm và biến
 window.UserManager = {
   userData: [],
@@ -109,7 +110,8 @@ window.UserManager = {
 
   fetchUserData: async function () {
     try {
-      const response = await fetch("http://www.tsroreee.com/api/users");
+      const url = `${baseUrl}/users`;
+      const response = await fetch(url);
       if (!response.ok) {
         throw new Error("Lỗi khi tải dữ liệu");
       }
@@ -135,8 +137,9 @@ window.UserManager = {
 
   deleteUser: async function (userId) {
     try {
+      const url = `${baseUrl}/users/${userId}`;
       const response = await fetch(
-        `http://www.tsroreee.com/api/users/${userId}`,
+        url,
         {
           method: "DELETE",
         }
@@ -269,12 +272,14 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       // Lấy province_id từ session
-      fetch("http://www.tsroreee.com/api/user-info")
+      const url = `${baseUrl}/user-info`;
+      fetch(url)
         .then((response) => response.json())
         .then((data) => {
           const province_id = data.province_id;
-
-          fetch("http://www.tsroreee.com/api/admin", {
+          
+          const adminUrl = `${baseUrl}/admin`;
+          fetch(adminUrl, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
