@@ -29,6 +29,10 @@ window.UserManager = {
     return approved === 1 ? "Đã xác thực" : "Chưa xác thực";
   },
 
+  getRegionId: function (regionId) {
+    return regionId === null ? "N/A" : regionId;
+  },
+
   getAvatarPath: function (avatarPath) {
     if (!avatarPath) return "uploads/avatars/default-avatar.png"; // Đường dẫn mặc định nếu không có avatar
     return avatarPath; // Trả về trực tiếp URL từ Firebase
@@ -76,7 +80,7 @@ window.UserManager = {
                       user.address
                     }</td>
                     <td style="text-align: center; vertical-align: middle;">${
-                      user.region_id
+                      this.getRegionId(user.region_id)
                     }</td>
                     <td style="text-align: center; vertical-align: middle;">${this.formatDate(
                       user.dob
