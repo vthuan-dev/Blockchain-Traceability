@@ -9,13 +9,13 @@ const express = require("express");
 const app = express();
 const { Web3 } = require("web3");
 const HDWalletProvider = require("@truffle/hdwallet-provider");
-
-const dotenv = require("dotenv");
+const path = require('path');
+// require("dotenv").config({ path: path.resolve(__dirname, "../../.env") });
+// const dotenv = require("dotenv");
 const mysql = require("mysql");
 require("dotenv").config();
 const axios = require("axios");
 const FormData = require("form-data");
-const path = require("path");
 const sharp = require("sharp");
 const QrCode = require("qrcode-reader");
 const { Network, Alchemy } = require("alchemy-sdk");
