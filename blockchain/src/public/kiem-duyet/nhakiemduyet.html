@@ -289,8 +289,19 @@
         }
       }
 
+      // Thêm hàm hiển thị/ẩn spinner
+      function showSpinner() {
+        document.querySelector('.spinner-container').style.display = 'flex';
+      }
+
+      function hideSpinner() {
+        document.querySelector('.spinner-container').style.display = 'none';
+      }
+
+      // Cập nhật hàm approveBatch
       async function approveBatch(batchId) {
         try {
+          showSpinner(); // Hiển thị spinner
           const response = await fetch(`/approve-batch/${batchId}`, {
             method: "POST",
             headers: {
@@ -299,25 +310,27 @@
           });
 
           if (response.ok) {
+            hideSpinner(); // Ẩn spinner
             showAlert("Phê duyệt thành công!", "success");
-            $("#batchDetailsModal").modal("hide"); // Đóng modal
-            await loadPendingBatches(); // Tải lại danh sách sau khi phê duyệt
+            $("#batchDetailsModal").modal("hide");
+            await loadPendingBatches();
           } else {
-            showAlert(
-              "Phê duyệt lô hàng thất bại. Do có người kiểm duyệt khác đã xử lý lô hàng này.",
-              "danger"
-            );
-            $("#batchDetailsModal").modal("hide"); // Đóng modal
-            await loadPendingBatches(); // Tải lại danh sách sau khi phê duyệt thất bại
+            hideSpinner(); // Ẩn spinner
+            showAlert("Phê duyệt lô hàng thất bại. Do có người kiểm duyệt khác đã xử lý lô hàng này.", "danger");
+            $("#batchDetailsModal").modal("hide");
+            await loadPendingBatches();
           }
         } catch (error) {
+          hideSpinner(); // Ẩn spinner trong trường hợp lỗi
           console.error("Lỗi khi phê duyệt lô hàng:", error);
           showAlert("Đã xảy ra lỗi. Vui lòng thử lại sau.", "danger");
         }
       }
 
+      // Cập nhật hàm rejectBatch
       async function rejectBatch(batchId) {
         try {
+          showSpinner(); // Hiển thị spinner
           const response = await fetch(`/reject-batch/${batchId}`, {
             method: "POST",
             headers: {
@@ -326,18 +339,18 @@
           });
 
           if (response.ok) {
+            hideSpinner(); // Ẩn spinner
             showAlert("Từ chối thành công!", "success");
-            $("#batchDetailsModal").modal("hide"); // Đóng modal
-            await loadPendingBatches(); // Tải lại danh sách sau khi từ chối
+            $("#batchDetailsModal").modal("hide");
+            await loadPendingBatches();
           } else {
-            showAlert(
-              "Từ chối lô hàng thất bại. Do có người kiểm duyệt khác đã xử lý lô hàng này.",
-              "danger"
-            );
-            $("#batchDetailsModal").modal("hide"); // Đóng modal
-            await loadPendingBatches(); // Tải lại danh sách sau khi từ chối
+            hideSpinner(); // Ẩn spinner
+            showAlert("Từ chối lô hàng thất bại. Do có người kiểm duyệt khác đã xử lý lô hàng này.", "danger");
+            $("#batchDetailsModal").modal("hide");
+            await loadPendingBatches();
           }
         } catch (error) {
+          hideSpinner(); // Ẩn spinner trong trường hợp lỗi
           console.error("Lỗi khi từ chối lô hàng:", error);
           showAlert("Đã xảy ra lỗi. Vui lòng thử lại sau.", "danger");
         }
@@ -605,5 +618,13 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="../js_giaodien/sanpham.js"></script>
+    <div class="spinner-container">
+        <div class="spinner-content">
+            <div class="spinner-border" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+            <div class="spinner-text">Vui lòng đợi...</div>
+        </div>
+    </div>
   </body>
 </html>

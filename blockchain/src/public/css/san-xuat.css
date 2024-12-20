@@ -386,15 +386,15 @@ body.menu-open {
 
 .modal-content {
     position: relative;
-    max-width: 90%;
-    max-height: 90%;
+    max-width: 70%;
+    max-height: 80vh;
     margin: auto;
     animation: modalFadeIn 0.3s ease;
 }
 
 .modal-image {
     max-width: 100%;
-    max-height: 90vh;
+    max-height: 70vh;
     object-fit: contain;
     border-radius: 8px;
     box-shadow: 0 0 20px rgba(0,0,0,0.3);
@@ -473,5 +473,81 @@ body.menu-open {
     
     .modal-controls {
         padding: 0 10px;
+    }
+}
+
+/* Thêm styles cho nút tải xuống */
+.modal-footer {
+    position: absolute;
+    bottom: -50px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    justify-content: center;
+}
+
+.download-btn {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.download-btn:hover {
+    background-color: #45a049;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+.download-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.download-btn i {
+    font-size: 18px;
+}
+
+/* Điều chỉnh responsive */
+@media (max-width: 768px) {
+    .modal-footer {
+        bottom: -40px;
+    }
+    
+    .download-btn {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+}
+
+/* Thêm media queries để responsive */
+@media (min-width: 1200px) {
+    .modal-content {
+        max-width: 50%;
+        max-height: 70vh;
+    }
+
+    .modal-image {
+        max-height: 60vh;
+    }
+}
+
+/* Giữ nguyên style cho màn hình nhỏ */
+@media (max-width: 768px) {
+    .modal-content {
+        max-width: 95%;
+        max-height: 90vh;
+    }
+
+    .modal-image {
+        max-height: 80vh;
     }
 }

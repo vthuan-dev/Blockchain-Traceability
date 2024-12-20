@@ -27,6 +27,11 @@ function createImageModal() {
                 <button class="modal-btn prev-btn"><i class="fas fa-chevron-left"></i></button>
                 <button class="modal-btn next-btn"><i class="fas fa-chevron-right"></i></button>
             </div>
+            <div class="modal-footer">
+                <button class="download-btn">
+                    <i class="fas fa-download"></i> Tải ảnh
+                </button>
+            </div>
         </div>
     `;
     document.body.appendChild(modal);
@@ -39,6 +44,7 @@ function initializeImageViewer() {
     const closeBtn = modal.querySelector('.close-modal');
     const prevBtn = modal.querySelector('.prev-btn');
     const nextBtn = modal.querySelector('.next-btn');
+    const downloadBtn = modal.querySelector('.download-btn');
     let currentImageIndex = 0;
     let currentImages = [];
 
@@ -90,6 +96,24 @@ function initializeImageViewer() {
             modalImg.src = currentImages[currentImageIndex];
             updateNavigationButtons();
         }
+    };
+
+    downloadBtn.onclick = function(e) {
+        e.stopPropagation();
+        const currentImage = currentImages[currentImageIndex];
+        
+        // Tạo tên file từ URL ảnh hoặc timestamp
+        const fileName = currentImage.split('/').pop() || `image-${Date.now()}.jpg`;
+        
+        // Tạo link tải xuống
+        const link = document.createElement('a');
+        link.href = currentImage;
+        link.download = fileName;
+        
+        // Thêm link vào DOM, click và xóa
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     };
 
     modal.onclick = function(e) {
