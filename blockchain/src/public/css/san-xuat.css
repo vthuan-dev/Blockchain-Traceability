@@ -74,6 +74,8 @@ body.menu-open {
 .table-responsive {
     overflow-x: auto;
     max-width: 100%;
+    position: relative;
+    z-index: 1;
 }
 
 .table {
@@ -142,7 +144,7 @@ body.menu-open {
 .modal {
     display: none;
     position: fixed;
-    z-index: 1050; /* Đảm bảo modal nằm trên các thành phần khác */
+    z-index: 2000;
     left: 0;
     top: 0;
     width: 100%;
@@ -379,7 +381,7 @@ body.menu-open {
     width: 100%;
     height: 100%;
     background-color: rgba(0,0,0,0.9);
-    z-index: 1000;
+    z-index: 2000;
     justify-content: center;
     align-items: center;
 }
@@ -550,4 +552,94 @@ body.menu-open {
     .modal-image {
         max-height: 80vh;
     }
+}
+
+/* CSS cho phần lọc trạng thái */
+.filter-container {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    margin-bottom: 25px;
+    border: 1px solid #e9ecef;
+    position: relative;
+}
+
+.filter-label {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 10px;
+    display: block;
+    font-size: 16px;
+}
+
+#statusFilter {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background: white url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23464646' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") no-repeat right 1rem center;
+    background-size: 1em;
+    width: 100%;
+    max-width: 300px;
+    padding: 8px 40px 8px 15px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 15px;
+    color: #495057;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    line-height: 1.2;
+}
+
+#statusFilter:hover {
+    border-color: #4CAF50;
+}
+
+#statusFilter:focus {
+    outline: none;
+    border-color: #4CAF50;
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+    z-index: 1001;
+}
+
+/* Style cho các option trong select */
+#statusFilter option {
+    position: relative;
+    z-index: 1002;
+    background: white;
+    padding: 8px;
+    color: #495057;
+    line-height: 1.2;
+}
+
+/* Màu cho từng trạng thái */
+#statusFilter option[value="Chờ phê duyệt"] {
+    color: #ffa500;
+}
+
+#statusFilter option[value="Đã phê duyệt"] {
+    color: #4CAF50;
+}
+
+#statusFilter option[value="Đã từ chối"] {
+    color: #dc3545;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .filter-container {
+        padding: 15px;
+    }
+
+    #statusFilter {
+        max-width: 100%;
+        font-size: 14px;
+        padding: 10px 35px 10px 12px;
+    }
+}
+
+/* Điều chỉnh vị trí text trong select khi đã chọn */
+#statusFilter:not(:placeholder-shown) {
+    padding-top: 6px;
+    padding-bottom: 6px;
 }

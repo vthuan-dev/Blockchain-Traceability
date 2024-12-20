@@ -91,9 +91,10 @@
                 </div>
                 <p class="mt-2">Đang tải lô hàng...</p>
             </div>
-            <div class="mt-4">
-                <label for="statusFilter">Lọc theo trạng thái:</label>
-                <select id="statusFilter" class="form-control">
+            <div class="filter-container">
+                <label for="statusFilter" class="filter-label">Lọc theo trạng thái:</label>
+                <select id="statusFilter" class="custom-select">
+                    <option value="">Tất cả trạng thái</option>
                     <option value="Chờ phê duyệt">Chờ phê duyệt</option>
                     <option value="Đã phê duyệt">Đã phê duyệt</option>
                     <option value="Đã từ chối">Đã từ chối</option>
@@ -388,6 +389,9 @@ function displayPendingBatches(batches) {
         return;
     }
 
+    // Sắp xếp mảng batches theo thời gian tạo mới nhất
+    batches.sort((a, b) => Number(b.productionDate) - Number(a.productionDate));
+
     let html = `
         <table class="table table-striped table-bordered">
             <thead>
@@ -432,6 +436,9 @@ function displayRejectedBatches(batches) {
         rejectedBatchesList.innerHTML = '<p>Không có lô hàng nào bị từ chối.</p>';
         return;
     }
+
+    // Sắp xếp mảng batches theo thời gian tạo mới nhất
+    batches.sort((a, b) => Number(b.productionDate) - Number(a.productionDate));
 
     let html = `
         <table class="table table-striped table-bordered">
@@ -603,6 +610,9 @@ function displayBatches(batches, containerId) {
         container.innerHTML = '<p>Không có lô hàng nào.</p>';
         return;
     }
+
+    // Sắp xếp mảng batches theo thời gian tạo mới nhất
+    batches.sort((a, b) => Number(b.productionDate) - Number(a.productionDate));
 
     let html = `
         <table class="table table-striped table-bordered">
