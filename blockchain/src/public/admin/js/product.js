@@ -1,3 +1,5 @@
+const baseUrl = window.location.hostname === 'localhost' ? 'http://localhost:3000/api' : 'http://www.tsroreee.com/api';
+
 // Tạo một đối tượng toàn cục để chứa các hàm và biến
 window.ProductManager = {
   productData: [],
@@ -95,7 +97,8 @@ window.ProductManager = {
   },
 
   fetchProductData: function () {
-    fetch("http://www.tsroreee.com/api/theproducts")
+    
+    fetch(`${baseUrl}/theproducts`)
       .then((response) => {
         if (!response.ok) {
           throw new Error("Lỗi khi tải dữ liệu");
@@ -165,7 +168,7 @@ window.ProductManager = {
   },
 
   updateProduct: function (productData) {
-    fetch("http://www.tsroreee.com/api/products/update", {
+    fetch(`${baseurl}/products/update`, {
       method: "POST",
       body: JSON.stringify(productData),
       headers: {
@@ -366,7 +369,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }
 
-    fetch("http://www.tsroreee.com/api/products", {
+    fetch(`${baseUrl}/products`, {
       method: "POST",
       body: formData,
     })

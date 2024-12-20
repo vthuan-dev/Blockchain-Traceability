@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const notificationList = document.getElementById("notificationList");
   const confirmReadButton = document.getElementById("confirmRead");
   const notificationIcon = document.getElementById("notificationIcon");
+  const baseUrl = window.location.hostname === "localhost" ? "http://localhost:3000/api" : "http://www.tsroreee.com/api";
 
   // Toggle dropdown menu
   if (profileIcon && dropdownMenu) {
@@ -326,7 +327,7 @@ async function deleteItem(url, id) {
 }
 
 function deleteProduct(productId) {
-  fetch(`http://www.tsroreee.com/api/products/${productId}`, { method: "DELETE" })
+  fetch(`${baseUrl}/products/${productId}`, { method: "DELETE" })
     .then((response) => {
       if (!response.ok) {
         throw new Error("Xóa thất bại");
@@ -353,7 +354,7 @@ function showMessage(message, type) {
 }
 
 function deleteUser(userId) {
-  deleteItem("http://www.tsroreee.com/api/users", userId);
+  deleteItem(`${baseUrl}/users`, userId);
 }
 
 function formatDate(dateString) {

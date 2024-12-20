@@ -7,6 +7,8 @@ document.addEventListener("DOMContentLoaded", function () {
   const removePanel = document.querySelector(".remove");
   const overlay = document.getElementById("overlay");
   const mainContent = document.querySelector("main");
+  const baseUrl = window.location.hostname === 'localhost' ? 'http://localhost:3000/api' : 'http://www.tsroreee.com/api';
+
 
   window.RegionManager = {
     regionData: [],
@@ -91,7 +93,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // Lấy dữ liệu regions
         // Đảm bảo đường dẫn API này chính xác
         const regionsResponse = await fetch(
-          `http://www.tsroreee.com/api/regions?province_id=${adminProvinceId}`
+          `${baseUrl}/regions?province_id=${adminProvinceId}`
         );
         if (!regionsResponse.ok) {
           throw new Error(`HTTP error! status: ${regionsResponse.status}`);
