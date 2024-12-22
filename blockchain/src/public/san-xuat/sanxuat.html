@@ -796,10 +796,12 @@ function generateQRCodeWithLogo(canvas, sscc, size, showLogo, callback) {
                 const logoSize = size * 0.2;
                 const logoX = (size - logoSize) / 2;
                 const logoY = (size - logoSize) / 2;
-
+                //tạo hình tròn trắng bao quanh logo
                 ctx.beginPath();
+                //arc nghia la hinh tron
                 ctx.arc(size / 2, size / 2, logoSize / 2, 0, 2 * Math.PI, false);
                 ctx.fillStyle = 'white';
+                // to mau trang cho 
                 ctx.fill();
 
                 ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
