@@ -275,6 +275,7 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
       }
 
+
       // Lấy province_id từ session
       const url = `${baseUrl}/user-info`;
       fetch(url)

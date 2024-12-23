@@ -33,7 +33,7 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: "http://www.tsroreee.com", // Thay đổi nếu bạn chạy ở một domain khc
+    origin: ["localhost", "http://www.tsroreee.com", "127.0.0.1"], // Thay đổi nếu bạn chạy ở một domain khc
     methods: ["GET", "POST"],
     credentials: true,
   },
@@ -553,7 +553,7 @@ app.post("/api/notifications/:id/read", async (req, res) => {
   }
 });
 
-const { saveNotification } = require("./notification.js");
+// const { registerNotification } = require("./notification.js");
 
 app.get("/api/notifications", async (req, res) => {
   console.log("Session adminId:", req.session.adminId); // Log giá trị userId
@@ -608,7 +608,7 @@ app.get("/kiem-duyet/nhakiemduyet.html", requireAuth, (req, res) => {
 
 app.get("/user-info", (req, res) => {
   console.log("Session trong /api/user-info:", req.session);
-  if (req.session && req.session.isLoggedIn) {
+  if (req.session?.isLoggedIn) {
     if (req.session.adminId) {
       // Trả về thông tin admin nếu có adminId trong session
       res.json({

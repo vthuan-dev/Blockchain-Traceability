@@ -37,6 +37,7 @@ app.use((req, res, next) => {
 });
 
 require("dotenv").config({ path: path.resolve(__dirname, "../../.env") });
+const { notifyNewBatch } = require('.//notification');
 
 const storage = multer.memoryStorage();
 
@@ -424,8 +425,11 @@ function setupRoutes(app, db) {
     async (req, res) => {
       console.log("Received body:", req.body);
       console.log("Received files:", req.files);
+      let connection;
 
       try {
+        connection = await db.getConnection();
+        await connection.beginTransaction();
         const {
           name,
           quantity,
@@ -567,7 +571,10 @@ function setupRoutes(app, db) {
           batchId = log ? log.returnValues.batchId : "Unknown";
         }
 
-        console.log("Extracted batchId:", batchId);
+         // Gọi hàm thông báo với connection từ transaction
+        await notifyNewBatch(connection, name, cleanProducerId, req.body.region_id);
+        // Commit transaction
+        await connection.commit();
 
         res.status(200).json({
           message: "Lô hàng đã được tạo thành công và đang chờ phê duyệt",
