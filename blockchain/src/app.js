@@ -33,7 +33,7 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: "http://www.tsroreee.com", // Thay đổi nếu bạn chạy ở một domain khc
+    origin: ["http://www.tsroreee.com", "http://localhost:3000", "http://127.0.0.1:3000"], // Thay đổi nếu bạn chạy ở một domain khc
     methods: ["GET", "POST"],
     credentials: true,
   },

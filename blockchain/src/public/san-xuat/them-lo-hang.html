@@ -12,7 +12,7 @@
 
     <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 </head>
 
 <body>
@@ -424,7 +424,12 @@
 
     <!-- Thêm socket listeners -->
     <script>
-        const socket = io(); // Khởi tạo socket connection
+        const ENDPOINT = window.location.host.indexOf("localhost") >= 0
+            ? "http://127.0.0.1:3000"
+            : window.location.host;
+
+        // Khai báo và khởi tạo socket trực tiếp
+        const socket = io(ENDPOINT);
 
         socket.on('connect', () => {
             console.log('Connected to server');
