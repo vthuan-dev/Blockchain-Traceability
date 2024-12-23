@@ -60,9 +60,7 @@
 
     <main>
         <div class="container mt-4">
-            <div class="table-title">
-                <h5><b>Quản lí lô hàng</b></h5>
-            </div>
+            
             <br>
             <div class="container-fluid mt-3">
                 <div class="row justify-content-center">
@@ -101,11 +99,12 @@
                     <option value="Đã phê duyệt">Đã phê duyệt</option>
                     <option value="Đã từ chối">Đã từ chối</option>
                 </select>
-            </div>
+            </div>  
             <!-- Container của bảng lô hàng -->
-            <h5><i>Danh sách lô hàng :</i></h5>
-            
-            <div id="batchesList"></div>
+            <div class="table-responsive">
+                <h5><i>Danh sách lô hàng</i></h5>
+                <div id="batchesList"></div>
+            </div>
 
          <div class="table-responsive">
     <div id="pendingBatchesList" style="display: none;"></div>
@@ -354,7 +353,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (response.ok) {
             const pendingBatches = await response.json();
             
-            // Xử lý và hiển thị dữ li���u
+            // Xử lý và hiển thị dữ liệu
             displayPendingBatches(pendingBatches);
 
             // Ẩn spinner và hiển thị bảng lô hàng
@@ -710,10 +709,26 @@ function showLargeQRCode(sscc, batchId) {
     container.style.padding = '20px';
     container.style.borderRadius = '10px';
     container.style.textAlign = 'center';
-
     container.style.maxWidth = '90%';
     container.style.maxHeight = '90%';
     container.style.overflow = 'auto';
+    container.style.position = 'relative';
+
+    const closeButton = document.createElement('button');
+    closeButton.innerHTML = '&times;';
+    closeButton.style.position = 'absolute';
+    closeButton.style.right = '10px';
+    closeButton.style.top = '10px';
+    closeButton.style.border = 'none';
+    closeButton.style.background = 'none';
+    closeButton.style.fontSize = '24px';
+    closeButton.style.cursor = 'pointer';
+    closeButton.style.color = '#666';
+    closeButton.onclick = (e) => {
+        e.stopPropagation();
+        document.body.removeChild(modal);
+    };
+    container.appendChild(closeButton);
 
     const largeCanvas = document.createElement('canvas');
     const size = Math.min(300, window.innerWidth * 0.8);
@@ -770,13 +785,17 @@ function showLargeQRCode(sscc, batchId) {
         }
     });
 
-    // Ngăn click trên container đóng modal
+    // Thêm event click cho modal để đóng khi click ra ngoài
+    modal.onclick = function() {
+        document.body.removeChild(modal);
+    };
+
+    // Ngăn sự kiện click từ container lan ra modal
     container.onclick = function(e) {
         e.stopPropagation();
     };
 
     modal.appendChild(container);
-
     document.body.appendChild(modal);
 }
 async function initializeBaseUrl() {

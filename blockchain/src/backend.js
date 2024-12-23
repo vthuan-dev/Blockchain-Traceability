@@ -683,16 +683,20 @@ function setupRoutes(app, db) {
           console.log("Không tìm thấy event ActivityLogAdded");
         }
 
+        // Thêm thông tin thành công vào response
         res.status(200).json({
+          success: true,
           message: "Nhật ký hoạt động đã được thêm thành công",
           transactionHash: result.transactionHash,
           imageUrls: imageUrls,
         });
+
       } catch (error) {
         console.error("Lỗi thêm nhật ký hoạt động:", error);
-        res
-          .status(500)
-          .json({ error: "Lỗi thêm nhật ký hoạt động: " + error.message });
+        res.status(500).json({ 
+          success: false,
+          error: "Lỗi thêm nhật ký hoạt động: " + error.message 
+        });
       }
     }
   );
@@ -700,7 +704,7 @@ function setupRoutes(app, db) {
   app.get("/api/pending-batches", async (req, res) => {
     try {
       if (!req.session.userId) {
-        return res.status(401).json({ error: "Người dùng chưa đ��ng nhập" });
+        return res.status(401).json({ error: "Người dùng chưa đng nhập" });
       }
 
       const producerId = req.session.userId;

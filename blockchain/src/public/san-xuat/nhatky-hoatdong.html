@@ -480,52 +480,54 @@
         document.addEventListener('DOMContentLoaded', fetchProducts);
         $('#addActivityLogModal').on('show.bs.modal', fetchProducts);
 
-        document.getElementById('addActivityLogForm').addEventListener('submit', function(e) {
+        // Thêm div container cho toast vào body
+        document.body.insertAdjacentHTML('beforeend', '<div class="toast-container"></div>');
+
+        // Hàm hiển thị toast
+        function showToast(message, type = 'success') {
+            const toastContainer = document.querySelector('.toast-container');
+            const icon = type === 'success' ? 'check-circle' : 'times-circle';
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <i class="fas fa-${icon} toast-icon"></i>
+                <p class="toast-message">${message}</p>
+            `;
+            toastContainer.appendChild(toast);
+
+            // Xóa toast sau 3 giây
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Cập nhật event listener form submit
+        document.getElementById('addActivityLogForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            const submitBtn = this.querySelector('.add-activity-btn');
+            submitBtn.classList.add('loading');
             const formData = new FormData(this);
 
-            // Log dữ liệu trước khi gửi
-            for (let [key, value] of formData.entries()) {
-                console.log(key, value);
-            }
+            try {
+                const response = await fetch('/createactivity', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
 
-            fetch('/createactivity', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.text().then(text => { throw new Error(text) });
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Response data:', data); // Log the response data
-                if (data.message === 'Nhật ký hoạt động đã được thêm thành công') {
-                    // Display success message
-                    const messageContainer = document.getElementById('messageContainer');
-                    messageContainer.textContent = data.message;
-                    messageContainer.className = 'alert alert-success';
-                    messageContainer.style.display = 'block';
-                    messageContainer.style.opacity = '1';
-                    messageContainer.style.visibility = 'visible';
-
+                if (data.success) {
+                    showToast(data.message);
                     $('#addActivityLogModal').modal('hide');
-                    $('.modal-backdrop').remove(); // Remove the modal backdrop
-                    fetchAndDisplayAllActivities(); // Cập nhật danh sách hoạt động
+                    fetchAndDisplayAllActivities();
                 } else {
-                    throw new Error(data.error || data.message || 'Lỗi không xác định');
+                    showToast(data.error || 'Có lỗi xảy ra', 'error');
                 }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                const messageContainer = document.getElementById('messageContainer');
-                messageContainer.textContent = 'Có lỗi xảy ra khi thêm nhật ký hoạt động: ' + error.message;
-                messageContainer.className = 'alert alert-danger';
-                messageContainer.style.display = 'block';
-                messageContainer.style.opacity = '1';
-                messageContainer.style.visibility = 'visible';
-            });
+            } catch (error) {
+                showToast('Có lỗi xảy ra khi thêm nhật ký hoạt động', 'error');
+            } finally {
+                submitBtn.classList.remove('loading');
+            }
         });
     </script>
 
