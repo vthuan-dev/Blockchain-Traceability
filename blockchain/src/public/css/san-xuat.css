@@ -74,6 +74,8 @@ body.menu-open {
 .table-responsive {
     overflow-x: auto;
     max-width: 100%;
+    position: relative;
+    z-index: 1;
 }
 
 .table {
@@ -142,7 +144,7 @@ body.menu-open {
 .modal {
     display: none;
     position: fixed;
-    z-index: 1050; /* Đảm bảo modal nằm trên các thành phần khác */
+    z-index: 2000;
     left: 0;
     top: 0;
     width: 100%;
@@ -379,22 +381,22 @@ body.menu-open {
     width: 100%;
     height: 100%;
     background-color: rgba(0,0,0,0.9);
-    z-index: 1000;
+    z-index: 2000;
     justify-content: center;
     align-items: center;
 }
 
 .modal-content {
     position: relative;
-    max-width: 90%;
-    max-height: 90%;
+    max-width: 70%;
+    max-height: 80vh;
     margin: auto;
     animation: modalFadeIn 0.3s ease;
 }
 
 .modal-image {
     max-width: 100%;
-    max-height: 90vh;
+    max-height: 70vh;
     object-fit: contain;
     border-radius: 8px;
     box-shadow: 0 0 20px rgba(0,0,0,0.3);
@@ -473,5 +475,507 @@ body.menu-open {
     
     .modal-controls {
         padding: 0 10px;
+    }
+}
+
+/* Thêm styles cho nút tải xuống */
+.modal-footer {
+    position: absolute;
+    bottom: -50px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    justify-content: center;
+}
+
+.download-btn {
+    background: linear-gradient(135deg, #00b09b, #96c93d);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(0, 176, 155, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.download-btn:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #96c93d, #00b09b);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.download-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 176, 155, 0.3);
+}
+
+.download-btn:hover:before {
+    opacity: 1;
+}
+
+.download-btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 10px rgba(0, 176, 155, 0.2);
+}
+
+.download-btn i {
+    font-size: 18px;
+    transition: transform 0.3s ease;
+    position: relative;
+    z-index: 1;
+}
+
+.download-btn:hover i {
+    transform: translateY(2px);
+    animation: bounce 0.5s ease infinite;
+}
+
+/* Text trong nút */
+.download-btn span {
+    position: relative;
+    z-index: 1;
+}
+
+/* Animation cho icon */
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-3px);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .download-btn {
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+    
+    .download-btn i {
+        font-size: 16px;
+    }
+}
+
+/* Disabled state */
+.download-btn:disabled {
+    background: linear-gradient(135deg, #cccccc, #999999);
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* Loading state */
+.download-btn.loading {
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+.download-btn.loading i {
+    animation: rotating 1s linear infinite;
+}
+
+@keyframes rotating {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Điều chỉnh responsive */
+@media (max-width: 768px) {
+    .modal-footer {
+        bottom: -40px;
+    }
+    
+    .download-btn {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+}
+
+/* Thêm media queries để responsive */
+@media (min-width: 1200px) {
+    .modal-content {
+        max-width: 50%;
+        max-height: 70vh;
+    }
+
+    .modal-image {
+        max-height: 60vh;
+    }
+}
+
+/* Giữ nguyên style cho màn hình nhỏ */
+@media (max-width: 768px) {
+    .modal-content {
+        max-width: 95%;
+        max-height: 90vh;
+    }
+
+    .modal-image {
+        max-height: 80vh;
+    }
+}
+
+/* CSS cho phần lọc trạng thái */
+.filter-container {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    margin-bottom: 25px;
+    border: 1px solid #e9ecef;
+    position: relative;
+}
+
+.filter-label {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 10px;
+    display: block;
+    font-size: 16px;
+}
+
+#statusFilter {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background: white url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23464646' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") no-repeat right 1rem center;
+    background-size: 1em;
+    width: 100%;
+    max-width: 300px;
+    padding: 8px 40px 8px 15px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 15px;
+    color: #495057;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    line-height: 1.2;
+}
+
+#statusFilter:hover {
+    border-color: #4CAF50;
+}
+
+#statusFilter:focus {
+    outline: none;
+    border-color: #4CAF50;
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+    z-index: 1001;
+}
+
+/* Style cho các option trong select */
+#statusFilter option {
+    position: relative;
+    z-index: 1002;
+    background: white;
+    padding: 8px;
+    color: #495057;
+    line-height: 1.2;
+}
+
+/* Màu cho từng trạng thái */
+#statusFilter option[value="Chờ phê duyệt"] {
+    color: #ffa500;
+}
+
+#statusFilter option[value="Đã phê duyệt"] {
+    color: #4CAF50;
+}
+
+#statusFilter option[value="Đã từ chối"] {
+    color: #dc3545;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .filter-container {
+        padding: 15px;
+    }
+
+    #statusFilter {
+        max-width: 100%;
+        font-size: 14px;
+        padding: 10px 35px 10px 12px;
+    }
+}
+
+/* Điều chỉnh vị trí text trong select khi đã chọn */
+#statusFilter:not(:placeholder-shown) {
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
+/* Style cho nút tạo lô hàng */
+.check-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
+    text-decoration: none;
+    border-radius: 50px;
+    font-size: 16px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: none;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.check-button:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #45a049, #4CAF50);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.check-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.3);
+    color: white;
+    text-decoration: none;
+}
+
+.check-button:hover:before {
+    opacity: 1;
+}
+
+.check-button:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 10px rgba(76, 175, 80, 0.2);
+}
+
+/* Icon cho nút */
+.check-button i {
+    margin-right: 8px;
+    font-size: 18px;
+}
+
+/* Animation khi hover */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.check-button:hover {
+    animation: pulse 1s infinite;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .check-button {
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+    
+    .check-button i {
+        font-size: 16px;
+    }
+}
+
+/* Container cho nút */
+.dashboard-table {
+    display: flex;
+    justify-content: flex-end;
+    margin: 20px 0;
+    padding: 10px;
+}
+
+/* Container cho các nút trong modal QR */
+.button-container {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+/* Style chung cho cả 2 nút */
+.toggle-button,
+.download-button {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 50px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Style riêng cho nút Toggle Logo */
+.toggle-button {
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    color: white;
+}
+
+.toggle-button:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #4f46e5, #6366f1);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* Style riêng cho nút Download */
+.download-button {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: white;
+}
+
+.download-button:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #16a34a, #22c55e);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* Hover effects */
+.toggle-button:hover,
+.download-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.toggle-button:hover:before,
+.download-button:hover:before {
+    opacity: 1;
+}
+
+/* Active state */
+.toggle-button:active,
+.download-button:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Icon styles */
+.toggle-button i,
+.download-button i {
+    font-size: 18px;
+    position: relative;
+    z-index: 1;
+}
+
+/* Text trong nút */
+.toggle-button span,
+.download-button span {
+    position: relative;
+    z-index: 1;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .button-container {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .toggle-button,
+    .download-button {
+        width: 100%;
+        justify-content: center;
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+}
+
+/* Style cho tiêu đề danh sách lô hàng */
+.table-responsive h5 {
+    position: relative;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2c3e50;
+    padding: 15px 0;
+    margin-bottom: 25px;
+    display: inline-block;
+}
+
+.table-responsive h5 i {
+    font-style: normal;
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 500;
+}
+
+.table-responsive h5::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(to right, #4CAF50, #45a049);
+    border-radius: 2px;
+    transform: scaleX(0);
+    transform-origin: left;
+    animation: slideIn 0.6s ease-out forwards;
+}
+
+@keyframes slideIn {
+    to {
+        transform: scaleX(1);
+    }
+}
+
+/* Hover effect */
+.table-responsive h5:hover {
+    transform: translateY(-2px);
+    transition: transform 0.3s ease;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .table-responsive h5 {
+        font-size: 1.25rem;
+        padding: 10px 0;
+        margin-bottom: 20px;
     }
 }
