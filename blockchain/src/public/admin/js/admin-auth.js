@@ -2,8 +2,8 @@
 
 function initAdminSocket() {
   const ENDPOINT =
-    window.location.host.indexOf("localhost") >= 0
-      ? "http://127.0.0.1:3000"
+    window.location.hostname.indexOf("localhost") >= 0
+      ? "http://localhost:3000"
       : window.location.host;
   window.socket = io(ENDPOINT);
 

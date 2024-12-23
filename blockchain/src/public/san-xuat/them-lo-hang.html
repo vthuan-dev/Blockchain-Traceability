@@ -166,6 +166,8 @@
         let productImageFiles = []; // Mảng lưu trữ các file ảnh sản phẩm
         let certificateImageFile = null; // Biến lưu trữ file ảnh giấy chứng nhận
         let producerId = null; // Biến để lưu ID người sản xuất
+        let region_id = null;
+        const { notifyNewBatch } = require("../../notification");
 
         function previewProductImages(input) {
             const preview = $('#imagePreview');

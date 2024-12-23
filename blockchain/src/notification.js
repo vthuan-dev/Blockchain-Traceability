@@ -8,7 +8,7 @@ const db = mysql.createPool({
   connectTimeout: 10000
 });
 
-async function saveNotification(connection, actorId, message, type) {
+async function registerNotification(connection, actorId, message, type) {
   try {
     // Không cần getConnection vì đã có connection từ transaction
     const [registerResult] = await connection.query(
@@ -49,6 +49,48 @@ async function saveNotification(connection, actorId, message, type) {
   }
 }
 
+async function notifyNewBatch(connection, batchName, actorId, regionId) {
+  try {
+    // Lưu thông tin lô hàng mới vào bảng batch
+    const [batchResult] = await connection.query(
+      'INSERT INTO batch (batch_name, actor_id, created_on) VALUES (?, ?, NOW())',
+      [batchName, actorId]
+    );
+    const batchId = batchResult.insertId;
+    
+    // Lưu vào bảng notification_object
+    const [notificationObjectResult] = await connection.query(
+      'INSERT INTO notification_object (entity_type_id, entity_id, created_on) VALUES (?, ?, NOW())',
+      [2, batchId]
+    );
+    const notificationObjectId = notificationObjectResult.insertId;
+     // Lưu vào bảng notification_change
+    await connection.query(
+      'INSERT INTO notification_change (notification_object_id, actor_id) VALUES (?, ?)',
+      [notificationObjectId, actorId]
+    );
+     // Lấy danh sách người kiểm định
+    const [inspectors] = await connection.query(
+      'SELECT id FROM users WHERE role_id = 2 AND region_id = ?', [regionId]
+    );
+     // Lưu thông báo cho từng người kiểm định
+    for (const inspector of inspectors) {
+      await connection.query(
+        `INSERT INTO notification (notification_object_id, user_id, recipient_type) 
+         VALUES (?, ?, ?) 
+         ON DUPLICATE KEY UPDATE notification_object_id = VALUES(notification_object_id)`,
+        [notificationObjectId, inspector.id, 'user']
+      );
+    }
+     await connection.commit();
+    return batchId;
+  } catch (error) {
+    console.error("Lỗi khi lưu thông báo lô hàng mới:", error);
+    throw error;
+  }
+} 
+
 module.exports = {
-  saveNotification
+  registerNotification,
+  notifyNewBatch
 };
