@@ -489,33 +489,113 @@ body.menu-open {
 }
 
 .download-btn {
-    background-color: #4CAF50;
+    background: linear-gradient(135deg, #00b09b, #96c93d);
     color: white;
     border: none;
-    padding: 10px 20px;
-    border-radius: 25px;
+    padding: 12px 24px;
+    border-radius: 50px;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 15px;
+    font-weight: 500;
     display: flex;
     align-items: center;
-    gap: 8px;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    gap: 10px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(0, 176, 155, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.download-btn:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #96c93d, #00b09b);
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
 .download-btn:hover {
-    background-color: #45a049;
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    box-shadow: 0 8px 25px rgba(0, 176, 155, 0.3);
+}
+
+.download-btn:hover:before {
+    opacity: 1;
 }
 
 .download-btn:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transform: translateY(1px);
+    box-shadow: 0 2px 10px rgba(0, 176, 155, 0.2);
 }
 
 .download-btn i {
     font-size: 18px;
+    transition: transform 0.3s ease;
+    position: relative;
+    z-index: 1;
+}
+
+.download-btn:hover i {
+    transform: translateY(2px);
+    animation: bounce 0.5s ease infinite;
+}
+
+/* Text trong nút */
+.download-btn span {
+    position: relative;
+    z-index: 1;
+}
+
+/* Animation cho icon */
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-3px);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .download-btn {
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+    
+    .download-btn i {
+        font-size: 16px;
+    }
+}
+
+/* Disabled state */
+.download-btn:disabled {
+    background: linear-gradient(135deg, #cccccc, #999999);
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* Loading state */
+.download-btn.loading {
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+.download-btn.loading i {
+    animation: rotating 1s linear infinite;
+}
+
+@keyframes rotating {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* Điều chỉnh responsive */
