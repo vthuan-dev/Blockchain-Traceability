@@ -763,7 +763,7 @@ function setupRoutes(app, db) {
     }
   });
 
-  app.get("/pending-batches-by-region", async (req, res) => {
+  app.get("/api/pending-batches-by-region", async (req, res) => {
     try {
       console.log("Bắt đầu xử lý yêu cầu lấy lô hàng chưa duyệt theo vùng");
       if (!req.session.userId) {

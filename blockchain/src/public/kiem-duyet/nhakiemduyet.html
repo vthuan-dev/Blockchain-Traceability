@@ -18,6 +18,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
   </head>
   <body>
+    <!-- Đặt ngay sau thẻ body mở đầu -->
+    <div class="toast-container"></div>
+
     <!-- Thanh điều hướng -->
     <nav class="navbar navbar-expand-lg navbar-light custom-navbar">
       <div class="container">
@@ -213,7 +216,7 @@
       });
       async function loadPendingBatches() {
         try {
-          const response = await fetch("/pending-batches-by-region");
+          const response = await fetch("/api/pending-batches-by-region");
           if (!response.ok) {
             throw new Error("Network response was not ok");
           }
@@ -233,8 +236,14 @@
         content.innerHTML = `
                 <p>Bạn có muốn phê duyệt hoặc từ chối lô hàng này?</p>
                 <div class="d-flex justify-content-center">
-                    <button class="btn btn-success mx-2" onclick="approveBatch('${batchId}')">Phê duyệt</button>
-                    <button class="btn btn-danger mx-2" onclick="rejectBatch('${batchId}')">Từ chối</button>
+                    <button id="approveBtn" class="btn btn-success mx-2" onclick="approveBatch('${batchId}')">
+                        <span class="button-spinner d-none"></span>
+                        <span class="button-text">Phê duyệt</span>
+                    </button>
+                    <button id="rejectBtn" class="btn btn-danger mx-2" onclick="rejectBatch('${batchId}')">
+                        <span class="button-spinner d-none"></span>
+                        <span class="button-text">Từ chối</span>
+                    </button>
                 </div>
             `;
         $("#batchDetailsModal").modal("show"); // Sử dụng Bootstrap để hiển thị modal
@@ -300,8 +309,16 @@
 
       // Cập nhật hàm approveBatch
       async function approveBatch(batchId) {
+        const approveBtn = document.getElementById('approveBtn');
+        const spinner = approveBtn.querySelector('.button-spinner');
+        const text = approveBtn.querySelector('.button-text');
+        
         try {
-          showSpinner(); // Hiển thị spinner
+          // Disable button và hiện spinner
+          approveBtn.disabled = true;
+          spinner.classList.remove('d-none');
+          text.textContent = 'Đang xử lý...';
+          
           const response = await fetch(`/approve-batch/${batchId}`, {
             method: "POST",
             headers: {
@@ -310,27 +327,34 @@
           });
 
           if (response.ok) {
-            hideSpinner(); // Ẩn spinner
-            showAlert("Phê duyệt thành công!", "success");
+            showToast('Phê duyệt thành công!', 'success');
             $("#batchDetailsModal").modal("hide");
             await loadPendingBatches();
           } else {
-            hideSpinner(); // Ẩn spinner
-            showAlert("Phê duyệt lô hàng thất bại. Do có người kiểm duyệt khác đã xử lý lô hàng này.", "danger");
-            $("#batchDetailsModal").modal("hide");
-            await loadPendingBatches();
+            showToast('Phê duyệt thất bại!', 'error');
           }
         } catch (error) {
-          hideSpinner(); // Ẩn spinner trong trường hợp lỗi
-          console.error("Lỗi khi phê duyệt lô hàng:", error);
-          showAlert("Đã xảy ra lỗi. Vui lòng thử lại sau.", "danger");
+          showToast('Đã xảy ra lỗi!', 'error');
+          console.error('Error:', error);
+        } finally {
+          // Restore button state
+          approveBtn.disabled = false;
+          spinner.classList.add('d-none');
+          text.textContent = 'Phê duyệt';
         }
       }
 
       // Cập nhật hàm rejectBatch
       async function rejectBatch(batchId) {
+        const rejectBtn = document.getElementById('rejectBtn');
+        const spinner = rejectBtn.querySelector('.button-spinner');
+        const text = rejectBtn.querySelector('.button-text');
+        
         try {
-          showSpinner(); // Hiển thị spinner
+          rejectBtn.disabled = true;
+          spinner.classList.remove('d-none');
+          text.textContent = 'Đang xử lý...';
+          
           const response = await fetch(`/reject-batch/${batchId}`, {
             method: "POST",
             headers: {
@@ -339,20 +363,19 @@
           });
 
           if (response.ok) {
-            hideSpinner(); // Ẩn spinner
-            showAlert("Từ chối thành công!", "success");
+            showToast('Từ chối thành công!', 'success');
             $("#batchDetailsModal").modal("hide");
             await loadPendingBatches();
           } else {
-            hideSpinner(); // Ẩn spinner
-            showAlert("Từ chối lô hàng thất bại. Do có người kiểm duyệt khác đã xử lý lô hàng này.", "danger");
-            $("#batchDetailsModal").modal("hide");
-            await loadPendingBatches();
+            showToast('Từ chối thất bại!', 'error');
           }
         } catch (error) {
-          hideSpinner(); // Ẩn spinner trong trường hợp lỗi
-          console.error("Lỗi khi từ chối lô hàng:", error);
-          showAlert("Đã xảy ra lỗi. Vui lòng thử lại sau.", "danger");
+          showToast('Đã xảy ra lỗi!', 'error');
+          console.error('Error:', error);
+        } finally {
+          rejectBtn.disabled = false;
+          spinner.classList.add('d-none');
+          text.textContent = 'Từ chối';
         }
       }
 
@@ -604,7 +627,17 @@
             </button>
           </div>
           <div class="modal-body" id="batchDetailsContent">
-            <!-- Nội dung chi tiết lô hàng sẽ được thêm động từ JavaScript -->
+            <p>Bạn có muốn phê duyệt hoặc từ chối lô hàng này?</p>
+            <div class="d-flex justify-content-center">
+              <button id="approveBtn" class="btn btn-success mx-2" onclick="approveBatch('${batchId}')">
+                <span class="button-spinner d-none"></span>
+                <span class="button-text">Phê duyệt</span>
+              </button>
+              <button id="rejectBtn" class="btn btn-danger mx-2" onclick="rejectBatch('${batchId}')">
+                <span class="button-spinner d-none"></span>
+                <span class="button-text">Từ chối</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -626,5 +659,35 @@
             <div class="spinner-text">Vui lòng đợi...</div>
         </div>
     </div>
+
+    <script>
+      function showToast(message, type = 'success') {
+        console.log('Showing toast:', message, type);
+        
+        const toastContainer = document.querySelector('.toast-container');
+        if (!toastContainer) {
+          console.error('Toast container not found!');
+          return;
+        }
+        
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        
+        const icon = type === 'success' ? '✓' : '✕';
+        
+        toast.innerHTML = `
+          <span class="toast-icon">${icon}</span>
+          <span class="toast-message">${message}</span>
+        `;
+        
+        toastContainer.appendChild(toast);
+        
+        // Tự động xóa toast sau 3 giây
+        setTimeout(() => {
+          toast.style.animation = 'fade-out 0.3s ease-out forwards';
+          setTimeout(() => toast.remove(), 300);
+        }, 3000);
+      }
+    </script>
   </body>
 </html>
