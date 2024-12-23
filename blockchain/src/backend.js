@@ -37,7 +37,7 @@ app.use((req, res, next) => {
 });
 
 require("dotenv").config({ path: path.resolve(__dirname, "../../.env") });
-const { notifyNewBatch } = require('../../notification');
+const { notifyNewBatch } = require('.//notification');
 
 const storage = multer.memoryStorage();
 

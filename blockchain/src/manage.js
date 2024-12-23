@@ -54,6 +54,36 @@ async function queryDatabase(query, params) {
   }
 }
 
+function validateEmail(email) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
+async function checkEmailExists(email) {
+  const baseUrl = window.location.hostname === 'localhost' ? 'http://localhost:3000/api' : 'http://www.tsroreee.com/api';
+  const response = await fetch(`${baseUrl}/check-email?email=${encodeURIComponent(email)}`);
+  const data = await response.json();
+  return data.exists;
+}
+
+router.get('/api/check-email', async (req, res) => {
+  const email = req.query.email;
+  // if (!email) {
+  //   return res.status(400).json({ error: 'Chưa nhập email' });
+  // }
+
+  try {
+    const query = 'SELECT COUNT(*) AS count FROM admin WHERE admin_email = ?';
+    const results = await db.query(query, [email]);
+    const exists = results[0].count > 0;
+    res.json({ exists });
+  } catch (error) {
+    console.error('Lỗi kiểm tra email:', error);
+    res.status(500).json({ error: 'Lỗi server' });
+  }
+});
+
+
 // Endpoint để lấy thông tin người dùng
 router.get("/api/users", async (req, res) => {
   try {
@@ -362,6 +392,14 @@ router.post("/api/admin", async (req, res) => {
 
   if (!email || !name || !password) {
     return res.status(400).json({ error: "Thiếu thông tin admin" });
+  }
+
+  if (!validateEmail(email)) {
+    return res.status(400).json({ error: "Email không đúng định dạng" });
+  }
+
+  if (await checkEmailExists(email)) {
+    return res.status(400).json({ error: "Email đã tồn tại" });
   }
 
   try {
