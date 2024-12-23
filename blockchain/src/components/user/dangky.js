@@ -1,11 +1,11 @@
 require("dotenv").config();
 const express = require("express");
 const mysql = require("mysql2/promise");
-const fs = require("fs").promises;
-const path = require("path");
+const fs = require("node:fs").promises;
+const path = require("node:path");
 const bcrypt = require("bcryptjs");
 const multer = require("multer");
-const crypto = require("crypto");
+const crypto = require("node:crypto");
 const { sendEmail } = require("./sendmail");
 const axios = require("axios");
 const db = require("../../config/db");
@@ -18,7 +18,7 @@ const {
   admin,
   adminBucket,
 } = require("../../firebase");
-const { saveNotification } = require("../../notification");
+const { registerNotification } = require("../../notification");
 
 const jsonData = require("./data.json");
 
@@ -145,8 +145,8 @@ async function checkDatabaseProvinces() {
 }
 checkDatabaseProvinces();
 
-module.exports = function (db) {
-  router.get("/dangky", function (req, res) {
+module.exports = (db) => {
+  router.get("/dangky", (req, res) => {
     res.sendFile(path.join(__dirname, "../../public/account/dangky.html"));
   });
 
@@ -198,7 +198,7 @@ module.exports = function (db) {
       const provincesData = await fetchDataFromJson();
       const province = provincesData.find((p) => p.id === provinceId);
 
-      if (province && province.data2) {
+      if (province?.data2) {
         res.json(province.data2);
       } else {
         console.log(
@@ -271,7 +271,7 @@ module.exports = function (db) {
     }
   });
 
-  router.post("/register", upload.single("avatar"), async function (req, res) {
+  router.post("/register", upload.single("avatar"), async (req, res) => {
     let connection;
     let tempImgUrl = null;
     try {
@@ -319,7 +319,7 @@ module.exports = function (db) {
       const phoneExistsQuery = "SELECT * FROM users WHERE phone = ?";
       if (await recordExists(phoneExistsQuery, [phone])) {
         return res.status(400).json({
-          message: "Số điện thoại này đã được sử dụng. Vui lòng chọn số khác."
+          message: "Số điện thoại này đã được sử d��ng. Vui lòng chọn số khác."
         });
       }
     
@@ -327,9 +327,9 @@ module.exports = function (db) {
       console.log("Checking IDs:", { province_id, district_id, ward_id });
 
       // Chuyển đổi các giá trị ID từ chuỗi sang số nguyên
-      const provinceId = parseInt(province_id, 10);
-      const districtId = parseInt(district_id, 10);
-      const wardId = parseInt(ward_id, 10);
+      const provinceId = Number.parseInt(province_id, 10);
+      const districtId = Number.parseInt(district_id, 10);
+      const wardId = Number.parseInt(ward_id, 10);
 
       // Xác thực các ID địa chỉ và thêm huyện/xã mới nếu cần
       const validatedIds = await validateLocationIds(
@@ -388,7 +388,7 @@ module.exports = function (db) {
         address,
         dob,
         gender,
-        parseInt(role_id, 10),
+        Number.parseInt(role_id, 10),
         region_id || null,
         validProvinceId,
         validDistrictId,
@@ -411,9 +411,7 @@ module.exports = function (db) {
       );
 
       const message = `Người dùng mới ${name} đã đăng ký với vai trò ${getRoleName(role_id)}`;
-      await saveNotification(connection, userId, message, 1);
-
-        
+      await registerNotification(connection, userId, message, 1);
 
       await connection.commit();
       res.status(201).json({
@@ -444,7 +442,7 @@ module.exports = function (db) {
       } else {
         res
           .status(500)
-          .json({ error: "Lỗi khi xử lý yêu cầu đăng ký: " + error.message });
+          .json({ error: `Lỗi khi xử lý yêu cầu đăng ký: ${error.message}` });
       }
     } finally {
       if (connection) {
@@ -453,7 +451,7 @@ module.exports = function (db) {
     }
   });
 
-  router.get(["/verify/:token", "/verify/:token"], async function (req, res) {
+  router.get(["/verify/:token", "/verify/:token"], async (req, res) => {
     const { token } = req.params;
     try {
       const [result] = await db.query(

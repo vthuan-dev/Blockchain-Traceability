@@ -166,6 +166,8 @@
         let productImageFiles = []; // Mảng lưu trữ các file ảnh sản phẩm
         let certificateImageFile = null; // Biến lưu trữ file ảnh giấy chứng nhận
         let producerId = null; // Biến để lưu ID người sản xuất
+        let region_id = null;
+        const { notifyNewBatch } = require("../../notification");
 
         function previewProductImages(input) {
             const preview = $('#imagePreview');
@@ -323,33 +325,26 @@
 
             const formData = new FormData(this);
             
-            // Xóa tất cả các file ảnh sản phẩm hiện có trong formData
+            // Xóa và thêm lại ảnh
             formData.delete('productImages');
             formData.delete('certificateImage');
             
-            // Thêm lại tất cả các file ảnh sản phẩm
             productImageFiles.forEach((file, index) => {
                 formData.append('productImages', file, file.name);
             });
 
-            // Thêm ảnh giấy chứng nhận nếu có
             if (certificateImageFile) {
                 formData.append('certificateImage', certificateImageFile, certificateImageFile.name);
             }
 
-            // Thêm ID người sản xuất vào formData
-            if (producerId) {
-                formData.append('producerId', producerId);
-            } else {
+            // Thêm producerId và region_id từ session
+            if (!producerId) {
                 alert('Không thể xác định ID người sản xuất. Vui lòng đăng nhập lại.');
                 return;
             }
+            formData.append('producerId', producerId);
+            formData.append('region_id', userData.region_id);
 
-            console.log('Số lượng ảnh sản phẩm được gửi:', productImageFiles.length);
-            console.log('Ảnh giấy chứng nhận được gửi:', certificateImageFile ? 'Có' : 'Không');
-            console.log('ID người sản xuất:', producerId);
-
-            // Hiển thị modal loading
             $('#loadingModal').modal('show');
 
             $.ajax({
@@ -381,13 +376,10 @@
                 },
                 error: function(xhr, status, error) {
                     console.error('Lỗi:', error);
-                    // Ẩn spinner và hiển thị thông báo lỗi
                     $('#loadingSpinner').hide();
                     $('#resultMessage').show();
                     $('#resultText').text('Lỗi: ' + (xhr.responseJSON ? xhr.responseJSON.error : error));
                     $('#resultText').addClass('text-danger');
-
-                    // Thêm nút đóng cho trường hợp lỗi
                     $('#resultMessage').append('<button type="button" class="btn btn-secondary mt-3" data-dismiss="modal">Đóng</button>');
                 }
             });
