@@ -278,24 +278,31 @@
         // Gọi hàm loadProducts khi trang được tải
         document.addEventListener('DOMContentLoaded', async function() {
             try {
-                const response = await fetch('/api/user-info');
-                console.log('Response status:', response.status);
+                const response = await fetch('/api/user-info', {
+                    credentials: 'include' // Quan trọng: gửi kèm cookie session
+                });
+                
                 if (response.ok) {
                     const data = await response.json();
-                    console.log('User data:', data);
                     document.getElementById('userName').textContent = data.name;
                     document.getElementById('userRole').textContent = `Vai trò: ${data.role}`;
                     document.getElementById('userRegion').textContent = `Khu vực: ${data.region}`;
                     producerId = data.userId;
-                    console.log('Producer ID:', producerId);
+                    
+                    // Emit event thông báo người dùng online
+                    socket.emit('userConnected', {
+                        userId: producerId,
+                        role: data.role
+                    });
+
+                    await loadProducts();
                 } else {
-                    console.error('Không thể lấy thông tin người dùng');
+                    window.location.href = '../account/dangnhap.html';
                 }
             } catch (error) {
                 console.error('Lỗi:', error);
+                window.location.href = '../account/dangnhap.html';
             }
-
-            loadProducts();
         });
 
         function validateDates() {
@@ -311,86 +318,62 @@
 
         $('#startDate, #endDate').on('change', validateDates);
 
-        $('#createBatchForm').submit(function(e) {
+        $('#createBatchForm').submit(async function(e) {
             e.preventDefault();
-            const startDate = new Date($('#startDate').val());
-            const endDate = new Date($('#endDate').val());
             
-            if (startDate >= endDate) {
-                alert('Ngày kết thúc phải sau ngày bắt đầu');
-                return;
-            }
+            try {
+                // Kiểm tra session trước khi submit
+                const sessionCheck = await fetch('/api/check-session', {
+                    credentials: 'include'
+                });
+                
+                if (!sessionCheck.ok) {
+                    alert('Phiên làm việc đã hết hạn, vui lòng đăng nhập lại');
+                    window.location.href = '../account/dangnhap.html';
+                    return;
+                }
 
-            const formData = new FormData(this);
-            
-            // Xóa tất cả các file ảnh sản phẩm hiện có trong formData
-            formData.delete('productImages');
-            formData.delete('certificateImage');
-            
-            // Thêm lại tất cả các file ảnh sản phẩm
-            productImageFiles.forEach((file, index) => {
-                formData.append('productImages', file, file.name);
-            });
-
-            // Thêm ảnh giấy chứng nhận nếu có
-            if (certificateImageFile) {
-                formData.append('certificateImage', certificateImageFile, certificateImageFile.name);
-            }
-
-            // Thêm ID người sản xuất vào formData
-            if (producerId) {
+                const formData = new FormData(this);
                 formData.append('producerId', producerId);
-            } else {
-                alert('Không thể xác định ID người sản xuất. Vui lòng đăng nhập lại.');
-                return;
-            }
 
-            console.log('Số lượng ảnh sản phẩm được gửi:', productImageFiles.length);
-            console.log('Ảnh giấy chứng nhận được gửi:', certificateImageFile ? 'Có' : 'Không');
-            console.log('ID người sản xuất:', producerId);
+                // Hiển thị modal loading
+                $('#loadingModal').modal('show');
 
-            // Hiển thị modal loading
-            $('#loadingModal').modal('show');
+                const response = await fetch('/createbatch', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'
+                });
 
-            $.ajax({
-                url: '/createbatch',
-                type: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function(result) {
-                    // Ẩn spinner
-                    $('#loadingSpinner').hide();
+                if (response.ok) {
+                    const result = await response.json();
                     
+                    // Emit event thông báo có lô hàng mới
+                    socket.emit('newBatchCreated', {
+                        producerId: producerId,
+                        batchId: result.batchId
+                    });
+
                     // Hiển thị thông báo thành công
+                    $('#loadingSpinner').hide();
                     $('#resultMessage').show();
                     $('#resultText').text('Lô hàng đã được tạo thành công và đang chờ phê duyệt');
                     $('#resultText').addClass('text-success');
 
-                    // Bắt đầu đếm ngược
-                    let countdown = 3;
-                    const countdownInterval = setInterval(function() {
-                        $('#countdownText').text(`Trang sẽ chuyển hướng về trang chủ sau ${countdown} giây`);
-                        countdown--;
-                        
-                        if (countdown < 0) {
-                            clearInterval(countdownInterval);
-                            window.location.href = '/san-xuat/sanxuat.html';
-                        }
-                    }, 1000);
-                },
-                error: function(xhr, status, error) {
-                    console.error('Lỗi:', error);
-                    // Ẩn spinner và hiển thị thông báo lỗi
-                    $('#loadingSpinner').hide();
-                    $('#resultMessage').show();
-                    $('#resultText').text('Lỗi: ' + (xhr.responseJSON ? xhr.responseJSON.error : error));
-                    $('#resultText').addClass('text-danger');
-
-                    // Thêm nút đóng cho trường hợp lỗi
-                    $('#resultMessage').append('<button type="button" class="btn btn-secondary mt-3" data-dismiss="modal">Đóng</button>');
+                    // Chuyển hướng sau 3 giây
+                    setTimeout(() => {
+                        window.location.href = 'sanxuat.html';
+                    }, 3000);
+                } else {
+                    throw new Error((await response.json()).error);
                 }
-            });
+            } catch (error) {
+                console.error('Lỗi:', error);
+                $('#loadingSpinner').hide();
+                $('#resultMessage').show();
+                $('#resultText').text('Lỗi: ' + error.message);
+                $('#resultText').addClass('text-danger');
+            }
         });
 
         // Xử lý đăng xuất
@@ -438,5 +421,18 @@
           </div>
         </div>
       </div>
+
+    <!-- Thêm socket listeners -->
+    <script>
+        const socket = io(); // Khởi tạo socket connection
+
+        socket.on('connect', () => {
+            console.log('Connected to server');
+        });
+
+        socket.on('batchStatusUpdated', (data) => {
+            console.log('Batch status updated:', data);
+        });
+    </script>
 </body>
 </html>
