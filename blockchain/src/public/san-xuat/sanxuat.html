@@ -81,8 +81,10 @@
             
             <p></p>
             <div class="dashboard-table">
-                <a href="them-lo-hang.html" class="check-button"><b>Tạo lô hàng</b></a>
-              
+                <a href="them-lo-hang.html" class="check-button">
+                    <i class="fas fa-plus"></i>
+                    <b>Tạo lô hàng</b>
+                </a>
             </div>
             <!-- Thêm spinner loading -->
             <div id="loadingSpinner" class="text-center mt-4">
@@ -94,7 +96,7 @@
             <div class="filter-container">
                 <label for="statusFilter" class="filter-label">Lọc theo trạng thái:</label>
                 <select id="statusFilter" class="custom-select">
-                    <option value="">Tất cả trạng thái</option>
+                    <!-- <option value="">Tất cả trạng thái</option> -->
                     <option value="Chờ phê duyệt">Chờ phê duyệt</option>
                     <option value="Đã phê duyệt">Đã phê duyệt</option>
                     <option value="Đã từ chối">Đã từ chối</option>
@@ -352,7 +354,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (response.ok) {
             const pendingBatches = await response.json();
             
-            // Xử lý và hiển thị dữ liệu
+            // Xử lý và hiển thị dữ li���u
             displayPendingBatches(pendingBatches);
 
             // Ẩn spinner và hiển thị bảng lô hàng
@@ -716,48 +718,64 @@ function showLargeQRCode(sscc, batchId) {
     const largeCanvas = document.createElement('canvas');
     const size = Math.min(300, window.innerWidth * 0.8);
     generateQRCodeWithLogo(largeCanvas, sscc, size, true, function (error) {
-    if (error) {
-        console.error('Error generating large QR code:', error);
-        container.innerHTML = '<p>Không thể tạo mã QR</p>';
-    } else {
-        container.appendChild(largeCanvas);
+        if (error) {
+            console.error('Error generating large QR code:', error);
+            container.innerHTML = '<p>Không thể tạo mã QR</p>';
+        } else {
+            container.appendChild(largeCanvas);
 
-        const buttonContainer = document.createElement('div');
-        buttonContainer.className = 'button-container';
+            const buttonContainer = document.createElement('div');
+            buttonContainer.className = 'button-container';
 
-        const toggleLogoButton = document.createElement('button');
-        toggleLogoButton.textContent = 'Ẩn Logo';
-        toggleLogoButton.className = 'toggle-button';
-        toggleLogoButton.onclick = function(event) {
-            event.stopPropagation();
-            generateQRCodeWithLogo(largeCanvas, qrData, size, !this.showLogo, function() {});
-            this.showLogo = !this.showLogo;
-            this.textContent = this.showLogo ? 'Ẩn Logo' : 'Hiện Logo';
-        };
-        toggleLogoButton.showLogo = true;
+            const toggleLogoButton = document.createElement('button');
+            toggleLogoButton.innerHTML = `
+                <i class="fas fa-image"></i>
+                <span>Ẩn Logo</span>
+            `;
+            toggleLogoButton.className = 'toggle-button';
+            
+            // Thêm event handler cho nút ẩn/hiện logo
+            let logoVisible = true;
+            toggleLogoButton.onclick = function(e) {
+                e.stopPropagation(); // Ngăn event bubble lên modal
+                logoVisible = !logoVisible;
+                generateQRCodeWithLogo(largeCanvas, sscc, size, logoVisible, function(error) {
+                    if (!error) {
+                        toggleLogoButton.querySelector('span').textContent = logoVisible ? 'Ẩn Logo' : 'Hiện Logo';
+                    }
+                });
+            };
 
-        const downloadButton = document.createElement('button');
-        downloadButton.textContent = 'Tải xuống QR Code';
-        downloadButton.className = 'download-button';
-        downloadButton.onclick = function(event) {
-            event.stopPropagation();
-            const link = document.createElement('a');
-            link.download = `qr-code-batch-${batchId}.png`;
-            link.href = largeCanvas.toDataURL();
-            link.click();
-        };
+            const downloadButton = document.createElement('button');
+            downloadButton.innerHTML = `
+                <i class="fas fa-download"></i>
+                <span>Tải xuống QR Code</span>
+            `;
+            downloadButton.className = 'download-button';
+            
+            // Thêm event handler cho nút tải xuống
+            downloadButton.onclick = function(e) {
+                e.stopPropagation(); // Ngăn event bubble lên modal
+                const link = document.createElement('a');
+                link.download = `QR_Code_${batchId}.png`;
+                link.href = largeCanvas.toDataURL('image/png');
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            };
 
-        buttonContainer.appendChild(toggleLogoButton);
-        buttonContainer.appendChild(downloadButton);
-        container.appendChild(buttonContainer);
-    }
-});
+            buttonContainer.appendChild(toggleLogoButton);
+            buttonContainer.appendChild(downloadButton);
+            container.appendChild(buttonContainer);
+        }
+    });
+
+    // Ngăn click trên container đóng modal
+    container.onclick = function(e) {
+        e.stopPropagation();
+    };
 
     modal.appendChild(container);
-
-    modal.onclick = function() {
-        document.body.removeChild(modal);
-    };
 
     document.body.appendChild(modal);
 }

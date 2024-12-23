@@ -682,11 +682,11 @@
         
         toastContainer.appendChild(toast);
         
-        // Tự động xóa toast sau 3 giây
+        // Tăng thời gian hiển thị lên 10 giây
         setTimeout(() => {
-          toast.style.animation = 'fade-out 0.3s ease-out forwards';
-          setTimeout(() => toast.remove(), 300);
-        }, 3000);
+          toast.style.animation = 'fade-out 1s ease-out forwards';
+          setTimeout(() => toast.remove(), 1000); // Tăng thời gian fade-out lên 1 giây
+        }, 10000); // Tăng thời gian hiển thị từ 3000 lên 10000 (10 giây)
       }
     </script>
   </body>
