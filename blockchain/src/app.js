@@ -378,7 +378,7 @@ app.put("/api/capnhatthongtin", upload.single("avatar"), async (req, res) => {
     connection = await db.getConnection();
     await connection.beginTransaction();
 
-    const { name, phone, address, dob, gender } = req.body;
+    const { name, phone, address, dob, gender, region_id } = req.body;
     const userId = req.session.userId;
 
     console.log("Received data:", {
@@ -387,6 +387,7 @@ app.put("/api/capnhatthongtin", upload.single("avatar"), async (req, res) => {
       address,
       dob,
       gender,
+      region_id,
       userId,
     });
 
@@ -398,7 +399,7 @@ app.put("/api/capnhatthongtin", upload.single("avatar"), async (req, res) => {
     let updateValues = [];
 
     // Xử lý các trường thông tin khác
-    const fields = { name, phone, address, dob, gender };
+    const fields = { name, phone, address, dob, gender, region_id };
     for (const [key, value] of Object.entries(fields)) {
       if (value) {
         updateFields.push(`${key} = ?`);
@@ -478,6 +479,17 @@ app.put("/api/capnhatthongtin", upload.single("avatar"), async (req, res) => {
         req.session.avatar = tempAvatarUrl;
       }
 
+      // Nếu có cập nhật region_id, lấy thêm tên region
+      if (region_id) {
+        const [regionResult] = await connection.query(
+          "SELECT region_name FROM regions WHERE region_id = ?",
+          [region_id]
+        );
+        if (regionResult[0]) {
+          req.session.region = regionResult[0].region_name;
+        }
+      }
+
       // Đảm bảo session được lưu
       await new Promise((resolve, reject) => {
         req.session.save((err) => {
@@ -537,10 +549,13 @@ const { sendNotification } = require("./notification.js");
 app.post("/api/notifications/:id/read", async (req, res) => {
   try {
     const notificationId = req.params.id;
+    const userId = req.session.userId;
+
     console.log("Đang xóa thông báo với ID:", notificationId);
-    const [result] = await db.query("DELETE FROM notification WHERE id = ?", [
-      notificationId,
-    ]);
+    const [result] = await db.query(
+      "DELETE FROM notification WHERE id = ? AND user_id = ?",
+      [notificationId, userId]
+    );
     console.log("Kết quả xóa:", result);
     if (result.affectedRows > 0) {
       res.status(200).json({ message: "Thông báo đã được xóa" });
@@ -550,6 +565,27 @@ app.post("/api/notifications/:id/read", async (req, res) => {
   } catch (error) {
     console.error("Lỗi khi xóa thông báo:", error);
     res.status(500).json({ error: "Lỗi server khi xóa thông báo" });
+  }
+});
+
+app.post("/api/notifications/mark-all-read", async (req, res) => {
+  try {
+    let query;
+    let params;
+
+    if (req.session.adminId) {
+      query = 'DELETE FROM notification WHERE recipient_type = "admin" AND admin_id = ?';
+      params = [req.session.adminId];
+    } else {
+      query = 'DELETE FROM notification WHERE recipient_type = "user" AND user_id = ?';
+      params = [req.session.userId];
+    }
+
+    await db.query(query, params);
+    res.status(200).json({ message: "Tất cả thông báo đã được xóa" });
+  } catch (error) {
+    console.error("Lỗi khi xóa tất cả thông báo:", error);
+    res.status(500).json({ error: "Lỗi server khi xóa tất cả thông báo" });
   }
 });
 
@@ -655,18 +691,7 @@ app.post("/api/dangxuat", (req, res) => {
 });
 //console.log('Các route đã đăng ký:', app._router.stack.filter(r => r.route).map(r => r.route.path));
 
-app.post("/api/notifications/mark-all-read", async (req, res) => {
-  try {
-    await db.query(
-      'DELETE FROM notification WHERE recipient_type = "admin" AND admin_id = ?',
-      [req.session.adminId]
-    );
-    res.status(200).json({ message: "Tất cả thông báo đã được xóa" });
-  } catch (error) {
-    console.error("Lỗi khi xóa tất cả thông báo:", error);
-    res.status(500).json({ error: "Lỗi server khi xóa tất cả thông báo" });
-  }
-});
+
 
 // Thiết lập Socket.io cho Chatbox
 let users = [];

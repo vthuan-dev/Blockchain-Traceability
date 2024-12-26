@@ -7,6 +7,8 @@ const db = mysql.createPool({
   database: process.env.DB_DATABASE,
   connectTimeout: 10000
 });
+const path = require('node:path');
+const { sendEmail } = require("./components/user/sendmail");
 
 async function registerNotification(connection, actorId, message, type) {
   try {
@@ -71,7 +73,79 @@ async function notifyNewBatch(connection, batchName, actorId, regionId) {
     );
      // Lấy danh sách người kiểm định
     const [inspectors] = await connection.query(
-      'SELECT id FROM users WHERE role_id = 2 AND region_id = ?', [regionId]
+      `SELECT u.uid, u.email, u.name, u.region_id 
+       FROM users u 
+       WHERE u.role_id = 2 AND u.region_id = ?`, 
+      [regionId]
+    );
+
+    // Log để debug
+    console.log('Danh sách người kiểm định:', inspectors);
+
+    if (!inspectors || inspectors.length === 0) {
+      console.log('Không tìm thấy người kiểm định cho khu vực:', regionId);
+      return;
+    }
+
+    for (const inspector of inspectors) {
+      // Kiểm tra email tồn tại trước khi gửi
+      if (inspector.email) {
+        try {
+          console.log('Chuẩn bị gửi email cho:', {
+            email: inspector.email,
+            name: inspector.name,
+            uid: inspector.uid
+          });
+
+          await sendEmail(
+            inspector.email,
+            inspector.name || 'Người kiểm định',
+            null,
+            'Thông báo: Có lô hàng mới cần kiểm duyệt',
+            path.join(__dirname, './public/kiem-duyet/thongbaoNKD.html')
+          );
+          
+          console.log('Đã gửi email thành công cho:', inspector.email);
+        } catch (emailError) {
+          console.error('Lỗi khi gửi email:', emailError);
+          console.error('Chi tiết người nhận:', inspector);
+        }
+      } else {
+        console.log('Không tìm thấy email cho người kiểm định:', inspector.uid);
+      }
+    }
+
+    //  await connection.commit();
+    return batchId;
+  } catch (error) {
+    console.error("Lỗi khi lưu thông báo lô hàng mới:", error);
+    throw error;
+  }
+} 
+
+async function notifyApproveBatch(connection, batchName, actorId, approveId) {
+  try {
+    // Lưu thông tin lô hàng mới vào bảng batch
+    const [batchResult] = await connection.query(
+      'INSERT INTO batch (batch_name, actor_id, created_on) VALUES (?, ?, NOW())',
+      [batchName, actorId]
+    );
+    const batchId = batchResult.insertId;
+    
+    // Lưu vào bảng notification_object
+    const [notificationObjectResult] = await connection.query(
+      'INSERT INTO notification_object (entity_type_id, entity_id, created_on) VALUES (?, ?, NOW())',
+      [2, batchId]
+    );
+    const notificationObjectId = notificationObjectResult.insertId;
+     // Lưu vào bảng notification_change
+    await connection.query(
+      'INSERT INTO notification_change (notification_object_id, actor_id) VALUES (?, ?)',
+      [notificationObjectId, actorId]
+    );
+     // Lấy danh sách người kiểm định
+    const [inspectors] = await connection.query(
+      'SELECT uid FROM users WHERE role_id = 2 AND region_id = ?', [regionId]
     );
      // Lưu thông báo cho từng người kiểm định
     for (const inspector of inspectors) {
@@ -81,14 +155,27 @@ async function notifyNewBatch(connection, batchName, actorId, regionId) {
          ON DUPLICATE KEY UPDATE notification_object_id = VALUES(notification_object_id)`,
         [notificationObjectId, inspector.id, 'user']
       );
+
+       // Thêm phần gửi email
+       try {
+        await sendEmail(
+          inspector.email,
+          inspector.name,
+          null,
+          'Thông báo: Có lô hàng mới cần kiểm duyệt',
+          path.join(__dirname, 'public/kiem-duyet/thongbaoNKD.html')
+        );
+      } catch (emailError) {
+        console.error('Lỗi khi gửi email cho người kiểm định:', emailError);
+        // Không throw error ở đây để không ảnh hưởng đến transaction chính
+      }
     }
-     await connection.commit();
     return batchId;
   } catch (error) {
     console.error("Lỗi khi lưu thông báo lô hàng mới:", error);
     throw error;
   }
-} 
+}
 
 module.exports = {
   registerNotification,

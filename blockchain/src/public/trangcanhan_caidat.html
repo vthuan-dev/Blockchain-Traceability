@@ -641,48 +641,113 @@
     });
   }
 
-  function updateDisplayInfo(formData) {
-    document.getElementById('userName').textContent = formData.get('name') || document.getElementById('userName').textContent;
-    document.getElementById('userRegion').textContent = `Khu vực: ${userInfo.region_name}`;
-    
-    // Cập nhật các thông tin khác nếu cần
+  async function updateDisplayInfo(userInfo) {
+    try {
+      if (!userInfo) {
+        userInfo = JSON.parse(localStorage.getItem('userInfo'));
+      }
+
+      if (!userInfo) {
+        console.error('Không tìm thấy thông tin người dùng');
+        return;
+      }
+
+      // Kiểm tra từng element trước khi cập nhật
+      const userNameElement = document.getElementById('userName');
+      const userRoleElement = document.getElementById('userRole');
+      const userRegionElement = document.getElementById('userRegion');
+      const userNameInputElement = document.getElementById('userNameInput');
+      const phoneInputElement = document.getElementById('phoneInput');
+      const emailInputElement = document.getElementById('emailInput');
+      const addressInputElement = document.getElementById('addressInput');
+      const regionInputElement = document.getElementById('regionInput');
+
+      // Cập nhật các element nếu tồn tại
+      if (userNameElement) userNameElement.textContent = userInfo.name || 'Chưa cập nhật';
+      if (userRoleElement) userRoleElement.textContent = `Vai trò: ${getRoleName(userInfo.roleId)}`;
+      if (userRegionElement) userRegionElement.textContent = `Khu vực: ${userInfo.region || 'Chưa cập nhật'}`;
+      
+      // Cập nhật các input field
+      if (userNameInputElement) userNameInputElement.value = userInfo.name || '';
+      if (phoneInputElement) phoneInputElement.value = userInfo.phone || '';
+      if (emailInputElement) emailInputElement.value = userInfo.email || '';
+      if (addressInputElement) addressInputElement.value = userInfo.address || '';
+      if (regionInputElement) regionInputElement.value = userInfo.region_id || '';
+
+      // Debug log
+      console.log('Đã cập nhật display với dữ liệu:', userInfo);
+
+    } catch (error) {
+      console.error('Lỗi khi cập nhật thông tin hiển thị:', error);
+    }
   }
 
-  // Thêm hàm mới để gửi dữ liệu đến server
-  async function saveProfileData(formData) {
+  async function saveProfileData() {
     try {
-      const avatarInput = document.getElementById('imageUpload');
-      if (avatarInput.files.length > 0) {
-        formData.append('avatar', avatarInput.files[0]);
-      }
+      const nameInput = document.getElementById('userNameInput');
+      const emailInput = document.getElementById('emailInput');
+      const phoneInput = document.getElementById('phoneInput');
+      const regionInput = document.getElementById('regionInput');
+
+      // Debug log
+      console.log('Input elements:', {
+        nameInput,
+        emailInput,
+        phoneInput,
+        regionInput
+      });
+
+      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+      
+      const newData = {
+        name: nameInput.value || userInfo.name,
+        email: emailInput.value || userInfo.email,
+        phone: phoneInput.value || userInfo.phone,
+        region_id: regionInput.value || userInfo.region_id
+      };
+
+      console.log('Dữ liệu gửi đi:', newData);
 
       const response = await fetch('/api/capnhatthongtin', {
         method: 'PUT',
-        body: formData
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newData)
       });
+
+      console.log('Response status:', response.status);
 
       if (response.ok) {
         const result = await response.json();
-        if (result.updated) {
-          showNotification(result.message, 'success'); // Hiển thị thông báo thành công
-          updateDefaultValues();
-          updateDisplayInfo(formData);
-          
-          if (result.avatarUrl) {
-            document.getElementById('avatarImage').src = result.avatarUrl;
-          }
-        } else {
-          showNotification(result.message, 'info');
-        }
+        console.log('Response data:', result);
+        
+        // Cập nhật localStorage
+        localStorage.setItem('userInfo', JSON.stringify({
+          ...userInfo,
+          ...newData
+        }));
+        
+        // Cập nhật display
+        updateDisplayInfo({
+          ...userInfo,
+          ...newData
+        });
+
+        showNotification('Cập nhật thông tin thành công!', 'success');
       } else {
-        const error = await response.json();
-        throw new Error(error.error || 'Có lỗi xảy ra khi cập nhật thông tin.');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Lỗi khi cập nhật thông tin');
       }
     } catch (error) {
-      console.error('Lỗi:', error);
-      showNotification(error.message, 'error');
+      console.error('Chi tiết lỗi:', error);
+      showNotification(error.message || 'Có lỗi xảy ra khi cập nhật thông tin', 'error');
     }
   }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    updateDisplayInfo();
+  });
 });
 
     document.getElementById('imageUpload').addEventListener('change', function(e) {

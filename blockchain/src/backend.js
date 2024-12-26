@@ -436,9 +436,11 @@ function setupRoutes(app, db) {
           farmPlotNumber,
           productId,
           producerId,
+          region_id,
           startDate,
           endDate,
         } = req.body;
+      
 
         if (
           !name ||
@@ -572,7 +574,7 @@ function setupRoutes(app, db) {
         }
 
          // Gọi hàm thông báo với connection từ transaction
-        await notifyNewBatch(connection, name, cleanProducerId, req.body.region_id);
+        await notifyNewBatch(connection, name, cleanProducerId, region_id);
         // Commit transaction
         await connection.commit();
 
@@ -587,6 +589,33 @@ function setupRoutes(app, db) {
       }
     }
   );
+
+  // API lấy thông báo cho nhà kiểm duyệt
+  app.get("/api/inspector-notifications", async (req, res) => {
+    try {
+      const userId = req.session.userId;
+      const [notifications] = await db.query(
+        `SELECT 
+          n.id AS notification_id,
+          b.batch_name,
+          b.created_on,
+          u.name AS producer_name,
+          'new_batch' AS notification_type
+        FROM notification n
+        JOIN notification_object no ON n.notification_object_id = no.id 
+        JOIN batch b ON no.entity_id = b.id
+        JOIN users u ON b.actor_id = u.uid
+        WHERE n.user_id = ? AND n.recipient_type = 'user'
+        ORDER BY b.created_on DESC`,
+        [userId]
+      );
+
+      res.json(notifications);
+    } catch (error) {
+      console.error("Lỗi khi lấy thông báo:", error);
+      res.status(500).json({ error: "Lỗi server khi lấy thông báo" });
+    }
+  });
 
   app.get("/create-activity", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "san-xuat", "them-nkhd.html"));

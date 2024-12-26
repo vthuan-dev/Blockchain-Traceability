@@ -401,7 +401,8 @@ module.exports = (db) => {
       const userId = result.insertId;
 
       // Sau khi insert user thành công
-      const verificationLink = `${process.env.BASE_URL}/api/verify/${verificationToken}`;
+      const verifyUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : 'https://truyxuatnguongbuoi.com';
+      const verificationLink = `${verifyUrl}/api/verify/${verificationToken}`;
       await sendEmail(
         email,
         name,

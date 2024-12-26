@@ -289,6 +289,7 @@
                     document.getElementById('userRole').textContent = `Vai trò: ${data.role}`;
                     document.getElementById('userRegion').textContent = `Khu vực: ${data.region}`;
                     producerId = data.userId;
+                    region_id = data.region_id;
                     
                     // Emit event thông báo người dùng online
                     socket.emit('userConnected', {
@@ -336,6 +337,7 @@
 
                 const formData = new FormData(this);
                 formData.append('producerId', producerId);
+                formData.append('region_id', region_id);
 
                 // Hiển thị modal loading
                 $('#loadingModal').modal('show');
