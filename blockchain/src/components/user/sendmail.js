@@ -2,17 +2,17 @@ const fs = require('node:fs');
 const path = require('node:path');
 const nodemailer = require('nodemailer');
 
-async function sendEmail(userEmail, userName, link, subject, templatePath) {
+async function sendEmail(userEmail, userName, data, subject, templatePath) {
     console.log('Bắt đầu gửi email cho:', userEmail);
 
     // Tạo transporter với cấu hình bảo mật hơn
     const transporter = nodemailer.createTransport({
         host: 'smtp.gmail.com',
         port: 587,
-        secure: false, // true for 465, false for other ports
+        secure: false,
         auth: {
             user: 'truyxuat.blockchain@gmail.com',
-            pass: 'ylml gpnp lgmz wpwz' // Nên dùng biến môi trường
+            pass: 'ylml gpnp lgmz wpwz'
         },
         tls: {
             rejectUnauthorized: false
@@ -23,10 +23,20 @@ async function sendEmail(userEmail, userName, link, subject, templatePath) {
         // Đọc template
         const emailTemplate = fs.readFileSync(templatePath, 'utf8');
         
-        // Thay thế placeholder
-        const emailContent = emailTemplate
-            .replace(/\{\{user_name\}\}/g, userName || '') // Thêm regex global flag
-            .replace(/\{\{link\}\}/g, link || '');        // Thêm regex global flag
+        // Khởi tạo nội dung email với userName
+        let emailContent = emailTemplate.replace(/\{\{user_name\}\}/g, userName || '');
+        
+        // Nếu data là object, thay thế tất cả các placeholder tương ứng
+        if (data && typeof data === 'object') {
+            for (const key of Object.keys(data)) {
+                const regex = new RegExp(`\\{\\{${key}\\}\\}`, 'g');
+                emailContent = emailContent.replace(regex, data[key] || '');
+            }
+        } 
+        // Nếu data là string (trường hợp link), xử lý như cũ
+        else if (typeof data === 'string') {
+            emailContent = emailContent.replace(/\{\{link\}\}/g, data || '');
+        }
 
         // Cấu hình email
         const mailOptions = {

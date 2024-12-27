@@ -33,7 +33,7 @@
 
         .header h1 {
             font-size: 24px;
-            color: #d9534f;
+            color: #28a745;
         }
 
         .content {
@@ -48,7 +48,16 @@
 
         .content p span {
             font-weight: bold;
-            color: #d9534f;
+            color: #28a745;
+        }
+
+        .status-badge {
+            background-color: #28a745;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            display: inline-block;
+            margin: 10px 0;
         }
 
         .footer {
@@ -68,8 +77,11 @@
         </div>
         <div class="content">
             <p>Xin chào <span>{{user_name}}</span>,</p>
-            <p>Chúng tôi xin thông báo có một lô hàng mới vừa được tạo ra và đang chờ kiểm duyệt.</p>
-            <p>Vui lòng đăng nhập vào hệ thống để kiểm tra và xác nhận thông tin lô hàng.</p>
+            <p>Chúng tôi vui mừng thông báo lô hàng <span>{{batchName}}</span> của bạn đã được phê duyệt.</p>
+            <!-- <div class="status-badge">
+                <i class="fas fa-check-circle"></i> Đã phê duyệt
+            </div> -->
+            <p>Bạn có thể tiếp tục quy trình sản xuất và cập nhật thông tin cho lô hàng này.</p>
             <p>Xin cảm ơn!</p>
         </div>
         <div class="footer">

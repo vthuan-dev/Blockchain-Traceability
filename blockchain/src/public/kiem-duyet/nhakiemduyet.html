@@ -204,6 +204,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="../js_giaodien/sanpham.js"></script>
+    <script src="..//thongbao.js"></script>
     <script src="../chatbox/chatbox.js"></script>
     <!-- <script>
       const socket = io();
@@ -332,11 +333,20 @@
                           </div>
                       `;
 
+                      // Khôi phục nút về trạng thái ban đầu
+                      markAllReadBtn.innerHTML = `
+                          <i class="fas fa-check-double mr-1"></i>
+                          Đánh dấu tất cả đã đọc
+                      `;
+                      markAllReadBtn.disabled = true; // Disable nút vì không còn thông báo
+
                   } catch (error) {
                       console.error('Lỗi khi đánh dấu tất cả đã đọc:', error);
-                      
-                      // Khôi phục nút về trạng thái ban đầu
-                      markAllReadBtn.innerHTML = originalContent;
+                      // Khôi phục nút về trạng thái ban đầu khi có lỗi
+                      markAllReadBtn.innerHTML = `
+                        <i class="fas fa-check-double mr-1"></i>
+                        Đánh dấu tất cả đã đọc
+                      `;
                       markAllReadBtn.disabled = false;
                   }
               });
@@ -357,10 +367,10 @@
                       const newCount = parseInt(notificationCount.textContent) - 1;
                       notificationCount.textContent = newCount;
                       
-                      // Tùy chọn: Xóa notification sau một khoảng thời gian
-                      setTimeout(() => {
-                          notificationItem.remove();
-                      }, 500);
+                      // // Tùy chọn: Xóa notification sau một khoảng thời gian
+                      // setTimeout(() => {
+                      //     notificationItem.remove();
+                      // }, 500);
                       
                   } catch (error) {
                       console.error('Lỗi khi đánh dấu đã đọc:', error);
@@ -483,22 +493,30 @@
       }
 
       // Cập nhật hàm approveBatch
-      async function approveBatch(batchId) {
+      async function approveBatch(blockchainBatchId) {
         const approveBtn = document.getElementById('approveBtn');
         const spinner = approveBtn.querySelector('.button-spinner');
         const text = approveBtn.querySelector('.button-text');
         
         try {
-          // Disable button và hiện spinner
           approveBtn.disabled = true;
           spinner.classList.remove('d-none');
           text.textContent = 'Đang xử lý...';
+
+          // Lấy local batch ID trước
+          const localBatchResponse = await fetch(`/api/local-batch-id/${blockchainBatchId}`);
+          if (!localBatchResponse.ok) {
+            throw new Error("Không thể lấy local batch ID");
+          }
+          const localBatchData = await localBatchResponse.json();
           
-          const response = await fetch(`/approve-batch/${batchId}`, {
+          // Gọi API approve với cả blockchain ID và local ID
+          const response = await fetch(`/approve-batch/${blockchainBatchId}`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
+            body: JSON.stringify({ localBatchId: localBatchData.localBatchId })
           });
 
           if (response.ok) {
@@ -512,7 +530,6 @@
           showToast('Đã xảy ra lỗi!', 'error');
           console.error('Error:', error);
         } finally {
-          // Restore button state
           approveBtn.disabled = false;
           spinner.classList.add('d-none');
           text.textContent = 'Phê duyệt';
@@ -520,7 +537,7 @@
       }
 
       // Cập nhật hàm rejectBatch
-      async function rejectBatch(batchId) {
+      async function rejectBatch(blockchainBatchId) {
         const rejectBtn = document.getElementById('rejectBtn');
         const spinner = rejectBtn.querySelector('.button-spinner');
         const text = rejectBtn.querySelector('.button-text');
@@ -529,12 +546,21 @@
           rejectBtn.disabled = true;
           spinner.classList.remove('d-none');
           text.textContent = 'Đang xử lý...';
+
+          // Lấy local batch ID trước
+          const localBatchResponse = await fetch(`/api/local-batch-id/${blockchainBatchId}`);
+          if (!localBatchResponse.ok) {
+            throw new Error("Không thể lấy local batch ID");
+          }
+          const localBatchData = await localBatchResponse.json();
           
-          const response = await fetch(`/reject-batch/${batchId}`, {
+          // Gọi API reject với cả blockchain ID và local ID
+          const response = await fetch(`/reject-batch/${blockchainBatchId}`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
+            body: JSON.stringify({ localBatchId: localBatchData.localBatchId })
           });
 
           if (response.ok) {

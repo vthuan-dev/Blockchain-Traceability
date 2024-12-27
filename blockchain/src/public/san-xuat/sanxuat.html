@@ -7,6 +7,7 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../css/san-xuat.css">
     <link rel="stylesheet" href="../css/nav-bar.css">
+    <link rel="stylesheet" href="../css/thongbao.css">
     <link rel="stylesheet" href="../css/chatbox.css">
     <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -33,8 +34,23 @@
                     <li class="nav-item">
                         <a class="nav-link" href="nhatky-hoatdong.html">Quản lí hoạt động</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Thông báo</a>
+                    <li class="nav-item dropdown" style="position: relative;">
+                        <a class="nav-link dropdown-toggle" href="#" id="notificationDropdown" role="button" data-toggle="dropdown">
+                            <i class="fas fa-bell"></i>
+                            <span class="badge badge-danger" id="notification-count">0</span>
+                        </a>
+                        <div class="dropdown-menu notification-menu" aria-labelledby="notificationDropdown">
+                            <div class="notification-header">
+                                <h6 class="dropdown-header">Thông báo</h6>
+                                <button class="btn btn-sm" id="markAllRead">
+                                  <i class="fas fa-check-double mr-1"></i>
+                                  Đánh dấu tất cả đã đọc
+                              </button>
+                            </div>
+                            <div class="notification-list" id="notificationList">
+                                 <!-- Notifications will be inserted here   -->
+                            </div>
+                        </div>
                     </li>
                 </ul>
                 <ul class="navbar-nav">
@@ -174,6 +190,161 @@
             }
         }
     </script>
+
+    <script>
+        // Thêm hàm load và hiển thị thông báo
+        async function loadNotifications() {
+            try {
+                const response = await fetch('/api/producer-notifications');
+                if (response.ok) {
+                    const notifications = await response.json();
+                    updateNotificationUI(notifications);
+                }
+            } catch (error) {
+                console.error('Lỗi khi tải thông báo:', error);
+            }
+        }
+
+        function updateNotificationUI(notifications) {
+            const notificationList = document.getElementById('notificationList');
+            const notificationCount = document.getElementById('notification-count');
+            const markAllReadBtn = document.getElementById('markAllRead');
+            
+            // Cập nhật số lượng thông báo
+            notificationCount.textContent = notifications.length;
+            markAllReadBtn.disabled = notifications.length === 0;
+
+            // Nếu không có thông báo, hiển thị message
+            if (notifications.length === 0) {
+                notificationList.innerHTML = `
+                    <div class="text-center text-muted p-3">
+                        <i class="fas fa-bell-slash mb-2" style="font-size: 24px;"></i>
+                        <p class="mb-0">Không có thông báo mới</p>
+                    </div>
+                `;
+                return;
+            }
+
+            notificationList.innerHTML = '';
+            notifications.forEach(notification => {
+                const notificationItem = document.createElement('div');
+                notificationItem.className = 'notification-item';
+                
+                // Xác định trạng thái và icon tương ứng
+                let statusIcon, statusText, statusClass;
+                if (notification.status === 1) {
+                    statusIcon = 'fa-check-circle';
+                    statusClass = 'text-success';
+                    statusText = 'đã phê duyệt';
+                } else if (notification.status === 2) {
+                    statusIcon = 'fa-times-circle';
+                    statusClass = 'text-danger';
+                    statusText = 'đã từ chối';
+                }
+                
+                notificationItem.innerHTML = `
+                    <div class="notification-content d-flex align-items-center p-3">
+                        <div>
+                            <div class="font-weight-bold mb-1">${notification.inspector_name}</div>
+                            <div class="notification-text mb-1">
+                                <i class="fas ${statusIcon} ${statusClass}"></i>
+                                ${statusText} lô hàng: ${notification.batch_name}
+                            </div>
+                            <div class="notification-time text-muted">
+                                ${new Date(notification.approved_on).toLocaleString()}
+                            </div>
+                        </div>
+                        <div class="isread-button" data-notification-id="${notification.notification_id}">
+                            <i class="fas fa-check"></i>
+                        </div>
+                    </div>
+                `;
+
+                // Thêm sự kiện click cho nút đánh dấu đã đọc
+                const isreadButton = notificationItem.querySelector('.isread-button');
+                isreadButton.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    try {
+                        const notificationId = isreadButton.dataset.notificationId;
+                        await markNotificationAsRead(notificationId);
+                        
+                        isreadButton.classList.add('marked');
+                        
+                        // Cập nhật số lượng thông báo
+                        const newCount = parseInt(notificationCount.textContent) - 1;
+                        notificationCount.textContent = newCount;
+                        
+                        // // Xóa notification sau một khoảng thời gian
+                        // setTimeout(() => {
+                        //     notificationItem.remove();
+                        //     if (newCount === 0) {
+                        //         updateNotificationUI([]);
+                        //     }
+                        // }, 500);
+                        
+                    } catch (error) {
+                        console.error('Lỗi khi đánh dấu đã đọc:', error);
+                        showToast('Có lỗi xảy ra khi đánh dấu đã đọc', 'error');
+                    }
+                });
+
+                notificationList.appendChild(notificationItem);
+            });
+
+            // Thêm xử lý sự kiện cho nút "Đánh dấu tất cả đã đọc"
+            markAllReadBtn.addEventListener('click', async () => {
+                try {
+                    const originalContent = markAllReadBtn.innerHTML;
+                    markAllReadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                    markAllReadBtn.disabled = true;
+
+                    const response = await fetch('/api/notifications/mark-all-read', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        credentials: 'include'
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+
+                    // Cập nhật UI
+                    notificationCount.textContent = '0';
+                    notificationList.innerHTML = `
+                        <div class="text-center text-muted p-3">
+                            <i class="fas fa-bell-slash mb-2" style="font-size: 24px;"></i>
+                            <p class="mb-0">Không có thông báo mới</p>
+                        </div>
+                    `;
+
+                    // Khôi phục nút về trạng thái ban đầu
+                    markAllReadBtn.innerHTML = `
+                        <i class="fas fa-check-double mr-1"></i>
+                        Đánh dấu tất cả đã đọc
+                    `;
+                    markAllReadBtn.disabled = true; // Disable nút vì không còn thông báo
+
+                } catch (error) {
+                    console.error('Lỗi khi đánh dấu tất cả đã đọc:', error);
+                    // Khôi phục nút về trạng thái ban đầu khi có lỗi
+                    markAllReadBtn.innerHTML = `
+                        <i class="fas fa-check-double mr-1"></i>
+                        Đánh dấu tất cả đã đọc
+                    `;
+                    markAllReadBtn.disabled = false;
+                }
+            });
+        }
+
+        // Khởi tạo thông báo khi trang load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadNotifications();
+            // Refresh thông báo mỗi 5 phút
+            setInterval(loadNotifications, 300000);
+        });
+    </script>
     
    
    <script>
@@ -269,26 +440,33 @@
             e.stopPropagation();
         });
     
-        // Xử lý cho dropdown trong menu
-        var dropdowns = document.querySelectorAll('.navbar-nav .dropdown');
-        dropdowns.forEach(function(dropdown) {
-            dropdown.addEventListener('click', function(e) {
-                e.stopPropagation();
-                this.classList.toggle('show');
-            });
-        });
-    
-        var userDropdown = document.querySelector('.navbar-nav .dropdown');
-        var userDropdownMenu = userDropdown.querySelector('.dropdown-menu');
-    
-        userDropdown.addEventListener('click', function(e) {
+        // Xử lý riêng cho dropdown thông báo
+        const notificationDropdown = document.getElementById("notificationDropdown");
+        const notificationMenu = notificationDropdown.nextElementSibling;
+        
+        notificationDropdown.addEventListener("click", function (e) {
+            e.preventDefault();
             e.stopPropagation();
-            userDropdownMenu.classList.toggle('show');
+            notificationMenu.classList.toggle("show");
         });
-    
-        document.addEventListener('click', function(e) {
+
+        // Xử lý riêng cho user dropdown
+        const userDropdown = document.getElementById("navbarDropdown");
+        const userMenu = userDropdown.nextElementSibling;
+        
+        userDropdown.addEventListener("click", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            userMenu.classList.toggle("show");
+        });
+
+        // Đóng tất cả dropdown khi click ra ngoài
+        document.addEventListener("click", function (e) {
+            if (!notificationDropdown.contains(e.target)) {
+                notificationMenu.classList.remove("show");
+            }
             if (!userDropdown.contains(e.target)) {
-                userDropdownMenu.classList.remove('show');
+                userMenu.classList.remove("show");
             }
         });
     });

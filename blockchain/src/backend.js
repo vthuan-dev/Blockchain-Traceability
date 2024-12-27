@@ -37,7 +37,7 @@ app.use((req, res, next) => {
 });
 
 require("dotenv").config({ path: path.resolve(__dirname, "../../.env") });
-const { notifyNewBatch } = require('.//notification');
+const { notifyNewBatch, notifyApproveBatch } = require('.//notification');
 
 const storage = multer.memoryStorage();
 
@@ -495,7 +495,7 @@ function setupRoutes(app, db) {
           req.files["productImages"].length > 0
         ) {
           console.log(
-            `Số lượng ảnh sản phẩm nhận được: ${req.files["productImages"].length}`
+            `Số lư��ng ảnh sản phẩm nhận được: ${req.files["productImages"].length}`
           );
 
           for (const file of req.files["productImages"]) {
@@ -600,7 +600,7 @@ function setupRoutes(app, db) {
           b.batch_name,
           b.created_on,
           u.name AS producer_name,
-          'new_batch' AS notification_type
+          'batch_upload' AS notification_type
         FROM notification n
         JOIN notification_object no ON n.notification_object_id = no.id 
         JOIN batch b ON no.entity_id = b.id
@@ -616,6 +616,34 @@ function setupRoutes(app, db) {
       res.status(500).json({ error: "Lỗi server khi lấy thông báo" });
     }
   });
+
+  // API để lấy thông báo cho nhà sản xuất
+  app.get("/api/producer-notifications", async (req, res) => {
+    try {
+      const userId = req.session.userId;
+      const [notifications] = await db.query(
+        `SELECT 
+          n.id AS notification_id,
+          n.status as status,
+          b.batch_name,
+          b.approved_on,
+          u.name AS inspector_name,
+          'batch_approval' AS notification_type
+        FROM notification n
+        JOIN notification_object no ON n.notification_object_id = no.id 
+        JOIN batch b ON no.entity_id = b.id
+        JOIN users u ON b.approved_by = u.uid
+        WHERE n.user_id = ? AND n.recipient_type = 'user'
+        ORDER BY b.approved_on DESC`,
+        [userId]
+      );
+
+      res.json(notifications);
+    } catch (error) {
+      console.error("Lỗi khi lấy thông báo:", error);
+      res.status(500).json({ error: "Lỗi server khi lấy thông báo" });
+    }
+  }); 
 
   app.get("/create-activity", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "san-xuat", "them-nkhd.html"));
@@ -980,105 +1008,189 @@ function setupRoutes(app, db) {
     });
   }
 
+  app.get("/api/local-batch-id/:blockchainBatchId", async (req, res) => {
+    let connection;
+    try {
+      const blockchainBatchId = req.params.blockchainBatchId;
+      
+      // Lấy thông tin batch từ blockchain
+      const batchDetails = await traceabilityContract.methods
+        .getBatchDetails(blockchainBatchId)
+        .call();
+  
+      connection = await db.getConnection();
+      
+      // Chuyển đổi timestamp blockchain sang UTC
+      const productionDateUTC = new Date(Number(batchDetails.productionDate) * 1000);
+      
+      // Truy vấn sử dụng UTC_TIMESTAMP() và CONVERT_TZ để chuẩn hóa múi giờ
+      const [batchResult] = await connection.query(
+        `SELECT id FROM batch 
+         WHERE batch_name = ? 
+         AND actor_id = ? 
+         AND ABS(
+           TIMESTAMPDIFF(
+             SECOND, 
+             CONVERT_TZ(created_on, @@session.time_zone, '+00:00'),
+             ?
+           )
+         ) < 60
+         LIMIT 1`,
+        [
+          batchDetails.name, 
+          batchDetails.producerId, 
+          productionDateUTC.toISOString().slice(0, 19).replace('T', ' ')
+        ]
+      );
+  
+      if (batchResult.length === 0) {
+        return res.status(404).json({ 
+          error: "Không tìm thấy batch ID trong hệ thống" 
+        });
+      }
+  
+      res.json({
+        localBatchId: batchResult[0].id
+      });
+  
+    } catch (error) {
+      console.error("Lỗi khi lấy local batch ID:", error);
+      res.status(500).json({ 
+        error: "Lỗi khi lấy local batch ID: " + error.message 
+      });
+    } finally {
+      if (connection) {
+        connection.release();
+      }
+    }
+  });
+
   app.post("/approve-batch/:batchId", async (req, res) => {
+    let connection;
     try {
       if (!req.session.userId) {
         return res.status(401).json({ error: "Người dùng chưa đăng nhập" });
       }
 
-      const batchId = req.params.batchId;
+      const blockchainBatchId = req.params.batchId;
+      const localBatchId = req.body.localBatchId;
       const userId = req.session.userId;
 
-      // Kiểm tra xem người dùng có phải là nhà kiểm duyệt không
-      const [approvers] = await db.query(
+      connection = await db.getConnection();
+      await connection.beginTransaction();
+
+      // Kiểm tra quyền kiểm duyệt
+      const [approvers] = await connection.query(
         "SELECT * FROM users WHERE uid = ? AND role_id = 2",
         [userId]
       );
       if (approvers.length === 0) {
-        return res
-          .status(403)
-          .json({ error: "Người dùng không có quyền kiểm duyệt" });
+        await connection.rollback();
+        return res.status(403).json({ error: "Người dùng không có quyền kiểm duyệt" });
       }
 
       // Kiểm tra trạng thái hiện tại của lô hàng
       const batchDetails = await traceabilityContract.methods
-        .getBatchDetails(batchId)
+        .getBatchDetails(blockchainBatchId)
         .call();
       if (batchDetails.status != 0) {
-        // 0 là trạng thái PendingApproval
-        return res
-          .status(400)
-          .json({
-            error: "Lô hàng này đã được xử lý bởi người kiểm duyệt khác",
-          });
+        await connection.rollback();
+        return res.status(400).json({
+          error: "Lô hàng này đã được xử lý bởi người kiểm duyệt khác",
+        });
       }
 
       // Gọi hàm approveBatch từ smart contract
-      // Gọi hàm approveBatch từ smart contract
       const result = await traceabilityContract.methods
-        .approveBatch(batchId, userId)
+        .approveBatch(blockchainBatchId, userId)
         .send({ from: account.address, gas: 3000000 });
+
+      // Gọi hàm thông báo với local batch ID
+      await notifyApproveBatch(connection, localBatchId, userId, 1);
+
+      await connection.commit();
       res.status(200).json({
         message: "Lô hàng đã được phê duyệt thành công",
         transactionHash: result.transactionHash,
       });
     } catch (error) {
+      if (connection) {
+        await connection.rollback();
+      }
       console.error("Lỗi khi phê duyệt lô hàng:", error);
-      res
-        .status(500)
-        .json({ error: "Không thể phê duyệt lô hàng: " + error.message });
+      res.status(500).json({ error: "Không thể phê duyệt lô hàng: " + error.message });
+    } finally {
+      if (connection) {
+        connection.release();
+      }
     }
   });
 
   app.post("/reject-batch/:batchId", async (req, res) => {
+    let connection;
     try {
       if (!req.session.userId) {
         return res.status(401).json({ error: "Người dùng chưa đăng nhập" });
       }
 
-      const batchId = req.params.batchId;
+      connection = await db.getConnection();
+      await connection.beginTransaction();
+
+      const blockchainBatchId = req.params.batchId;
+      const localBatchId = req.body.localBatchId;
       const userId = req.session.userId;
 
       // Kiểm tra xem người dùng có phải là nhà kiểm định không
-      const [approvers] = await db.query(
+      const [approvers] = await connection.query(
         "SELECT * FROM users WHERE uid = ? AND role_id = 2",
         [userId]
       );
       if (approvers.length === 0) {
-        return res
-          .status(403)
-          .json({ error: "Người dùng không có quyền kiểm định" });
+        await connection.rollback();
+        return res.status(403).json({ error: "Người dùng không có quyền kiểm định" });
       }
 
       // Kiểm tra trạng thái hiện tại của lô hàng
       const batchDetails = await traceabilityContract.methods
-        .getBatchDetails(batchId)
+        .getBatchDetails(blockchainBatchId)
         .call();
       if (batchDetails.status != 0) {
-        // 0 là trạng thái PendingApproval
-        return res
-          .status(400)
-          .json({
-            error: "Lô hàng này đã được xử lý bởi người kiểm duyệt khác",
-          });
+        await connection.rollback();
+        return res.status(400).json({
+          error: "Lô hàng này đã được xử lý bởi người kiểm duyệt khác",
+        });
       }
 
       // Gọi hàm rejectBatch từ smart contract
-      // Gọi hàm rejectBatch từ smart contract
       const result = await traceabilityContract.methods
-        .rejectBatch(batchId, userId)
+        .rejectBatch(blockchainBatchId, userId)
         .send({ from: account.address, gas: 3000000 });
+
+        console.log("Thông tin lô hàng từ chối: ", localBatchId, userId);
+
+      // Gọi hàm notifyApproveBatch để lưu thông báo từ chối
+      await notifyApproveBatch(connection, localBatchId, userId, 2);
+      
+      // Commit transaction nếu mọi thứ thành công
+      await connection.commit();
+
       res.status(200).json({
         message: "Lô hàng đã bị từ chối thành công",
         transactionHash: result.transactionHash,
       });
     } catch (error) {
+      if (connection) {
+        await connection.rollback();
+      }
       console.error("Lỗi khi từ chối lô hàng:", error);
-      res
-        .status(500)
-        .json({ error: "Không thể từ chối lô hàng: " + error.message });
+      res.status(500).json({ error: "Không thể từ chối lô hàng: " + error.message });
+    } finally {
+      if (connection) {
+        connection.release();
+      }
     }
   });
+
   app.get("/batch-details/:batchId", async (req, res) => {
     try {
       const batchId = req.params.batchId;
