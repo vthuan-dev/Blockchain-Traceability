@@ -21,6 +21,7 @@ const QrCode = require("qrcode-reader");
 const { Network, Alchemy } = require("alchemy-sdk");
 const util = require('util'); // Thêm dòng này
 const bodyParser = require('body-parser');
+const fs = require('fs');
 
 app.use(bodyParser.json({limit: '100mb'}));
 app.use(bodyParser.urlencoded({limit: '100mb', extended: true}));
@@ -39,16 +40,44 @@ app.use((req, res, next) => {
 require("dotenv").config({ path: path.resolve(__dirname, "../../.env") });
 const { notifyNewBatch, notifyApproveBatch } = require('.//notification');
 
-const storage = multer.memoryStorage();
+// Tạo thư mục uploads
+const uploadDir = path.join(__dirname, 'public', 'uploads', 'batches');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
 
-const s3Client = new S3Client({
-  endpoint: "https://s3.filebase.com",
-  region: "us-east-1",
-  credentials: {
-    accessKeyId: process.env.S3_ACCESS_KEY,
-    secretAccessKey: process.env.S3_SECRET_KEY,
+// Thay đổi cấu hình multer
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const today = new Date();
+    const uploadPath = path.join(
+      uploadDir,
+      today.getFullYear().toString(),
+      (today.getMonth() + 1).toString()
+    );
+    
+    if (!fs.existsSync(uploadPath)) {
+      fs.mkdirSync(uploadPath, { recursive: true });
+    }
+    cb(null, uploadPath);
   },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  }
 });
+
+// Cập nhật cấu hình upload
+const upload = multer({
+  storage: storage,
+  limits: { 
+    fileSize: 100 * 1024 * 1024,
+    files: 10 
+  }
+}).fields([
+  { name: "productImages", maxCount: 10 },
+  { name: "certificateImage", maxCount: 1 }
+]);
 
 const db = mysql.createConnection({
   host: process.env.DB_HOST,
@@ -146,18 +175,6 @@ const activityLogContract = new web3.eth.Contract(
   activityLogAddress
 );
 
-// tạo biến lưu trữ file, giới hạn số lượng file và tên file, maxCount: số lượng file, name: tên file
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 100 * 1024 * 1024,
-    files: 10
-
-  } // 100MB limit
-}).fields([
-  { name: "productImages", maxCount: 10 },
-  { name: "certificateImage", maxCount: 1 },
-]);
-
 const activityUpload = multer({
   storage: multer.memoryStorage(),
   fileFilter: (req, file, cb) => {
@@ -183,26 +200,22 @@ const { base58btc } = require("multiformats/bases/base58");
 
 const BUCKET_NAME = "nckh";
 
-async function uploadFile(fileBuffer, fileName) {
+async function uploadFile(file) {
   try {
-    console.log(`Bắt đầu tải lên Filebase: ${fileName}`);
-
-    const params = {
-      Bucket: BUCKET_NAME,
-      Key: fileName,
-      Body: fileBuffer,
+    // File đã được lưu bởi multer, chỉ cần trả về URL
+    const relativePath = path.relative(path.join(__dirname, 'public'), file.path);
+    const publicUrl = `/${relativePath}`;
+    console.log(`File uploaded successfully: ${publicUrl}`);
+    return {
+      success: true,
+      ipfsUrl: publicUrl // Giữ tên ipfsUrl để tương thích với code cũ
     };
-
-    const command = new PutObjectCommand(params);
-    await s3Client.send(command);
-    console.log(`Tải lên thành công: ${fileName}`);
-
-    return await checkFileStatusWithRetry(fileName);
   } catch (error) {
-    console.error("Lỗi khi tải lên Filebase:", error);
+    console.error("Lỗi khi xử lý file:", error);
     throw error;
   }
 }
+
 function convertBigIntToString(item) {
   if (typeof item === "bigint") {
     return item.toString();
@@ -495,19 +508,17 @@ function setupRoutes(app, db) {
           req.files["productImages"].length > 0
         ) {
           console.log(
-            `Số lư��ng ảnh sản phẩm nhận được: ${req.files["productImages"].length}`
+            `Số lượng ảnh sản phẩm nhận được: ${req.files["productImages"].length}`
           );
 
           for (const file of req.files["productImages"]) {
             try {
-              const result = await uploadFile(file.buffer, file.originalname);
+              const result = await uploadFile(file);
               productImageUrls.push(result.ipfsUrl);
               console.log(`Đã thêm URL ảnh sản phẩm: ${result.ipfsUrl}`);
             } catch (uploadError) {
-              console.error(
-                `Lỗi khi tải lên ảnh ${file.originalname}:`,
-                uploadError
-              );
+              cleanupUploadedFiles(req.files);
+              throw uploadError;
             }
           }
 
@@ -522,16 +533,11 @@ function setupRoutes(app, db) {
         let certificateImageUrl = "";
 
         if (req.files["certificateImage"] && req.files["certificateImage"][0]) {
-          const certificateImageFile = req.files["certificateImage"][0];
-          const certificateImageResult = await uploadFile(
-            certificateImageFile.buffer,
-            certificateImageFile.originalname
-          );
-          certificateImageUrl = certificateImageResult.ipfsUrl;
+          const result = await uploadFile(req.files["certificateImage"][0]);
+          certificateImageUrl = result.ipfsUrl;
           console.log("Certificate image uploaded:", certificateImageUrl);
         } else {
-          console.log("Không có ảnh chứng nhận được tải lên");
-          certificateImageUrl = "default_certificate_image_url";
+          certificateImageUrl = "/uploads/default/certificate.jpg";
         }
 
         console.log("Calling createBatch with params:", {
@@ -584,8 +590,18 @@ function setupRoutes(app, db) {
           status: "PendingApproval",
         });
       } catch (err) {
+        if (req.files) {
+          cleanupUploadedFiles(req.files);
+        }
+        if (connection) {
+          await connection.rollback();
+        }
         console.error("Error creating batch:", err);
         res.status(500).json({ error: "Lỗi khi tạo lô hàng: " + err.message });
+      } finally {
+        if (connection) {
+          connection.release();
+        }
       }
     }
   );
@@ -679,14 +695,12 @@ function setupRoutes(app, db) {
         if (req.files && req.files.length > 0) {
           for (const file of req.files) {
             try {
-              const result = await uploadFile(file.buffer, file.originalname);
+              const result = await uploadFile(file);
               imageUrls.push(result.ipfsUrl);
               console.log(`Đã thêm URL ảnh hoạt động: ${result.ipfsUrl}`);
             } catch (uploadError) {
-              console.error(
-                `Lỗi khi tải lên ảnh ${file.originalname}:`,
-                uploadError
-              );
+              cleanupUploadedFiles(req.files);
+              throw uploadError;
             }
           }
         }
@@ -756,6 +770,9 @@ function setupRoutes(app, db) {
         });
 
       } catch (error) {
+        if (req.files) {
+          cleanupUploadedFiles(req.files);
+        }
         console.error("Lỗi thêm nhật ký hoạt động:", error);
         res.status(500).json({ 
           success: false,
@@ -2784,10 +2801,12 @@ function setupRoutes(app, db) {
     const baseUrl = process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
     res.json({ baseUrl });
   });
+
+  // Thêm route để serve static files
+  app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads')));
 }
 
 module.exports = {
-  s3Client,
   web3,
   traceabilityContract,
   activityLogContract,

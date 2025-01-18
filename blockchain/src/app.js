@@ -4,6 +4,7 @@ const bodyParser = require("body-parser");
 const mysql = require("mysql2/promise");
 const path = require("path");
 const multer = require("multer");
+const fs = require("fs");
 require("./websocket.js");
 
 const {
@@ -89,17 +90,44 @@ const db = mysql.createPool({
   connectionLimit: 10,
   queueLimit: 0,
 });
-const upload = multer({ storage: multer.memoryStorage() });
+
+const uploadDir = path.join(__dirname, 'public', 'uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const diskStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const today = new Date();
+    const uploadPath = path.join(
+      uploadDir,
+      today.getFullYear().toString(),
+      (today.getMonth() + 1).toString()
+    );
+    
+    if (!fs.existsSync(uploadPath)) {
+      fs.mkdirSync(uploadPath, { recursive: true });
+    }
+    cb(null, uploadPath);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({
+  storage: diskStorage,
+  limits: { fileSize: 100 * 1024 * 1024 }
+});
+
 const dangkyRoutes = require("./components/user/dangky.js")(db, upload);
 const dangnhapRoutes = require("./components/user/dangnhap.js")(db);
 app.use("/api", dangkyRoutes);
 app.use("/api", dangnhapRoutes);
 const {
-  s3Client,
   web3,
   contract,
-  uploadFile,
-  checkFileStatusWithRetry,
   setupRoutes,
   activityUpload,
   processFiles,
@@ -108,7 +136,6 @@ const {
   getProducerById,
   replacer,
   cleanKeys,
-  BUCKET_NAME,
 } = require("./backend.js");
 
 app.use((req, res, next) => {
