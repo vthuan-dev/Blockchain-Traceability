@@ -252,8 +252,50 @@ body.dark-theme .dropdown-divider {
     border-top-color: #2a3142;
 }
 
+/* Style cho card và form trong dark theme */
+body.dark-theme .card-custom {
+    background-color: #1a1f2c;
+    border-color: #2a3142;
+}
+
+body.dark-theme .card-body {
+    background-color: #1a1f2c;
+    color: #e0e0e0;
+}
+
+body.dark-theme .form-control {
+    background-color: #2a3142;
+    border-color: #3a4255;
+    color: #e0e0e0;
+}
+
+body.dark-theme .form-control:focus {
+    background-color: #2a3142;
+    border-color: #4fd1c5;
+    color: #e0e0e0;
+    box-shadow: 0 0 0 0.2rem rgba(79, 209, 197, 0.25);
+}
+
 body.dark-theme .form-label {
     color: #e0e0e0; /* Màu sáng cho các nhãn form trong chế độ tối */
+}
+
+/* Style cho input file trong dark theme */
+body.dark-theme .custom-file-label {
+    background-color: #2a3142;
+    border-color: #3a4255;
+    color: #e0e0e0;
+}
+
+body.dark-theme .custom-file-label::after {
+    background-color: #3a4255;
+    border-color: #3a4255;
+    color: #e0e0e0;
+}
+
+body.dark-theme .custom-file-input:focus~.custom-file-label {
+    border-color: #4fd1c5;
+    box-shadow: 0 0 0 0.2rem rgba(79, 209, 197, 0.25);
 }
 
 body.dark-theme label[for="language"],

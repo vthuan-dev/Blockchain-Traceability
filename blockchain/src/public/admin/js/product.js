@@ -61,7 +61,9 @@ window.ProductManager = {
                       product.product_name
                     }</td>
                     <td style="text-align: center; vertical-align: middle;">${
-                      product.description
+                      product.description.length > 100 
+                        ? product.description.substring(0, 100) + '...' 
+                        : product.description
                     }</td>
                     <td style="text-align: center; vertical-align: middle;">${
                       product.price
@@ -251,7 +253,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 <tr>
                     <td>${product.product_id}</td>
                     <td>${product.product_name}</td>
-                    <td>${product.description}</td>
+                    <td>${product.description.length > 100 
+                        ? product.description.substring(0, 100) + '...' 
+                        : product.description}</td>
                     <td>${product.price}</td>
                     <td>${imagePath}</td>
                     <td>${formatDate(product.created_at)}</td>

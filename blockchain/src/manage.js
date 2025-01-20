@@ -59,29 +59,7 @@ function validateEmail(email) {
   return emailRegex.test(email);
 }
 
-async function checkEmailExists(email) {
-  const baseUrl = window.location.hostname === 'localhost' ? 'http://localhost:3000/api' : 'http://www.tsroreee.com/api';
-  const response = await fetch(`${baseUrl}/check-email?email=${encodeURIComponent(email)}`);
-  const data = await response.json();
-  return data.exists;
-}
 
-router.get('/api/check-email', async (req, res) => {
-  const email = req.query.email;
-  // if (!email) {
-  //   return res.status(400).json({ error: 'Chưa nhập email' });
-  // }
-
-  try {
-    const query = 'SELECT COUNT(*) AS count FROM admin WHERE admin_email = ?';
-    const results = await db.query(query, [email]);
-    const exists = results[0].count > 0;
-    res.json({ exists });
-  } catch (error) {
-    console.error('Lỗi kiểm tra email:', error);
-    res.status(500).json({ error: 'Lỗi server' });
-  }
-});
 
 
 // Endpoint để lấy thông tin người dùng
@@ -386,6 +364,31 @@ router.post("/api/products/update", upload.single("img"), async (req, res) => {
   }
 });
 
+// Hàm kiểm tra email tồn tại
+async function checkEmailExists(email) {
+  const query = `
+    SELECT 
+      (SELECT COUNT(*) FROM admin WHERE admin_email = ?) as admin_count,
+      (SELECT COUNT(*) FROM users WHERE email = ?) as user_count
+  `;
+  const results = await queryDatabase(query, [email, email]);
+  return results[0].admin_count > 0 || results[0].user_count > 0;
+}
+
+// API endpoint kiểm tra email
+// router.get('/api/check-admin-email', async (req, res) => {
+//   const email = req.query.email;
+
+
+//   try {
+//     const exists = await checkEmailExists(email);
+//     res.json({ exists });
+//   } catch (error) {
+//     console.error('Lỗi kiểm tra email:', error);
+//     res.status(500).json({ error: 'Lỗi server' });
+//   }
+// });
+
 // Cập nhật endpoint tạo admin mới
 router.post("/api/admin", async (req, res) => {
   const { email, name, password, province_id } = req.body;
@@ -398,8 +401,10 @@ router.post("/api/admin", async (req, res) => {
     return res.status(400).json({ error: "Email không đúng định dạng" });
   }
 
-  if (await checkEmailExists(email)) {
-    return res.status(400).json({ error: "Email đã tồn tại" });
+  // Kiểm tra xem email đã tồn tại chưa
+  const emailExists = await checkEmailExists(email);
+  if (emailExists) {
+    return res.status(400).json({ error: "Email này đã được sử dụng trong hệ thống" });
   }
 
   try {
