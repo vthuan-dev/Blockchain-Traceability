@@ -5,6 +5,7 @@ const path = require("path");
 const bodyParser = require("body-parser");
 const multer = require("multer");
 const bcrypt = require("bcryptjs");
+const fs = require("fs").promises;
 const axios = require("axios");
 const {
   storage,
@@ -86,6 +87,25 @@ router.get("/api/theproducts", async (req, res) => {
   }
 });
 
+async function saveProductImage(file) {
+  try {
+    const sanitizedFileName = file.originalname.replace(/\s+/g, "_").toLowerCase();
+    const fileName = `${Date.now()}_${sanitizedFileName}`;
+    // Thay đổi đường dẫn để lưu vào thư mục product trong source
+    const uploadPath = path.join(__dirname, 'public/uploads/product', fileName);
+    
+    // Đảm bảo thư mục tồn tại
+    await fs.mkdir(path.dirname(uploadPath), { recursive: true });
+    
+    await fs.writeFile(uploadPath, file.buffer);
+    // Trả về đường dẫn tương đối từ thư mục public
+    return `/uploads/product/${fileName}`;
+  } catch (error) {
+    console.error("Lỗi khi lưu file:", error);
+    throw new Error("Lỗi khi lưu file");
+  }
+}
+
 // Thêm endpoint mới để xử lý việc thêm sản phẩm
 router.post("/api/products", upload.single("img"), async (req, res) => {
   let connection;
@@ -106,26 +126,12 @@ router.post("/api/products", upload.single("img"), async (req, res) => {
 
     if (img) {
       try {
-        const sanitizedFileName = img.originalname
-          .replace(/\s+/g, "_")
-          .toLowerCase();
-        const fileName = `products/${Date.now()}_${sanitizedFileName}`;
-        const file = adminBucket.file(fileName);
-
-        await file.save(img.buffer, {
-          metadata: { contentType: img.mimetype },
-        });
-
-        const [url] = await file.getSignedUrl({
-          action: "read",
-          expires: "03-09-2491",
-        });
-
-        tempImgUrl = url;
-        console.log("Hình ảnh sản phẩm đã được upload:", tempImgUrl);
+        const imgUrl = await saveProductImage(img);
+        tempImgUrl = imgUrl;
+        console.log("Hình ảnh sản phẩm đã được lưu:", tempImgUrl);
       } catch (uploadError) {
-        console.error("Lỗi khi upload hình ảnh:", uploadError);
-        throw new Error("Lỗi khi upload hình ảnh");
+        console.error("Lỗi khi lưu hình ảnh:", uploadError);
+        throw new Error("Lỗi khi lưu hình ảnh");
       }
     }
 
@@ -278,44 +284,39 @@ router.post("/api/products/update", upload.single("img"), async (req, res) => {
     if (req.file) {
       try {
         // Xóa hình ảnh cũ
-        const [oldProduct] = await connection.query(
-          "SELECT img FROM products WHERE product_id = ?",
-          [product_id]
-        );
-        if (oldProduct[0] && oldProduct[0].img) {
-          const oldFileName = oldProduct[0].img.split("/").pop().split("?")[0];
-          const oldFile = adminBucket.file(`products/${oldFileName}`);
-          await oldFile
-            .delete()
-            .catch((error) =>
-              console.log("Lỗi khi xóa hình ảnh cũ từ Firebase:", error)
-            );
+const [oldProduct] = await connection.query(
+  "SELECT img FROM products WHERE product_id = ?",
+  [product_id]
+);
+
+if (oldProduct[0] && oldProduct[0].img) {
+  try {
+      // Lấy tên file từ đường dẫn đầy đủ
+      const oldFileName = oldProduct[0].img.split('/').pop();
+      // Đường dẫn đến file ảnh cũ trong thư mục product
+      const oldPath = path.join(__dirname, 'public/uploads/product', oldFileName);
+      
+      // Kiểm tra file có tồn tại không trước khi xóa
+      const fileExists = await fs.access(oldPath).then(() => true).catch(() => false);
+      if (fileExists) {
+          await fs.unlink(oldPath);
+          console.log("Đã xóa file ảnh cũ:", oldFileName);
         }
+      } catch (error) {
+        console.error("Lỗi khi xóa hình ảnh cũ:", error);
+      }
+    }
 
-        // Upload hình ảnh mới
-        const sanitizedFileName = req.file.originalname
-          .replace(/\s+/g, "_")
-          .toLowerCase();
-        const fileName = `products/${Date.now()}_${sanitizedFileName}`;
-        const file = adminBucket.file(fileName);
-
-        await file.save(req.file.buffer, {
-          metadata: { contentType: req.file.mimetype },
-        });
-
-        const [url] = await file.getSignedUrl({
-          action: "read",
-          expires: "03-09-2491",
-        });
-
-        tempImgUrl = url;
+        // Lưu hình ảnh mới
+        const imgUrl = await saveProductImage(req.file);
+        tempImgUrl = imgUrl;
         updateFields.push("img = ?");
         updateValues.push(tempImgUrl);
 
-        console.log("Hình ảnh mới đã được upload:", tempImgUrl);
+        console.log("Hình ảnh mới đã được lưu:", tempImgUrl);
       } catch (uploadError) {
-        console.error("Lỗi khi upload hình ảnh:", uploadError);
-        throw new Error("Lỗi khi upload hình ảnh");
+        console.error("Lỗi khi lưu hình ảnh:", uploadError);
+        throw new Error("Lỗi khi lưu hình ảnh");
       }
     }
 
