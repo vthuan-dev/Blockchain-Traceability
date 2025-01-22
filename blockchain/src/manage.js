@@ -5,6 +5,7 @@ const path = require("path");
 const bodyParser = require("body-parser");
 const multer = require("multer");
 const bcrypt = require("bcryptjs");
+const fs = require("fs").promises;
 const axios = require("axios");
 const {
   storage,
@@ -59,29 +60,7 @@ function validateEmail(email) {
   return emailRegex.test(email);
 }
 
-async function checkEmailExists(email) {
-  const baseUrl = window.location.hostname === 'localhost' ? 'http://localhost:3000/api' : 'http://www.tsroreee.com/api';
-  const response = await fetch(`${baseUrl}/check-email?email=${encodeURIComponent(email)}`);
-  const data = await response.json();
-  return data.exists;
-}
 
-router.get('/api/check-email', async (req, res) => {
-  const email = req.query.email;
-  // if (!email) {
-  //   return res.status(400).json({ error: 'Chưa nhập email' });
-  // }
-
-  try {
-    const query = 'SELECT COUNT(*) AS count FROM admin WHERE admin_email = ?';
-    const results = await db.query(query, [email]);
-    const exists = results[0].count > 0;
-    res.json({ exists });
-  } catch (error) {
-    console.error('Lỗi kiểm tra email:', error);
-    res.status(500).json({ error: 'Lỗi server' });
-  }
-});
 
 
 // Endpoint để lấy thông tin người dùng
@@ -108,6 +87,25 @@ router.get("/api/theproducts", async (req, res) => {
   }
 });
 
+async function saveProductImage(file) {
+  try {
+    const sanitizedFileName = file.originalname.replace(/\s+/g, "_").toLowerCase();
+    const fileName = `${Date.now()}_${sanitizedFileName}`;
+    // Thay đổi đường dẫn để lưu vào thư mục product trong source
+    const uploadPath = path.join(__dirname, 'public/uploads/product', fileName);
+    
+    // Đảm bảo thư mục tồn tại
+    await fs.mkdir(path.dirname(uploadPath), { recursive: true });
+    
+    await fs.writeFile(uploadPath, file.buffer);
+    // Trả về đường dẫn tương đối từ thư mục public
+    return `/uploads/product/${fileName}`;
+  } catch (error) {
+    console.error("Lỗi khi lưu file:", error);
+    throw new Error("Lỗi khi lưu file");
+  }
+}
+
 // Thêm endpoint mới để xử lý việc thêm sản phẩm
 router.post("/api/products", upload.single("img"), async (req, res) => {
   let connection;
@@ -128,26 +126,12 @@ router.post("/api/products", upload.single("img"), async (req, res) => {
 
     if (img) {
       try {
-        const sanitizedFileName = img.originalname
-          .replace(/\s+/g, "_")
-          .toLowerCase();
-        const fileName = `products/${Date.now()}_${sanitizedFileName}`;
-        const file = adminBucket.file(fileName);
-
-        await file.save(img.buffer, {
-          metadata: { contentType: img.mimetype },
-        });
-
-        const [url] = await file.getSignedUrl({
-          action: "read",
-          expires: "03-09-2491",
-        });
-
-        tempImgUrl = url;
-        console.log("Hình ảnh sản phẩm đã được upload:", tempImgUrl);
+        const imgUrl = await saveProductImage(img);
+        tempImgUrl = imgUrl;
+        console.log("Hình ảnh sản phẩm đã được lưu:", tempImgUrl);
       } catch (uploadError) {
-        console.error("Lỗi khi upload hình ảnh:", uploadError);
-        throw new Error("Lỗi khi upload hình ảnh");
+        console.error("Lỗi khi lưu hình ảnh:", uploadError);
+        throw new Error("Lỗi khi lưu hình ảnh");
       }
     }
 
@@ -300,44 +284,39 @@ router.post("/api/products/update", upload.single("img"), async (req, res) => {
     if (req.file) {
       try {
         // Xóa hình ảnh cũ
-        const [oldProduct] = await connection.query(
-          "SELECT img FROM products WHERE product_id = ?",
-          [product_id]
-        );
-        if (oldProduct[0] && oldProduct[0].img) {
-          const oldFileName = oldProduct[0].img.split("/").pop().split("?")[0];
-          const oldFile = adminBucket.file(`products/${oldFileName}`);
-          await oldFile
-            .delete()
-            .catch((error) =>
-              console.log("Lỗi khi xóa hình ảnh cũ từ Firebase:", error)
-            );
+const [oldProduct] = await connection.query(
+  "SELECT img FROM products WHERE product_id = ?",
+  [product_id]
+);
+
+if (oldProduct[0] && oldProduct[0].img) {
+  try {
+      // Lấy tên file từ đường dẫn đầy đủ
+      const oldFileName = oldProduct[0].img.split('/').pop();
+      // Đường dẫn đến file ảnh cũ trong thư mục product
+      const oldPath = path.join(__dirname, 'public/uploads/product', oldFileName);
+      
+      // Kiểm tra file có tồn tại không trước khi xóa
+      const fileExists = await fs.access(oldPath).then(() => true).catch(() => false);
+      if (fileExists) {
+          await fs.unlink(oldPath);
+          console.log("Đã xóa file ảnh cũ:", oldFileName);
         }
+      } catch (error) {
+        console.error("Lỗi khi xóa hình ảnh cũ:", error);
+      }
+    }
 
-        // Upload hình ảnh mới
-        const sanitizedFileName = req.file.originalname
-          .replace(/\s+/g, "_")
-          .toLowerCase();
-        const fileName = `products/${Date.now()}_${sanitizedFileName}`;
-        const file = adminBucket.file(fileName);
-
-        await file.save(req.file.buffer, {
-          metadata: { contentType: req.file.mimetype },
-        });
-
-        const [url] = await file.getSignedUrl({
-          action: "read",
-          expires: "03-09-2491",
-        });
-
-        tempImgUrl = url;
+        // Lưu hình ảnh mới
+        const imgUrl = await saveProductImage(req.file);
+        tempImgUrl = imgUrl;
         updateFields.push("img = ?");
         updateValues.push(tempImgUrl);
 
-        console.log("Hình ảnh mới đã được upload:", tempImgUrl);
+        console.log("Hình ảnh mới đã được lưu:", tempImgUrl);
       } catch (uploadError) {
-        console.error("Lỗi khi upload hình ảnh:", uploadError);
-        throw new Error("Lỗi khi upload hình ảnh");
+        console.error("Lỗi khi lưu hình ảnh:", uploadError);
+        throw new Error("Lỗi khi lưu hình ảnh");
       }
     }
 
@@ -386,6 +365,31 @@ router.post("/api/products/update", upload.single("img"), async (req, res) => {
   }
 });
 
+// Hàm kiểm tra email tồn tại
+async function checkEmailExists(email) {
+  const query = `
+    SELECT 
+      (SELECT COUNT(*) FROM admin WHERE admin_email = ?) as admin_count,
+      (SELECT COUNT(*) FROM users WHERE email = ?) as user_count
+  `;
+  const results = await queryDatabase(query, [email, email]);
+  return results[0].admin_count > 0 || results[0].user_count > 0;
+}
+
+// API endpoint kiểm tra email
+// router.get('/api/check-admin-email', async (req, res) => {
+//   const email = req.query.email;
+
+
+//   try {
+//     const exists = await checkEmailExists(email);
+//     res.json({ exists });
+//   } catch (error) {
+//     console.error('Lỗi kiểm tra email:', error);
+//     res.status(500).json({ error: 'Lỗi server' });
+//   }
+// });
+
 // Cập nhật endpoint tạo admin mới
 router.post("/api/admin", async (req, res) => {
   const { email, name, password, province_id } = req.body;
@@ -398,8 +402,10 @@ router.post("/api/admin", async (req, res) => {
     return res.status(400).json({ error: "Email không đúng định dạng" });
   }
 
-  if (await checkEmailExists(email)) {
-    return res.status(400).json({ error: "Email đã tồn tại" });
+  // Kiểm tra xem email đã tồn tại chưa
+  const emailExists = await checkEmailExists(email);
+  if (emailExists) {
+    return res.status(400).json({ error: "Email này đã được sử dụng trong hệ thống" });
   }
 
   try {
