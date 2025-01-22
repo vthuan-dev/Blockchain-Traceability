@@ -707,19 +707,6 @@ app.get("/user-info", (req, res) => {
   }
 });
 
-app.post("/api/dangxuat", (req, res) => {
-  req.session.destroy((err) => {
-    if (err) {
-      return res.status(500).json({ message: "Không thể đăng xuất" });
-    }
-    res.clearCookie("connect.sid"); // Xóa cookie session
-    res.json({ message: "Đăng xuất thành công" });
-  });
-});
-//console.log('Các route đã đăng ký:', app._router.stack.filter(r => r.route).map(r => r.route.path));
-
-
-
 // Thiết lập Socket.io cho Chatbox
 let users = [];
 
