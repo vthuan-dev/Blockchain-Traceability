@@ -837,7 +837,7 @@ io.on("connection", (socket) => {
         io.to(socket.id).emit("message", {
           from: "Hệ thống",
           to: message.from,
-          body: "Xin lỗi. Khng có admin nào đang online",
+          body: "Xin lỗi. Không có admin nào đang online",
         });
       }
     }
