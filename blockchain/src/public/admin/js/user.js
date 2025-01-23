@@ -297,7 +297,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 showMessage("Lỗi: " + data.error, "error");
               } else {
                 showMessage("Admin đã được thêm thành công", "success");
-                window.location.href = "user.html";
+                setTimeout(() => {
+                  window.location.href = "user.html";
+                }, 2000);
               }
             })
             .catch((error) => {

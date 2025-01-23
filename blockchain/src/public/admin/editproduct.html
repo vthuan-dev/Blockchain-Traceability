@@ -244,15 +244,17 @@
                 .then(data => {
                     console.log('Phản hồi từ server:', data);
                     if (data.updated) {
-                        alert('Sản phẩm đã được cập nhật thành công!');
+                        showMessage('Sản phẩm đã được cập nhật thành công!', 'success');
+                        setTimeout(() => {
+                            window.location.href = 'product.html';
+                        }, 2000);
                     } else {
-                        alert(data.message);
+                        showMessage(data.message, 'warning');
                     }
-                    window.location.href = 'product.html';
                 })
                 .catch((error) => {
                     console.error('Lỗi:', error);
-                    alert('Có lỗi xảy ra khi cập nhật sản phẩm: ' + error.message);
+                    showMessage('Có lỗi xảy ra khi cập nhật sản phẩm: ' + error.message, 'error');
                 });
             });
         });
