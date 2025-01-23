@@ -39,8 +39,14 @@
 }
 
 .sidebar .section-title {
+    text-transform: uppercase;
+    font-size: 1rem;
     font-weight: bold;
     margin-top: 20px;
+    color: inherit;
+    text-align: left;
+    padding: 0;
+    border: none;
 }
 
 .sidebar .divider {
@@ -82,32 +88,55 @@ main {
 /* Stat card styles */
 .stat-card-custom {
     border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    padding: 10px;
+    padding: 20px;
     color: white;
+    height: 100%;
+    transition: transform 0.3s;
+    text-align: center;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: space-between;
-    height: 120px;
+    justify-content: center;
 }
 
-.stat-card-custom .stat-icon {
-    font-size: 2rem;
+.stat-card-custom:hover {
+    transform: translateY(-5px);
 }
 
-.stat-card-custom .stat-info {
-    text-align: right;
+.stat-icon {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
 }
 
-.stat-card-custom .stat-info h3 {
-    margin: 0;
-    font-size: 1rem;
+.stat-info {
+    width: 100%;
+}
+
+.stat-info h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.stat-number {
+    font-size: 1.5rem;
     font-weight: bold;
+    margin: 10px 0;
 }
 
-.stat-card-custom .stat-info p {
-    margin: 0;
-    font-size: 0.9rem;
+.stat-info small {
+    display: block;
+    opacity: 0.9;
+    margin-top: 5px;
+}
+
+.section-title {
+    text-align: center;
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    padding: 10px 0;
+    border-bottom: 2px solid #4CAF50;
 }
 
 .stat-card-container {
@@ -212,4 +241,61 @@ main {
 .pagination-info,
 .pagination-controls {
     margin-bottom: 10px;
+}
+
+.welcome-card {
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+}
+
+.welcome-content {
+    padding: 20px 0;
+}
+
+.welcome-text {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+.section-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+    padding-left: 10px;
+    border-left: 4px solid #4CAF50;
+}
+
+.notification-list, .activity-list {
+    margin-top: 15px;
+}
+
+.notification-item, .activity-item {
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.notification-item:last-child, .activity-item:last-child {
+    border-bottom: none;
+}
+
+.notification-item i, .activity-item i {
+    margin-right: 10px;
+    font-size: 8px;
+}
+
+.bg-green { background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); }
+.bg-blue { background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%); }
+.bg-orange { background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%); }
+.bg-red { background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%); }
+
+/* Định dạng section-title cho nội dung chính */
+.main-section-title {
+    text-align: center;
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    padding: 10px 0;
+    border-bottom: 2px solid #4CAF50;
 }
