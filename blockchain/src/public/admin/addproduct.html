@@ -4,12 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thêm sản phẩm mới</title>
+    <script>
+        (function () {
+            document.documentElement.classList.add(localStorage.getItem('theme') || 'light-theme');
+        })();
+    </script>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="./css/style.css">
     <link rel="stylesheet" href="./css/responsive.css">
     <link rel="stylesheet" href="./css/animation.css">
     <link rel="stylesheet" href="./css/theme.css">
+    <link rel="stylesheet" href="./css/header.css">
+    <link rel="stylesheet" href="./css/main.css">
     <style>
         @media (max-width: 768px) {
             .form-row {
@@ -32,36 +39,32 @@
 </head>
 <body onload="time()">
     <div id="messageContainer"></div>
-    <header class="text-white py-2">
-        <div class="container-fluid">
-            <div class="row align-items-center">
-                <div class="col-3 col-md-3 header-logo">
-                    <a href="#"><img src="..\hinhanh\Bitcoin-Blockchain-Network-icon-on-transparent-background-PNG.png" alt="Logo" class="img-fluid" style="max-height: 50px;"></a>
+    <header class="text-white">
+
+        <div class="header-container">
+            <!-- Logo -->
+            <div class="header-left">
+                <a href="#" class="header-logo">
+                    <img src="..\hinhanh\Bitcoin-Blockchain-Network-icon-on-transparent-background-PNG.png" alt="Logo">
+                </a>
+            </div>
+        
+            <!-- Title -->
+            <div class="header-title">
+                <h2>THÊM SẢN PHẨM MỚI</h2>
+            </div>
+        
+            <!-- Actions: Notification, Theme, Profile -->
+            <div class="header-right">
+                <div class="action-item notification-item">
+                    <i class="fas fa-bell" id="notificationIcon" title="Thông báo"></i>
+                    <span class="badge badge-danger noti_count"></span>
                 </div>
-                <div class="col-6 col-md-5 text-center header-title">
-                    <h2 class="mb-0 h4">THÊM SẢN PHẨM MỚI</h2>
+                <div class="action-item">
+                    <i class="fas fa-sun" id="themeIcon" title="Đổi giao diện"></i>
                 </div>
-                <div class="col-3 col-md-3 text-right header-icons">
-                    <div class="d-inline-block position-relative mr-3">
-                        <i class="fas fa-bell" id="notificationIcon"></i>
-                        <span class="badge badge-danger noti_count"></span>
-                    </div>
-                    <div class="d-inline-block position-relative ml-auto text-right">
-                        <i class="fas fa-user profile-pic" id="profileIcon"></i>
-                        <div class="dropdown-menu dropdown-menu-right fade-in" style="display: none;">
-                            <div class="dropdown-header">
-                                <i class="fas fa-user-circle"></i>
-                                <span class="section-title" id="section-title-red">XIN CHÀO</span>
-                            </div>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="./caidat.html">
-                                <i class="fas fa-cog"></i> Cài đặt
-                            </a>
-                            <a class="dropdown-item" href="../account/dangnhap.html">
-                                <i class="fas fa-sign-out-alt"></i> Đăng xuất
-                            </a>
-                        </div>
-                    </div>
+                <div class="action-item">
+                    <i class="fas fa-sign-out-alt" id="logoutIcon" title="Đăng xuất"></i>
                 </div>
             </div>
         </div>
@@ -72,7 +75,7 @@
     <div class="container-fluid">
         <div class="row">
             <nav class="col-md-2 sidebar">
-                
+                <div class="section-title"></div>
                 <a href="admintest.html" class="menu-item rounded"><i class="fas fa-home"></i> Trang chủ</a>
                 <div class="divider"></div>
                 <div class="section-title">CHỨC NĂNG</div>
