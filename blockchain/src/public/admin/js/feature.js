@@ -247,6 +247,7 @@ function time() {
 }
 
 // Function to fetch admin info and update section title
+
 async function fetchAdminInfo() {
   try {
     const response = await fetch("/api/admin-info");
@@ -261,7 +262,7 @@ async function fetchAdminInfo() {
   } catch (error) {
     console.error("Lỗi:", error);
   }
-}
+} 
 
 function debounce(func, delay) {
   let timeoutId;

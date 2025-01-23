@@ -41,7 +41,7 @@ function updateThemeIcon() {
   const themeIcon = document.getElementById('themeIcon');
   if (themeIcon) {
     const currentTheme = localStorage.getItem('theme') || 'light-theme';
-    themeIcon.className = currentTheme === 'light-theme' ? 'fas fa-sun' : 'fas fa-moon';
+    themeIcon.className = currentTheme === 'light-theme' ? 'fas fa-moon' : 'fas fa-sun';
   }
 }
 
