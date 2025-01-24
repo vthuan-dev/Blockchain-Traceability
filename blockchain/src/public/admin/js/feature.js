@@ -109,7 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
 // Hàm đánh dấu một thông báo đã đọc
 async function markNotificationAsRead(notificationId) {
   try {
-    const response = await fetch(`/api/notifications/${notificationId}/read`, {
+    const response = await fetch(`/api/notifications/${notificationId}/admin-read`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

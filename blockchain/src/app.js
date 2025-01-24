@@ -595,6 +595,28 @@ app.post("/api/notifications/:id/read", async (req, res) => {
   }
 });
 
+app.post("/api/notifications/:id/admin-read", async (req, res) => {
+  try {
+    const notificationId = req.params.id;
+    const adminId = req.session.adminId;
+
+    console.log("Đang xóa thông báo với ID:", notificationId);
+    const [result] = await db.query(
+      "DELETE FROM notification WHERE id = ? AND admin_id = ?",
+      [notificationId, adminId]
+    );
+    console.log("Kết quả xóa:", result);
+    if (result.affectedRows > 0) {
+      res.status(200).json({ message: "Thông báo đã được xóa" });
+    } else {
+      res.status(404).json({ error: "Không tìm thấy thông báo" });
+    }
+  } catch (error) {
+    console.error("Lỗi khi xóa thông báo:", error);
+    res.status(500).json({ error: "Lỗi server khi xóa thông báo" });
+  }
+});
+
 app.post("/api/notifications/mark-all-read", async (req, res) => {
   try {
     let query;
