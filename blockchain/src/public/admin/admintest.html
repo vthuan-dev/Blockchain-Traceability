@@ -203,27 +203,6 @@
         <script>
             document.addEventListener('DOMContentLoaded', applySettings);
         </script>
-
-        <script>
-        document.getElementById('logoutIcon').addEventListener('click', async function(e) {
-            e.preventDefault();
-            try {
-                const response = await fetch('/api/dangxuat', { 
-                    method: 'POST',
-                    credentials: 'same-origin'
-                });
-                if (response.ok) {
-                    window.location.href = '../account/dangnhap.html';
-                } else {
-                    console.error('Không thể đăng xuất');
-                    alert('Đăng xuất không thành công. Vui lòng thử lại.');
-                }
-            } catch (error) {
-                console.error('Lỗi khi đăng xuất:', error);
-                alert('Có lỗi xảy ra khi đăng xuất. Vui lòng thử lại sau.');
-            }
-        });
-        </script>
         <!-- <script>
         document.addEventListener('DOMContentLoaded', () => {
             initAdminSocket();

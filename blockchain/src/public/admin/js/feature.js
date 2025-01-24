@@ -17,6 +17,26 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Xử lý sự kiện đăng xuất
+  document.getElementById('logoutIcon').addEventListener('click', async function(e) {
+    e.preventDefault();
+    try {
+      const response = await fetch('/api/dangxuat', { 
+        method: 'POST',
+        credentials: 'same-origin'
+      });
+      if (response.ok) {
+        window.location.href = '../account/dangnhap.html';
+      } else {
+        console.error('Không thể đăng xuất');
+        alert('Đăng xuất không thành công. Vui lòng thử lại.');
+      }
+    } catch (error) {
+      console.error('Lỗi khi đăng xuất:', error);
+      alert('Có lỗi xảy ra khi đăng xuất. Vui lòng thử lại sau.');
+    }
+  });
+
   // Toggle notification panel và fetch notifications khi click vào icon
   if (notificationIcon && notificationPanel) {
     notificationIcon.addEventListener("click", () => {

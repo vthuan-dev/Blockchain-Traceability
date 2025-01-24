@@ -291,6 +291,25 @@
                 notificationList.appendChild(notificationItem);
             });
 
+            // Hàm đánh dấu thông báo đã đọc
+            async function markNotificationAsRead(notificationId) {
+                try {
+                    const response = await fetch(`/api/notifications/${notificationId}/read`, {
+                        method: 'POST',
+                        credentials: 'include' // Đảm bảo gửi cookie session
+                    });
+
+                    if (response.ok) {
+                        loadNotifications(); // Tải lại danh sách thông báo
+                    } else {
+                        const error = await response.json();
+                        console.error('Lỗi:', error.error);
+                    }
+                } catch (error) {
+                    console.error('Lỗi khi đánh dấu thông báo đã đọc:', error);
+                }
+            }
+
             // Thêm xử lý sự kiện cho nút "Đánh dấu tất cả đã đọc"
             markAllReadBtn.addEventListener('click', async () => {
                 try {
