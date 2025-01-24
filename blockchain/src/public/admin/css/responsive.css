@@ -3,7 +3,7 @@
         flex-direction: column;
         align-items: flex-start;
         height: auto;
-        padding: 10px 0;
+        
     }
 
     .header-logo, .header-icons, .header-title {
@@ -103,6 +103,16 @@
         width: auto;
     }
 
-
+    .notification-panel {
+        width: 90%;
+        /* left: 50%; */
+        transform: translateX(-50%);
+        right: auto;
+    }
+    
+    .btn-mark-read {
+        font-size: 11px;
+        padding: 3px 6px;
+    }
 }
 

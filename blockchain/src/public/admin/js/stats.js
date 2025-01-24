@@ -537,8 +537,8 @@ window.StatManager = {
 };
 
 document.addEventListener("DOMContentLoaded", () => {
-  StatManager.updateUserCount();
-  StatManager.updateProductCount();
+  // StatManager.updateUserCount();
+  // StatManager.updateProductCount();
   StatManager.initTabs();
   StatManager.renderUserStats();
   StatManager.renderProductStats();

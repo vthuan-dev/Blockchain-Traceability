@@ -323,9 +323,7 @@ document.addEventListener("DOMContentLoaded", function () {
       if (e.target.closest(".fa-trash-alt")) {
         const row = e.target.closest("tr");
         const productId = row.cells[0].textContent;
-        if (confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) {
-          deleteProduct(productId);
-        }
+        showDeleteConfirmation(productId, "product");
       }
     });
   }

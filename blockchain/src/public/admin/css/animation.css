@@ -32,21 +32,63 @@
     animation: fadeInDropdown 0.3s ease-out;
 }
 
-@keyframes fadeInNotification {
-    from {
-        opacity: 0;
-        transform: translate(-50%, -10px);
-    }
-    to {
-        opacity: 1;
-        transform: translate(-50%, 0);
-    }
-}
-
+/* Animation cho notification panel */
 .notification-panel {
-    animation: fadeInNotification 0.3s ease-out;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    animation: hidePanel 0.3s ease forwards;
 }
 
 .notification-panel.show {
-    display: block;
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    animation: showPanel 0.3s ease forwards;
+}
+
+@keyframes showPanel {
+    0% {
+        opacity: 0;
+        transform: translateY(10px);
+        visibility: hidden;
+    }
+    1% {
+        visibility: visible;
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+        visibility: visible;
+    }
+}
+
+@keyframes hidePanel {
+    0% {
+        opacity: 1;
+        transform: translateY(0);
+        visibility: visible;
+    }
+    99% {
+        visibility: visible;
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(10px);
+        visibility: hidden;
+    }
+}
+
+@keyframes fadeInNotification {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }

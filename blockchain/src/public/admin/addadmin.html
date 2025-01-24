@@ -4,6 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Thêm Admin</title>
+    <script>
+      (function () {
+        document.documentElement.classList.add(localStorage.getItem('theme') || 'light-theme');
+      })();
+    </script>
     <link
       rel="stylesheet"
       href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
@@ -13,53 +18,40 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
     />
     <link rel="stylesheet" href="./css/style.css" />
+    <link rel="stylesheet" href="./css/header.css">
+    <link rel="stylesheet" href="./css/main.css">
     <link rel="stylesheet" href="./css/responsive.css" />
     <link rel="stylesheet" href="./css/animation.css" />
     <link rel="stylesheet" href="./css/theme.css" />
   </head>
   <body onload="time()">
     <div id="messageContainer"></div>
-    <header class="text-white py-2">
-      <div class="container-fluid">
-        <div class="row align-items-center">
-          <div class="col-3 col-md-3 header-logo">
-            <a href="#"
-              ><img
-                src="..\hinhanh\Bitcoin-Blockchain-Network-icon-on-transparent-background-PNG.png"
-                alt="Logo"
-                class="img-fluid"
-                style="max-height: 50px"
-            /></a>
+    <header class="text-white">
+
+      <div class="header-container">
+        <!-- Logo -->
+        <div class="header-left">
+          <a href="#" class="header-logo">
+            <img src="..\hinhanh\Bitcoin-Blockchain-Network-icon-on-transparent-background-PNG.png" alt="Logo">
+          </a>
+        </div>
+      
+        <!-- Title -->
+        <div class="header-title">
+          <h2>THÊM ADMIN MỚI</h2>
+        </div>
+      
+        <!-- Actions: Notification, Theme, Profile -->
+        <div class="header-right">
+          <div class="action-item notification-item">
+            <i class="fas fa-bell" id="notificationIcon" title="Thông báo"></i>
+            <span class="badge badge-danger noti_count"></span>
           </div>
-          <div class="col-6 col-md-5 text-center header-title">
-            <h2 class="mb-0 h4">THÊM ADMIN MỚI</h2>
+          <div class="action-item">
+            <i class="fas fa-sun" id="themeIcon" title="Đổi giao diện"></i>
           </div>
-          <div class="col-3 col-md-3 text-right header-icons">
-            <div class="d-inline-block position-relative mr-3">
-              <i class="fas fa-bell" id="notificationIcon"></i>
-              <span class="badge badge-danger noti_count"></span>
-            </div>
-            <div class="d-inline-block position-relative ml-auto text-right">
-              <i class="fas fa-user profile-pic" id="profileIcon"></i>
-              <div
-                class="dropdown-menu dropdown-menu-right fade-in"
-                style="display: none"
-              >
-                <div class="dropdown-header">
-                  <i class="fas fa-user-circle"></i>
-                  <span class="section-title" id="section-title-red"
-                    >XIN CHÀO</span
-                  >
-                </div>
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="./caidat.html">
-                  <i class="fas fa-cog"></i> Cài đặt
-                </a>
-                <a class="dropdown-item" href="../account/dangnhap.html">
-                  <i class="fas fa-sign-out-alt"></i> Đăng xuất
-                </a>
-              </div>
-            </div>
+          <div class="action-item">
+            <i class="fas fa-sign-out-alt" id="logoutIcon" title="Đăng xuất"></i>
           </div>
         </div>
       </div>
@@ -70,28 +62,21 @@
     <div class="container-fluid">
       <div class="row">
         <nav class="col-md-2 sidebar">
-          <a href="admintest.html" class="menu-item rounded"
-            ><i class="fas fa-home"></i> Trang chủ</a
-          >
+          <div class="section-title"></div>
+          <a href="admintest.html" class="menu-item rounded mt-2"><i class="fas fa-home"></i> Trang chủ</a>
           <div class="divider"></div>
           <div class="section-title">CHỨC NĂNG</div>
-          <a href="user.html" class="menu-item rounded"
-            ><i class="fas fa-users"></i> Quản lý người dùng</a
-          >
+          <a href="user.html" class="menu-item rounded"><i class="fas fa-users"></i> Quản lý người dùng</a>
           <!-- <a href="#" class="menu-item"><i class="fas fa-exchange-alt"></i> Quản lý giao dịch</a> -->
           <!-- <a href="#" class="menu-item"><i class="fas fa-cogs"></i> Quy trình</a> -->
-          <a href="product.html" class="menu-item rounded"
-            ><i class="fas fa-box"></i> Sản phẩm</a
-          >
-          <a href="region.html" class="menu-item rounded"
-            ><i class="fas fa-map-marker-alt"></i> Vùng sản xuất</a
-          >
+          <a href="product.html" class="menu-item rounded"><i class="fas fa-box"></i> Sản phẩm</a>
+          <a href="region.html" class="menu-item rounded"><i class="fas fa-map-marker-alt"></i> Vùng sản xuất</a>
           <div class="divider"></div>
           <div class="section-title">TIỆN ÍCH</div>
           <a href="stats.html" class="menu-item rounded"><i class="fas fa-chart-bar"></i> Báo cáo và thống kê</a>
-          <a href="reply.html" class="menu-item rounded"
-            ><i class="fas fa-comments"></i> Phản hồi</a
-          >
+          <a href="reply.html" class="menu-item rounded"><i class="fas fa-comments"></i> Phản hồi
+            <span class="badge badge-danger ml-2 reply-count" style="display: none;">0</span>
+          </a>
         </nav>
 
         <main class="col-md-10 col-12 px-2 offset-md-2 pt-5">
@@ -198,7 +183,7 @@
       id="notificationPanel"
     >
       <div class="notification-header">
-        <h5 class="notification-title">Thông báo</h5>
+        <h4 class="notification-title pl-1">Thông báo</h4>
 
         <button id="confirmRead" class="btn-mark-read btn-sm">
           <i class="fas fa-check-double"></i> Đánh dấu tất cả đã đọc

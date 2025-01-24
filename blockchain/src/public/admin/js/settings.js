@@ -14,6 +14,7 @@ function applySettings() {
 
   applyTheme(theme);
   document.documentElement.lang = language;
+  updateThemeIcon();
 
   // Cập nhật giá trị trong form nếu đang ở trang cài đặt
   const languageSelect = document.getElementById("language");
@@ -36,6 +37,14 @@ function applyTheme(theme) {
   document.body.classList.add(theme);
 }
 
+function updateThemeIcon() {
+  const themeIcon = document.getElementById('themeIcon');
+  if (themeIcon) {
+    const currentTheme = localStorage.getItem('theme') || 'light-theme';
+    themeIcon.className = currentTheme === 'light-theme' ? 'fas fa-moon' : 'fas fa-sun';
+  }
+}
+
 // Áp dụng cài đặt khi trang được tải
 document.addEventListener("DOMContentLoaded", applySettings);
 
@@ -51,6 +60,22 @@ if (document.getElementById("language")) {
     .getElementById("language")
     .addEventListener("change", previewSettings);
 }
+
+// Thêm event listener cho icon theme
+document.addEventListener('DOMContentLoaded', function() {
+  const themeIcon = document.getElementById('themeIcon');
+  if (themeIcon) {
+    updateThemeIcon();
+    themeIcon.addEventListener('click', function() {
+      const currentTheme = localStorage.getItem('theme') || 'light-theme';
+      const newTheme = currentTheme === 'light-theme' ? 'dark-theme' : 'light-theme';
+      
+      localStorage.setItem('theme', newTheme);
+      applyTheme(newTheme);
+      updateThemeIcon();
+    });
+  }
+});
 
 // Trong trang cài đặt, thêm event listener cho form submit
 if (document.querySelector(".settings-form")) {

@@ -13,15 +13,15 @@
     border-left: 3px solid transparent;
 }
 
-#userList .list-group-item:hover {
-    background-color: #f8f9fa;
-    border-left-color: #007bff;
+#userList .list-group-item:hover,
+#userList .list-group-item.active {
+    background-color: transparent !important;
+    border-left-color: transparent !important;
+    color: inherit !important;
 }
 
 #userList .list-group-item.active {
-    background-color: #e9ecef;
-    color: #495057;
-    border-left-color: #007bff;
+    z-index: 2;
 }
 
 #userList .list-group-item .badge {
@@ -30,7 +30,7 @@
 
 #userList .list-group-item:hover .badge,
 #userList .list-group-item.active .badge {
-    background-color: #15b91d;
+    /* background-color: #15b91d; */
     color: white;
 }
 
@@ -229,4 +229,77 @@
     .header-icons {
         font-size: 1rem;
     }
+}
+
+/* Dark theme cho chat area */
+body.dark-theme .chat-box {
+    background-color: #1a1f2c;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+body.dark-theme .chat-box .card-header {
+    background: linear-gradient(135deg, #4fd1c5, #45b7ab);
+}
+
+body.dark-theme .chat-box .card-body {
+    background-color: #0a0e17;
+}
+
+body.dark-theme #messageList {
+    background-color: #0a0e17;
+}
+
+/* Dark theme cho tin nhắn */
+body.dark-theme #messageList .list-group-item:not(.admin-message) {
+    background-color: #2a3142;
+    color: #e0e0e0;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+body.dark-theme #messageList .list-group-item.admin-message {
+    background-color: #4fd1c5;
+    color: #1a1f2c;
+    font-weight: 500;
+}
+
+/* Dark theme cho form nhập tin nhắn */
+body.dark-theme #messageForm {
+    background-color: #1a1f2c;
+    border-top: 1px solid #2a3142;
+}
+
+body.dark-theme #messageInput {
+    background-color: #2a3142;
+    color: #e0e0e0;
+}
+
+body.dark-theme #messageInput:focus {
+    box-shadow: 0 0 0 2px rgba(79, 209, 197, 0.2);
+}
+
+body.dark-theme #messageForm button {
+    background-color: #4fd1c5;
+}
+
+body.dark-theme #messageForm button:hover {
+    background-color: #45b7ab;
+}
+
+/* body.dark-theme .message-time {
+    color: #8b9cb3;
+} */
+
+body.dark-theme #messageList .no-messages {
+    color: #8b9cb3;
+}
+
+/* Bỏ hiệu ứng hover cho list-group-item */
+body.dark-theme #userList .list-group-item:hover {
+    background-color: #2a3142;
+}
+
+/* Giữ nguyên màu badge khi hover */
+body.dark-theme #userList .list-group-item:hover .badge {
+    background-color: #4fd1c5;
+    color: #1a1f2c;
 }

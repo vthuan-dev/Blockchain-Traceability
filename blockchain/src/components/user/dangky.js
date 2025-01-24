@@ -438,7 +438,7 @@ module.exports = (db) => {
           .status(500)
           .json({
             error:
-              "Không thể gửi email xác thực. Vui lòng kiểm tra cấu hình email.",
+              "Không thể gửi email xác thực. Vui lòng kiểm tra email của bạn.",
           });
       } else {
         res
