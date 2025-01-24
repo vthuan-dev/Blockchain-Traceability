@@ -8,7 +8,7 @@ body {
 
 /* Header styles */
 :root {
-    --header-height: 70px; /* Thay đổi giá trị này nếu chiều cao header thay đổi */
+    --header-height: 60px; /* Thay đổi giá trị này nếu chiều cao header thay đổi */
 }
 
 .chart-container {

@@ -267,7 +267,7 @@ main {
     border-left: 4px solid #4CAF50;
 }
 
-.notification-list, .activity-list {
+/* .notification-list, .activity-list {
     margin-top: 15px;
 }
 
@@ -283,7 +283,7 @@ main {
 .notification-item i, .activity-item i {
     margin-right: 10px;
     font-size: 8px;
-}
+} */
 
 .bg-green { background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); }
 .bg-blue { background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%); }

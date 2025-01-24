@@ -195,11 +195,11 @@ body.dark-theme .notification-header {
     border-bottom: 1px solid #2a3142;
 }
 
-/* body.dark-theme .notification-title {
+body.dark-t heme .notification-title {
     color: #e0e0e0;
     font-size: 18px;
     margin: 0;
-} */
+}
 
 body.dark-theme #confirmRead {
     background-color: transparent;
@@ -338,4 +338,82 @@ body.dark-theme .table-striped tbody tr:nth-of-type(odd) {
 body.dark-theme .table-striped tbody tr:nth-of-type(odd):hover {
     background-color: #2a3142; 
     color: #ffffff;
+}
+
+/* Light theme cho notification */
+body.light-theme .notification-panel {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 12px;
+}
+
+body.light-theme .notification-header {
+    border-bottom: 1px solid #e0e0e0;
+    color: #333333;
+    padding: 0 0 12px 0;
+}
+
+body.light-theme .notification-header h5 {
+    font-size: 1rem;
+    margin: 0;
+}
+
+body.light-theme .notification-item {
+    padding: 10px 0;
+    font-size: 0.9rem;
+}
+
+body.light-theme .header-right .action-item:hover i {
+    color: #f5f5f5;
+}
+
+body.light-theme .btn-mark-read {
+    background-color: transparent;
+    border: 1px solid #4caf50;
+    color: #4caf50;
+    padding: 4px 8px;
+    font-size: 0.85rem;
+}
+
+body.light-theme .btn-mark-read:hover {
+    background-color: #4caf50;
+    color: #ffffff;
+}
+
+/* Dark theme cho notification */
+body.dark-theme .notification-panel {
+    background-color: #1a1f2c;
+    border: 1px solid #2a3142;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    padding: 12px;
+}
+
+body.dark-theme .notification-header {
+    border-bottom: 1px solid #2a3142;
+    color: #e0e0e0;
+    padding: 0 0 12px 0;
+}
+
+body.dark-theme .notification-header h5 {
+    font-size: 1rem;
+    margin: 0;
+}
+
+body.dark-theme .notification-item {
+    padding: 10px 0;
+    font-size: 0.9rem;
+}
+
+body.dark-theme .btn-mark-read {
+    background-color: transparent;
+    border: 1px solid #4fd1c5;
+    color: #4fd1c5;
+    padding: 4px 8px;
+    font-size: 0.85rem;
+}
+
+body.dark-theme .btn-mark-read:hover {
+    background-color: #4fd1c5;
+    color: #1a1f2c;
 }
