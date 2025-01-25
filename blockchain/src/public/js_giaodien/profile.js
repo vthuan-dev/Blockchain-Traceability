@@ -1,3 +1,6 @@
+import { loadNotifications as loadProducerNotifications } from './thongbaoNSX.js';
+import { loadNotifications as loadInspectorNotifications } from './thongbaoNKD.js';
+
 document.addEventListener("DOMContentLoaded", async function () {
   try {
     const response = await fetch("/api/user-info");
@@ -19,8 +22,28 @@ document.addEventListener("DOMContentLoaded", async function () {
         navItems.innerHTML += `
                     <li class="nav-item"><a class="nav-link" href="./san-xuat/sanxuat.html">Quản lí lô hàng</a></li>
                     <li class="nav-item"><a class="nav-link" href="./san-xuat/nhatky-hoatdong.html">Quản lí hoạt động</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Thông báo</a></li>
+                    <li class="nav-item dropdown" style="position: relative;">
+                        <a class="nav-link dropdown-toggle" href="#" id="notificationDropdown" role="button" data-toggle="dropdown">
+                            <i class="fas fa-bell"></i>
+                            <span class="badge badge-danger" id="notification-count">0</span>
+                        </a>
+                        <div class="dropdown-menu notification-menu" aria-labelledby="notificationDropdown">
+                            <div class="notification-header">
+                                <h6 class="dropdown-header">Thông báo</h6>
+                                <button class="btn btn-sm" id="markAllRead">
+                                    <i class="fas fa-check-double mr-1"></i>
+                                    Đánh dấu tất cả đã đọc
+                                </button>
+                            </div>
+                            <div class="notification-list" id="notificationList">
+                                <!-- Notifications will be inserted here   -->
+                            </div>
+                        </div>
+                    </li>
                 `;
+
+        // Gọi trực tiếp hàm load thông báo
+        loadProducerNotifications();
       } else if (roleId === 2) {
         // Người kiểm duyệt
         navbarBrand.setAttribute("href", "../kiem-duyet/nhakiemduyet.html");
@@ -28,8 +51,28 @@ document.addEventListener("DOMContentLoaded", async function () {
         navItems.innerHTML += `
                     <li class="nav-item"><a class="nav-link" href="../kiem-duyet/nhakiemduyet.html">Quản lí lô hàng</a></li>
                     <li class="nav-item"><a class="nav-link" href="../kiem-duyet/nhatky-hoatdong.html">Quản lí hoạt động</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Thông báo</a></li>
+                    <li class="nav-item dropdown" style="position: relative;">
+                        <a class="nav-link dropdown-toggle" href="#" id="notificationDropdown" role="button" data-toggle="dropdown">
+                            <i class="fas fa-bell"></i>
+                            <span class="badge badge-danger" id="notification-count">0</span>
+                        </a>
+                        <div class="dropdown-menu notification-menu" aria-labelledby="notificationDropdown">
+                            <div class="notification-header">
+                                <h6 class="dropdown-header">Thông báo</h6>
+                                <button class="btn btn-sm" id="markAllRead">
+                                    <i class="fas fa-check-double mr-1"></i>
+                                    Đánh dấu tất cả đã đọc
+                                </button>
+                            </div>
+                            <div class="notification-list" id="notificationList">
+                                <!-- Notifications will be inserted here   -->
+                            </div>
+                        </div>
+                    </li>
                 `;
+
+        // Gọi trực tiếp hàm load thông báo
+        loadInspectorNotifications();
       } else if (roleId === 3) {
         // Admin
         navItems.innerHTML += `
@@ -116,3 +159,5 @@ function hasDataChanged() {
     avatarInput.files.length > 0
   );
 }
+
+

@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="../css/them-lo-hang.css">
     <link rel="stylesheet" href="../css/nav-bar.css">
     <link rel="stylesheet" href="../css/chatbox.css">
+    <link rel="stylesheet" href="../css/thongbao.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
     <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
@@ -35,8 +36,23 @@
                 <li class="nav-item">
                     <a class="nav-link" href="#">Quản lí hoạt động</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Thông báo</a>
+                <li class="nav-item dropdown" style="position: relative;">
+                    <a class="nav-link dropdown-toggle" href="#" id="notificationDropdown" role="button" data-toggle="dropdown">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge badge-danger" id="notification-count">0</span>
+                    </a>
+                    <div class="dropdown-menu notification-menu" aria-labelledby="notificationDropdown">
+                        <div class="notification-header">
+                            <h6 class="dropdown-header">Thông báo</h6>
+                            <button class="btn btn-sm" id="markAllRead">
+                                <i class="fas fa-check-double mr-1"></i>
+                                Đánh dấu tất cả đã đọc
+                            </button>
+                        </div>
+                        <div class="notification-list" id="notificationList">
+                            <!-- Notifications will be inserted here   -->
+                        </div>
+                    </div>
                 </li>
             </ul>
             <ul class="navbar-nav ml-auto">
@@ -142,6 +158,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="../chatbox/chatbox.js"></script>
+    <script type="module" src="../js_giaodien/thongbaoNSX.js"></script>
 
     <script>
        function toggleChat() {
