@@ -211,7 +211,7 @@ app.get("/api/products", async (req, res) => {
 
 app.get("/api/nhasanxuat", async (req, res) => {
   try {
-    const [rows] = await db.query("SELECT * FROM users WHERE role_id = 1");
+    const [rows] = await db.query("SELECT * FROM users join roles on users.role_id = roles.role_id left join regions on users.region_id = regions.region_id WHERE users.role_id = 1");
     res.json(rows);
   } catch (err) {
     console.error("Lỗi khi lấy danh sách nhà sản xuất:", err.message);
@@ -221,7 +221,7 @@ app.get("/api/nhasanxuat", async (req, res) => {
 
 app.get("/api/nhakiemduyet", async (req, res) => {
   try {
-    const [rows] = await db.query("SELECT * FROM users WHERE role_id = 2");
+    const [rows] = await db.query("SELECT * FROM users join roles on users.role_id = roles.role_id left join regions on users.region_id = regions.region_id WHERE users.role_id = 2");
     res.json(rows);
   } catch (err) {
     console.error("Lỗi khi lấy danh sách nhà kiểm duyệt:", err.message);

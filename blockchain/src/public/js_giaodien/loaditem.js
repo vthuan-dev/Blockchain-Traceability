@@ -128,3 +128,45 @@ function createUserCard(user) {
         </div>
     `;
 }
+
+// Hàm tạo card cho nhà kiểm duyệt
+function createInspectorCard(inspector) {
+    return `
+        <div class="col-md-3 col-6 mb-3" data-aos="fade-up">
+            <a href="trangcanhan.html?uid=${inspector.uid}" class="text-decoration-none">
+                <div class="card user-card" data-uid="${inspector.uid}">
+                    <div class="card-img-wrapper">
+                        <img src="${inspector.avatar || 'https://static.vecteezy.com/system/resources/previews/009/292/244/non_2x/default-avatar-icon-of-social-media-user-vector.jpg'}" 
+                             class="card-img-top" 
+                             alt="${inspector.name}">
+                    </div>
+                    <div class="card-body text-center">
+                        <h5 class="card-title">${inspector.name}</h5>
+                        ${inspector.region_name ? `<div class="vung">${inspector.region_name}</div>` : ''}
+                    </div>
+                </div>
+            </a>
+        </div>
+    `;
+}
+
+// Hàm tạo card cho nhà sản xuất
+function createProducerCard(producer) {
+    return `
+        <div class="col-md-3 col-6 mb-3" data-aos="fade-up">
+            <a href="trangcanhan.html?uid=${producer.uid}" class="text-decoration-none">
+                <div class="card user-card" data-uid="${producer.uid}">
+                    <div class="card-img-wrapper">
+                        <img src="${producer.avatar || 'https://static.vecteezy.com/system/resources/previews/009/292/244/non_2x/default-avatar-icon-of-social-media-user-vector.jpg'}" 
+                             class="card-img-top" 
+                             alt="${producer.name}">
+                    </div>
+                    <div class="card-body text-center">
+                        <h5 class="card-title">${producer.name}</h5>
+                        ${producer.region_name ? `<div class="vung">${producer.region_name}</div>` : ''}
+                    </div>
+                </div>
+            </a>
+        </div>
+    `;
+}

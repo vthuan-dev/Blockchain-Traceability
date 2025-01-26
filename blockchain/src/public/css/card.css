@@ -1,0 +1,184 @@
+.card {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+    background: white;
+    margin-bottom: 15px;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.card-img-wrapper {
+    position: relative;
+    padding-top: 85%;
+    /* Giảm chiều cao của khung ảnh */
+    overflow: hidden;
+}
+
+.card-img-top {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.card-body {
+    padding: 0.8rem;
+}
+
+.card-title {
+    font-size: 0.95rem;
+    margin-bottom: 0.3rem;
+    color: #333;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+/* User Card Specific Styles */
+.user-card .chucdanh {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 0.3rem;
+}
+
+.user-card .vung {
+    font-size: 0.8rem;
+    color: #888;
+}
+
+/* Product Card Specific Styles */
+.product-card .card-title {
+    margin-bottom: 0;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .col-6 {
+        padding: 4px;
+    }
+
+    .card {
+        margin-bottom: 8px;
+    }
+
+    .card-body {
+        padding: 0.6rem;
+    }
+
+    .card-title {
+        font-size: 0.85rem;
+    }
+
+    .card-img-wrapper {
+        padding-top: 80%;
+        /* Giảm chiều cao ảnh trên mobile */
+    }
+
+    .user-card .chucdanh {
+        font-size: 0.8rem;
+    }
+
+    .user-card .vung {
+        font-size: 0.7rem;
+    }
+}
+
+/* Load More Button Style */
+.load-more-btn {
+    background-color: #78e08f;
+    border: none;
+    padding: 8px 25px;
+    border-radius: 20px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    margin: 20px auto;
+    display: block;
+}
+
+.load-more-btn:hover {
+    background-color: #167e4d;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.load-more-btn:active {
+    transform: translateY(0);
+}
+
+/* CSS for the product ID */
+.sanpham-id {
+    font-size: 0.9rem;
+    color: #777;
+    margin-top: 10px;
+}
+
+/* Keyframes for fadeInUp animation */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* CSS for the highlighted product heading */
+.highlighted-heading {
+    font-size: 2rem;
+    color: #333;
+    text-align: center;
+    margin: 20px 0;
+    position: relative;
+    animation: fadeIn 1s ease-out;
+}
+
+/* Keyframes for fadeIn animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.highlighted-heading::after {
+    content: '';
+    display: block;
+    width: 50px;
+    height: 3px;
+    background: #ff6347;
+    margin: 10px auto 0;
+}
+
+.text-danger.h2 {
+    color: #18ad51 !important;
+}
+
+/* Custom styles for the image */
+.custom-img {
+    border-radius: 10px;
+    /* Bo tròn các góc */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    /* Thêm bóng đổ */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    /* Hiệu ứng chuyển đổi */
+}
+
+.custom-img:hover {
+    transform: scale(1.05);
+    /* Phóng to khi hover */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    /* Tăng bóng đổ khi hover */
+}

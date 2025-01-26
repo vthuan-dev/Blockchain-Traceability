@@ -76,60 +76,15 @@
         </div>
 
         <div class="sanpham">
-            <h2 class="highlighted-heading" data-aos="fade-up">
-                Thông tin sản phẩm
-            </h2>
+            <h2 class="highlighted-heading" data-aos="fade-up">Thông tin sản phẩm</h2>
             <div class="row">
-                <div class="col-md-3 col-6 mb-4" data-aos="fade-up">
-                    <div class="card">
-                        <img src="./hinhanh/5-hinh-anh-cay-buoi-nam-roi-inkythuatso-21-15-48-49.jpg" class="card-img-top" alt="...">
-                        <div class="card-body">
-                            <h5 class="card-title">Bưởi năm roi</h5>
-                            <div class="sanpham-id">
-                                NS123456
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3 col-6 mb-4" data-aos="fade-up">
-                    <div class="card justify-content-center" >
-                        <img src="./hinhanh/5-hinh-anh-cay-buoi-nam-roi-inkythuatso-21-15-48-49.jpg" class="card-img-top" alt="...">
-                        <div class="card-body">
-                            <h5 class="card-title">Bưởi năm roi</h5>
-                            <div class="sanpham-id">
-                                NS123456
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3 col-6 mb-4" data-aos="fade-up">
-                    <div class="card">
-                        <img src="./hinhanh/5-hinh-anh-cay-buoi-nam-roi-inkythuatso-21-15-48-49.jpg" class="card-img-top" alt="...">
-                        <div class="card-body">
-                            <h5 class="card-title">Bưởi năm roi</h5>
-                            <div class="sanpham-id">
-                                NS123456
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3 col-6 mb-4" data-aos="fade-up">
-                    <div class="card">
-                        <img src="./hinhanh/5-hinh-anh-cay-buoi-nam-roi-inkythuatso-21-15-48-49.jpg" class="card-img-top" alt="...">
-                        <div class="card-body">
-                            <h5 class="card-title">Bưởi năm roi</h5>
-                            <div class="sanpham-id">
-                                NS123456
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div> 
+                <!-- Các sản phẩm sẽ được thêm vào đây bởi JavaScript -->
+            </div>
         </div>
     
-        <div class="text-center my-2">
+        <!-- <div class="text-center my-2">
             <button id="loadMore" class="btn btn-primary" data-aos="fade-up">Xem thêm</button>
-        </div>
+        </div> -->
 
         <div class="chat-icon" id="openChat" onclick="toggleChat()">
             <i class="fas fa-comments"></i>
@@ -195,7 +150,20 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="../js_giaodien/loaditem.js"></script>
     <script src="../chatbox/chatbox.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            // Load sản phẩm
+            await loadItems(
+                '/api/products-home',
+                '.sanpham .row',
+                8,
+                createProductCard
+            );
+        });
+    </script>
 
     <script>
        function toggleChat() {

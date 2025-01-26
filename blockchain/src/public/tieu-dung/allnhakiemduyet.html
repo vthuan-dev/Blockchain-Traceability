@@ -81,10 +81,6 @@
                 <!-- Nội dung sẽ được thêm vào đây bằng JavaScript -->
             </div>
         </div>
-    
-        <div class="text-center my-2">
-            <button id="loadMore" class="btn btn-primary" data-aos="fade-up">Xem thêm</button>
-        </div>
 
         <div class="chat-icon" id="openChat" onclick="toggleChat()">
             <i class="fas fa-comments"></i>
@@ -169,41 +165,17 @@
         }
     </script>
     
+    <script src="../js_giaodien/loaditem.js"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
-            try {
-                const response = await fetch('/api/nhakiemduyet');
-                const data = await response.json();
-                const container = document.getElementById('nhakiemduyet-container');
-
-                data.forEach((user, index) => {
-                    if (index % 4 === 0 && index !== 0) {
-                        container.appendChild(document.createElement('div')).classList.add('w-100');
-                    }
-
-                    const col = document.createElement('div');
-                    col.classList.add('col-md-3', 'col-6', 'mb-4');
-                    col.setAttribute('data-aos', 'fade-up');
-
-                    const avatarPath = user.avatar.split('avatars').pop();
-
-                    col.innerHTML = `
-                        <a href="trangcanhan.html">
-                            <div class="card">
-                                <img src="uploads/avatars${avatarPath}" class="card-img-top" alt="...">
-                                <div class="card-body">
-                                    <h5 class="card-title">${user.name}</h5>
-                                    <div class="sanpham-id"><span>ID nhà kiểm duyệt: </span> ${user.uid}</div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-
-                    container.appendChild(col);
-                });
-            } catch (error) {
-                console.error('Lỗi khi lấy danh sách nhà kiểm duyệt:', error);
-            }
+            // Load nhà kiểm duyệt với 8 items mỗi trang
+            await loadItems(
+                '/api/nhakiemduyet',
+                '#nhakiemduyet-container',
+                8,
+                createInspectorCard
+            );
         });
     </script>
 </body>
