@@ -103,67 +103,6 @@ body {
     margin: 10px auto 0;
 }
 
-/* Footer styles */
-.footer {
-    background-color: #f0f2f5;
-    /* Màu nền nhẹ nhàng */
-    color: #d0dceb;
-    /* Màu chữ tối */
-    padding: 40px 0;
-    border-radius: 20px 20px 0 0;
-    /* Bo tròn góc trên */
-    box-shadow: 0 -5px 15px rgba(99, 146, 97, 0.1);
-    /* Thêm bóng đổ nhẹ */
-    height: 240px;
-}
-
-.footer.bg-dark {
-    background-color: #78e08f !important;
-}
-
-.footer h3 {
-    font-size: 1.5rem;
-    margin-bottom: 20px;
-    color: #167e4d;
-    /* Màu xanh của Google */
-    font-weight: 600;
-}
-
-.footer p {
-    font-size: 1rem;
-    line-height: 1.6;
-    color: #5f6368;
-    /* Màu chữ nhạt hơn */
-}
-
-.footer a {
-    color: #338b67;
-    /* Màu link */
-    text-decoration: none;
-    transition: color 0.3s ease;
-}
-
-.footer a:hover {
-    color: #174ea6;
-    /* Màu link khi hover */
-    text-decoration: underline;
-}
-
-.footer .col-md-4 {
-    margin-bottom: 20px;
-}
-
-.footer .social-links a {
-    display: inline-block;
-    margin-right: 15px;
-    font-size: 1.2rem;
-    color: #1a73e8;
-}
-
-.footer .social-links a:hover {
-    color: #174ea6;
-}
-
 .text-danger.h2 {
     color: #18ad51 !important;
 }
@@ -405,10 +344,10 @@ body {
 }
 
 /* Hiệu ứng active cho nav-link */
-.navbar-nav .nav-item.active .nav-link {
+/* .navbar-nav .nav-item.active .nav-link {
     background-color: #4cd137;
     font-weight: bold;
-}
+} */
 
 /* Hiệu ứng hover cho dropdown */
 .navbar-nav .dropdown-menu {
@@ -514,58 +453,3 @@ body {
     text-align: center;
 }
 
-/* Footer styles */
-.footer {
-    background-color: #f0f2f5;
-    /* Màu nền nhẹ nhàng */
-    color: #333;
-    /* Màu chữ tối */
-    padding: 10px 0;
-    border-radius: 20px 20px 0 0;
-    /* Bo tròn góc trên */
-    box-shadow: 0 -5px 15px rgba(99, 146, 97, 0.1);
-    /* Thêm bóng đổ nhẹ */
-}
-
-.footer h3 {
-    font-size: 1.5rem;
-    margin-bottom: 20px;
-    color: #167e4d;
-    /* Màu xanh của Google */
-    font-weight: 600;
-}
-
-.footer p {
-    font-size: 1rem;
-    line-height: 1.6;
-    color: #5f6368;
-    /* Màu chữ nhạt hơn */
-}
-
-.footer a {
-    color: #338b67;
-    /* Màu link */
-    text-decoration: none;
-    transition: color 0.3s ease;
-}
-
-.footer a:hover {
-    color: #174ea6;
-    /* Màu link khi hover */
-    text-decoration: underline;
-}
-
-.footer .col-md-4 {
-    margin-bottom: 20px;
-}
-
-.footer .social-links a {
-    display: inline-block;
-    margin-right: 15px;
-    font-size: 1.2rem;
-    color: #1a73e8;
-}
-
-.footer .social-links a:hover {
-    color: #174ea6;
-}

@@ -1,0 +1,107 @@
+/* Footer styles */
+.footer {
+    background-color: #343a40;  /* Màu nền tối */
+    color: #ffffff;
+    padding: 50px 0 30px;
+    margin-top: 50px;
+}
+
+.footer h3 {
+    font-size: 1.2rem;
+    margin-bottom: 25px;
+    color: #78e08f;  /* Màu xanh làm nổi bật tiêu đề */
+    font-weight: 600;
+    position: relative;
+}
+
+.footer h3::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -8px;
+    width: 30px;
+    height: 2px;
+    background-color: #78e08f;
+}
+
+.footer p {
+    font-size: 0.9rem;
+    line-height: 1.8;
+    color: #b2bec3;  /* Màu text nhạt hơn */
+    margin-bottom: 12px;
+}
+
+.footer a {
+    color: #b2bec3;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.footer a:hover {
+    color: #78e08f;
+    text-decoration: none;
+}
+
+.social-links {
+    margin-top: 20px;
+}
+
+.social-links a {
+    display: inline-block;
+    width: 35px;
+    height: 35px;
+    background-color: rgba(120, 224, 143, 0.1);  /* Màu nền icon nhẹ */
+    border-radius: 50%;
+    text-align: center;
+    line-height: 35px;
+    margin-right: 10px;
+    transition: all 0.3s ease;
+}
+
+.social-links a:hover {
+    background-color: #78e08f;
+    color: #343a40;
+    transform: translateY(-3px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .footer {
+        padding: 30px 0;
+        text-align: center;
+    }
+
+    .footer h3::after {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .footer .col-md-4 {
+        margin-bottom: 30px;
+    }
+
+    .social-links {
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+
+    .d-none.d-md-block {
+        display: block !important;
+    }
+
+    .footer .col-md-4:not(:last-child) {
+        padding-bottom: 20px;
+        margin-bottom: 20px;
+        border-bottom: 1px solid rgba(178, 190, 195, 0.1);
+    }
+}
+
+/* Animation cho hover effects */
+@keyframes slideRight {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(5px);
+    }
+}
