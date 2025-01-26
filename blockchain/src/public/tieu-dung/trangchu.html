@@ -177,6 +177,7 @@
     <script src="https://cdn.jsdelivr.net/npm/babel-standalone/babel.min.js"></script>
     <script src="../../components/tieu-dung/trang-chu.js"></script>
     <script src="../chatbox/chatbox.js"></script>
+    <script src="../js_giaodien/loaditem.js"></script>
 
     <script>
       function toggleChat() {
@@ -197,102 +198,27 @@
       }
     </script>
     <script>
-      // lấy danh sách sản phẩm để hiển thị trên trang chủ
       document.addEventListener("DOMContentLoaded", async () => {
-        try {
-          const response = await fetch("/api/products-home");
-          const products = await response.json();
-
-          const productContainer = document.querySelector(".sanpham .row");
-          products.forEach((product) => {
-            const productCard = `
-                    <div class="col-md-3 col-6 mb-4" data-aos="fade-up">
-                        <a href="sanpham.html?id=${product.product_id}" class="text-decoration-none">
-                            <div class="card">
-                                <img src="${product.img}" class="card-img-top" alt="${product.product_name}">
-                                <div class="card-body">
-                                    <h5 class="card-title">${product.product_name}</h5>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                `;
-            productContainer.innerHTML += productCard;
-          });
-        } catch (error) {
-          console.error("Lỗi khi lấy danh sách sản phẩm:", error);
-        }
+        // Load sản phẩm
+        await loadItems(
+            '/api/products-home',
+            '.sanpham .row',
+            8,
+            createProductCard
+        );
+        
+        // Load người dùng
+        await loadItems(
+            '/api/users-home',
+            '.thanhvien .row',
+            8,
+            createUserCard
+        );
+        
+        // Thêm sự kiện click cho user cards
+        addUserCardClickEvents();
       });
     </script>
-    <script>
-      // lấy danh sách người dùng để hiển thị trên trang chủ
-      document.addEventListener("DOMContentLoaded", async () => {
-        try {
-          const response = await fetch("/api/users-home");
-          const users = await response.json();
-
-          const userContainer = document.querySelector(".thanhvien .row");
-          users.forEach((user) => {
-            const userCard = `
-            <div class="col-md-3 col-6 mb-4" data-aos="fade-up">
-                <div class="card user-card" data-uid="${user.uid}">
-                    <img src="${user.avatar}" class="card-img-top" alt="${
-              user.name
-            }">
-                    <div class="card-body">
-                        <h5 class="card-title">${user.name}</h5>
-                        <div class="chucdanh">${user.role_name}</div>
-                        <div class="vung">${
-                          user.region_name || "Không xác định"
-                        }</div>
-                    </div>
-                </div>
-            </div>
-        `;
-            userContainer.innerHTML += userCard;
-          });
-
-          // Thêm sự kiện click vào mỗi thẻ người dùng
-          document.querySelectorAll(".user-card").forEach((card) => {
-            card.addEventListener("click", () => {
-              const userId = card.getAttribute("data-uid");
-              window.location.href = `trangcanhan.html?uid=${userId}`;
-            });
-          });
-        } catch (error) {
-          console.error("Lỗi khi lấy danh sách người dùng:", error);
-        }
-      });
-
-      document.addEventListener("DOMContentLoaded", async () => {
-        const userId = getUserIdFromURL(); // Hàm để lấy userId từ URL hoặc session
-
-        try {
-          const response = await fetch(`/api/user/${userId}`);
-          const user = await response.json();
-
-          if (response.status !== 200) {
-            throw new Error(user.error || "Lỗi không xác định");
-          }
-
-          document.querySelector(".profile-img").src = user.avatar;
-          document.querySelector(".profile-name").textContent = user.name;
-          document.querySelector(".profile-phone").textContent = user.phone;
-          document.querySelector(".profile-address").textContent = user.address;
-          document.querySelector(".profile-region").textContent =
-            user.region_name || "Không xác định";
-        } catch (error) {
-          console.error("Lỗi khi lấy thông tin chi tiết người dùng:", error);
-        }
-      });
-
-      function getUserIdFromURL() {
-        // Hàm để lấy userId từ URL hoặc session
-        const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get("uid") || sessionStorage.getItem("userId");
-      }
-    </script>
-
     <script>
       document.addEventListener("click", function (event) {
         var isClickInside = document

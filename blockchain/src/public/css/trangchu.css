@@ -22,35 +22,115 @@ body {
 }
 
 .card {
-    border: 1px solid #ddd;
-
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s, box-shadow 0.2s;
-    animation: fadeInUp 0.5s ease-out;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+    background: white;
+    margin-bottom: 15px;
 }
 
 .card:hover {
-    transform: scale(1.05);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
-/* CSS for the card image */
+.card-img-wrapper {
+    position: relative;
+    padding-top: 85%; /* Giảm chiều cao của khung ảnh */
+    overflow: hidden;
+}
+
 .card-img-top {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
-    height: 200px;
-    /* Đặt chiều cao cố định */
+    height: 100%;
     object-fit: cover;
-    /* Đảm bảo ảnh được cắt để vừa với khung */
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
 }
 
-/* CSS for the card title */
+.card-body {
+    padding: 0.8rem;
+}
+
 .card-title {
-    font-size: 1.25rem;
+    font-size: 0.95rem;
+    margin-bottom: 0.3rem;
     color: #333;
-    font-weight: bold;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+/* User Card Specific Styles */
+.user-card .chucdanh {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 0.3rem;
+}
+
+.user-card .vung {
+    font-size: 0.8rem;
+    color: #888;
+}
+
+/* Product Card Specific Styles */
+.product-card .card-title {
+    margin-bottom: 0;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .col-6 {
+        padding: 4px;
+    }
+    
+    .card {
+        margin-bottom: 8px;
+    }
+
+    .card-body {
+        padding: 0.6rem;
+    }
+
+    .card-title {
+        font-size: 0.85rem;
+    }
+
+    .card-img-wrapper {
+        padding-top: 80%; /* Giảm chiều cao ảnh trên mobile */
+    }
+
+    .user-card .chucdanh {
+        font-size: 0.8rem;
+    }
+
+    .user-card .vung {
+        font-size: 0.7rem;
+    }
+}
+
+/* Load More Button Style */
+.load-more-btn {
+    background-color: #78e08f;
+    border: none;
+    padding: 8px 25px;
+    border-radius: 20px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    margin: 20px auto;
+    display: block;
+}
+
+.load-more-btn:hover {
+    background-color: #167e4d;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.load-more-btn:active {
+    transform: translateY(0);
 }
 
 /* CSS for the product ID */
@@ -416,40 +496,24 @@ body {
     margin: 10px auto 0;
 }
 
-.card {
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s, box-shadow 0.2s;
-    animation: fadeInUp 0.5s ease-out;
-}
-
-.card:hover {
-    transform: scale(1.05);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-}
-
-.card-img-top {
-    width: 100%;
-    height: 200px;
-    /* Đặt chiều cao cố định */
-    object-fit: cover;
-    /* Đảm bảo ảnh được cắt để vừa với khung */
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
-}
-
-.card-title {
-    font-size: 1.25rem;
-    color: #333;
-    font-weight: bold;
-    text-align: center;
-}
-
 .vung-id {
     font-size: 0.9rem;
     color: #777;
     margin-top: 10px;
     text-align: center;
+}
+
+/* Điều chỉnh kích thước cột */
+.col-md-3 {
+    max-width: 280px; /* Giới hạn chiều rộng tối đa */
+}
+
+/* Container spacing */
+.sanpham, .thanhvien {
+    padding: 0 10px;
+}
+
+.row {
+    margin: 0 -10px;
 }
 
