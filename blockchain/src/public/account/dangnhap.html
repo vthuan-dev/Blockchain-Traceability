@@ -6,6 +6,7 @@
     <link rel="icon" type="image/x-icon" href="../hinhanh/logo_buoi.webp">
     <title>Đăng Nhập</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
         .container {
             max-width: 500px;
@@ -72,11 +73,41 @@
                 padding: 8px 16px;
             }
         }
+        
+        /* Style cho nút quay lại */
+        .back-button {
+            position: relative;
+            margin-top: 20px;
+        }
+        
+        .back-button .btn {
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        
+        .back-button .btn:hover {
+            transform: translateX(-5px);
+            background-color: #78e08f;
+            border-color: #78e08f;
+            color: white;
+        }
+        
+        .back-button i {
+            margin-right: 5px;
+        }
     </style>
 </head>
 <body>
     <div id="messageContainer"></div>
     <div class="container">
+        <!-- Thêm nút quay lại trang chủ -->
+        <div class="back-button mb-3">
+            <a href="/" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Quay lại trang chủ
+            </a>
+        </div>
+        
         <h1 class="text-center">Đăng Nhập</h1>
         <form id="loginForm" class="mt-4">
             <div class="form-group">
