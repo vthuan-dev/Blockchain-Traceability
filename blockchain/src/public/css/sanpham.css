@@ -115,3 +115,177 @@
         padding: 15px; /* Khoảng cách bên trong */
         border-radius: 10px; /* Bo góc */
     }
+
+/* .sanpham-container {
+    padding: 2rem 0;
+} */
+
+.product-details {
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+}
+
+.product-gallery {
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.main-image {
+    position: relative;
+    width: 100%;
+    padding-top: 75%; /* Tỷ lệ khung hình 4:3 */
+    overflow: hidden;
+    border-radius: 8px;
+    background: #f8f9fa;
+}
+
+.product-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* Giữ tỷ lệ ảnh gốc */
+    object-position: center;
+    padding: 1rem;
+    transition: transform 0.3s ease;
+}
+
+/* Hiệu ứng hover cho ảnh */
+.product-img:hover {
+    transform: scale(1.05);
+    cursor: zoom-in;
+}
+
+.product-info {
+    padding-top: 2rem;
+    border-top: 1px solid #eee;
+}
+
+.product-name {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.product-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.meta-item {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.8rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin: 0 auto;
+}
+
+.meta-item .label {
+    font-weight: 600;
+    color: #34495e;
+    min-width: 120px;
+}
+
+.meta-item .value {
+    color: #2c3e50;
+    margin-left: 1rem;
+    font-weight: 500;
+}
+
+/* Style cho các section mới */
+.product-section {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.section-title {
+    font-size: 1.25rem;
+    color: #2c3e50;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #4cd137;
+}
+
+.section-content {
+    color: #555;
+    line-height: 1.6;
+}
+
+.section-content ul {
+    padding-left: 1.5rem;
+    margin-bottom: 0;
+}
+
+.section-content ul li {
+    margin-bottom: 0.5rem;
+}
+
+.section-content p {
+    margin-bottom: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .meta-item {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .meta-item .value {
+        margin-left: 0;
+        margin-top: 0.5rem;
+    }
+    
+    .product-section {
+        padding: 1rem;
+    }
+
+    .product-gallery {
+        padding: 0.5rem;
+    }
+    
+    .main-image {
+        padding-top: 100%; /* Tỷ lệ 1:1 trên mobile */
+    }
+}
+
+/* Style cho overlay khi click vào ảnh */
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 1000;
+    cursor: pointer;
+}
+
+.overlay.active {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#overlay-img {
+    max-width: 90%;
+    max-height: 90vh;
+    object-fit: contain;
+    border-radius: 8px;
+}

@@ -11,13 +11,16 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="../css/trangchu.css" />
+    <link rel="stylesheet" href="../css/nav-bar.css">
+    <link rel="stylesheet" href="../css/footer.css">
+    <link rel="stylesheet" href="../css/sanpham.css" />
+    <link rel="stylesheet" href="../css/chatbox.css" />
+    <!-- <link rel="stylesheet" href="../css/trangcanhan.css" /> -->
     <link
       href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="../css/sanpham.css" />
-    <link rel="stylesheet" href="../css/chatbox.css" />
-    <link rel="stylesheet" href="../css/trangcanhan.css" />
+    
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
@@ -84,40 +87,30 @@
     </style>
   </head>
   <body>
-    <nav
-      class="navbar custom-navbar navbar-expand-lg navbar-light bg-light custom-navbar-height"
-    >
+    <nav class="navbar custom-navbar navbar-expand-lg navbar-light bg-light custom-navbar-height">
       <div class="logo-home">
         <a href="trangchu.html">
-          <img
-            src="\hinhanh\Bitcoin-Blockchain-Network-icon-on-transparent-background-PNG.png"
-            alt="logo"
-            class="logo"
-          />
+          <img src="\hinhanh\Bitcoin-Blockchain-Network-icon-on-transparent-background-PNG.png" alt="logo" class="logo" />
         </a>
       </div>
-      <a class="navbar-brand" href="#"> Sản phẩm</a>
-      <button
-        class="navbar-toggler ml-auto"
-        type="button"
-        data-toggle="collapse"
-        data-target="#navbarNav"
-        aria-controls="navbarNav"
-        aria-expanded="false"
-        aria-label="Toggle navigation"
-      >
+      <a class="navbar-brand" href="#">Trang chủ</a>
+      <button class="navbar-toggler ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav"
+        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ml-auto">
-          <li class="nav-item active">
-            <a class="nav-link" href="allsanpham.html">Sản phẩm</a>
+          <li class="nav-item">
+            <a class="nav-link" href="/">Trang chủ</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="allnongdan.html">Nhà sản xuất</a>
+            <a class="nav-link" href="./allsanpham.html">Sản phẩm</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="allnhakiemduyet.html">Nhà kiểm duyệt</a>
+            <a class="nav-link" href="./allnongdan.html">Nhà sản xuất</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="./allnhakiemduyet.html">Nhà kiểm duyệt</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="#">Vùng sản xuất</a>
@@ -134,69 +127,94 @@
     <div class="container">
       <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="#">Trang chủ</a></li>
+          <li class="breadcrumb-item"><a href="./allsanpham.html">Sản phẩm</a></li>
           <li class="breadcrumb-item active" aria-current="page">
             Bưởi da xanh
           </li>
         </ol>
       </nav>
-      <div class="sanpham">
+      <div class="sanpham-container">
         <div class="row justify-content-center">
           <div class="col-md-8">
-            <div class="tieude text-center">
-              <div class="row no-gutters justify-content-center">
-                <div class="col-md-6 col-12 mb-3 d-flex justify-content-center">
+            <div class="product-details">
+              <div class="product-gallery">
+                <div class="main-image">
                   <img
-                    src="./hinhanh/buoi-dien-222.jpg"
+                    src="../hinhanh/buoi-dien-222.jpg"
                     alt=""
-                    class="img-fluid custom-img"
+                    class="img-fluid product-img"
                     onclick="showImage(this)"
                   />
                 </div>
               </div>
-              <div class="ten_sanpham mb-3">
-                <h3 class="font-weight-bold"></h3>
-              </div>
-              <div class="ma_sanpham">
-                <h5 class="font-weight-bold">MÃ SẢN PHẨM</h5>
-                <p></p>
-                <p>Nơi trồng: <span id="noiTrong"></span></p>
-                <p></p>
+              
+              <div class="product-info">
+                <h2 class="product-name text-center"></h2>
+                
+                <!-- Thông tin cơ bản -->
+                <div class="product-meta text-center">
+                  <div class="meta-item">
+                    <span class="label">Mã sản phẩm:</span>
+                    <span class="value product-id"></span>
+                  </div>
+                  <div class="meta-item">
+                    <span class="label">Giá bán:</span>
+                    <span class="value product-price"></span>
+                  </div>
+                </div>
+
+                <!-- Mô tả sản phẩm -->
+                <div class="product-section">
+                  <h3 class="section-title">Mô tả sản phẩm</h3>
+                  <div class="section-content mota">
+                    <p></p>
+                  </div>
+                </div>
+
+                <!-- Công dụng -->
+                <div class="product-section">
+                  <h3 class="section-title">Công dụng</h3>
+                  <div class="section-content congdung">
+                    <ul></ul>
+                  </div>
+                </div>
+
+                <!-- Quy trình -->
+                <div class="product-section">
+                  <h3 class="section-title">Quy trình sản xuất</h3>
+                  <div class="section-content quytrinh">
+                    <ul></ul>
+                  </div>
+                </div>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-            <div class="tab-content active" id="thongtin">
-              <div class="chitiet">
-                <h2 class="product-title">Thông tin sản phẩm</h2>
-                <div class="mota">
-                  <h5 class="description-title">Mô tả</h5>
-                  <p></p>
-                </div>
-                <hr />
-                <div class="congdung">
-                  <h5 class="description-title">Công dụng</h5>
-                  <ul></ul>
-                </div>
-                <hr />
-                <div class="quytrinh">
-                  <h5 class="description-title">Quy trình trồng trọt</h5>
-                  <ul></ul>
-                </div>
-
-                <hr />
-              </div>
-              <div class="tab-content" id="lienket">
-                <h2>Các bên có liên quan</h2>
-                <p>Đây là thông tin về các bên có liên quan.</p>
-              </div>
-              <div class="tab-content" id="xacthuc">
-                <h2>Thông tin xác thực</h2>
-                <p>Đây là thông tin xác thực.</p>
-              </div>
-              <div class="tab-content" id="lohang">
-                <h2>Lô hàng</h2>
-                <p>Đây là thông tin về lô hàng.</p>
-              </div>
+    <div class="footer bg-dark text-white py-4" data-aos="fade-up">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-4">
+            <h3>Thông tin liên hệ</h3>
+            <p>Địa chỉ: CTU, đường 3/2, Xuân Khánh, Ninh Kiều, Cần Thơ</p>
+            <p>Điện thoại: 0333351725</p>
+            <p>Email: vthuan.dev@gmail.com</p>
+          </div>
+          <div class="col-md-4 d-none d-md-block">
+            <h3>Về chúng tôi</h3>
+            <p>
+              Sản phẩm này được dùng để truy xuất nguồn gốc sản phẩm bưởi bằng
+              công nghệ Blockchain.
+            </p>
+          </div>
+          <div class="col-md-4 d-none d-md-block">
+            <h3>Theo dõi chúng tôi</h3>
+            <div class="social-links">
+              <a href="#"><i class="fab fa-facebook-f"></i></a>
+              <a href="#"><i class="fab fa-twitter"></i></a>
+              <a href="#"><i class="fab fa-instagram"></i></a>
             </div>
           </div>
         </div>
@@ -231,7 +249,7 @@
             class="form-control"
             placeholder="type message"
           />
-          <button type="submit" class="btn btn-primary">Send</button>
+          <button type="submit" class="btn btn-primary">Gửi</button>
         </form>
       </div>
     </div>
@@ -246,6 +264,7 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
     <script src="../js_giaodien/sanpham.js"></script>
     <script src="../chatbox/chatbox.js"></script>
 
@@ -269,43 +288,90 @@
     </script>
 
     <script>
-      document.addEventListener("DOMContentLoaded", async () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const productId = urlParams.get("id");
-
-        if (productId) {
-          try {
-            const response = await fetch(`/api/product/${productId}`);
-            const product = await response.json();
-
-            if (response.ok) {
-              // Cập nhật các phần tử HTML với thông tin sản phẩm
-              document.querySelector(".ten_sanpham h3").textContent =
-                product.product_name;
-              document.querySelector(".ma_sanpham p:nth-child(2)").textContent =
-                product.product_id;
-              document.querySelector(
-                ".ma_sanpham p:nth-child(4)"
-              ).textContent = `Gía bán hiện tại: ${product.price}đ/kg`;
-              document.querySelector(".mota p").textContent =
-                product.description;
-              document.querySelector(".congdung ul").innerHTML = product.uses
-                .split("\n")
-                .map((use) => `<li>${use}</li>`)
-                .join("");
-              document.querySelector(".quytrinh ul").innerHTML = product.process
-                .split("\n")
-                .map((step) => `<li>${step}</li>`)
-                .join("");
-              document.querySelector(".custom-img").src = product.img;
-            } else {
-              console.error("Lỗi khi lấy thông tin sản phẩm:", product.error);
-            }
-          } catch (error) {
-            console.error("Lỗi khi gọi API:", error);
+      // Hàm để cập nhật breadcrumb
+        function updateBreadcrumb(productName) {
+          const breadcrumbItem = document.querySelector('.breadcrumb-item.active');
+          if (breadcrumbItem) {
+            breadcrumbItem.textContent = productName;
           }
         }
-      });
+
+        document.addEventListener("DOMContentLoaded", async () => {
+          const urlParams = new URLSearchParams(window.location.search);
+          const productId = urlParams.get("id");
+
+          if (productId) {
+            try {
+              const response = await fetch(`/api/product/${productId}`);
+              const product = await response.json();
+
+              if (response.ok) {
+                // Cập nhật hình ảnh sản phẩm
+                const productImg = document.querySelector(".product-img");
+                if (productImg && product.img) {
+                  productImg.src = `${product.img}`;
+                  productImg.alt = product.product_name;
+                }
+
+                // Cập nhật tên sản phẩm
+                const productName = document.querySelector(".product-name");
+                if (productName) {
+                  productName.textContent = product.product_name;
+                }
+
+                // Cập nhật breadcrumb
+                updateBreadcrumb(product.product_name);
+
+                // Cập nhật mã sản phẩm
+                const productId = document.querySelector(".product-id");
+                if (productId) {
+                  productId.textContent = product.product_id;
+                }
+
+                // Cập nhật giá
+                const productPrice = document.querySelector(".product-price");
+                if (productPrice) {
+                  productPrice.textContent = `${new Intl.NumberFormat('vi-VN').format(product.price)}đ/kg`;
+                }
+
+                // Cập nhật mô tả
+                const productDesc = document.querySelector(".mota p");
+                if (productDesc) {
+                  productDesc.textContent = product.description;
+                }
+
+                // Cập nhật công dụng
+                const productUses = document.querySelector(".congdung ul");
+                if (productUses && product.uses) {
+                  productUses.innerHTML = product.uses
+                    .split("\n")
+                    .map(use => `<li>${use.trim()}</li>`)
+                    .filter(use => use !== "<li></li>")
+                    .join("");
+                }
+
+                // Cập nhật quy trình
+                const productProcess = document.querySelector(".quytrinh ul");
+                if (productProcess && product.process) {
+                  productProcess.innerHTML = product.process
+                    .split("\n")
+                    .map(step => `<li>${step.trim()}</li>`)
+                    .filter(step => step !== "<li></li>")
+                    .join("");
+                }
+
+              } else {
+                console.error("Lỗi khi lấy thông tin sản phẩm:", product.error);
+                // Hiển thị thông báo lỗi cho người dùng
+                alert("Không thể tải thông tin sản phẩm. Vui lòng thử lại sau.");
+              }
+            } catch (error) {
+              console.error("Lỗi khi gọi API:", error);
+              // Hiển thị thông báo lỗi cho người dùng
+              alert("Đã xảy ra lỗi khi tải thông tin sản phẩm. Vui lòng thử lại sau.");
+            }
+          }
+        });
     </script>
   </body>
 </html>

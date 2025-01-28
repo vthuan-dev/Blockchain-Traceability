@@ -1,44 +1,71 @@
 /* CSS cho navbar */
 .navbar {
     z-index: 1030;
-    color: black;
-    background-color: #4cd137 !important;
-    border-bottom-left-radius: 5px;  /* Thêm border radius cho góc dưới bên trái */
-    border-bottom-right-radius: 5px; /* Thêm border radius cho góc dưới bên phải */
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-
+    background-color: #4CAF50 !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 80px;
     position: sticky;
     top: 0;
-    transition: all 0.1s ease;
+    transition: all 0.3s ease;
+    width: 100%;
 }
 
-.navbar-item:hover {
-    color: #fff;
-    
-}
-
+/* Logo styles */
 .navbar-brand {
     display: flex;
     align-items: center;
     text-decoration: none !important;
+    color: #fff !important;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-left: 10px;
+    padding: 0;
 }
 
 .logo-image {
-    width: 67px;
-    height: 67px;
+    height: 50px;
+    width: auto;
     margin-right: 10px;
     object-fit: contain;
 }
 
-.navbar-brand span {
-    font-size: 1.2rem;
-    font-weight: bold;
+/* Navigation links */
+.navbar-nav .nav-link {
+    color: #fff !important;
+    font-size: 1rem;
+    padding: 10px 15px;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+    font-weight: 500 !important; 
+}
+
+.navbar-nav .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+/* CSS cho logo */
+.logo-home {
+    display: flex;
+    align-items: center;
+}
+
+.logo-home .logo {
+    height: 50px;
+    /* Chiều cao của logo */
+    width: auto;
+    /* Tự động điều chỉnh chiều rộng để giữ tỉ lệ */
+    margin-right: 10px;
+    /* Khoảng cách giữa logo và tên thương hiệu */
 }
 
 /* Dropdown styles */
 .dropdown-menu {
-    background-color: #4cd137; /* Giữ màu nền giống navbar */
+    background-color: #4CAF50;
     border: none;
     box-shadow: 0 8px 16px rgba(0,0,0,.1);
     border-radius: 8px;
@@ -46,28 +73,26 @@
 }
 
 .dropdown-item {
-    border-radius: 5px;
-    color: white !important; /* Đặt màu chữ thành trắng */
+    color: white !important;
     padding: 0.5rem 1.5rem;
-    transition: background-color 0.2s ease;
+    transition: all 0.3s ease;
+    border-radius: 5px;
 }
 
 .dropdown-item:hover {
-    background-color: rgba(255, 255, 255, 0.1); /* Màu nền khi hover */
-    color: white !important;
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: translateX(5px);
 }
 
-.dropdown-divider {
-    border-top-color: rgba(255, 255, 255, 0.2); /* Màu của đường phân cách */
+/* Hamburger menu */
+.navbar-toggler {
+    border: none;
+    background-color: transparent;
+    padding: 0;
 }
 
-#logoutButton {
-    color: white !important;
-}
-
-#logoutButton:hover {
-    background-color: rgba(255, 0, 0, 0.1); /* Màu nền đỏ nhạt khi hover */
-    color: white !important;
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba%28255, 255, 255, 1%29' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
 }
 
 /* User info in dropdown */
@@ -75,18 +100,17 @@
     font-weight: bold;
 }
 
-/* #userRole {
-    color: rgba(255, 255, 255, 0.8) !important; 
+#logoutButton {
+    color: white !important;
 }
 
-#userRegion {
-    font-size: 0.9rem;
-    color: #6c757d;
-} */
+#logoutButton:hover {
+    background-color: rgba(255, 0, 0, 0.1);
+}
 
 .common-user-info {
     font-size: 0.9rem;
-    color: #6c757d;
+    color: #fff;
     font-weight: bold;
 }
 
@@ -97,7 +121,7 @@
         top: -100%;
         left: 0;
         right: 0;
-        background-color: #4cd137;
+        background-color: #4CAF50;
         padding: 1rem;
         max-height: calc(100vh - 56px);
         overflow-y: auto;
@@ -109,13 +133,33 @@
     }
 
     .navbar-collapse.show {
-        top: 90px;
+        top: 80px;
     }
 
+    .navbar-nav {
+        background-color: transparent;
+    }
+
+    .nav-item {
+        width: 100%;
+        text-align: center;
+    }
+
+    .dropdown-menu {
+        background-color: transparent;
+        box-shadow: none;
+    }
+
+    .dropdown-item {
+        color: #fff !important;
+        text-align: center;
+    }
+
+    /* Menu overlay */
     .menu-overlay {
         display: none;
         position: fixed;
-        top: 56px;
+        top: 0;
         left: 0;
         right: 0;
         bottom: 0;
@@ -129,61 +173,19 @@
         display: block;
         opacity: 1;
     }
-
-    .dropdown-menu {
-        background-color: transparent;
-        background-color: #4cd137 !important;
-    }
-
-    .dropdown-item, #userRole, #logoutButton, #userRegion {
-        color: rgb(0, 0, 0) !important;
-        font-weight: bold;
-    }
-
-    .dropdown-item:hover, #logoutButton:hover {
-        background-color: rgba(255, 255, 255, 0.1);
-    }
-
-    .navbar-nav .dropdown-menu {
-        position: static;
-        float: none;
-    }
 }
 
-/* Menu overlay */
-.menu-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1020;
-    opacity: 0;
-    transition: opacity 0.1s ease-out;
-}
-
-.menu-overlay.show {
-    display: block;
-    opacity: 1;
-    transition: opacity 0.1s ease-in;
-}
-
+/* Utility classes */
 body.menu-open {
     overflow: hidden;
 }
 
-.nav-item { 
+.nav-item {
     align-items: center;
 }
 
 .navbar-nav .nav-link,
 .navbar-nav .dropdown-toggle,
 .navbar-nav .dropdown-item {
-    text-decoration: none !important;
-}
-
-.navbar-brand {
     text-decoration: none !important;
 }

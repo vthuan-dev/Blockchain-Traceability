@@ -4,7 +4,7 @@ body {
     /* Màu xanh lá cây nhạt */
     color: #333;
     /* Màu chữ */
-    font-family: Arial, sans-serif;
+    /* font-family: Arial, sans-serif; */
     /* Font chữ */
     margin: 0;
     padding: 0;
@@ -14,11 +14,6 @@ body {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 20px;
-}
-
-.custom-navbar-height {
-    height: 120px;
-    /* Bạn có thể thay đổi giá trị này theo nhu cầu */
 }
 
 .card {
@@ -342,123 +337,6 @@ body {
         background-color: #f8f9fa;
         /* Màu nền khi hover */
     }
-}
-
-/* CSS cho thanh điều hướng */
-.navbar {
-    background-color: #4CAF50 !important;
-    /* Màu nền cho thanh điều hướng */
-    z-index: 1000;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    /* Thêm bóng đổ */
-    padding: 10px 20px;
-    /* Thêm khoảng cách */
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    /* Thêm dòng này */
-    min-height: 80px;
-    /* Thay đổi từ height cố định sang min-height */
-    transition: all 0.3s ease;
-}
-
-.navbar-brand {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #fff;
-    /* Màu chữ cho thương hiệu */
-    margin-left: 10px;
-    /* Khoảng cách giữa logo và tên thương hiệu */
-    padding: 0;
-    /* Thêm dòng này */
-}
-
-.navbar-nav .nav-link {
-    color: #fff;
-    /* Màu chữ cho các liên kết */
-    font-size: 1rem;
-    padding: 10px 15px;
-    border-radius: 20px;
-    transition: all 0.3s ease;
-}
-
-.navbar-nav .nav-link:hover {
-    background-color: rgba(255, 255, 255, 0.2);
-    transform: translateY(-2px);
-}
-
-.navbar-toggler {
-    border: none;
-    background-color: transparent;
-    padding: 0;
-    /* Thêm dòng này */
-}
-
-.navbar-toggler-icon {
-    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba%28255, 255, 255, 1%29' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
-}
-
-@media (max-width: 992px) {
-
-    /* Chỉ áp dụng cho màn hình nhỏ hơn 992px */
-    .navbar-nav {
-        flex-direction: column;
-    }
-
-    .nav-item {
-        width: 100%;
-        text-align: center;
-    }
-
-    .navbar-collapse {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        z-index: 1000;
-        background-color: #4CAF50;
-        border-radius: 0 0 10px 10px;
-        padding: 10px;
-        border-radius: 10px;
-    }
-}
-
-/* Hiệu ứng active cho nav-link */
-/* .navbar-nav .nav-item.active .nav-link {
-    background-color: #4cd137;
-    font-weight: bold;
-} */
-
-/* Hiệu ứng hover cho dropdown */
-.navbar-nav .dropdown-menu {
-    border: none;
-    background-color: #45a049;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-}
-
-.navbar-nav .dropdown-item {
-    color: #fff;
-    transition: all 0.3s ease;
-}
-
-.navbar-nav .dropdown-item:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    transform: translateX(5px);
-}
-
-/* CSS cho logo */
-.logo-home {
-    display: flex;
-    align-items: center;
-}
-
-.logo-home .logo {
-    height: 50px;
-    /* Chiều cao của logo */
-    width: auto;
-    /* Tự động điều chỉnh chiều rộng để giữ tỉ lệ */
-    margin-right: 10px;
-    /* Khoảng cách giữa logo và tên thương hiệu */
 }
 
 /* CSS cho banner */

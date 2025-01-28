@@ -2507,18 +2507,6 @@ function setupRoutes(app, db) {
     }
     return result;
   }
-  app.get("/api/products", async (req, res) => {
-    try {
-      const [results] = await db.query(
-        "SELECT product_id, product_name FROM products"
-      );
-      console.log("Products:", results); // Log dữ liệu sản phẩm
-      res.json(results);
-    } catch (error) {
-      console.error("Lỗi khi truy vấn sản phẩm:", error);
-      res.status(500).json({ error: "Lỗi server nội bộ" });
-    }
-  });
 
   app.get("/api/producer-activity-logs", async (req, res) => {
     try {
