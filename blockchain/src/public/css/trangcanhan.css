@@ -94,7 +94,7 @@ body {
 }
 
 .list-unstyled li {
-    padding: 12px 0;
+    padding: 12px 10px;
     border-bottom: 1px solid #e0e0e0;
     transition: all 0.3s ease;
 }
@@ -165,6 +165,8 @@ body {
 }
 
 .profile-phone {
+    position: relative;
+    display: inline-block;
     color: #4CAF50;
     font-weight: 600;
     cursor: pointer;
@@ -185,49 +187,56 @@ body {
 }
 
 .profile-phone::after {
-    content: '\f0d7';
-    font-family: 'Font Awesome 5 Free';
-    font-weight: 900;
-    margin-left: 5px;
+    content: '▼';
     font-size: 0.8em;
+    margin-left: 5px;
+    color: #666;
 }
 
 .contact-options-dropdown {
     position: absolute;
-    top: 100%;
+    top: calc(100% + 5px); /* Đặt vị trí ngay dưới profile-phone và thêm khoảng cách 5px */
     left: 0;
-    z-index: 1000;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     display: none;
+    z-index: 1000;
     min-width: 120px;
-    padding: 5px 0;
-    margin: 5px 0 0;
-    background-color: #ffffff;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
 }
 
 .contact-options-dropdown.show {
     display: block;
 }
 
-.contact-options-dropdown a {
-    display: block;
+.contact-options-dropdown .dropdown-item {
     padding: 8px 15px;
-    color: #333;
+    color: #333 !important;
+    display: flex;
+    align-items: center;
+    gap: 8px;
     text-decoration: none;
-    transition: all 0.3s ease;
+    transition: background-color 0.2s;
+    white-space: nowrap;
 }
 
-.contact-options-dropdown a:hover {
-    background-color: #f1f8e9;
-    color: #4CAF50;
+.contact-options-dropdown .dropdown-item:hover {
+    background-color: #f8f9fa;
+    color: #4CAF50 !important;
 }
 
-.contact-options-dropdown i {
-    margin-right: 8px;
+.contact-options-dropdown .dropdown-item i {
     width: 20px;
     text-align: center;
+}
+
+.contact-options-dropdown .call-option i {
+    color: #28a745;
+}
+
+.contact-options-dropdown .zalo-option i {
+    color: #0068ff;
 }
 
 .show {
@@ -572,4 +581,95 @@ h2.text-danger:hover {
     .btn-save {
         background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
     }
+}
+
+/* Đảm bảo phần tử cha có position relative */
+.phone {
+    position: relative;
+    display: inline-block;
+}
+
+/* Style cho phone number container */
+.position-relative {
+    position: relative;
+    display: inline-block;
+}
+
+/* Style cho số điện thoại */
+.phone-number-trigger {
+    color: #4CAF50;
+    padding: 5px 10px;
+    border-radius: 15px;
+    background-color: #e8f5e9;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-block;
+    position: relative;
+}
+
+.phone-number-trigger:hover {
+    background-color: #c8e6c9;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Style cho dropdown */
+.contact-options-dropdown {
+    position: absolute;
+    left: 0;
+    top: calc(100% + 5px);
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    display: none;
+    z-index: 1000;
+    min-width: 150px;
+    padding: 5px 0;
+}
+
+.contact-options-dropdown.show {
+    display: block;
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Style cho các options trong dropdown */
+.dropdown-item {
+    padding: 8px 15px;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.dropdown-item:hover {
+    background-color: #f8f9fa;
+    color: #4CAF50;
+    padding-left: 20px;
+}
+
+.dropdown-item i {
+    width: 20px;
+    text-align: center;
+}
+
+.call-option i {
+    color: #28a745;
+}
+
+.zalo-option i {
+    color: #0068ff;
 }

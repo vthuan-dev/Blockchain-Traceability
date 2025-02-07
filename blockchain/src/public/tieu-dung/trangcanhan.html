@@ -82,8 +82,8 @@
                             <ul class="list-unstyled">
                                 <li><strong>Vùng sản xuất:</strong> <span class="profile-region"></span></li>
                                 <li class="position-relative">
-                                    <strong>Điện thoại:</strong> 
-                                    <span class="profile-phone" id="phoneNumber" data-phone=""></span>
+                                    <strong>Điện thoại:</strong>
+                                    <span id="phoneNumber" data-phone="0326714224" class="phone-number-trigger">0326714224</span>
                                     <div class="contact-options-dropdown" id="contactOptions">
                                         <a id="callOption" class="dropdown-item call-option">
                                             <i class="fas fa-phone"></i> Gọi
@@ -212,23 +212,47 @@
     </script>
 
 <script>
-        document.addEventListener('DOMContentLoaded', async () => {
-        const userId = getUserIdFromURL(); // Hàm để lấy userId từ URL hoặc session
+    document.addEventListener('DOMContentLoaded', async () => {
+        const userId = getUserIdFromURL();
+        
+        if (!userId) {
+            console.error('Không tìm thấy userId');
+            return;
+        }
 
         try {
             const response = await fetch(`/api/user/${userId}`);
             const user = await response.json();
 
-            if (response.status !== 200) {
+            if (!response.ok) {
                 throw new Error(user.error || 'Lỗi không xác định');
             }
 
-            document.querySelector('.profile-img').src = user.avatar || 'https://static.vecteezy.com/system/resources/previews/009/292/244/non_2x/default-avatar-icon-of-social-media-user-vector.jpg';
-            document.querySelector('.profile-name').textContent = user.name;
-            document.querySelector('.profile-phone').textContent = user.phone;
-            document.querySelector('.profile-phone').setAttribute('data-phone', user.phone);
-            document.querySelector('.profile-address').textContent = user.address;
-            document.querySelector('.profile-region').textContent = user.region_name || 'Không xác định';
+            // Cập nhật selector cho đúng với cấu trúc HTML
+            const profileImg = document.querySelector('.profile-img');
+            const profileName = document.querySelector('.profile-name');
+            const phoneNumber = document.getElementById('phoneNumber'); // Thay đổi selector này
+            const profileAddress = document.querySelector('.profile-address');
+            const profileRegion = document.querySelector('.profile-region');
+
+            if (profileImg) profileImg.src = user.avatar || 'https://static.vecteezy.com/system/resources/previews/009/292/244/non_2x/default-avatar-icon-of-social-media-user-vector.jpg';
+            if (profileName) profileName.textContent = user.name;
+            if (phoneNumber) {
+                phoneNumber.textContent = user.phone;
+                phoneNumber.setAttribute('data-phone', user.phone);
+            }
+            if (profileAddress) profileAddress.textContent = user.address;
+            if (profileRegion) profileRegion.textContent = user.region_name || 'Không xác định';
+
+            // Thêm log để debug
+            console.log('Dữ liệu người dùng:', user);
+            console.log('Các phần tử DOM:', {
+                profileImg: !!profileImg,
+                profileName: !!profileName,
+                phoneNumber: !!phoneNumber,
+                profileAddress: !!profileAddress,
+                profileRegion: !!profileRegion
+            });
         } catch (error) {
             console.error('Lỗi khi lấy thông tin chi tiết người dùng:', error);
         }
@@ -245,16 +269,34 @@
     document.addEventListener('DOMContentLoaded', function() {
     const phoneNumber = document.getElementById('phoneNumber');
     const contactOptions = document.getElementById('contactOptions');
+    const callOption = document.getElementById('callOption');
+    const zaloOption = document.getElementById('zaloOption');
 
+    // Xử lý click vào số điện thoại
     phoneNumber.addEventListener('click', function(event) {
         event.stopPropagation();
         contactOptions.classList.toggle('show');
     });
 
+    // Đóng dropdown khi click ra ngoài
     document.addEventListener('click', function(event) {
         if (!phoneNumber.contains(event.target) && !contactOptions.contains(event.target)) {
             contactOptions.classList.remove('show');
         }
+    });
+
+    // Xử lý click vào nút gọi điện
+    callOption.addEventListener('click', function(e) {
+        e.preventDefault();
+        const phone = phoneNumber.getAttribute('data-phone');
+        window.location.href = `tel:${phone}`;
+    });
+
+    // Xử lý click vào nút Zalo
+    zaloOption.addEventListener('click', function(e) {
+        e.preventDefault();
+        const phone = phoneNumber.getAttribute('data-phone');
+        window.location.href = `https://zalo.me/${phone}`;
     });
 });
 </script>
