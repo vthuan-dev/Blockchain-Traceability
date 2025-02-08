@@ -395,6 +395,33 @@ async function getProducerById(producerId) {
     );
   });
 }
+
+// Thêm hàm cleanupUploadedFiles
+function cleanupUploadedFiles(files) {
+  if (!files) return;
+  
+  // Nếu files là một mảng
+  if (Array.isArray(files)) {
+    files.forEach(file => {
+      if (file.path && fs.existsSync(file.path)) {
+        fs.unlinkSync(file.path);
+      }
+    });
+  } 
+  // Nếu files là một object chứa các file
+  else if (typeof files === 'object') {
+    Object.values(files).forEach(fileArray => {
+      if (Array.isArray(fileArray)) {
+        fileArray.forEach(file => {
+          if (file.path && fs.existsSync(file.path)) {
+            fs.unlinkSync(file.path);
+          }
+        });
+      }
+    });
+  }
+}
+
 function setupRoutes(app, db) {
   app.get("/batches/:producerId", async (req, res) => {
     try {
