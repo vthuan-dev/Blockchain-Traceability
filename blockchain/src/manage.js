@@ -201,6 +201,12 @@ router.delete("/api/users/:id", async (req, res) => {
     connection = await db.getConnection();
     await connection.beginTransaction();
 
+    // Xóa các ràng buộc khóa ngoại trong bảng batch trước
+    await connection.query(
+      "UPDATE batch SET approved_by = NULL WHERE approved_by = ?",
+      [userId]
+    );
+
     // Xóa các hàng liên quan trong bảng register
     await connection.query("DELETE FROM register WHERE actor_id = ?", [userId]);
 

@@ -517,6 +517,7 @@ function setupRoutes(app, db) {
             .json({ error: "Ngày kết thúc phải sau ngày bắt đầu" });
         }
 
+        console.log("cleanProducerId:", cleanProducerId);
         const userExists = await checkUserExists(cleanProducerId);
         const productExists = await checkProductExists(cleanProductId);
 

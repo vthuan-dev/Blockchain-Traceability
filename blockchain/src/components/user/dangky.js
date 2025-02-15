@@ -319,7 +319,7 @@ module.exports = (db) => {
       const phoneExistsQuery = "SELECT * FROM users WHERE phone = ?";
       if (await recordExists(phoneExistsQuery, [phone])) {
         return res.status(400).json({
-          message: "Số điện thoại này đã được sử d��ng. Vui lòng chọn số khác."
+          message: "Số điện thoại này đã được sử dụng. Vui lòng chọn số khác."
         });
       }
     
@@ -351,24 +351,28 @@ module.exports = (db) => {
           const sanitizedFileName = avatar.originalname
             .replace(/\s+/g, "_")
             .toLowerCase();
-          const fileName = `avatars/${Date.now()}_${sanitizedFileName}`;
-          const file = adminBucket.file(fileName);
+          const fileName = `${Date.now()}_${sanitizedFileName}`;
+          const avatarPath = path.join(__dirname, '../../public/uploads/avatars', fileName);
 
-          await file.save(avatar.buffer, {
-            metadata: { contentType: avatar.mimetype },
-          });
+          // Tạo thư mục avatars nếu chưa tồn tại
+          const avatarsDir = path.join(__dirname, '../../public/uploads/avatars');
+          if (!fs.existsSync(avatarsDir)) {
+            fs.mkdirSync(avatarsDir, { recursive: true });
+          }
 
-          const [url] = await file.getSignedUrl({
-            action: "read",
-            expires: "03-09-2491",
-          });
+          // Lưu file vào thư mục avatars
+          await fs.promises.writeFile(avatarPath, avatar.buffer);
 
-          tempImgUrl = url;
+          // Tạo URL cho avatar
+          tempImgUrl = `/uploads/avatars/${fileName}`;
           console.log("Avatar đã được upload:", tempImgUrl);
         } catch (uploadError) {
           console.error("Lỗi khi upload avatar:", uploadError);
           throw new Error("Lỗi khi upload avatar");
         }
+      } else {
+        // Sử dụng avatar mặc định nếu không có file upload
+        tempImgUrl = "/uploads/avatars/default_avatar.jpg";
       }
 
       // Tạo fullAddress từ các thành phần địa ch

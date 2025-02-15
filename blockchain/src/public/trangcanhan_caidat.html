@@ -751,19 +751,43 @@
   });
 });
 
-    document.getElementById('imageUpload').addEventListener('change', function(e) {
-        var file = e.target.files[0];
-        if (file) {
-            // Hiển thị preview ảnh
-            var reader = new FileReader();capnhatthongtin
-            reader.onload = function(e) {
-                document.getElementById('avatarImage').src = e.target.result;
-            }
-            reader.readAsDataURL(file);
+    document.getElementById('imageUpload').addEventListener('change', async function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
 
-            // Hiển thị tên file
-            // document.getElementById('fileName').textContent = file.name;
-            // document.getElementById('fileInfo').style.display = 'block';
+        // Kiểm tra kích thước file (giới hạn 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            showNotification('File ảnh không được vượt quá 5MB', 'warning');
+            return;
+        }
+
+        // Kiểm tra định dạng file
+        if (!['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)) {
+            showNotification('Chỉ chấp nhận file ảnh định dạng JPG, JPEG hoặc PNG', 'warning');
+            return;
+        }
+
+        try {
+            const formData = new FormData();
+            formData.append('avatar', file);
+
+            const response = await fetch('/api/capnhatthongtin', {
+                method: 'PUT',
+                body: formData
+            });
+
+            const result = await response.json();
+            
+            if (result.updated) {
+                // Cập nhật ảnh preview
+                document.getElementById('avatarImage').src = result.avatarUrl;
+                showNotification('Cập nhật ảnh đại diện thành công', 'success');
+            } else {
+                showNotification(result.message || 'Không thể cập nhật ảnh đại diện', 'error');
+            }
+        } catch (error) {
+            console.error('Lỗi khi upload ảnh:', error);
+            showNotification('Có lỗi xảy ra khi cập nhật ảnh đại diện', 'error');
         }
     });
     </script>

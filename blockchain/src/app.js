@@ -405,18 +405,7 @@ app.put("/api/capnhatthongtin", upload.single("avatar"), async (req, res) => {
     connection = await db.getConnection();
     await connection.beginTransaction();
 
-    const { name, phone, address, dob, gender, region_id } = req.body;
     const userId = req.session.userId;
-
-    console.log("Received data:", {
-      name,
-      phone,
-      address,
-      dob,
-      gender,
-      region_id,
-      userId,
-    });
 
     if (!userId) {
       return res.status(401).json({ error: "Người dùng chưa đăng nhập" });
@@ -425,16 +414,7 @@ app.put("/api/capnhatthongtin", upload.single("avatar"), async (req, res) => {
     let updateFields = [];
     let updateValues = [];
 
-    // Xử lý các trường thông tin khác
-    const fields = { name, phone, address, dob, gender, region_id };
-    for (const [key, value] of Object.entries(fields)) {
-      if (value) {
-        updateFields.push(`${key} = ?`);
-        updateValues.push(value);
-      }
-    }
-
-    // Xử lý avatar
+    // Xử lý avatar nếu có file upload
     if (req.file) {
       try {
         // Xóa avatar cũ
@@ -442,54 +422,63 @@ app.put("/api/capnhatthongtin", upload.single("avatar"), async (req, res) => {
           "SELECT avatar FROM users WHERE uid = ?",
           [userId]
         );
-        if (oldUser[0] && oldUser[0].avatar) {
-          const oldFileName = oldUser[0].avatar.split("/").pop().split("?")[0];
-          const oldFile = adminBucket.file(`avatars/${oldFileName}`);
-          await oldFile
-            .delete()
-            .catch((error) =>
-              console.log("Lỗi khi xóa avatar cũ từ Firebase:", error)
-            );
+
+        if (oldUser[0]?.avatar) {
+          if (!oldUser[0].avatar.includes('firebase')) {
+            const oldAvatarPath = path.join(__dirname, 'public', 'uploads', 'avatars', path.basename(oldUser[0].avatar));
+            if (fs.existsSync(oldAvatarPath)) {
+              fs.unlinkSync(oldAvatarPath);
+            }
+          }
         }
 
-        // Upload avatar mới
-        const sanitizedFileName = req.file.originalname
-          .replace(/\s+/g, "_")
-          .toLowerCase();
-        const fileName = `avatars/${Date.now()}_${sanitizedFileName}`;
-        const file = adminBucket.file(fileName);
+        // Tạo tên file mới
+        const fileExt = path.extname(req.file.originalname);
+        const newFileName = `avatar_${userId}_${Date.now()}${fileExt}`;
+        const avatarDir = path.join(__dirname, 'public', 'uploads', 'avatars');
+        
+        // Tạo thư mục nếu chưa tồn tại
+        if (!fs.existsSync(avatarDir)) {
+          fs.mkdirSync(avatarDir, { recursive: true });
+        }
 
-        await file.save(req.file.buffer, {
-          metadata: { contentType: req.file.mimetype },
-        });
+        // Lưu file mới - sử dụng req.file.buffer nếu có, nếu không thì dùng fs.copyFileSync
+        const newFilePath = path.join(avatarDir, newFileName);
+        if (req.file.buffer) {
+          fs.writeFileSync(newFilePath, req.file.buffer);
+        } else if (req.file.path) {
+          fs.copyFileSync(req.file.path, newFilePath);
+        } else {
+          throw new Error('Không tìm thấy dữ liệu file');
+        }
 
-        const [url] = await file.getSignedUrl({
-          action: "read",
-          expires: "03-09-2491",
-        });
-
-        tempAvatarUrl = url;
+        // Cập nhật đường dẫn trong database
+        tempAvatarUrl = `/uploads/avatars/${newFileName}`;
         updateFields.push("avatar = ?");
         updateValues.push(tempAvatarUrl);
 
-        console.log("Avatar mới đã được upload:", tempAvatarUrl);
       } catch (uploadError) {
-        console.error("Lỗi khi upload avatar:", uploadError);
-        throw new Error("Lỗi khi upload avatar");
+        console.error("Lỗi khi xử lý avatar:", uploadError);
+        throw new Error("Lỗi khi xử lý avatar");
+      }
+    }
+
+    // Xử lý các trường thông tin khác nếu có
+    const { name, phone, address, dob, gender, region_id } = req.body;
+    const fields = { name, phone, address, dob, gender, region_id };
+    
+    for (const [key, value] of Object.entries(fields)) {
+      if (value) {
+        updateFields.push(`${key} = ?`);
+        updateValues.push(value);
       }
     }
 
     if (updateFields.length > 0) {
-      const updateQuery = `UPDATE users SET ${updateFields.join(
-        ", "
-      )} WHERE uid = ?`;
+      const updateQuery = `UPDATE users SET ${updateFields.join(", ")} WHERE uid = ?`;
       updateValues.push(userId);
 
-      console.log("Update Query:", updateQuery);
-      console.log("Update Values:", updateValues);
-
       const [result] = await connection.query(updateQuery, updateValues);
-      console.log("Update Result:", result);
 
       if (result.affectedRows === 0) {
         throw new Error("Không có hàng nào được cập nhật trong cơ sở dữ liệu");
@@ -530,13 +519,13 @@ app.put("/api/capnhatthongtin", upload.single("avatar"), async (req, res) => {
       await connection.commit();
       res.json({
         updated: true,
-        message: "Thông tin đã được cập nhật thành công", // Thêm thông báo này
-        avatarUrl: tempAvatarUrl,
+        message: "Thông tin đã được cập nhật thành công",
+        avatarUrl: tempAvatarUrl
       });
     } else {
       res.json({
         updated: false,
-        message: "Không có thông tin nào được cập nhật",
+        message: "Không có thông tin nào được cập nhật"
       });
     }
   } catch (error) {
@@ -544,11 +533,7 @@ app.put("/api/capnhatthongtin", upload.single("avatar"), async (req, res) => {
       await connection.rollback();
     }
     console.error("Lỗi chi tiết khi cập nhật thông tin người dùng:", error);
-    let errorMessage = "Lỗi khi cập nhật thông tin người dùng";
-    if (error.message) {
-      errorMessage += `: ${error.message}`;
-    }
-    res.status(500).json({ error: errorMessage });
+    res.status(500).json({ error: error.message || "Lỗi khi cập nhật thông tin người dùng" });
   } finally {
     if (connection) {
       connection.release();
