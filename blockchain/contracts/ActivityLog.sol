@@ -24,12 +24,17 @@ contract ActivityLog {
         string[] imageUrls,
         uint256[] relatedProductIds
     );
+
+    constructor() {
+        // Thêm constructor rỗng
+    }
+
     function addActivityLog(
         uint256 _batchId,
         uint256 _participantId,
         string memory _activityName,
         string memory _description,
-        bool _isSystemActivity, // Đổi tên tham số này
+        bool _isSystemActivity,
         string[] memory _imageUrls,
         uint256[] memory _relatedProductIds
     ) public {
@@ -39,7 +44,7 @@ contract ActivityLog {
             timestamp: block.timestamp,
             activityName: _activityName,
             description: _description,
-            isSystemActivity: _isSystemActivity, // Và ở đây
+            isSystemActivity: _isSystemActivity,
             imageUrls: _imageUrls,
             relatedProductIds: _relatedProductIds
         });
@@ -56,44 +61,16 @@ contract ActivityLog {
             _relatedProductIds
         );
     }
-    function getActivityLogs(
-        uint256 _uid
-    ) public view returns (ActivityLogEntry[] memory) {
+
+    function getActivityLogs(uint256 _uid) public view returns (ActivityLogEntry[] memory) {
         return _activityLogs[_uid];
     }
 
-    function getProducerActivityLogs(
-        uint256 _uid
-    ) public view returns (ActivityLogEntry[] memory) {
-        ActivityLogEntry[] memory allLogs = _activityLogs[_uid];
-        uint256 count = 0;
-        for (uint256 i = 0; i < allLogs.length; i++) {
-            if (!allLogs[i].isSystemActivity) {
-                // Sửa ở đây
-                count++;
-            }
-        }
-
-        ActivityLogEntry[] memory producerLogs = new ActivityLogEntry[](count);
-        uint256 index = 0;
-        for (uint256 i = 0; i < allLogs.length; i++) {
-            if (!allLogs[i].isSystemActivity) {
-                // Và ở đây
-                producerLogs[index] = allLogs[i];
-                index++;
-            }
-        }
-
-        return producerLogs;
-    }
-    function getSystemActivityLogs(
-        uint256 _uid
-    ) public view returns (ActivityLogEntry[] memory) {
+    function getSystemActivityLogs(uint256 _uid) public view returns (ActivityLogEntry[] memory) {
         ActivityLogEntry[] memory allLogs = _activityLogs[_uid];
         uint256 count = 0;
         for (uint256 i = 0; i < allLogs.length; i++) {
             if (allLogs[i].isSystemActivity) {
-                // Sửa ở đây
                 count++;
             }
         }
@@ -102,13 +79,33 @@ contract ActivityLog {
         uint256 index = 0;
         for (uint256 i = 0; i < allLogs.length; i++) {
             if (allLogs[i].isSystemActivity) {
-                // Và ở đây
                 systemLogs[index] = allLogs[i];
                 index++;
             }
         }
 
         return systemLogs;
+    }
+
+    function getProducerActivityLogs(uint256 _uid) public view returns (ActivityLogEntry[] memory) {
+        ActivityLogEntry[] memory allLogs = _activityLogs[_uid];
+        uint256 count = 0;
+        for (uint256 i = 0; i < allLogs.length; i++) {
+            if (!allLogs[i].isSystemActivity) {
+                count++;
+            }
+        }
+
+        ActivityLogEntry[] memory producerLogs = new ActivityLogEntry[](count);
+        uint256 index = 0;
+        for (uint256 i = 0; i < allLogs.length; i++) {
+            if (!allLogs[i].isSystemActivity) {
+                producerLogs[index] = allLogs[i];
+                index++;
+            }
+        }
+
+        return producerLogs;
     }
 
     function getSystemActivityLogsBySSCC(

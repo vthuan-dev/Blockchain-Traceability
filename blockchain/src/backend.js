@@ -124,40 +124,81 @@ const alchemy = new Alchemy(settings);
 // Thêm dòng này ở đầu file nếu chưa có
 //const Web3 = require('web3');
 
-// Sửa đổi cách đọc và xử lý private key
+// Khởi tạo Web3 với provider phù hợp
+const web3 = new Web3('http://127.0.0.1:7545');
+
+// Kiểm tra private key
 const privateKey = process.env.PRIVATE_KEY;
-if (!privateKey || privateKey.length !== 64) {
-  console.error("Invalid private key in .env file");
+if (!privateKey) {
+  console.error("Private key not found in .env file");
   process.exit(1);
 }
 
-const formattedPrivateKey = privateKey.startsWith("0x")
-  ? privateKey
-  : `0x${privateKey}`;
+try {
+  // Xóa wallet hiện tại
+  web3.eth.accounts.wallet.clear();
+  
+  // Format private key
+  const formattedPrivateKey = privateKey.startsWith("0x") 
+    ? privateKey 
+    : `0x${privateKey}`;
+    
+  // Log để debug
+  console.log("Using private key:", formattedPrivateKey.substring(0, 10) + "...");
+  
+  // Tạo account từ private key
+  const account = web3.eth.accounts.privateKeyToAccount(formattedPrivateKey);
+  console.log("Created account address:", account.address);
+  
+  // Thêm vào wallet
+  web3.eth.accounts.wallet.add(account);
+  web3.eth.defaultAccount = account.address;
+  
+  // Kiểm tra balance
+  web3.eth.getBalance(account.address).then(balance => {
+    console.log(`Account ${account.address}`);
+    console.log(`Balance: ${web3.utils.fromWei(balance, 'ether')} ETH`);
+  });
+} catch (error) {
+  console.error("Error initializing account:", error);
+  console.error("Error details:", error.message);
+  process.exit(1);
+}
 
-// Khởi tạo Web3 và tài khoản
-const web3 = new Web3(
-  `https://eth-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`
-);
-const account = web3.eth.accounts.privateKeyToAccount(formattedPrivateKey);
-web3.eth.accounts.wallet.add(account);
-web3.eth.defaultAccount = account.address;
+// Giảm gas price
+const gasPrice = web3.utils.toWei('20', 'gwei');
 
-web3.eth.accounts.wallet.add(account);
-web3.eth.defaultAccount = account.address;
+// Thêm hàm kiểm tra balance
+async function checkBalance(address) {
+  const balance = await web3.eth.getBalance(address);
+  console.log(`Balance of ${address}: ${web3.utils.fromWei(balance, 'ether')} ETH`);
+  return balance;
+}
 
-web3.eth.net.isListening()
-.then(() => console.log('Web3 is connected'))
-.catch(e => console.log('Wow. Something went wrong: ' + e));
+// // Sửa phần khởi tạo account
+// try {
+//   const account = web3.eth.accounts.privateKeyToAccount(formattedPrivateKey);
+//   web3.eth.accounts.wallet.add(account);
+//   web3.eth.defaultAccount = account.address;
+  
+//   // Kiểm tra balance
+//   checkBalance(account.address).then(balance => {
+//     console.log(`Account address: ${account.address}`);
+//     console.log(`Balance: ${web3.utils.fromWei(balance, 'ether')} ETH`);
+//     if (web3.utils.fromWei(balance, 'ether') < 0.1) {
+//       console.warn('Warning: Account balance is low');
+//     }
+//   });
+// } catch (error) {
+//   console.error("Lỗi khi thêm account:", error);
+// }
 
-const adminAddress = account.address;
-
-web3.eth.net
-  .isListening()
-  .then(() => console.log("Đã kết nối với ETH node"))
-  .catch((e) => console.log("Lỗi rồi", e));
-
-console.log("Admin address:", adminAddress);
+// Cập nhật options cho contract calls
+const contractOptions = {
+  from: web3.eth.defaultAccount,
+  gasPrice: gasPrice,
+  gas: 3000000  // Giảm gas limit
+};
 
 const traceabilityContractABI =
   require("../build/contracts/TraceabilityContract.json").abi;
@@ -591,7 +632,7 @@ function setupRoutes(app, db) {
             cleanStartDate,
             cleanEndDate
           )
-          .send({ from: account.address, gas: 5000000 });
+          .send(contractOptions);
 
         console.log(
           "Transaction result:",
@@ -1112,61 +1153,79 @@ function setupRoutes(app, db) {
   app.post("/approve-batch/:batchId", async (req, res) => {
     let connection;
     try {
-      if (!req.session.userId) {
-        return res.status(401).json({ error: "Người dùng chưa đăng nhập" });
-      }
+        if (!req.session.userId) {
+            return res.status(401).json({ error: "Người dùng chưa đăng nhập" });
+        }
 
-      const blockchainBatchId = req.params.batchId;
-      const localBatchId = req.body.localBatchId;
-      const userId = req.session.userId;
+        const blockchainBatchId = req.params.batchId;
+        const localBatchId = req.body.localBatchId;
+        const userId = req.session.userId;
 
-      connection = await db.getConnection();
-      await connection.beginTransaction();
+        // Lấy account từ web3 wallet
+        const account = web3.eth.accounts.wallet[0];
+        if (!account) {
+            throw new Error("Không tìm thấy account trong wallet");
+        }
 
-      // Kiểm tra quyền kiểm duyệt
-      const [approvers] = await connection.query(
-        "SELECT * FROM users WHERE uid = ? AND role_id = 2",
-        [userId]
-      );
-      if (approvers.length === 0) {
-        await connection.rollback();
-        return res.status(403).json({ error: "Người dùng không có quyền kiểm duyệt" });
-      }
+        connection = await db.getConnection();
+        await connection.beginTransaction();
 
-      // Kiểm tra trạng thái hiện tại của lô hàng
-      const batchDetails = await traceabilityContract.methods
-        .getBatchDetails(blockchainBatchId)
-        .call();
-      if (batchDetails.status != 0) {
-        await connection.rollback();
-        return res.status(400).json({
-          error: "Lô hàng này đã được xử lý bởi người kiểm duyệt khác",
+        // Kiểm tra quyền kiểm duyệt
+        const [approvers] = await connection.query(
+            "SELECT * FROM users WHERE uid = ? AND role_id = 2",
+            [userId]
+        );
+        if (approvers.length === 0) {
+            await connection.rollback();
+            return res.status(403).json({ error: "Người dùng không có quyền kiểm duyệt" });
+        }
+
+        // Kiểm tra trạng thái hiện tại của lô hàng
+        const batchDetails = await traceabilityContract.methods
+            .getBatchDetails(blockchainBatchId)
+            .call();
+        if (batchDetails.status != 0) {
+            await connection.rollback();
+            return res.status(400).json({
+                error: "Lô hàng này đã được xử lý bởi người kiểm duyệt khác",
+            });
+        }
+
+        console.log("Sending transaction from account:", account.address);
+        
+        // Gọi hàm approveBatch từ smart contract
+        const result = await traceabilityContract.methods
+            .approveBatch(blockchainBatchId, userId)
+            .send({ 
+                from: account.address, 
+                gas: 3000000,
+                gasPrice: web3.utils.toWei('20', 'gwei')
+            });
+
+        // Gọi hàm thông báo với local batch ID
+        await notifyApproveBatch(connection, localBatchId, userId, 1);
+
+        await connection.commit();
+        
+        console.log("Transaction successful:", result.transactionHash);
+        
+        res.status(200).json({
+            message: "Lô hàng đã được phê duyệt thành công",
+            transactionHash: result.transactionHash,
         });
-      }
-
-      // Gọi hàm approveBatch từ smart contract
-      const result = await traceabilityContract.methods
-        .approveBatch(blockchainBatchId, userId)
-        .send({ from: account.address, gas: 3000000 });
-
-      // Gọi hàm thông báo với local batch ID
-      await notifyApproveBatch(connection, localBatchId, userId, 1);
-
-      await connection.commit();
-      res.status(200).json({
-        message: "Lô hàng đã được phê duyệt thành công",
-        transactionHash: result.transactionHash,
-      });
     } catch (error) {
-      if (connection) {
-        await connection.rollback();
-      }
-      console.error("Lỗi khi phê duyệt lô hàng:", error);
-      res.status(500).json({ error: "Không thể phê duyệt lô hàng: " + error.message });
+        console.error("Chi tiết lỗi:", error);
+        if (connection) {
+            await connection.rollback();
+        }
+        res.status(500).json({ 
+            error: "Không thể phê duyệt lô hàng: " + error.message,
+            details: error.stack
+        });
     } finally {
-      if (connection) {
-        connection.release();
-      }
+        if (connection) {
+            connection.release();
+        }
     }
   });
 
@@ -1365,78 +1424,67 @@ function setupRoutes(app, db) {
   });
   app.get("/api/approved-batches", async (req, res) => {
     try {
-      if (!req.session.userId) {
-        return res.status(401).json({ error: "Người dùng chưa đăng nhập" });
-      }
+        if (!req.session.userId) {
+            return res.status(401).json({ error: "Người dùng chưa đăng nhập" });
+        }
 
-      const userId = req.session.userId;
-      console.log("Gọi hàm getApprovedBatchesByProducer với userId:", userId);
+        const userId = req.session.userId;
+        console.log("Gọi hàm getApprovedBatchesByProducer với userId:", userId);
 
-      const approvedBatches = await traceabilityContract.methods
-        .getApprovedBatchesByProducer(userId)
-        .call({ from: account.address });
-      console.log("Số lượng lô hàng đã duyệt:", approvedBatches.length);
+        const approvedBatches = await traceabilityContract.methods
+            .getApprovedBatchesByProducer(userId)
+            .call(); // Đã xóa { from: account.address } vì chỉ là call
+        console.log("Số lượng lô hàng đã duyệt:", approvedBatches.length);
 
-      const serializedBatches = approvedBatches.map((batch) => {
-        const serializedBatch = {
-          batchId: batch.batchId.toString(),
-          name: batch.name,
-          sscc: batch.sscc || "",
-          quantity: batch.quantity.toString(),
-          productionDate: batch.productionDate.toString(),
-          status: translateStatus(batch.status),
-          productImageUrls: batch.productImageUrls,
-          certificateImageUrl: batch.certificateImageUrl,
-        };
-        console.log(
-          "Serialized batch:",
-          JSON.stringify(serializedBatch, null, 2)
-        );
-        return serializedBatch;
-      });
+        const serializedBatches = approvedBatches.map((batch) => ({
+            batchId: batch.batchId.toString(),
+            name: batch.name,
+            sscc: batch.sscc || "",
+            quantity: batch.quantity.toString(),
+            productionDate: batch.productionDate.toString(),
+            status: translateStatus(batch.status),
+            productImageUrls: batch.productImageUrls,
+            certificateImageUrl: batch.certificateImageUrl,
+        }));
 
-      res.status(200).json(serializedBatches);
+        res.status(200).json(serializedBatches);
     } catch (error) {
-      console.error("Lỗi khi lấy danh sách lô hàng đã duyệt:", error);
-      res
-        .status(500)
-        .json({
-          error: "Không thể lấy danh sách lô hàng đã duyệt: " + error.message,
+        console.error("Lỗi khi lấy danh sách lô hàng đã duyệt:", error);
+        res.status(500).json({
+            error: "Không thể lấy danh sách lô hàng đã duyệt: " + error.message,
         });
     }
   });
 
   app.get("/api/rejected-batches", async (req, res) => {
     try {
-      if (!req.session.userId) {
-        return res.status(401).json({ error: "Người dùng chưa đăng nhập" });
-      }
+        if (!req.session.userId) {
+            return res.status(401).json({ error: "Người dùng chưa đăng nhập" });
+        }
 
-      const userId = req.session.userId;
-      console.log("Gọi hàm getRejectedBatchesByProducer với userId:", userId);
+        const userId = req.session.userId;
+        console.log("Gọi hàm getRejectedBatchesByProducer với userId:", userId);
 
-      const rejectedBatches = await traceabilityContract.methods
-        .getRejectedBatchesByProducer(userId)
-        .call({ from: account.address });
-      console.log("Số lượng lô hàng bị từ chối:", rejectedBatches.length);
+        const rejectedBatches = await traceabilityContract.methods
+            .getRejectedBatchesByProducer(userId)
+            .call(); // Đã xóa { from: account.address } vì chỉ là call
+        console.log("Số lượng lô hàng bị từ chối:", rejectedBatches.length);
 
-      const serializedBatches = rejectedBatches.map((batch) => ({
-        batchId: batch.batchId.toString(),
-        name: batch.name,
-        quantity: batch.quantity.toString(),
-        productionDate: batch.productionDate.toString(),
-        status: translateStatus(batch.status),
-        productImageUrls: batch.productImageUrls,
-        certificateImageUrl: batch.certificateImageUrl,
-      }));
+        const serializedBatches = rejectedBatches.map((batch) => ({
+            batchId: batch.batchId.toString(),
+            name: batch.name,
+            quantity: batch.quantity.toString(),
+            productionDate: batch.productionDate.toString(),
+            status: translateStatus(batch.status),
+            productImageUrls: batch.productImageUrls,
+            certificateImageUrl: batch.certificateImageUrl,
+        }));
 
-      res.status(200).json(serializedBatches);
+        res.status(200).json(serializedBatches);
     } catch (error) {
-      console.error("Lỗi khi lấy danh sách lô hàng bị từ chối:", error);
-      res
-        .status(500)
-        .json({
-          error: "Không thể lấy danh sách lô hàng bị từ chối: " + error.message,
+        console.error("Lỗi khi lấy danh sách lô hàng bị từ chối:", error);
+        res.status(500).json({
+            error: "Không thể lấy danh sách lô hàng bị từ chối: " + error.message,
         });
     }
   });
@@ -1445,73 +1493,81 @@ function setupRoutes(app, db) {
   // ... (các import và cấu hình khác)
   app.post("/api/accept-transport", async (req, res) => {
     try {
-      const { sscc, action } = req.body;
-      const userId = req.session.userId;
-      const roleId = req.session.roleId;
+        const { sscc, action } = req.body;
+        const userId = req.session.userId;
+        const roleId = req.session.roleId;
 
-      console.log("Received request:", { sscc, action, userId, roleId });
+        console.log("Received request:", { sscc, action, userId, roleId });
 
-      if (!userId) {
-        return res.status(401).json({ error: "Người dùng chưa đăng nhập" });
-      }
+        if (!userId) {
+            return res.status(401).json({ error: "Người dùng chưa đăng nhập" });
+        }
 
-      // Kiểm tra action hợp lệ
-      const validActions = [
-        "Bat dau van chuyen",
-        "Tam dung van chuyen",
-        "Tiep tuc van chuyen",
-        "Hoan thanh van chuyen",
-      ];
-      if (!validActions.includes(action)) {
-        return res.status(400).json({ error: "Hành động không hợp lệ" });
-      }
+        // Lấy account từ web3 wallet
+        const account = web3.eth.accounts.wallet[0];
+        if (!account) {
+            throw new Error("Không tìm thấy account trong wallet");
+        }
 
-      // Thực hiện các truy vấn đồng thời
-      const [participantResult, batchId] = await Promise.all([
-        db.query("SELECT * FROM users WHERE uid = ? AND role_id IN (6, 8)", [
-          userId,
-        ]),
-        traceabilityContract.methods.getBatchIdBySSCC(sscc).call(),
-      ]);
+        // Kiểm tra action hợp lệ
+        const validActions = [
+            "Bat dau van chuyen",
+            "Tam dung van chuyen",
+            "Tiep tuc van chuyen",
+            "Hoan thanh van chuyen",
+        ];
+        if (!validActions.includes(action)) {
+            return res.status(400).json({ error: "Hành động không hợp lệ" });
+        }
 
-      const [participant] = participantResult;
-      if (!participant) {
-        return res
-          .status(403)
-          .json({
-            error: "Người dùng không có quyền vận chuyển hoặc nhận hàng",
-          });
-      }
+        // Thực hiện các truy vấn đồng thời
+        const [participantResult, batchId] = await Promise.all([
+            db.query("SELECT * FROM users WHERE uid = ? AND role_id IN (6, 8)", [userId]),
+            traceabilityContract.methods.getBatchIdBySSCC(sscc).call()
+        ]);
 
-      if (!batchId) {
-        return res
-          .status(404)
-          .json({ error: "Không tìm thấy lô hàng với SSCC này" });
-      }
+        const [participant] = participantResult;
+        if (!participant) {
+            return res.status(403).json({
+                error: "Người dùng không có quyền vận chuyển hoặc nhận hàng",
+            });
+        }
 
-      const participantType = roleId === 8 ? "Warehouse" : "Transporter";
-      console.log("Participant type:", participantType);
+        if (!batchId) {
+            return res.status(404).json({ error: "Không tìm thấy lô hàng với SSCC này" });
+        }
 
-      console.log("Updating transport status:", {
-        batchId,
-        userId,
-        action,
-        participantType,
-      });
-      await traceabilityContract.methods
-        .updateTransportStatus(batchId, userId, action, participantType)
-        .send({ from: account.address, gas: 500000 });
+        const participantType = roleId === 8 ? "Warehouse" : "Transporter";
+        console.log("Participant type:", participantType);
 
-      res.json({
-        success: true,
-        message: "Đã cập nhật trạng thái vận chuyển thành công",
-      });
+        console.log("Updating transport status:", {
+            batchId,
+            userId,
+            action,
+            participantType,
+        });
+
+        // Thực hiện giao dịch với blockchain
+        const result = await traceabilityContract.methods
+            .updateTransportStatus(batchId, userId, action, participantType)
+            .send({ 
+                from: account.address, 
+                gas: 500000,
+                gasPrice: web3.utils.toWei('20', 'gwei')
+            });
+
+        console.log("Transaction successful:", result.transactionHash);
+
+        res.json({
+            success: true,
+            message: "Đã cập nhật trạng thái vận chuyển thành công",
+            transactionHash: result.transactionHash
+        });
     } catch (error) {
-      console.error("Lỗi khi cập nhật trạng thái vận chuyển:", error);
-      res
-        .status(500)
-        .json({
-          error: "Không thể cập nhật trạng thái vận chuyển: " + error.message,
+        console.error("Lỗi khi cập nhật trạng thái vận chuyển:", error);
+        res.status(500).json({
+            error: "Không thể cập nhật trạng thái vận chuyển: " + error.message,
+            details: error.stack
         });
     }
   });
