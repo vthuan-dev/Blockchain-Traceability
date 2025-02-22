@@ -2385,48 +2385,54 @@ function setupRoutes(app, db) {
   }
   app.post("/api/warehouse-confirm", async (req, res) => {
     try {
-      const { sscc } = req.body;
-      console.log("Received warehouse confirmation request for SSCC:", sscc);
+        const { sscc } = req.body;
+        console.log("Received warehouse confirmation request for SSCC:", sscc);
 
-      const batchId = await traceabilityContract.methods
-        .getBatchIdBySSCC(sscc)
-        .call();
-      console.log("Batch ID:", batchId);
+        // Lấy account từ web3 wallet
+        const account = web3.eth.accounts.wallet[0];
+        if (!account) {
+            throw new Error("Không tìm thấy account trong wallet");
+        }
 
-      const userId = req.session.userId;
-      console.log("User ID:", userId);
+        const batchId = await traceabilityContract.methods
+            .getBatchIdBySSCC(sscc)
+            .call();
+        console.log("Batch ID:", batchId);
 
-      console.log("Using admin address:", adminAddress);
+        const userId = req.session.userId;
+        console.log("User ID:", userId);
 
-      const result = await traceabilityContract.methods
-        .warehouseConfirmation(batchId, userId)
-        .send({
-          from: adminAddress,
-          gas: 500000, // Điều chỉnh gas nếu cần
-        });
-      console.log("Transaction result:", result);
+        console.log("Using account address:", account.address);
 
-      res
-        .status(200)
-        .json({
-          message: "Xác nhận nhận hàng thành công",
-          transactionHash: result.transactionHash,
+        const result = await traceabilityContract.methods
+            .warehouseConfirmation(batchId, userId)
+            .send({
+                from: account.address,  // Sử dụng account.address thay vì adminAddress
+                gas: 500000,
+                gasPrice: web3.utils.toWei('20', 'gwei')
+            });
+        
+        console.log("Transaction result:", result);
+
+        res.status(200).json({
+            message: "Xác nhận nhận hàng thành công",
+            transactionHash: result.transactionHash,
         });
     } catch (error) {
-      console.error("Error in warehouse confirmation:", error);
-      res
-        .status(500)
-        .json({
-          error: "Có lỗi xảy ra khi xác nhận nhận hàng: " + error.message,
+        console.error("Error in warehouse confirmation:", error);
+        res.status(500).json({
+            error: "Có lỗi xảy ra khi xác nhận nhận hàng: " + error.message,
+            details: error.stack
         });
     }
   });
+
   // Thêm event listener bên ngoài route handler
   traceabilityContract.events.WarehouseConfirmed({}, (error, event) => {
     if (error) {
-      console.error("Error on WarehouseConfirmed event:", error);
+        console.error("Error on WarehouseConfirmed event:", error);
     } else {
-      console.log("WarehouseConfirmed event:", event.returnValues);
+        console.log("WarehouseConfirmed event:", event.returnValues);
     }
   });
   // Hàm hỗ trợ để lấy role của người dùng
