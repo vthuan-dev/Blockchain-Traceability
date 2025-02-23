@@ -535,9 +535,16 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    showToast(data.message);
+                    // Đóng modal
                     $('#addActivityLogModal').modal('hide');
+                    // Xóa overlay tối của modal
+                    $('.modal-backdrop').remove();
+                    // Reset form
+                    this.reset();
+                    // Refresh danh sách hoạt động
                     fetchAndDisplayAllActivities();
+                    // Hiển thị thông báo thành công
+                    showToast(data.message);
                 } else {
                     showToast(data.error || 'Có lỗi xảy ra', 'error');
                 }
@@ -545,6 +552,10 @@
                 showToast('Có lỗi xảy ra khi thêm nhật ký hoạt động', 'error');
             } finally {
                 submitBtn.classList.remove('loading');
+                // Đảm bảo body không còn class modal-open
+                document.body.classList.remove('modal-open');
+                // Xóa inline style của body
+                document.body.style.removeProperty('padding-right');
             }
         });
     </script>

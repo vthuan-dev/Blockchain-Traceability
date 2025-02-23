@@ -175,8 +175,36 @@ const activityLogContract = new web3.eth.Contract(
   activityLogAddress
 );
 
+// Tạo thư mục uploads cho activities
+const activityUploadDir = path.join(__dirname, 'public', 'uploads', 'activities');
+if (!fs.existsSync(activityUploadDir)) {
+  fs.mkdirSync(activityUploadDir, { recursive: true });
+}
+
+// Cấu hình storage cho activities
+const activityStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const today = new Date();
+    const uploadPath = path.join(
+      activityUploadDir,
+      today.getFullYear().toString(),
+      (today.getMonth() + 1).toString()
+    );
+    
+    if (!fs.existsSync(uploadPath)) {
+      fs.mkdirSync(uploadPath, { recursive: true });
+    }
+    cb(null, uploadPath);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+// Cập nhật cấu hình multer cho activities
 const activityUpload = multer({
-  storage: multer.memoryStorage(),
+  storage: activityStorage,
   fileFilter: (req, file, cb) => {
     if (file.mimetype.startsWith("image/")) {
       cb(null, true);
@@ -184,15 +212,11 @@ const activityUpload = multer({
       cb(new Error("Chỉ chấp nhận file ảnh"), false);
     }
   },
-}).array("imageUrls", 5); // Cho phép tối đa 5 ảnh
-app.use(express.static(path.join(__dirname, "public")));
-app.get("*.css", (req, res, next) => {
-  res.set("Content-Type", "text/css");
-  next();
-});
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit
+    files: 5 // Tối đa 5 ảnh
+  }
+}).array("imageUrls", 5);
 
 const { CID } = require("multiformats/cid");
 const { sha256 } = require("multiformats/hashes/sha2");
@@ -692,6 +716,7 @@ function setupRoutes(app, db) {
   app.get("/create-activity", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "san-xuat", "them-nkhd.html"));
   });
+  
   app.post(
     "/createactivity",
     (req, res, next) => {
