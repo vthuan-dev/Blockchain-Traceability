@@ -240,3 +240,64 @@ textarea.form-control {
         opacity: 1;
     }
 }
+
+/* Điều chỉnh modal cho mobile */
+@media (max-width: 768px) {
+  .modal-dialog {
+    margin: 10px;
+    max-width: 95%;
+    width: 95%;
+  }
+
+  .modal-content {
+    padding: 15px;
+    border-radius: 10px;
+  }
+
+  .modal-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+  }
+
+  .form-group {
+    margin-bottom: 15px;
+  }
+
+  .form-control {
+    font-size: 16px; /* Ngăn iOS zoom vào input */
+    padding: 10px;
+  }
+
+  /* Điều chỉnh select2 trên mobile */
+  .select2-container {
+    width: 100% !important;
+  }
+
+  .select2-selection {
+    height: auto !important;
+    min-height: 38px;
+  }
+
+  /* Điều chỉnh nút submit */
+  .add-activity-btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+  }
+
+  /* Điều chỉnh input file */
+  input[type="file"] {
+    width: 100%;
+    padding: 8px;
+  }
+}
+
+/* Thêm animation cho modal */
+.modal.fade .modal-dialog {
+  transform: scale(0.8);
+  transition: transform 0.3s ease-out;
+}
+
+.modal.show .modal-dialog {
+  transform: scale(1);
+}

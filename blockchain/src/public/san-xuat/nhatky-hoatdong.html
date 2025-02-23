@@ -165,7 +165,7 @@
 
 
     <div class="modal fade" id="addActivityLogModal" tabindex="-1" role="dialog" aria-labelledby="addActivityLogModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
+        <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="addActivityLogModalLabel">Thêm nhật ký hoạt động</h5>
@@ -185,7 +185,7 @@
                         </div>
                         <div class="form-group">
                             <label for="relatedProductId">Sản phẩm liên quan</label>
-                            <select class="form-control" id="relatedProductId" name="relatedProductIds" multiple>
+                            <select class="form-control select2-mobile" id="relatedProductId" name="relatedProductIds" multiple>
                                 <option value="">Chọn sản phẩm</option>
                             </select>
                         </div>
@@ -194,7 +194,9 @@
                             <input type="file" class="form-control-file" id="imageUrls" name="imageUrls" multiple>
                         </div>
                         <input type="hidden" name="isSystemGenerated" value="false">
-                        <button type="submit" class="btn add-activity-btn"><i class="fas fa-plus-circle mr-2"></i>Thêm nhật ký hoạt động</button>
+                        <button type="submit" class="btn add-activity-btn">
+                            <i class="fas fa-plus-circle mr-2"></i>Thêm nhật ký hoạt động
+                        </button>
                     </form>
                 </div>
             </div>
