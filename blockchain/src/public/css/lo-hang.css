@@ -882,3 +882,209 @@
     .address-link:hover {
         color: #0056b3;
     }
+
+    /* Thêm CSS để kiểm soát kích thước logo */
+    .logo-home {
+        max-width: 200px; /* Giới hạn chiều rộng tối đa */
+        height: auto;
+        display: flex;
+        align-items: center;
+    }
+
+    .logo-home img {
+        max-width: 100%;
+        height: auto;
+        max-height: 60px; /* Giới hạn chiều cao tối đa */
+        object-fit: contain;
+    }
+
+    /* Điều chỉnh navbar */
+    .custom-navbar-height {
+        min-height: 80px;
+        padding: 10px 20px;
+        background-color: #4CAF50 !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .logo-home {
+            max-width: 150px;
+        }
+        
+        .logo-home img {
+            max-height: 40px;
+        }
+
+        .navbar-collapse {
+            background-color: #4CAF50;
+            padding: 10px;
+            border-radius: 0 0 8px 8px;
+        }
+    }
+
+    /* Navbar text colors */
+    .navbar-light .navbar-brand,
+    .navbar-light .navbar-nav .nav-link {
+        color: white !important;
+    }
+
+    .navbar-light .navbar-nav .nav-link:hover {
+        color: rgba(255,255,255,0.9) !important;
+        background-color: rgba(255,255,255,0.1);
+        border-radius: 5px;
+    }
+
+    /* Navbar toggler color */
+    .navbar-light .navbar-toggler {
+        border-color: rgba(255,255,255,0.5);
+    }
+
+    .navbar-light .navbar-toggler-icon {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 0.8)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    }
+
+    /* Active link style */
+    .navbar-light .navbar-nav .active > .nav-link {
+        font-weight: bold;
+        background-color: rgba(255,255,255,0.1);
+        border-radius: 5px;
+    }
+
+    /* Dropdown menu styles */
+    .dropdown-menu {
+        background-color: #4CAF50;
+        border: none;
+        box-shadow: 0 8px 16px rgba(0,0,0,.1);
+        border-radius: 8px;
+        padding: 0.5rem 0;
+        z-index: 1031;
+        min-width: 200px;
+    }
+
+    .dropdown-item {
+        color: rgb(23, 176, 85) !important;
+        padding: 0.5rem 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .dropdown-item:hover {
+        background-color: rgba(255,255,255,0.1);
+        color: white !important;
+    }
+
+    .dropdown-divider {
+        border-color: rgba(255,255,255,0.1);
+        margin: 0.5rem 0;
+    }
+
+    /* Fix dropdown position on mobile */
+    @media (max-width: 768px) {
+        .navbar-collapse {
+            background-color: #4CAF50;
+            padding: 10px;
+            border-radius: 0 0 8px 8px;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            z-index: 1030;
+        }
+
+        .dropdown-menu {
+            background-color: rgba(255,255,255,0.1);
+            border: none;
+            margin-top: 0;
+            position: static !important;
+            float: none;
+            width: 100%;
+        }
+
+        .dropdown-item {
+            padding: 0.5rem 2rem;
+        }
+    }
+
+    /* Fix dropdown toggle arrow color */
+    .navbar-light .navbar-nav .nav-link.dropdown-toggle::after {
+        border-top-color: white;
+    }
+
+    /* Active dropdown item */
+    .dropdown-item.active, 
+    .dropdown-item:active {
+        background-color: rgba(255,255,255,0.2);
+    }
+
+    /* Fix navbar collapse styles */
+    .navbar-collapse.collapse.show {
+        background-color: #4CAF50;
+        padding: 10px;
+        border-radius: 0 0 8px 8px;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        z-index: 1030;
+        width: 100%;
+    }
+
+    /* Override the inline styles */
+    #navbarNav.show {
+        display: block !important;
+        background-color: #4CAF50 !important;
+        padding: 10px !important;
+        border-radius: 0 0 8px 8px !important;
+        position: absolute !important;
+        top: 100% !important;
+        left: 0 !important;
+        right: 0 !important;
+        z-index: 1030 !important;
+    }
+
+    /* Ensure proper stacking context */
+    .navbar {
+        position: relative;
+        z-index: 1030;
+    }
+
+    /* Container positioning */
+    .container {
+        position: relative;
+    }
+
+    /* Mobile menu styles */
+    @media (max-width: 992px) {
+        .navbar-collapse.collapse.show {
+            background-color: #4CAF50;
+            padding: 10px;
+            border-radius: 0 0 8px 8px;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            z-index: 1030;
+        }
+
+        .navbar-nav {
+            padding: 10px;
+        }
+
+        .navbar-nav .nav-link {
+            color: white !important;
+            padding: 10px 15px;
+        }
+
+        /* Hamburger button */
+        .navbar-toggler {
+            border-color: rgba(255,255,255,0.5) !important;
+        }
+
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 0.8)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+        }
+
+        .navbar-nav {
+            background-color: #4CAF50 !important; /* Đảm bảo màu nền đúng */
+        }
+    }

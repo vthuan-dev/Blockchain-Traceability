@@ -77,6 +77,10 @@
             border-radius: 8px;
             padding: 0.5rem 0;
             z-index: 1031;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            min-width: 200px;
+            text-align: center;
         }
 
         .dropdown-item {
@@ -84,6 +88,7 @@
             padding: 0.5rem 1.5rem;
             transition: all 0.3s ease;
             border-radius: 5px;
+            text-align: center;
         }
 
         .dropdown-item:hover {
@@ -96,6 +101,19 @@
 
         #logoutButton:hover {
             background-color: rgba(255, 0, 0, 0.1);
+        }
+
+        /* Notification menu specific styles */
+        .notification-menu {
+            width: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .notification-header {
+            padding: 10px 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
         }
 
         /* Responsive styles */
@@ -121,8 +139,15 @@
             }
 
             .dropdown-menu {
-                background-color: transparent;
-                box-shadow: none;
+                position: static !important;
+                transform: none !important;
+                left: 0 !important;
+                width: 100%;
+                margin-top: 0;
+            }
+
+            .notification-menu {
+                width: 100%;
             }
 
             .dropdown-item {
@@ -162,7 +187,7 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav mr-auto">
+                <ul class="navbar-nav mx-auto justify-content-center">
                     <li class="nav-item">
                         <a class="nav-link" href="sanxuat.html">Quản lí lô hàng</a>
                     </li>
