@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="../css/san-xuat.css">
     <link rel="stylesheet" href="../css/nhatky-hoatdong.css">
     <link rel="stylesheet" href="../css/thongbao.css">
-    <link rel="stylesheet" href="../css/nav-bar.css">
     <link rel="stylesheet" href="../css/chatbox.css">
 
     <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
@@ -21,7 +20,135 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet">
 
+    <style>
+        /* CSS cho navbar */
+        .navbar {
+            z-index: 1030;
+            background-color: #4CAF50 !important;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 80px;
+            position: sticky;
+            top: 0;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
 
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            text-decoration: none !important;
+            color: #fff !important;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-left: 10px;
+            padding: 0;
+        }
+
+        .logo-image {
+            height: 50px;
+            width: auto;
+            margin-right: 10px;
+            object-fit: contain;
+        }
+
+        .navbar-nav .nav-link {
+            color: #fff !important;
+            font-size: 1rem;
+            padding: 10px 15px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            font-weight: 500 !important;
+        }
+
+        .navbar-nav .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* Dropdown styles */
+        .dropdown-menu {
+            background-color: #4CAF50;
+            border: none;
+            box-shadow: 0 8px 16px rgba(0,0,0,.1);
+            border-radius: 8px;
+            padding: 0.5rem 0;
+            z-index: 1031;
+        }
+
+        .dropdown-item {
+            color: white !important;
+            padding: 0.5rem 1.5rem;
+            transition: all 0.3s ease;
+            border-radius: 5px;
+        }
+
+        .dropdown-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        #logoutButton {
+            color: white !important;
+        }
+
+        #logoutButton:hover {
+            background-color: rgba(255, 0, 0, 0.1);
+        }
+
+        /* Responsive styles */
+        @media (max-width: 991px) {
+            .navbar-collapse {
+                position: fixed;
+                top: -100%;
+                left: 0;
+                right: 0;
+                background-color: #4CAF50;
+                padding: 1rem;
+                max-height: calc(100vh - 56px);
+                overflow-y: auto;
+                transition: top 0.3s ease-in-out;
+                z-index: 1025;
+                height: auto;
+                border-bottom-left-radius: 15px;
+                border-bottom-right-radius: 15px;
+            }
+
+            .navbar-collapse.show {
+                top: 80px;
+            }
+
+            .dropdown-menu {
+                background-color: transparent;
+                box-shadow: none;
+            }
+
+            .dropdown-item {
+                text-align: center;
+            }
+        }
+
+        /* Menu overlay */
+        .menu-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1020;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .menu-overlay.show {
+            display: block;
+            opacity: 1;
+        }
+    </style>
 
 </head>
 <body>
@@ -324,26 +451,33 @@
             e.stopPropagation();
         });
     
-        // Xử lý cho dropdown trong menu
-        var dropdowns = document.querySelectorAll('.navbar-nav .dropdown');
-        dropdowns.forEach(function(dropdown) {
-            dropdown.addEventListener('click', function(e) {
-                e.stopPropagation();
-                this.classList.toggle('show');
-            });
-        });
-    
-        var userDropdown = document.querySelector('.navbar-nav .dropdown');
-        var userDropdownMenu = userDropdown.querySelector('.dropdown-menu');
-    
-        userDropdown.addEventListener('click', function(e) {
+        // Xử lý riêng cho dropdown thông báo
+        const notificationDropdown = document.getElementById("notificationDropdown");
+        const notificationMenu = notificationDropdown.nextElementSibling;
+        
+        notificationDropdown.addEventListener("click", function (e) {
+            e.preventDefault();
             e.stopPropagation();
-            userDropdownMenu.classList.toggle('show');
+            notificationMenu.classList.toggle("show");
         });
-    
-        document.addEventListener('click', function(e) {
+
+        // Xử lý riêng cho user dropdown
+        const userDropdown = document.getElementById("navbarDropdown");
+        const userMenu = userDropdown.nextElementSibling;
+        
+        userDropdown.addEventListener("click", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            userMenu.classList.toggle("show");
+        });
+
+        // Đóng tất cả dropdown khi click ra ngoài
+        document.addEventListener("click", function (e) {
+            if (!notificationDropdown.contains(e.target)) {
+                notificationMenu.classList.remove("show");
+            }
             if (!userDropdown.contains(e.target)) {
-                userDropdownMenu.classList.remove('show');
+                userMenu.classList.remove("show");
             }
         });
     });
