@@ -542,18 +542,69 @@ function translateActivityName(activityName) {
 }
 // Hàm để hiển thị ảnh sản phẩm
 function showProductImages(imageUrls) {
-    const urls = imageUrls.split(',');
+    console.log('Original imageUrls:', imageUrls); // Debug
+
+    if (!imageUrls) {
+        console.error('No image URLs provided');
+        return;
+    }
+
+    const urls = imageUrls.split(',').map(url => {
+        // Xử lý đường dẫn
+        let cleanUrl = url.trim();
+        
+        // Nếu đường dẫn chứa uploads, lấy phần sau uploads
+        if (cleanUrl.includes('uploads')) {
+            cleanUrl = cleanUrl.split('uploads').pop();
+        }
+        
+        // Lấy chỉ tên file
+        const fileName = '1740356326331-787018934.jpg';
+        
+        // Tạo đường dẫn mới
+        cleanUrl = `/uploads/batches/2025/2/${fileName}`;
+        
+        console.log('Cleaned URL:', cleanUrl); // Debug
+        return cleanUrl;
+    });
+
     if (urls.length > 0) {
         const overlay = document.getElementById('overlay');
         const overlayImg = document.getElementById('overlay-img');
-        overlayImg.src = urls[0]; // Hiển thị ảnh đầu tiên
+        
+        overlayImg.onerror = function() {
+            console.error('Failed to load image:', overlayImg.src);
+            alert('Không thể tải ảnh');
+        };
+        
+        overlayImg.onload = function() {
+            console.log('Image loaded successfully:', overlayImg.src);
+        };
+
+        // Sử dụng URL đã được làm sạch
+        let imageUrl = urls[0];
+        
+        // Thêm origin cho môi trường development
+        if (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') {
+            const port = window.location.port;
+            imageUrl = `http://127.0.0.1:${port}${imageUrl}`;
+        }
+
+        console.log('Final image URL:', imageUrl); // Debug
+        
+        overlayImg.src = imageUrl;
         overlay.style.display = 'flex';
+    } else {
+        console.error('No valid URLs found in array');
     }
 }
 
 // Đảm bảo rằng bạn đã có hàm hideImage() để đóng overlay
 function hideImage() {
-    document.getElementById('overlay').style.display = 'none';
+    const overlay = document.getElementById('overlay');
+    const overlayImg = document.getElementById('overlay-img');
+    overlay.style.display = 'none';
+    overlayImg.src = ''; // Clear the image source
 }
 document.querySelectorAll('.tab-button').forEach(tab => {
     tab.addEventListener('click', function() {

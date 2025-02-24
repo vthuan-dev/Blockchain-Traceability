@@ -1749,23 +1749,23 @@ function setupRoutes(app, db) {
     }
   });
 
-  async function getProductInfoFromDatabase(productId) {
-    return new Promise((resolve, reject) => {
-      db.query(
-        "SELECT product_id, product_name, description, price, img, uses, process FROM products WHERE product_id = ?",
-        [productId],
-        (error, results) => {
-          if (error) {
-            reject(error);
-          } else if (results.length > 0) {
-            resolve(results[0]);
-          } else {
-            resolve(null);
-          }
-        }
-      );
-    });
-  }
+  // async function getProductInfoFromDatabase(productId) {
+  //   return new Promise((resolve, reject) => {
+  //     db.query(
+  //       "SELECT product_id, product_name, description, price, img, uses, process FROM products WHERE product_id = ?",
+  //       [productId],
+  //       (error, results) => {
+  //         if (error) {
+  //           reject(error);
+  //         } else if (results.length > 0) {
+  //           resolve(results[0]);
+  //         } else {
+  //           resolve(null);
+  //         }
+  //       }
+  //     );
+  //   });
+  // }
 
   async function getWarehouseInfo(warehouseId) {
     return new Promise((resolve, reject) => {
