@@ -70,6 +70,9 @@
     box-shadow: 0 8px 16px rgba(0,0,0,.1);
     border-radius: 8px;
     padding: 0.5rem 0;
+    z-index: 1031;
+    min-width: 200px;
+    text-align: center;
 }
 
 .dropdown-item {
@@ -77,11 +80,11 @@
     padding: 0.5rem 1.5rem;
     transition: all 0.3s ease;
     border-radius: 5px;
+    text-align: center;
 }
 
 .dropdown-item:hover {
     background-color: rgba(255, 255, 255, 0.1);
-    transform: translateX(5px);
 }
 
 /* Hamburger menu */
