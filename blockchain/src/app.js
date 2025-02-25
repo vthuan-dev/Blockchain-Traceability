@@ -52,6 +52,19 @@ const session = require("express-session");  // Import express-session
 // Tạo RedisStore từ connect-redis và express-session
 const RedisStore = require("connect-redis").default
 
+// Thiết lập session middleware
+app.use(session({
+  store: new RedisStore({ client: redisClient }),
+  secret: process.env.SESSION_SECRET || 'blockchain_secret_key',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production', // Sử dụng secure cookie trong production
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000 // 24 giờ
+  }
+}));
+
 // Middleware để log session cho debug
 app.use((req, res, next) => {
   console.log('Session ID:', req.sessionID);
