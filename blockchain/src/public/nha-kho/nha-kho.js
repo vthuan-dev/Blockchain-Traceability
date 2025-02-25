@@ -493,15 +493,41 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function handleQRCode(decodedText) {
-    console.log("QR Code detected:", decodedText);
+    console.log("Đã phát hiện mã QR:", decodedText);
+    // Hiển thị loading spinner
+    showLoadingSpinner();
+    
     // Trích xuất SSCC từ URL
     const sscc = extractSSCC(decodedText);
     if (sscc) {
-      console.log("Extracted SSCC:", sscc);
-      fetchBatchInfoBySSCC(sscc);
+        console.log("Đã trích xuất SSCC:", sscc);
+        fetchBatchInfoBySSCC(sscc)
+            .finally(() => {
+                // Ẩn loading spinner khi hoàn thành (dù thành công hay thất bại)
+                hideLoadingSpinner();
+            });
     } else {
-      console.error("Không thể trích xuất SSCC từ URL:", decodedText);
-      alert("Mã QR không hợp lệ hoặc không chứa SSCC");
+        console.error("Không thể trích xuất SSCC từ URL:", decodedText);
+        alert("Mã QR không hợp lệ hoặc không chứa SSCC");
+        hideLoadingSpinner();
+    }
+  }
+
+  function showLoadingSpinner() {
+    if (!document.getElementById('loadingSpinner')) {
+        const spinner = document.createElement('div');
+        spinner.id = 'loadingSpinner';
+        spinner.className = 'loading-spinner';
+        spinner.innerHTML = '<div class="spinner"></div>';
+        document.body.appendChild(spinner);
+    }
+    document.getElementById('loadingSpinner').style.display = 'block';
+  }
+
+  function hideLoadingSpinner() {
+    const spinner = document.getElementById('loadingSpinner');
+    if (spinner) {
+        spinner.style.display = 'none';
     }
   }
 
