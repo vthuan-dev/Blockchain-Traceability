@@ -36,7 +36,11 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: ["http://www.tsroreee.com", "http://localhost:3000", "http://127.0.0.1:3000"], // Thay đổi nếu bạn chạy ở một domain khc
+    origin: [
+      "https://blockchain-truyxuat-54cfaa613f9c.herokuapp.com/", // Tên miền Heroku của bạn
+      "http://localhost:3000", 
+      "http://127.0.0.1:3000"
+    ],
     methods: ["GET", "POST"],
     credentials: true,
   },
@@ -45,23 +49,35 @@ const io = socketIo(server, {
 app.use(cors());
 app.use(bodyParser.json());
 
-// Cấu hình session với Redis
-app.use(session({
-  store: new RedisStore({
-    client: redisClient,
-    prefix: 'sess:'
-  }),
-  secret: process.env.SESSION_SECRET || 'your-secret-key',
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: process.env.NODE_ENV === 'production',
-    httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000, // 1 ngày
-    sameSite: 'lax'
-  },
-  name: 'blockchain.sid'
-}));
+const redis = require('ioredis');
+const connectRedis = require('connect-redis');
+const RedisStore = connectRedis(session);
+
+// Cấu hình Redis client với URL kết nối lấy từ Heroku
+const redisClient = new redis(process.env.REDIS_URL);
+
+redisClient.on('connect', () => {
+  console.log('Connected to Redis successfully');
+});
+
+redisClient.on('error', (err) => {
+  console.error('Redis connection error:', err);
+});
+
+app.use(
+  session({
+    store: new RedisStore({ client: redisClient }),
+    secret: process.env.SESSION_SECRET || 'fallback_secret',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: true, 
+      httpOnly: true,
+      sameSite: 'None',
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    },
+  })
+);
 
 // Middleware để log session cho debug
 app.use((req, res, next) => {
