@@ -912,3 +912,18 @@ db.getConnection()
     console.error('Lỗi kết nối database:', err);
   });
 
+// Thêm vào đầu file
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+// Đảm bảo app lắng nghe đúng port
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});
+
