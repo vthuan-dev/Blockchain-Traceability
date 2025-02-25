@@ -1,12 +1,17 @@
 {
   "name": "nckh-be",
   "version": "1.0.0",
-  "main": "src/app.js",
+  "main": "blockchain/src/app.js",
   "scripts": {
-    "test": "mocha --require @babel/register src/test/*.test.js",
     "start": "node blockchain/src/app.js",
+    "heroku-postbuild": "webpack --config webpack.config.js",
     "build": "webpack --config webpack.config.js",
-    "dev": "nodemon blockchain/src/app.js"
+    "dev": "nodemon blockchain/src/app.js",
+    "test": "mocha --require @babel/register src/test/*.test.js"
+  },
+  "engines": {
+    "node": "18.x",
+    "npm": "9.x"
   },
   "keywords": [],
   "author": "",
