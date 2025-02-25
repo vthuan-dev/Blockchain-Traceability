@@ -90,25 +90,40 @@ const db = mysql.createConnection({
   queueLimit: 0,
   multipleStatements: true,
   keepAliveInitialDelay: 10000,
-  connectTimeout: 10000,
+  connectTimeout: 10000
 });
 
-const query = util.promisify(db.query).bind(db);
-
+// Xử lý lỗi kết nối
 db.on('error', (err) => {
   console.error('Lỗi kết nối database:', err);
   if (err.code === 'PROTOCOL_CONNECTION_LOST') {
     console.log('Kết nối database bị mất, đang thử kết nối lại...');
+    handleReconnect();
   }
 });
 
+function handleReconnect() {
+  db.connect((err) => {
+    if (err) {
+      console.error('Lỗi khi kết nối lại:', err);
+      setTimeout(handleReconnect, 2000);
+    } else {
+      console.log('Đã kết nối lại thành công');
+    }
+  });
+}
+
+// Kết nối ban đầu
 db.connect((err) => {
   if (err) {
     console.error("Lỗi kết nối cơ sở dữ liệu:", err.message);
+    setTimeout(handleReconnect, 2000);
     return;
   }
   console.log("Đã kết nối cơ sở dữ liệu");
 });
+
+const query = util.promisify(db.query).bind(db);
 
 const uploadQR = multer({
   storage: multer.memoryStorage(),
@@ -447,6 +462,19 @@ function cleanupUploadedFiles(files) {
 }
 
 function setupRoutes(app, db) {
+  // Thêm middleware kiểm tra kết nối database
+  app.use(async (req, res, next) => {
+    try {
+      // Kiểm tra kết nối trước mỗi request
+      const connection = await db.getConnection();
+      connection.release();
+      next();
+    } catch (err) {
+      console.error('Database connection error:', err);
+      res.status(500).json({ error: 'Lỗi kết nối database' });
+    }
+  });
+
   app.get("/batches/:producerId", async (req, res) => {
     try {
       const producerId = parseInt(req.params.producerId, 10);

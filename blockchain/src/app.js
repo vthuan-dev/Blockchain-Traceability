@@ -85,10 +85,13 @@ const db = mysql.createPool({
   port: process.env.DB_PORT,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
-  connectTimeout: 200000,
+  connectTimeout: 60000,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
+  enableKeepAlive: true,
+  keepAliveInitialDelay: 0,
+  multipleStatements: true
 });
 
 const uploadDir = path.join(__dirname, 'public', 'uploads');
@@ -874,4 +877,38 @@ io.on("connection", (socket) => {
 server.listen(3000, () => {
   console.log("Server đang chạy trên cổng 3000");
 });
+
+// Thêm error handler cho pool
+db.on('error', function(err) {
+  console.error('Database error:', err);
+  if(err.code === 'PROTOCOL_CONNECTION_LOST') {
+    console.log('Đang thử kết nối lại...');
+    handleReconnect();
+  }
+});
+
+// Tách logic reconnect thành hàm riêng
+function handleReconnect() {
+  setTimeout(() => {
+    db.getConnection()
+      .then(connection => {
+        console.log('Đã kết nối lại thành công');
+        connection.release();
+      })
+      .catch(err => {
+        console.error('Kết nối lại thất bại:', err);
+        handleReconnect();
+      });
+  }, 2000);
+}
+
+// Kiểm tra kết nối ban đầu
+db.getConnection()
+  .then(connection => {
+    console.log('Đã kết nối thành công đến MySQL');
+    connection.release();
+  })
+  .catch(err => {
+    console.error('Lỗi kết nối database:', err);
+  });
 

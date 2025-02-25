@@ -7,6 +7,10 @@ let fileSelected;
 let scanButton;
 let qrReader;
 
+// Thêm biến toàn cục để theo dõi gallery
+let currentGalleryImages = [];
+let currentImageIndex = 0;
+
 function displayBatchInfo(info) {
   console.log("Displaying batch info:", info);
   const batchInfoDiv = document.getElementById("batchInfo");
@@ -181,92 +185,96 @@ function openImageModal(src) {
 }
 
 function openImageGallery(type) {
-  console.log("Opening gallery for:", type);
-  console.log("Batch Info:", batchInfo);
-  const modal = document.getElementById("imageModal");
-  const modalContent = document.getElementById("modalContent");
-
-  if (!modal || !modalContent) {
-    console.error("Modal elements not found");
-    alert("Không thể hiển thị hình ảnh. Vui lòng thử lại sau.");
-    return;
-  }
-
-  modal.style.display = "block";
-
-  let galleryHTML = '<div class="image-gallery">';
-  const images =
-    type === "product" ? batchInfo.productImageUrls : batchInfo.batchImageUrls;
-
-  console.log("Images:", images);
-
-  if (images && Object.keys(images).length > 0) {
-    Object.values(images).forEach((url) => {
-      console.log("Adding image:", url);
-      galleryHTML += `<img src="${url}" alt="${type} image" class="gallery-image" onclick="expandImage('${url}')">`;
-    });
-  } else {
-    galleryHTML += "<p>Không có hình ảnh để hiển thị.</p>";
-  }
-
-  galleryHTML += "</div>";
-  modalContent.innerHTML = galleryHTML;
-  modalContent.style.display = "block";
-
-  // Đóng modal khi nhấp vào bất kỳ đâu trên modal
-  modal.onclick = function (event) {
-    if (event.target === modal || event.target.className === "modal-overlay") {
-      closeModal();
+    const modal = document.getElementById('imageGalleryModal');
+    const galleryImage = document.getElementById('galleryCurrentImage');
+    
+    if (!modal || !galleryImage) {
+        console.error("Modal elements not found");
+        return;
     }
-  };
+
+    // Lấy danh sách ảnh
+    const images = type === 'product' ? 
+        (batchInfo.productImageUrls ? Object.values(batchInfo.productImageUrls) : []) : 
+        (batchInfo.batchImageUrls ? Object.values(batchInfo.batchImageUrls) : []);
+
+    if (images.length === 0) {
+        alert('Không có hình ảnh để hiển thị.');
+        return;
+    }
+
+    // Lưu danh sách ảnh và reset index
+    currentGalleryImages = images;
+    currentImageIndex = 0;
+
+    // Hiển thị ảnh đầu tiên
+    updateGalleryView();
+    
+    // Hiển thị modal
+    modal.style.display = "block";
+
+    // Cập nhật số lượng ảnh
+    document.getElementById('totalImages').textContent = images.length;
+
+    // Ẩn/hiện nút điều hướng nếu chỉ có 1 ảnh
+    const prevBtn = document.querySelector('.prev-btn');
+    const nextBtn = document.querySelector('.next-btn');
+    if (images.length <= 1) {
+        prevBtn.style.display = 'none';
+        nextBtn.style.display = 'none';
+    } else {
+        prevBtn.style.display = 'block';
+        nextBtn.style.display = 'block';
+    }
+
+    // Thêm sự kiện bàn phím
+    document.addEventListener('keydown', handleGalleryKeyPress);
 }
 
-function expandImage(src) {
-  const modal = document.getElementById("imageModal");
-  const modalImg = document.getElementById("modalImage");
-  const modalContent = document.getElementById("modalContent");
+function navigateGallery(direction) {
+    currentImageIndex = (currentImageIndex + direction + currentGalleryImages.length) % currentGalleryImages.length;
+    updateGalleryView();
+}
 
-  modal.style.display = "block";
-  modalImg.src = src;
-  modalImg.style.display = "block";
-  modalContent.style.display = "none";
+function updateGalleryView() {
+    const galleryImage = document.getElementById('galleryCurrentImage');
+    const currentIndexSpan = document.getElementById('currentImageIndex');
+    
+    galleryImage.src = currentGalleryImages[currentImageIndex];
+    currentIndexSpan.textContent = currentImageIndex + 1;
+}
 
-  // Đóng modal khi nhấp vào bất kỳ đâu trên modal
-  modal.onclick = function (event) {
-    if (event.target === modal || event.target.className === "modal-overlay") {
-      closeModal();
+function handleGalleryKeyPress(event) {
+    if (event.key === 'ArrowLeft') {
+        navigateGallery(-1);
+    } else if (event.key === 'ArrowRight') {
+        navigateGallery(1);
+    } else if (event.key === 'Escape') {
+        closeModal();
     }
-  };
 }
 
 function closeModal() {
-  const modal = document.getElementById("imageModal");
-  modal.style.display = "none";
+    const modal = document.getElementById('imageGalleryModal');
+    modal.style.display = 'none';
+    // Xóa event listener khi đóng modal
+    document.removeEventListener('keydown', handleGalleryKeyPress);
 }
 
-// Thêm event listener cho nút đóng và overlay
-document.addEventListener("DOMContentLoaded", function () {
-  const modal = document.getElementById("imageModal");
-  const closeButton = modal.querySelector(".close");
+// Cập nhật event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('imageGalleryModal');
+    const modalOverlay = modal.querySelector('.modal-overlay');
+    const closeBtn = modal.querySelector('.close');
 
-  if (closeButton) {
-    closeButton.addEventListener("click", closeModal);
-  }
+    modalOverlay.addEventListener('click', closeModal);
+    closeBtn.addEventListener('click', closeModal);
 
-  // Đóng modal khi nhấp vào bất kỳ đâu trên modal
-  modal.addEventListener("click", function (event) {
-    if (event.target === modal || event.target.className === "modal-overlay") {
-      closeModal();
-    }
-  });
-
-  // Ngăn chặn sự kiện click từ việc lan truyền khi nhấp vào nội dung modal
-  const modalContent = modal.querySelector(".modal-content");
-  if (modalContent) {
-    modalContent.addEventListener("click", function (event) {
-      event.stopPropagation();
+    // Ngăn chặn sự kiện click từ việc lan truyền khi nhấp vào nội dung modal
+    const modalContent = modal.querySelector('.modal-content');
+    modalContent.addEventListener('click', function(event) {
+        event.stopPropagation();
     });
-  }
 });
 
 // Event listener cho DOMContentLoaded
