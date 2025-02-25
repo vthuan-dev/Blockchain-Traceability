@@ -317,34 +317,32 @@ document.addEventListener("DOMContentLoaded", async function () {
   scanButton = document.getElementById("scan-button");
   qrReader = document.getElementById("qr-reader");
 
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    stream.getTracks().forEach(track => track.stop());
-} catch (err) {
-    console.log("Camera permission not granted:", err);
-}
-
-const requestCameraButton = document.getElementById('request-camera');
-if (requestCameraButton) {
-    requestCameraButton.addEventListener('click', async () => {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: "environment" } 
-            });
-            stream.getTracks().forEach(track => track.stop());
-            alert('Đã cấp quyền camera thành công!');
-            // Tự động bắt đầu quét
-            startScanner();
-        } catch (err) {
-            console.error("Camera permission error:", err);
-            alert('Vui lòng cấp quyền camera trong cài đặt trình duyệt của bạn.');
-        }
-    });
-}
-
   if (startCameraButton) {
-    startCameraButton.addEventListener("click", toggleQRScanner);
+    startCameraButton.addEventListener("click", async function() {
+      // Nếu đang quét, dừng quét
+      if (html5QrCode && html5QrCode.isScanning) {
+        stopScanner();
+        return;
+      }
+      
+      // Nếu chưa quét, bắt đầu quét
+      try {
+        // Yêu cầu quyền camera khi nhấn nút này
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          video: { facingMode: "environment" } 
+        });
+        // Dừng stream ngay sau khi được cấp quyền
+        stream.getTracks().forEach(track => track.stop());
+        
+        // Bắt đầu quét sau khi được cấp quyền
+        startScanner();
+      } catch (err) {
+        console.error("Camera permission error:", err);
+        alert('Vui lòng cấp quyền camera trong cài đặt trình duyệt của bạn.');
+      }
+    });
   }
+  
   if (qrInput) {
     qrInput.addEventListener("change", handleFileInput);
   }
@@ -352,97 +350,85 @@ if (requestCameraButton) {
     scanButton.addEventListener("click", scanQR);
   }
 
-  function toggleQRScanner() {
-    if (html5QrCode && html5QrCode.isScanning) {
-      stopScanner();
-    } else {
-      startScanner();
-    }
-  }
-  async function requestCameraPermission() {
+  async function startScanner() {
     try {
-        const result = await navigator.permissions.query({ name: 'camera' });
-        if (result.state === 'denied') {
-            alert('Vui lòng cấp quyền camera trong cài đặt trình duyệt của bạn.');
-            return false;
-        }
-        return true;
-    } catch (err) {
-        console.log("Không thể kiểm tra quyền camera:", err);
-        return true; // Tiếp tục nếu không thể kiểm tra
-    }
-}
-async function startScanner() {
-  try {
       // Khởi tạo scanner trước
       if (!html5QrCode) {
-          html5QrCode = new Html5Qrcode("qr-reader");
+        html5QrCode = new Html5Qrcode("qr-reader");
       }
       qrReader.style.display = "block";
 
       // Thử camera sau trước
       await html5QrCode.start(
-          { facingMode: { exact: "environment" } },
-          {
-              fps: 10,
-              qrbox: { width: 250, height: 250 },
-              aspectRatio: 1.0
-          },
-          (decodedText) => {
-              console.log("QR Code detected:", decodedText);
-              stopScanner();
-              handleQRCode(decodedText);
-          },
-          (errorMessage) => {
-              console.log("QR Error:", errorMessage);
-          }
+        { facingMode: { exact: "environment" } },
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 250 },
+          aspectRatio: 1.0
+        },
+        (decodedText) => {
+          console.log("QR Code detected:", decodedText);
+          stopScanner();
+          handleQRCode(decodedText);
+        },
+        (errorMessage) => {
+          console.log("QR Error:", errorMessage);
+        }
       );
 
+      // Đổi text của nút thành "Dừng quét"
       startCameraButton.textContent = "Dừng quét";
       scanButton.disabled = true;
 
-  } catch (err) {
+    } catch (err) {
       console.error("Back camera error:", err);
       
       // Thử camera trước nếu camera sau không được
       try {
-          await html5QrCode.start(
-              { facingMode: "user" },
-              {
-                  fps: 10,
-                  qrbox: { width: 250, height: 250 },
-                  aspectRatio: 1.0
-              },
-              (decodedText) => {
-                  console.log("QR Code detected:", decodedText);
-                  stopScanner();
-                  handleQRCode(decodedText);
-              }
-          );
-      } catch (frontErr) {
-          console.error("Front camera error:", frontErr);
-          alert("Không thể truy cập camera. Vui lòng kiểm tra quyền và thử lại.");
-          await stopScanner();
-      }
-  }
-}
-async function stopScanner() {
-  try {
-      if (html5QrCode) {
-          if (html5QrCode.isScanning) {
-              await html5QrCode.stop();
-              console.log("Scanner stopped");
+        await html5QrCode.start(
+          { facingMode: "user" },
+          {
+            fps: 10,
+            qrbox: { width: 250, height: 250 },
+            aspectRatio: 1.0
+          },
+          (decodedText) => {
+            console.log("QR Code detected:", decodedText);
+            stopScanner();
+            handleQRCode(decodedText);
           }
-          await html5QrCode.clear();
-          html5QrCode = null;
+        );
+        
+        // Đổi text của nút thành "Dừng quét"
+        startCameraButton.textContent = "Dừng quét";
+        scanButton.disabled = true;
+        
+      } catch (frontErr) {
+        console.error("Front camera error:", frontErr);
+        alert("Không thể truy cập camera. Vui lòng kiểm tra quyền và thử lại.");
+        await stopScanner();
+      }
+    }
+  }
+
+  async function stopScanner() {
+    try {
+      if (html5QrCode) {
+        if (html5QrCode.isScanning) {
+          await html5QrCode.stop();
+          console.log("Scanner stopped");
+        }
+        await html5QrCode.clear();
+        html5QrCode = null;
       }
       qrReader.style.display = "none";
       startCameraButton.textContent = "Quét QR bằng camera";
       scanButton.disabled = false;
-  } catch (err) {
+    } catch (err) {
       console.error("Stop scanner error:", err);
+    }
   }
-}
+
   function handleFileInput(event) {
     const file = event.target.files[0];
     if (file) {
@@ -509,6 +495,7 @@ async function stopScanner() {
     };
     reader.readAsDataURL(file);
   }
+
   function handleQRCode(decodedText) {
     console.log("QR Code detected:", decodedText);
     // Trích xuất SSCC từ URL
@@ -553,42 +540,6 @@ window.openImageModal = openImageModal;
 window.openImageGallery = openImageGallery;
 window.expandImage = expandImage;
 window.closeModal = closeModal;
-
-async function updateTransportStatus(sscc, action) {
-  console.log("Updating transport status:", { sscc, action });
-  
-  // Tìm và thêm loading state cho nút được click
-  const clickedButton = event.target.closest('button');
-  clickedButton.classList.add('btn-loading');
-  
-  try {
-    const response = await fetch("/api/accept-transport", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ sscc, action }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || "Không thể cập nhật trạng thái vận chuyển");
-    }
-
-    showActionMessage(data.message, "success");
-    await fetchBatchInfoBySSCC(sscc);
-  } catch (error) {
-    console.error("Error:", error);
-    showActionMessage(
-      "Có lỗi xảy ra khi cập nhật trạng thái vận chuyển: " + error.message,
-      "error"
-    );
-  } finally {
-    // Xóa loading state
-    clickedButton.classList.remove('btn-loading');
-  }
-}
 
 function showActionMessage(message, type) {
   const actionMessage = document.getElementById("actionMessage");
