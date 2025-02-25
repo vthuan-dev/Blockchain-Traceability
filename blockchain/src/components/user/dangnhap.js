@@ -60,6 +60,14 @@ module.exports = function (db) {
           }
           
           console.log("Session sau khi lưu:", req.session);
+          res.cookie('blockchain.sid', req.sessionID, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 24 * 60 * 60 * 1000 // 1 ngày
+          });
+          
+          console.log("Session ID đã được thiết lập:", req.sessionID);
           return res.status(200).json({
             message: "Đăng nhập thành công",
             admin: {
@@ -165,6 +173,14 @@ module.exports = function (db) {
           }
           
           console.log("Session sau khi lưu:", req.session);
+          res.cookie('blockchain.sid', req.sessionID, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 24 * 60 * 60 * 1000 // 1 ngày
+          });
+          
+          console.log("Session ID đã được thiết lập:", req.sessionID);
           return res.status(200).json({
             message: "Đăng nhập thành công",
             user: {
