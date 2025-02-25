@@ -34,7 +34,11 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: ["http://www.tsroreee.com", "http://localhost:3000", "http://127.0.0.1:3000"], // Thay đổi nếu bạn chạy ở một domain khc
+    origin: [
+      "https://blockchain-truyxuat-54cfaa613f9c.herokuapp.com/", // Tên miền Heroku của bạn
+      "http://localhost:3000", 
+      "http://127.0.0.1:3000"
+    ],
     methods: ["GET", "POST"],
     credentials: true,
   },
@@ -43,26 +47,19 @@ const io = socketIo(server, {
 app.use(cors());
 app.use(bodyParser.json());
 
-const Redis = require('ioredis');
+const redis = require('ioredis');
 const connectRedis = require('connect-redis');
 const RedisStore = connectRedis(session);
 
-const redisClient = new Redis({
-  host: 'localhost',  // Thay đổi từ 'redis' thành 'localhost'
-  port: 6379,
-  retryStrategy: function(times) {
-    const delay = Math.min(times * 50, 2000);
-    return delay;
-  }
-});
-
-// Thêm error handling
-redisClient.on('error', (err) => {
-  console.error('Redis connection error:', err);
-});
+// Cấu hình Redis client với URL kết nối lấy từ Heroku
+const redisClient = new redis(process.env.REDIS_URL);
 
 redisClient.on('connect', () => {
   console.log('Connected to Redis successfully');
+});
+
+redisClient.on('error', (err) => {
+  console.error('Redis connection error:', err);
 });
 
 app.use(
@@ -72,10 +69,11 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: false,
+      secure: true, 
       httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000
-    }
+      sameSite: 'None',
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    },
   })
 );
 
