@@ -4,8 +4,8 @@
   "main": "blockchain/src/app.js",
   "scripts": {
     "start": "node blockchain/src/app.js",
-    "heroku-postbuild": "webpack --config webpack.config.js",
-    "build": "webpack --config webpack.config.js",
+    "heroku-postbuild": "echo 'Skipping webpack build'",
+    "build": "echo 'Skipping webpack build'",
     "dev": "nodemon blockchain/src/app.js",
     "test": "mocha --require @babel/register src/test/*.test.js"
   },

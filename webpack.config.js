@@ -1,7 +1,7 @@
 const path = require("path");
 
 module.exports = {
-  entry: "./src/public/chatbox/chatbox.js", // Điều chỉnh đường dẫn này theo cấu trúc thư mục thực tế của bạn
+  entry: "./src/public/chatbox/index.js", // Điều chỉnh đường dẫn này theo cấu trúc thư mục thực tế của bạn
   output: {
     path: path.resolve(__dirname, "./blockchain/src/public/chatbox"), // Nơi chứa file sau khi bundling
     filename: "chat.bundle.js", // Tên file sau khi bundling
