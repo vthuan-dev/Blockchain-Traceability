@@ -24,6 +24,8 @@ const bcrypt = require("bcryptjs");
 const nodemailer = require("nodemailer");
 require("dotenv").config({ path: path.resolve(__dirname, "../../.env") });
 const session = require("express-session");
+const RedisStore = require('connect-redis').default;
+const redisClient = require('./config/redis');
 
 // Thêm phần này để tích hợp Socket.io
 const http = require("http");
@@ -43,23 +45,30 @@ const io = socketIo(server, {
 app.use(cors());
 app.use(bodyParser.json());
 
-const redisClient = require('./config/redis');
-const connectRedis = require('connect-redis');
-const RedisStore = connectRedis(session);
+// Cấu hình session với Redis
+app.use(session({
+  store: new RedisStore({ 
+    client: redisClient,
+    prefix: 'sess:',
+    disableTouch: false
+  }),
+  secret: process.env.SESSION_SECRET || 'your-secret-key',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000 // 1 day
+  },
+  name: 'blockchain.sid'
+}));
 
-app.use(
-  session({
-    store: new RedisStore({ client: redisClient }),
-    secret: process.env.SESSION_SECRET || 'fallback_secret',
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      secure: process.env.NODE_ENV === 'production',
-      httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000
-    }
-  })
-);
+// Middleware để log session cho debug
+app.use((req, res, next) => {
+  console.log('Session ID:', req.sessionID);
+  console.log('Session Data:', req.session);
+  next();
+});
 
 const db = mysql.createPool({
   host: process.env.DB_HOST,
