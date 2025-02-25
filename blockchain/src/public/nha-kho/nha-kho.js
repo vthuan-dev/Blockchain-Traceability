@@ -160,28 +160,39 @@ async function confirmReceipt(sscc) {
   }
 }
 
-function openImageModal(src) {
-  const modal = document.getElementById("imageModal");
-  const modalImg = document.getElementById("modalImage");
-  const modalContent = document.getElementById("modalContent");
-  const modalOverlay = modal.querySelector(".modal-overlay");
+function openImageModal(imageUrl) {
+    const modal = document.getElementById('imageModal');
+    const modalImage = document.getElementById('modalImage');
+    
+    // Chuẩn hóa đường dẫn
+    imageUrl = decodeURIComponent(imageUrl); // Giải mã URL nếu đã bị mã hóa
+    imageUrl = imageUrl.replace(/\\/g, '/');
+    
+    // Tách năm và tháng từ đường dẫn
+    const match = imageUrl.match(/(\d{4})\/(\d{1,2})/);
+    const year = match ? match[1] : new Date().getFullYear();
+    const month = match ? match[2] : (new Date().getMonth() + 1);
+    
+    // Tách tên file
+    const fileName = imageUrl.split('/').pop();
+    
+    // Tạo đường dẫn mới với cấu trúc chính xác
+    imageUrl = `/uploads/batches/${year}/${month}/${fileName}`;
 
-  modal.style.display = "block";
-  modalImg.src = src;
-  modalImg.style.display = "block";
-  modalContent.style.display = "none";
+    console.log('Loading image from:', imageUrl); // Debug log
 
-  // Đóng modal khi nhấp vào bất kỳ đâu trên modal
-  modal.onclick = function (event) {
-    if (event.target === modal || event.target.className === "modal-overlay") {
-      closeModal();
-    }
-  };
+    modalImage.onerror = function() {
+        console.error('Failed to load image:', imageUrl);
+        alert('Không thể tải hình ảnh. Vui lòng thử lại sau.');
+    };
 
-  // Ngăn chặn sự kiện click từ việc lan truyền đến overlay khi nhấp vào ảnh
-  modalImg.onclick = function (event) {
-    event.stopPropagation();
-  };
+    modalImage.onload = function() {
+        console.log('Image loaded successfully');
+        modal.style.display = "block";
+    };
+
+    // Set src sau khi đã thiết lập handlers
+    modalImage.src = imageUrl;
 }
 
 function openImageGallery(type) {
@@ -240,7 +251,24 @@ function updateGalleryView() {
     const galleryImage = document.getElementById('galleryCurrentImage');
     const currentIndexSpan = document.getElementById('currentImageIndex');
     
-    galleryImage.src = currentGalleryImages[currentImageIndex];
+    let imageUrl = currentGalleryImages[currentImageIndex];
+    
+    // Chuẩn hóa đường dẫn
+    imageUrl = decodeURIComponent(imageUrl);
+    imageUrl = imageUrl.replace(/\\/g, '/');
+    
+    // Tách năm và tháng từ đường dẫn
+    const match = imageUrl.match(/(\d{4})\/(\d{1,2})/);
+    const year = match ? match[1] : new Date().getFullYear();
+    const month = match ? match[2] : (new Date().getMonth() + 1);
+    
+    // Tách tên file
+    const fileName = imageUrl.split('/').pop();
+    
+    // Tạo đường dẫn mới với cấu trúc chính xác
+    imageUrl = `/uploads/batches/${year}/${month}/${fileName}`;
+
+    galleryImage.src = imageUrl;
     currentIndexSpan.textContent = currentImageIndex + 1;
 }
 

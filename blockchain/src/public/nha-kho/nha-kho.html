@@ -321,20 +321,40 @@
     </div>
 
     <style>
+        #imageGalleryModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1001;
+        }
+
         .gallery-content {
             width: 90%;
             max-width: 800px;
-            background: white;
-            border-radius: 10px;
+            background: transparent;
             position: relative;
-            margin: 20px auto;
+            margin: 60px auto;
             padding: 20px;
+            z-index: 1002;
         }
 
         .gallery-container {
             position: relative;
             width: 100%;
-            height: 70vh;
+            height: 65vh;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -352,13 +372,15 @@
             max-width: 100%;
             max-height: 100%;
             object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
 
         .nav-btn {
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(255, 255, 255, 0.2);
             color: white;
             border: none;
             padding: 15px;
@@ -370,27 +392,38 @@
         }
 
         .nav-btn:hover {
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(255, 255, 255, 0.4);
         }
 
         .prev-btn {
-            left: 10px;
+            left: 20px;
         }
 
         .next-btn {
-            right: 10px;
+            right: 20px;
         }
 
         .gallery-counter {
             text-align: center;
-            margin-top: 10px;
+            margin-top: 15px;
             font-size: 16px;
-            color: #333;
+            color: white;
+        }
+
+        .close {
+            position: absolute;
+            right: 15px;
+            top: -40px;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+            z-index: 1003;
         }
 
         @media (max-width: 768px) {
             .gallery-content {
                 width: 95%;
+                margin: 40px auto;
                 padding: 10px;
             }
 
@@ -399,10 +432,113 @@
             }
 
             .nav-btn {
-                padding: 10px;
-                font-size: 14px;
+                padding: 12px;
+                font-size: 16px;
+            }
+
+            .close {
+                top: -30px;
+                right: 10px;
+                font-size: 24px;
             }
         }
+    </style>
+
+    <script>
+    function openImageModal(imageUrl) {
+        const modal = document.getElementById('imageModal');
+        const modalImage = document.getElementById('modalImage');
+        
+        // Đảm bảo imageUrl bắt đầu bằng /uploads nếu chưa có
+        if (!imageUrl.startsWith('/uploads')) {
+            imageUrl = `/uploads${imageUrl.split('uploads').pop()}`;
+        }
+
+        // Thêm base URL cho môi trường development
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            const port = window.location.port;
+            imageUrl = `http://localhost:${port}${imageUrl}`;
+        }
+
+        console.log('Loading image from:', imageUrl); // Debug log
+
+        modalImage.onerror = function() {
+            console.error('Failed to load image:', imageUrl);
+            alert('Không thể tải hình ảnh. Vui lòng thử lại sau.');
+        };
+
+        modalImage.onload = function() {
+            console.log('Image loaded successfully');
+            modal.style.display = "block";
+        };
+
+        // Set src sau khi đã thiết lập handlers
+        modalImage.src = imageUrl;
+    }
+
+    // Đóng modal khi click vào nút close hoặc bên ngoài modal
+    window.onclick = function(event) {
+        const modal = document.getElementById('imageModal');
+        if (event.target == modal || event.target.className == 'close') {
+            modal.style.display = "none";
+        }
+    }
+    </script>
+
+    <style>
+    /* Cập nhật style cho modal */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.9);
+        z-index: 1000;
+    }
+
+    .modal-content {
+        position: relative;
+        margin: auto;
+        padding: 20px;
+        width: 90%;
+        max-width: 800px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    #modalImage {
+        width: 100%;
+        max-height: 80vh;
+        object-fit: contain;
+    }
+
+    .close {
+        position: absolute;
+        right: 15px;
+        top: -40px;
+        color: #fff;
+        font-size: 30px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .close:hover {
+        color: #ccc;
+    }
+
+    @media (max-width: 768px) {
+        .modal-content {
+            width: 95%;
+            padding: 10px;
+        }
+        
+        .close {
+            top: -30px;
+            right: 10px;
+        }
+    }
     </style>
 </body>
 </html>
