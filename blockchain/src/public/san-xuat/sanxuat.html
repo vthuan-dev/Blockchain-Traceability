@@ -829,18 +829,25 @@ async function initializeBaseUrl() {
     try {
         const response = await fetch('/api/config');
         const config = await response.json();
-        baseUrl = config.baseUrl;
+        window.baseUrl = config.baseUrl;
+        console.log("Base URL đã được khởi tạo:", window.baseUrl);
     } catch (error) {
-        console.error('Error fetching base URL:', error);
-        // Fallback to window.location if API fails
-        baseUrl = `${window.location.protocol}//${window.location.host}`;
+        console.error('Lỗi khi lấy base URL:', error);
+        // Sử dụng window.location nếu API thất bại
+        window.baseUrl = `${window.location.protocol}//${window.location.host}`;
+        console.log("Sử dụng base URL dự phòng:", window.baseUrl);
     }
-}
+} 
 
 
 function generateQRUrl(sscc) {
+    // Đảm bảo baseUrl được định nghĩa trước khi sử dụng
+    if (!window.baseUrl) {
+        window.baseUrl = `${window.location.protocol}//${window.location.host}`;
+        console.log("Sử dụng base URL mặc định:", window.baseUrl);
+    }
     // Tạo URL cho mã QR với định dạng mong muốn
-    return `${baseUrl}/tieu-dung/lo-hang.html?sscc=${sscc}`;
+    return `${window.baseUrl}/tieu-dung/lo-hang.html?sscc=${sscc}`;
 }
 
 function generateQRCodeWithLogo(canvas, sscc, size, showLogo, callback) {
