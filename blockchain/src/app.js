@@ -48,8 +48,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 const redis = require('ioredis');
-const connectRedis = require('connect-redis');
-const RedisStore = connectRedis(session);
+const RedisStore = require('connect-redis')(session);
 
 // Cấu hình Redis client với URL kết nối lấy từ Heroku
 const redisClient = new redis(process.env.REDIS_URL);
