@@ -43,27 +43,9 @@ const io = socketIo(server, {
 app.use(cors());
 app.use(bodyParser.json());
 
-const Redis = require('ioredis');
+const redisClient = require('./config/redis');
 const connectRedis = require('connect-redis');
 const RedisStore = connectRedis(session);
-
-const redisClient = new Redis({
-  host: 'localhost',  // Thay đổi từ 'redis' thành 'localhost'
-  port: 6379,
-  retryStrategy: function(times) {
-    const delay = Math.min(times * 50, 2000);
-    return delay;
-  }
-});
-
-// Thêm error handling
-redisClient.on('error', (err) => {
-  console.error('Redis connection error:', err);
-});
-
-redisClient.on('connect', () => {
-  console.log('Connected to Redis successfully');
-});
 
 app.use(
   session({
@@ -72,7 +54,7 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: false,
+      secure: process.env.NODE_ENV === 'production',
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000
     }
@@ -874,10 +856,6 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(3000, () => {
-  console.log("Server đang chạy trên cổng 3000");
-});
-
 // Thêm error handler cho pool
 db.on('error', function(err) {
   console.error('Database error:', err);
@@ -923,7 +901,7 @@ process.on('unhandledRejection', (reason, promise) => {
 
 // Đảm bảo app lắng nghe đúng port
 const port = process.env.PORT || 3000;
-app.listen(port, () => {
+server.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
 
