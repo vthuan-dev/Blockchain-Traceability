@@ -4,35 +4,50 @@ require('dotenv').config();
 let redisClient;
 
 try {
-  // Sử dụng REDIS_URL từ biến môi trường (Heroku Key-Value Store tạo biến này)
-  const redisUrl = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
+  // Sử dụng REDIS_URL từ biến môi trường (Heroku tạo biến này)
+  const redisUrl = process.env.REDIS_URL;
   
-  // Thêm tùy chọn TLS để bỏ qua xác minh chứng chỉ
+  if (!redisUrl) {
+    throw new Error('REDIS_URL không được cấu hình');
+  }
+  
+  console.log('Đang kết nối đến Redis tại:', redisUrl.replace(/:[^:]*@/, ':***@')); // Ẩn mật khẩu trong log
+  
+  // Cấu hình Redis với các tùy chọn phù hợp cho Heroku
   const redisOptions = {
-    tls: {
+    tls: redisUrl.includes('rediss://') ? {
       rejectUnauthorized: false // Bỏ qua việc xác minh chứng chỉ SSL
-    }
+    } : undefined,
+    retryStrategy: function(times) {
+      const delay = Math.min(times * 100, 3000);
+      console.log(`Đang thử kết nối lại Redis sau ${delay}ms...`);
+      return delay;
+    },
+    maxRetriesPerRequest: 5
   };
 
   redisClient = new Redis(redisUrl, redisOptions);
 
   redisClient.on('connect', () => {
-    console.log('Connected to Redis successfully');
+    console.log('Đã kết nối thành công đến Redis');
   });
 
   redisClient.on('error', (err) => {
-    console.error('Redis connection error:', err);
+    console.error('Lỗi kết nối Redis:', err);
   });
 
 } catch (error) {
-  console.error('Error initializing Redis client:', error);
+  console.error('Lỗi khởi tạo Redis client:', error);
   // Tạo một client giả nếu không thể kết nối Redis
   redisClient = {
     get: () => Promise.resolve(null),
     set: () => Promise.resolve(null),
     del: () => Promise.resolve(null),
+    // Thêm các phương thức cần thiết khác
+    on: () => {},
+    quit: () => Promise.resolve(),
   };
-  console.log('Using fallback Redis client');
+  console.log('Sử dụng Redis client dự phòng');
 }
 
 module.exports = redisClient;

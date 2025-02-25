@@ -46,72 +46,11 @@ const io = socketIo(server, {
 app.use(cors());
 app.use(bodyParser.json());
 
-const redis = require('ioredis');  // Kết nối Redis
+const redisClient = require('./config/redis');  // Sử dụng Redis client đã cấu hình
 const session = require("express-session");  // Import express-session
 
 // Tạo RedisStore từ connect-redis và express-session
 const RedisStore = require("connect-redis").default
-
-// Kết nối Redis client
-const redisClient = new redis({
-  url: process.env.REDIS_URL || 'redis://127.0.0.1:6379',
-  tls: process.env.REDIS_URL && process.env.REDIS_URL.includes('rediss://') ? {
-    rejectUnauthorized: false  // Bỏ qua việc kiểm tra chứng chỉ SSL chỉ khi sử dụng rediss://
-  } : undefined,
-  reconnectOnError: function(err) {
-    console.log('Redis kết nối lỗi:', err);
-    return true; // Tự động kết nối lại
-  },
-  retryStrategy: function(times) {
-    const delay = Math.min(times * 50, 2000);
-    console.log(`Đang thử kết nối lại Redis sau ${delay}ms...`);
-    return delay;
-  }
-});
-
-// Xử lý sự kiện lỗi Redis
-redisClient.on('error', (err) => {
-  console.error('Redis error:', err);
-  // Nếu không thể kết nối Redis, sử dụng MemoryStore thay thế
-  if (err.code === 'ECONNREFUSED' && !app.get('usingMemoryStore')) {
-    console.log('Chuyển sang sử dụng MemoryStore...');
-    app.set('usingMemoryStore', true);
-    app.use(
-      session({
-        secret: process.env.SESSION_SECRET || 'fallback_secret',
-        resave: false,
-        saveUninitialized: false,
-        cookie: {
-          secure: process.env.NODE_ENV === 'production',
-          httpOnly: true,
-          sameSite: 'None',
-          maxAge: 24 * 60 * 60 * 1000, // 24 hours
-        },
-      })
-    );
-  }
-});
-
-// Cấu hình session sử dụng RedisStore
-if (!app.get('usingMemoryStore')) {
-  app.use(
-    session({
-      store: new RedisStore({ 
-        client: redisClient,
-        disableTouch: false,
-      }),
-      secret: process.env.SESSION_SECRET || 'fallback_secret',
-      resave: false,
-      saveUninitialized: false,
-      cookie: {
-        secure: process.env.NODE_ENV === 'production',
-        httpOnly: true,
-        sameSite: 'None',
-        maxAge: 24 * 60 * 60 * 1000, // 24 hours
-      },
-    })
-  );
-}
 
 // Middleware để log session cho debug
 app.use((req, res, next) => {
