@@ -7,7 +7,14 @@ try {
   // Sử dụng REDIS_URL từ biến môi trường (Heroku Key-Value Store tạo biến này)
   const redisUrl = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
   
-  redisClient = new Redis(redisUrl);
+  // Thêm tùy chọn TLS để bỏ qua xác minh chứng chỉ
+  const redisOptions = {
+    tls: {
+      rejectUnauthorized: false // Bỏ qua việc xác minh chứng chỉ SSL
+    }
+  };
+  
+  redisClient = new Redis(redisUrl, redisOptions);
   
   redisClient.on('connect', () => {
     console.log('Connected to Redis successfully');
