@@ -67,7 +67,7 @@
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <button id="start-camera" class="btn btn-primary btn-block">
-                            <i class="fas fa-camera"></i> Sử dụng camera
+                            <i class="fas fa-camera"></i> Quét QR bằng camera
                         </button>
                     </div>
 
@@ -79,27 +79,13 @@
                     </div>
                 </div>
                 
-                <!-- Container cho camera permission UI -->
-                <div id="camera-permission" style="display: none;" class="text-center p-4">
-                    <div class="camera-permission-content">
-                        <img src="../hinhanh/camera-permission.png" alt="Camera Permission" class="mb-3" style="width: 150px;">
-                        <h5>Yêu cầu quyền truy cập Camera</h5>
-                        <p class="text-muted">Vui lòng cấp quyền truy cập camera để quét mã QR</p>
-                        <button id="request-permission" class="btn btn-primary">
-                            <i class="fas fa-camera"></i> Cấp quyền Camera
-                        </button>
-                        <button id="cancel-permission" class="btn btn-secondary mt-2">
-                            <i class="fas fa-times"></i> Dừng quét
-                        </button>
-                    </div>
-                </div>
-
                 <div id="qr-reader" style="width: 100%; display: none;"></div>
                 <div id="file-selected" class="mt-2 mb-2" style="display: none;">
                     <i class="fas fa-check-circle"></i> Đã chọn hình ảnh có chứa QR
                 </div>
                 <button id="scan-button" class="btn btn-success btn-block mt-3" disabled>
                     <i class="fas fa-search"></i> Quét 
+                </button>
             </div>
 
             <div id="batchInfo" style="display: none;">

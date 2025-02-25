@@ -1,6 +1,11 @@
 let batchInfo;
 let html5QrCode;
 let isConfirming = false;
+let startCameraButton;
+let qrInput;
+let fileSelected;
+let scanButton;
+let qrReader;
 
 function displayBatchInfo(info) {
   console.log("Displaying batch info:", info);
@@ -266,62 +271,121 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // Event listener cho DOMContentLoaded
 document.addEventListener("DOMContentLoaded", function () {
-  const startCameraButton = document.getElementById("start-camera");
-  const qrInput = document.getElementById("qr-input");
-  const fileSelected = document.getElementById("file-selected");
-  const scanButton = document.getElementById("scan-button");
-  const qrReader = document.getElementById("qr-reader");
+  startCameraButton = document.getElementById("start-camera");
+  qrInput = document.getElementById("qr-input");
+  fileSelected = document.getElementById("file-selected");
+  scanButton = document.getElementById("scan-button");
+  qrReader = document.getElementById("qr-reader");
 
-  startCameraButton.addEventListener("click", toggleQRScanner);
-  qrInput.addEventListener("change", handleFileInput);
-  scanButton.addEventListener("click", scanQR);
+  if (startCameraButton) {
+    startCameraButton.addEventListener("click", async function() {
+      // Nếu đang quét, dừng quét
+      if (html5QrCode && html5QrCode.isScanning) {
+        stopScanner();
+        return;
+      }
+      
+      // Nếu chưa quét, bắt đầu quét
+      try {
+        // Yêu cầu quyền camera khi nhấn nút này
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          video: { facingMode: "environment" } 
+        });
+        // Dừng stream ngay sau khi được cấp quyền
+        stream.getTracks().forEach(track => track.stop());
+        
+        // Bắt đầu quét sau khi được cấp quyền
+        startScanner();
+      } catch (err) {
+        console.error("Camera permission error:", err);
+        alert('Vui lòng cấp quyền camera trong cài đặt trình duyệt của bạn.');
+      }
+    });
+  }
+  
+  if (qrInput) {
+    qrInput.addEventListener("change", handleFileInput);
+  }
+  if (scanButton) {
+    scanButton.addEventListener("click", scanQR);
+  }
 
-  function toggleQRScanner() {
-    if (html5QrCode && html5QrCode.isScanning) {
-      stopScanner();
-    } else {
-      startScanner();
+  async function startScanner() {
+    try {
+      // Khởi tạo scanner trước
+      if (!html5QrCode) {
+        html5QrCode = new Html5Qrcode("qr-reader");
+      }
+      qrReader.style.display = "block";
+
+      // Thử camera sau trước
+      await html5QrCode.start(
+        { facingMode: { exact: "environment" } },
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 250 },
+          aspectRatio: 1.0
+        },
+        (decodedText) => {
+          console.log("QR Code detected:", decodedText);
+          stopScanner();
+          handleQRCode(decodedText);
+        },
+        (errorMessage) => {
+          console.log("QR Error:", errorMessage);
+        }
+      );
+
+      // Đổi text của nút thành "Dừng quét"
+      startCameraButton.textContent = "Dừng quét";
+      scanButton.disabled = true;
+
+    } catch (err) {
+      console.error("Back camera error:", err);
+      
+      // Thử camera trước nếu camera sau không được
+      try {
+        await html5QrCode.start(
+          { facingMode: "user" },
+          {
+            fps: 10,
+            qrbox: { width: 250, height: 250 },
+            aspectRatio: 1.0
+          },
+          (decodedText) => {
+            console.log("QR Code detected:", decodedText);
+            stopScanner();
+            handleQRCode(decodedText);
+          }
+        );
+        
+        // Đổi text của nút thành "Dừng quét"
+        startCameraButton.textContent = "Dừng quét";
+        scanButton.disabled = true;
+        
+      } catch (frontErr) {
+        console.error("Front camera error:", frontErr);
+        alert("Không thể truy cập camera. Vui lòng kiểm tra quyền và thử lại.");
+        await stopScanner();
+      }
     }
   }
 
-  function startScanner() {
-    html5QrCode = new Html5Qrcode("qr-reader");
-    qrReader.style.display = "block";
-    const qrCodeSuccessCallback = (decodedText, decodedResult) => {
-      console.log("QR Code from camera:", decodedText); // Thêm log để kiểm tra giá trị từ camera
-      stopScanner();
-      handleQRCode(decodedText);
-    };
-    const config = { fps: 10, qrbox: { width: 250, height: 250 } };
-
-    html5QrCode
-      .start({ facingMode: "environment" }, config, qrCodeSuccessCallback)
-      .then(() => {
-        console.log("QR Code scanning is started");
-        startCameraButton.textContent = "Dừng quét";
-        scanButton.disabled = true;
-      })
-      .catch((err) => {
-        console.error(`Không thể bắt đầu quét QR: ${err}`);
-        alert(
-          "Không thể bắt đầu quét QR. Vui lòng kiểm tra quyền truy cập camera."
-        );
-      });
-  }
-
-  function stopScanner() {
-    if (html5QrCode && html5QrCode.isScanning) {
-      html5QrCode
-        .stop()
-        .then(() => {
-          console.log("QR Code scanning stopped.");
-          startCameraButton.textContent = "Quét QR bằng camera";
-          qrReader.style.display = "none";
-          scanButton.disabled = false;
-        })
-        .catch((err) => {
-          console.log("Unable to stop scanning.", err);
-        });
+  async function stopScanner() {
+    try {
+      if (html5QrCode) {
+        if (html5QrCode.isScanning) {
+          await html5QrCode.stop();
+          console.log("Scanner stopped");
+        }
+        await html5QrCode.clear();
+        html5QrCode = null;
+      }
+      qrReader.style.display = "none";
+      startCameraButton.textContent = "Quét QR bằng camera";
+      scanButton.disabled = false;
+    } catch (err) {
+      console.error("Stop scanner error:", err);
     }
   }
 
@@ -427,109 +491,6 @@ document.addEventListener("DOMContentLoaded", function () {
     showTransportCompletionMessage();
   }
 });
-
-// Thêm kiểm tra quyền camera khi trang được tải
-document.addEventListener('DOMContentLoaded', async function() {
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        stream.getTracks().forEach(track => track.stop());
-    } catch (err) {
-        console.log("Camera permission not granted:", err);
-    }
-
-    const requestCameraButton = document.getElementById('request-camera');
-    if (requestCameraButton) {
-        requestCameraButton.addEventListener('click', async () => {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: "environment" } 
-                });
-                stream.getTracks().forEach(track => track.stop());
-                alert('Đã cấp quyền camera thành công!');
-                // Tự động bắt đầu quét
-                startScanner();
-            } catch (err) {
-                console.error("Camera permission error:", err);
-                alert('Vui lòng cấp quyền camera trong cài đặt trình duyệt của bạn.');
-            }
-        }); 
-    }
-});
-
-// Cập nhật hàm startScanner
-async function startScanner() {
-    try {
-        // Khởi tạo scanner trước
-        if (!html5QrCode) {
-            html5QrCode = new Html5Qrcode("qr-reader");
-        }
-        qrReader.style.display = "block";
-
-        // Thử camera sau trước
-        await html5QrCode.start(
-            { facingMode: { exact: "environment" } },
-            {
-                fps: 10,
-                qrbox: { width: 250, height: 250 },
-                aspectRatio: 1.0
-            },
-            (decodedText) => {
-                console.log("QR Code detected:", decodedText);
-                stopScanner();
-                handleQRCode(decodedText);
-            },
-            (errorMessage) => {
-                console.log("QR Error:", errorMessage);
-            }
-        );
-
-        startCameraButton.textContent = "Dừng quét";
-        scanButton.disabled = true;
-
-    } catch (err) {
-        console.error("Back camera error:", err);
-        
-        // Thử camera trước nếu camera sau không được
-        try {
-            await html5QrCode.start(
-                { facingMode: "user" },
-                {
-                    fps: 10,
-                    qrbox: { width: 250, height: 250 },
-                    aspectRatio: 1.0
-                },
-                (decodedText) => {
-                    console.log("QR Code detected:", decodedText);
-                    stopScanner();
-                    handleQRCode(decodedText);
-                }
-            );
-        } catch (frontErr) {
-            console.error("Front camera error:", frontErr);
-            alert("Không thể truy cập camera. Vui lòng kiểm tra quyền và thử lại.");
-            await stopScanner();
-        }
-    }
-}
-
-// Cập nhật hàm stopScanner
-async function stopScanner() {
-    try {
-        if (html5QrCode) {
-            if (html5QrCode.isScanning) {
-                await html5QrCode.stop();
-                console.log("Scanner stopped");
-            }
-            await html5QrCode.clear();
-            html5QrCode = null;
-        }
-        qrReader.style.display = "none";
-        startCameraButton.textContent = "Quét QR bằng camera";
-        scanButton.disabled = false;
-    } catch (err) {
-        console.error("Stop scanner error:", err);
-    }
-}
 
 // Gán các hàm cần thiết cho window object
 window.displayBatchInfo = displayBatchInfo;
