@@ -24,8 +24,6 @@ const bcrypt = require("bcryptjs");
 const nodemailer = require("nodemailer");
 require("dotenv").config({ path: path.resolve(__dirname, "../../.env") });
 const session = require("express-session");
-const RedisStore = require('connect-redis').default;
-const redisClient = require('./config/redis');
 
 // Thêm phần này để tích hợp Socket.io
 const http = require("http");
@@ -71,7 +69,7 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: true, 
+      secure: process.env.NODE_ENV === 'production', 
       httpOnly: true,
       sameSite: 'None',
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
