@@ -13,6 +13,8 @@ module.exports = function (db) {
   router.post("/dangnhap", async function (req, res) {
     const { email, password, isAdmin } = req.body;
 
+    console.log("Thử đăng nhập với:", { email, isAdmin });
+
     if (!email || !password) {
       return res
         .status(400)
@@ -47,19 +49,27 @@ module.exports = function (db) {
         req.session.province_id = admin.province_id;
         req.session.roleId = 3;
         req.session.role = "Admin";
-        req.session.isLoggedIn = true; // Khi đăng nhập thành công
+        req.session.isLoggedIn = true;
 
-        console.log("Admin session after login:", req.session);
+        console.log("Session trước khi lưu:", req.session);
 
-        res.status(200).json({
-          message: "Đăng nhập thành công",
-          admin: {
-            adminId: admin.id,
-            adminEmail: admin.admin_email,
-            adminName: admin.admin_name,
-            province_id: admin.province_id,
-            roleId: 3,
-          },
+        return req.session.save((err) => {
+          if (err) {
+            console.error("Lỗi khi lưu session:", err);
+            return res.status(500).json({ message: "Lỗi đăng nhập, vui lòng thử lại" });
+          }
+          
+          console.log("Session sau khi lưu:", req.session);
+          return res.status(200).json({
+            message: "Đăng nhập thành công",
+            admin: {
+              adminId: admin.id,
+              adminEmail: admin.admin_email,
+              adminName: admin.admin_name,
+              province_id: admin.province_id,
+              roleId: 3,
+            }
+          });
         });
       } else {
         const [users] = await db.query("SELECT * FROM users WHERE email = ?", [
@@ -148,24 +158,32 @@ module.exports = function (db) {
           // ... (các thông tin session khác)
         });
 
-        res.status(200).json({
-          message: "Đăng nhập thành công",
-          user: {
-            uid: user.uid,
-            name: user.name,
-            email: user.email,
-            roleId: user.role_id,
-            phone: user.phone,
-            address: user.address,
-            dob: user.dob,
-            gender: user.gender,
-            province_id: user.province_id,
-            district_id: user.district_id,
-            ward_id: user.ward_id,
-            region_id: user.region_id,
-            region: region,
-            avatar: user.avatar,
-          },
+        return req.session.save((err) => {
+          if (err) {
+            console.error("Lỗi khi lưu session:", err);
+            return res.status(500).json({ message: "Lỗi đăng nhập, vui lòng thử lại" });
+          }
+          
+          console.log("Session sau khi lưu:", req.session);
+          return res.status(200).json({
+            message: "Đăng nhập thành công",
+            user: {
+              uid: user.uid,
+              name: user.name,
+              email: user.email,
+              roleId: user.role_id,
+              phone: user.phone,
+              address: user.address,
+              dob: user.dob,
+              gender: user.gender,
+              province_id: user.province_id,
+              district_id: user.district_id,
+              ward_id: user.ward_id,
+              region_id: user.region_id,
+              region: region,
+              avatar: user.avatar,
+            },
+          });
         });
       }
     } catch (error) {

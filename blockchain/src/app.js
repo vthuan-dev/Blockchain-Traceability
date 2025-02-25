@@ -57,7 +57,8 @@ app.use(session({
   cookie: {
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000 // 1 day
+    maxAge: 24 * 60 * 60 * 1000, // 1 ngày
+    sameSite: 'lax'
   },
   name: 'blockchain.sid'
 }));
@@ -66,6 +67,16 @@ app.use(session({
 app.use((req, res, next) => {
   console.log('Session ID:', req.sessionID);
   console.log('Session Data:', req.session);
+  next();
+});
+
+// Middleware để debug
+app.use((req, res, next) => {
+  console.log("===== DEBUG SESSION =====");
+  console.log("Session ID:", req.sessionID);
+  console.log("isLoggedIn:", req.session.isLoggedIn);
+  console.log("roleId:", req.session.roleId);
+  console.log("Headers Cookie:", req.headers.cookie);
   next();
 });
 
@@ -138,7 +149,11 @@ app.use((req, res, next) => {
   next();
 });
 app.get("/api/check-login", (req, res) => {
-  res.json({ isLoggedIn: req.session.isLoggedIn === true });
+  console.log("Kiểm tra đăng nhập - Session:", req.session);
+  res.json({ 
+    isLoggedIn: req.session.isLoggedIn === true,
+    roleId: req.session.roleId
+  });
 });
 
 setupRoutes(app, db);
