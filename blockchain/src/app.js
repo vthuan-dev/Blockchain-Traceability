@@ -24,8 +24,7 @@ const bcrypt = require("bcryptjs");
 const nodemailer = require("nodemailer");
 require("dotenv").config({ path: path.resolve(__dirname, "../../.env") });
 const session = require("express-session");
-const { createClient } = require('redis');
-const RedisStore = require('connect-redis');
+const RedisStore = require('connect-redis').default;
 const redisClient = require('./config/redis');
 
 // Thêm phần này để tích hợp Socket.io
@@ -48,7 +47,7 @@ app.use(bodyParser.json());
 
 // Cấu hình session với Redis
 app.use(session({
-  store: new RedisStore.default({
+  store: new RedisStore({
     client: redisClient,
     prefix: 'sess:'
   }),
