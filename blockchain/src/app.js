@@ -53,7 +53,12 @@ const session = require("express-session");  // Import express-session
 const RedisStore = require("connect-redis").default
 
 // Kết nối Redis client
-const redisClient = new redis(process.env.REDIS_URL);
+const redisClient = new redis({
+  url: process.env.REDIS_URL,
+  tls: {
+    rejectUnauthorized: false  // Bỏ qua việc kiểm tra chứng chỉ SSL
+  }
+});
 
 // Cấu hình session sử dụng RedisStore
 app.use(
