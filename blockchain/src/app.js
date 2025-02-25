@@ -46,36 +46,32 @@ const io = socketIo(server, {
 app.use(cors());
 app.use(bodyParser.json());
 
-const redis = require('ioredis');
-const connectRedis = require('connect-redis');
-const session = require("express-session");
-const RedisStore = connectRedis(session);
+const redis = require('ioredis');  // Kết nối Redis
+const session = require("express-session");  // Import express-session
+const connectRedis = require('connect-redis');  // Import connect-redis
 
-// Cấu hình Redis client với URL kết nối lấy từ Heroku
-const redisClient = new redis(process.env.REDIS_URL); 
+// Tạo RedisStore từ connect-redis và express-session
+const RedisStore = connectRedis(session);  // Không cần gọi connect-redis như một hàm
 
-redisClient.on('connect', () => {
-  console.log('Connected to Redis successfully');
-});
+// Kết nối Redis client
+const redisClient = new redis(process.env.REDIS_URL);
 
-redisClient.on('error', (err) => {
-  console.error('Redis connection error:', err);
-});
-
+// Cấu hình session sử dụng RedisStore
 app.use(
   session({
-    store: new RedisStore({ client: redisClient }),
+    store: new RedisStore({ client: redisClient }),  // Tạo store từ Redis client
     secret: process.env.SESSION_SECRET || 'fallback_secret',
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: process.env.NODE_ENV === 'production', 
+      secure: process.env.NODE_ENV === 'production',  // Cần secure khi chạy trên HTTPS
       httpOnly: true,
-      sameSite: 'None',
+      sameSite: 'None',  // Giữ sameSite là 'None' khi sử dụng CORS
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
     },
   })
 );
+
 
 // Middleware để log session cho debug
 app.use((req, res, next) => {
