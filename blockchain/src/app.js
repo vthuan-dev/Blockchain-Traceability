@@ -23,7 +23,6 @@ const { uploadFile: uploadFileFirebase, deleteFile } = require("./firebase.js");
 const bcrypt = require("bcryptjs");
 const nodemailer = require("nodemailer");
 require("dotenv").config({ path: path.resolve(__dirname, "../../.env") });
-const session = require("express-session");
 
 // Thêm phần này để tích hợp Socket.io
 const http = require("http");
@@ -49,6 +48,7 @@ app.use(bodyParser.json());
 
 const redis = require('ioredis');
 const connectRedis = require('connect-redis');
+const session = require("express-session");
 const RedisStore = connectRedis(session);
 
 // Cấu hình Redis client với URL kết nối lấy từ Heroku
