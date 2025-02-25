@@ -48,10 +48,9 @@ app.use(bodyParser.json());
 
 const redis = require('ioredis');  // Kết nối Redis
 const session = require("express-session");  // Import express-session
-const connectRedis = require('connect-redis');  // Import connect-redis
 
 // Tạo RedisStore từ connect-redis và express-session
-const RedisStore = connectRedis(session);  // Không cần gọi connect-redis như một hàm
+const RedisStore = require("connect-redis").default
 
 // Kết nối Redis client
 const redisClient = new redis(process.env.REDIS_URL);
