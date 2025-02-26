@@ -153,11 +153,12 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    credentials: 'same-origin',
+                    credentials: 'include',
                     body: JSON.stringify({ email, password, isAdmin }),
                 });
 
                 const data = await response.json();
+                console.log('Phản hồi đăng nhập:', data);
 
                 if (response.ok) {
                     messageContainer.innerHTML = data.message;
@@ -199,14 +200,14 @@
                         }
                     }, 2000);
                 } else {
-                    messageContainer.innerHTML = data.message;
+                    messageContainer.innerHTML = data.message || 'Đăng nhập thất bại';
                     messageContainer.className = 'error';
                     messageContainer.style.display = 'block';
                     messageContainer.style.opacity = '1';
                     window.scrollTo(0, 0);
                 }
             } catch (error) {
-                console.error('Lỗi:', error);
+                console.error('Lỗi khi đăng nhập:', error);
                 messageContainer.innerHTML = 'Đã xảy ra lỗi khi đăng nhập';
                 messageContainer.className = 'error';
                 messageContainer.style.display = 'block';
