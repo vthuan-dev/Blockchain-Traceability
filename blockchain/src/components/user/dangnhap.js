@@ -220,13 +220,8 @@ module.exports = function (db) {
   router.post("/reset-passwd", async function (req, res) {
     const { email, newPassword, recaptchaResponse } = req.body;
     
-    console.log("Reset password request received:", {
-        email,
-        hasRecaptchaResponse: !!recaptchaResponse
-    });
-
     try {
-        // Validate input
+        // Validate input và verify reCAPTCHA
         if (!email || !newPassword || !recaptchaResponse) {
             return res.status(400).json({
                 message: "Vui lòng điền đầy đủ thông tin và xác thực reCAPTCHA"
@@ -236,16 +231,13 @@ module.exports = function (db) {
         // Verify reCAPTCHA
         const secretKey = '6LfDTuQqAAAAALINytqdW5QvK9Ubm7pkqQup5TgS';
         const verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${recaptchaResponse}`;
-
         const verifyResponse = await axios({
             method: 'post',
             url: verifyUrl,
-            headers: {
+            headers: {  
                 'Content-Type': 'application/x-www-form-urlencoded'
             }
         });
-
-        console.log('reCAPTCHA verification response:', verifyResponse.data);
 
         if (!verifyResponse.data.success) {
             return res.status(400).json({
@@ -254,7 +246,14 @@ module.exports = function (db) {
             });
         }
 
-        // Tìm user với email
+        // Kiểm tra password mới có đủ mạnh không (theo constraint của DB)
+        if (newPassword.length < 8 || !/.*[0-9].*/.test(newPassword)) {
+            return res.status(400).json({
+                message: "Mật khẩu phải có ít nhất 8 ký tự và chứa ít nhất 1 số"
+            });
+        }
+
+        // Tìm user
         const [users] = await db.query("SELECT * FROM users WHERE email = ?", [email]);
         
         if (users.length === 0) {
@@ -263,17 +262,32 @@ module.exports = function (db) {
             });
         }
 
-        // Hash password mới
+        // Tạo token reset password
+        const resetToken = crypto.randomBytes(32).toString('hex');
         const hashedPassword = await bcrypt.hash(newPassword, 10);
+        const expiryTime = new Date(Date.now() + 3600000); // 1 giờ
 
-        // Sửa từ 'password' thành 'passwd' để khớp với tên cột trong database
-        await db.query("UPDATE users SET passwd = ? WHERE email = ?", [
-            hashedPassword,
-            email
-        ]);
+        // Lưu token và mật khẩu tạm thời
+        await db.query(
+            "UPDATE users SET reset_password_token = ?, temp_password = ?, reset_password_expires = ? WHERE email = ?",
+            [resetToken, hashedPassword, expiryTime, email]
+        );
+
+        // Tạo link xác nhận
+        const resetUrl = `${req.protocol}://${req.get('host')}/api/confirm-reset-password/${resetToken}`;
+        
+        // Gửi email xác nhận sử dụng hàm sendEmail có sẵn
+        const templatePath = path.join(__dirname, '../../templates/reset-password.html');
+        await sendEmail(
+            email,
+            users[0].name,
+            resetUrl,
+            'Xác nhận đặt lại mật khẩu',
+            templatePath
+        );
 
         return res.status(200).json({
-            message: "Đặt lại mật khẩu thành công"
+            message: "Vui lòng kiểm tra email của bạn để xác nhận đặt lại mật khẩu"
         });
 
     } catch (error) {
@@ -285,32 +299,35 @@ module.exports = function (db) {
     }
   });
 
-  router.get("/reset-password/:token", async function (req, res) {
-    const { token } = req.params;
+  // Route xử lý xác nhận reset password
+  router.get("/confirm-reset-password/:token", async function (req, res) {
     try {
-      const [users] = await db.query(
-        "SELECT * FROM users WHERE verificationToken = ?",
-        [token]
-      );
-      const user = users[0];
+        const { token } = req.params;
 
-      if (!user) {
-        return res
-          .status(400)
-          .send("Token đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.");
-      }
+        // Tìm user với token hợp lệ và chưa hết hạn
+        const [users] = await db.query(
+            "SELECT * FROM users WHERE reset_password_token = ? AND reset_password_expires > NOW()",
+            [token]
+        );
 
-      const hashedPassword = await bcrypt.hash(globalNewPassword, 10);
+        if (users.length === 0) {
+            return res.status(400).send("Link đặt lại mật khẩu không hợp lệ hoặc đã hết hạn");
+        }
 
-      await db.query(
-        "UPDATE users SET passwd = ? WHERE verificationToken = ?",
-        [hashedPassword, token]
-      );
+        const user = users[0];
 
-      res.redirect("/dangnhap.html");
+        // Cập nhật mật khẩu mới và xóa các trường temporary
+        await db.query(
+            "UPDATE users SET passwd = ?, reset_password_token = NULL, temp_password = NULL, reset_password_expires = NULL WHERE email = ?",
+            [user.temp_password, user.email]
+        );
+
+        // Chuyển hướng về trang đăng nhập với thông báo thành công
+        res.redirect('/account/dangnhap.html?reset=success');
+
     } catch (error) {
-      console.error("Lỗi khi đặt lại mật khẩu:", error);
-      res.status(500).send("Đã xảy ra lỗi khi đặt lại mật khẩu.");
+        console.error("Lỗi khi xác nhận đặt lại mật khẩu:", error);
+        res.status(500).send("Đã xảy ra lỗi khi xác nhận đặt lại mật khẩu");
     }
   });
 
