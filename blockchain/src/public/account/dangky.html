@@ -9,91 +9,183 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <style>
+        /* Style chung cho container */
         .container {
-            max-width: 500px;
-            margin-top: 50px;
+            max-width: 600px;
+            margin-top: 80px;
+            margin-bottom: 40px;
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            border: none;
+            animation: fadeIn 0.5s ease-out;
         }
+
+        /* Style cho heading */
+        h1 {
+            color: #2d3436;
+            font-size: 28px;
+            margin-bottom: 30px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        /* Style cho form groups */
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            position: relative;
         }
+
+        .form-group label {
+            font-size: 14px;
+            color: #636e72;
+            margin-bottom: 8px;
+            font-weight: 500;
+            display: block;
+        }
+
+        /* Style cho inputs và selects */
+        .form-control {
+            height: 45px;
+            padding: 10px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-size: 15px;
+            background-color: white;
+        }
+
+        .form-control:focus {
+            border-color: #78e08f;
+            box-shadow: 0 0 0 0.2rem rgba(120, 224, 143, 0.25);
+        }
+
+        /* Style cho button */
+        .btn-success {
+            height: 45px;
+            background: linear-gradient(45deg, #78e08f, #38ada9);
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 16px;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(56, 173, 169, 0.4);
+            background: linear-gradient(45deg, #38ada9, #78e08f);
+        }
+
+        /* Style cho thông báo vai trò */
+        .anncounce {
+            text-align: center;
+            color: #e74c3c;
+            padding: 12px;
+            margin-bottom: 25px;
+            font-weight: 500;
+            font-size: 15px;
+            background-color: rgba(231, 76, 60, 0.1);
+            border-radius: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        /* Style cho link đăng nhập */
+        .dangnhap {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .dangnhap p {
+            color: #636e72;
+            font-size: 14px;
+        }
+
+        .dangnhap a {
+            color: #38ada9;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .dangnhap a:hover {
+            color: #78e08f;
+            text-decoration: underline;
+        }
+
+        /* Style cho disabled inputs */
         .form-control:disabled,
         .form-control[readonly],
         select:disabled {
-            background-color: #e9ecef !important;
-            opacity: 0.65 !important;
+            background-color: #f8f9fa !important;
+            opacity: 0.8 !important;
             cursor: not-allowed !important;
         }
-        select:disabled {
-            color: #6c757d !important;
+
+        /* Animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-        .form-control {
-            padding: 5px 10px;
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
         }
-        .btn {
-            padding: 10px 20px;
+
+        /* Style cho modal */
+        .modal-content {
+            border-radius: 15px;
+            border: none;
         }
-        body{
-            background-image: url("/hinhanh/background-buoi.jpg");
-            background-size: cover;
-        }
-        .container {
-            max-width: 500px;
-            background-color: rgba(255, 255, 255, 0.8); 
+
+        .modal-header {
+            border-bottom: 1px solid #e9ecef;
             padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            border: 1px solid #ccc;
         }
 
-        .alert-box {
-            cursor: pointer;
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #28a745;
-            color: #fff;
+        .modal-body {
+            padding: 25px;
+        }
+
+        .modal-footer {
+            border-top: 1px solid #e9ecef;
             padding: 15px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out;
         }
 
-        .alert-box.show {
-            opacity: 1;
-        }
-        .anncounce {
-        text-align: center;
-        color: #be3636;
-   
-        padding: 10px;
-        margin-bottom: 20px;
-        font-weight: bold;
-        font-size: 16px;
-        animation: pulse 2s infinite;
-    }
+        /* Responsive */
+        @media (max-width: 576px) {
+            .container {
+                margin-top: 60px;
+                padding: 20px;
+                margin-bottom: 20px;
+            }
 
-    @keyframes pulse {
-        0% {
-            transform: scale(1);
-        }
-        50% {
-            transform: scale(1.05);
-        }
-        100% {
-            transform: scale(1);
-        }
-    }
+            h1 {
+                font-size: 24px;
+                margin-bottom: 20px;
+            }
 
-    .modal-content {
-        background-color: rgba(255, 255, 255, 0.9);
-    }
-    .spinner-border {
-        width: 3rem;
-        height: 3rem;
-    }
+            .form-group {
+                margin-bottom: 15px;
+            }
+
+            .btn-success {
+                height: 40px;
+                font-size: 15px;
+            }
+        }
     </style>
 </head>
 <body>

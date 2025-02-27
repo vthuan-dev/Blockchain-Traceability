@@ -10,29 +10,119 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <style>
         .container {
-            max-width: 500px;
-            margin-top: 50px;
+            max-width: 400px;
+            margin-top: 80px;
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            border: none;
         }
+
+        h1 {
+            color: #2d3436;
+            font-size: 28px;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 25px;
+            position: relative;
         }
+
+        .form-group label {
+            font-size: 14px;
+            color: #636e72;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
         .form-control {
-            padding: 5px 10px;
+            height: 45px;
+            padding: 10px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-size: 15px;
         }
-        .btn {
-            padding: 10px 20px;
+
+        .form-control:focus {
+            border-color: #78e08f;
+            box-shadow: 0 0 0 0.2rem rgba(120, 224, 143, 0.25);
         }
+
+        .btn-primary {
+            height: 45px;
+            background: linear-gradient(45deg, #78e08f, #38ada9);
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 16px;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(56, 173, 169, 0.4);
+            background: linear-gradient(45deg, #38ada9, #78e08f);
+        }
+
+        .form-check {
+            margin: 15px 0;
+        }
+
+        .form-check-label {
+            color: #636e72;
+            font-size: 14px;
+        }
+
+        .form-check-input {
+            margin-top: 0.2rem;
+        }
+
+        .dangky, .quenmk {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .dangky p, .quenmk p {
+            color: #636e72;
+            font-size: 14px;
+        }
+
+        .dangky a, .quenmk a {
+            color: #38ada9;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .dangky a:hover, .quenmk a:hover {
+            color: #78e08f;
+            text-decoration: underline;
+        }
+
+        /* Animation cho form */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .container {
+            animation: fadeIn 0.5s ease-out;
+        }
+
         body{
             background-image: url("/hinhanh/background-buoi.jpg");
             background-size: cover;
-        }
-        .container {
-            max-width: 500px;
-            background-color: rgba(255, 255, 255, 0.8); /* Màu nền trắng với độ trong suốt */
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            border: 1px solid #ccc; /* Thêm khung cho form */
         }
         
         #messageContainer {
@@ -62,40 +152,96 @@
         
         @media (max-width: 576px) {
             .container {
-                margin-top: 20px;
+                margin-top: 60px;
                 padding: 15px;
+                margin-bottom: 20px;
             }
             
             h1 {
                 font-size: 24px;
+                margin-top: 20px;
             }
             
             .btn {
                 padding: 8px 16px;
             }
+
+            .back-button {
+                position: fixed;
+                top: 10px;
+                left: 10px;
+                z-index: 1000;
+            }
+            
+            .back-button .btn {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+                background-color: rgba(255, 255, 255, 0.95);
+            }
+
+            .form-group {
+                margin-bottom: 12px;
+            }
+
+            .dangky, .quenmk {
+                margin-top: 10px;
+                font-size: 0.9rem;
+            }
+
+            #loginForm {
+                margin-top: 15px;
+            }
         }
         
-        /* Style cho nút quay lại */
+        @media (max-width: 320px) {
+            .container {
+                margin-top: 70px;
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            .back-button .btn {
+                padding: 5px 10px;
+                font-size: 0.75rem;
+            }
+        }
+        
+        /* Style mới cho nút quay lại */
         .back-button {
-            position: relative;
-            margin-top: 20px;
+            position: absolute;
+            top: 20px;
+            left: 20px;
         }
         
         .back-button .btn {
+            background-color: rgba(255, 255, 255, 0.9);
+            border: 2px solid #78e08f;
+            color: #2d3436;
             padding: 8px 15px;
             font-size: 0.9rem;
+            border-radius: 20px;
             transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
         
         .back-button .btn:hover {
-            transform: translateX(-5px);
             background-color: #78e08f;
-            border-color: #78e08f;
             color: white;
+            transform: translateX(-5px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
         
         .back-button i {
-            margin-right: 5px;
+            transition: transform 0.3s ease;
+        }
+        
+        .back-button .btn:hover i {
+            transform: translateX(-3px);
         }
         
         /* Custom styles cho toast */
@@ -118,10 +264,10 @@
 </head>
 <body>
     <div class="container">
-        <!-- Thêm nút quay lại trang chủ -->
-        <div class="back-button mb-3">
-            <a href="/" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left"></i> Quay lại trang chủ
+        <div class="back-button">
+            <a href="/" class="btn">
+                <i class="fas fa-arrow-left"></i>
+                Trang chủ
             </a>
         </div>
         
@@ -129,25 +275,26 @@
         <form id="loginForm" class="mt-4">
             <div class="form-group">
                 <label for="email">Email:</label>
-                <input type="email" class="form-control" id="email" name="email" required>
+                <input type="email" class="form-control" id="email" name="email" required 
+                       placeholder="Nhập địa chỉ email">
             </div>
             <div class="form-group">
                 <label for="password">Mật Khẩu:</label>
-                <input type="password" class="form-control" id="password" name="password" required>
+                <input type="password" class="form-control" id="password" name="password" required
+                       placeholder="Nhập mật khẩu">
             </div>
-            <div class="form-check mb-1">
+            <div class="form-check mb-3">
                 <input type="checkbox" class="form-check-input" id="adminCheck">
                 <label class="form-check-label" for="adminCheck">Đăng nhập với tư cách Admin</label>
             </div>
-            <div id="messageContainer" class="text-center"></div>
             <button type="submit" class="btn btn-primary btn-block">Đăng Nhập</button>
         </form>
-        <br>
+        
         <div class="dangky">
-            <p>Hoặc <a href="/account/dangky.html">Đăng ký</a> nếu như bạn chưa có tài khoản</p>
+            <p>Chưa có tài khoản? <a href="/account/dangky.html">Đăng ký ngay</a></p>
         </div>
         <div class="quenmk">
-            <p><a href="/account/quenmatkhau.html">Quên mật khẩu</a></p>
+            <p><a href="/account/quenmatkhau.html">Quên mật khẩu?</a></p>
         </div>
     </div>
 
