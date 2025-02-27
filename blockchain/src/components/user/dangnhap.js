@@ -219,9 +219,14 @@ module.exports = function (db) {
 
   router.post("/reset-passwd", async function (req, res) {
     const { email, newPassword, recaptchaResponse } = req.body;
+    
+    console.log("Reset password request received:", {
+        email,
+        hasRecaptchaResponse: !!recaptchaResponse
+    });
 
     try {
-        // Kiểm tra đầu vào
+        // Validate input
         if (!email || !newPassword || !recaptchaResponse) {
             return res.status(400).json({
                 message: "Vui lòng điền đầy đủ thông tin và xác thực reCAPTCHA"
@@ -229,87 +234,53 @@ module.exports = function (db) {
         }
 
         // Verify reCAPTCHA
-        try {
-            const recaptchaVerifyUrl = 'https://www.google.com/recaptcha/api/siteverify';
-            const verifyResponse = await axios.post(recaptchaVerifyUrl, null, {
-                params: {
-                    secret: '6LfETuQqAAAAAJiJqnltTbrrprFcYytET3K9RWXD',
-                    response: recaptchaResponse
-                }
-            });
+        const secretKey = '6LfDTuQqAAAAALINytqdW5QvK9Ubm7pkqQup5TgS';
+        const verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${recaptchaResponse}`;
 
-            console.log('reCAPTCHA response:', verifyResponse.data); // Thêm log
-
-            if (!verifyResponse.data.success) {
-                console.error('reCAPTCHA verification failed:', verifyResponse.data);
-                return res.status(400).json({
-                    message: 'Xác thực reCAPTCHA thất bại, vui lòng thử lại'
-                });
+        const verifyResponse = await axios({
+            method: 'post',
+            url: verifyUrl,
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
             }
-        } catch (recaptchaError) {
-            console.error("Lỗi xác thực reCAPTCHA:", recaptchaError);
-            return res.status(500).json({
-                message: "Lỗi xác thực reCAPTCHA, vui lòng thử lại sau"
+        });
+
+        console.log('reCAPTCHA verification response:', verifyResponse.data);
+
+        if (!verifyResponse.data.success) {
+            return res.status(400).json({
+                message: 'Xác thực reCAPTCHA thất bại, vui lòng thử lại',
+                errors: verifyResponse.data['error-codes']
             });
         }
 
-        // Kiểm tra user tồn tại
-        const [users] = await db.query(
-            "SELECT * FROM users WHERE email = ?",
-            [email]
-        );
-        const user = users[0];
-
-        if (!user) {
-            return res.status(400).json({
+        // Tìm user với email
+        const [users] = await db.query("SELECT * FROM users WHERE email = ?", [email]);
+        
+        if (users.length === 0) {
+            return res.status(404).json({
                 message: "Email không tồn tại trong hệ thống"
             });
         }
 
-        // Hash mật khẩu mới ngay lập tức thay vì lưu vào biến global
+        // Hash password mới
         const hashedPassword = await bcrypt.hash(newPassword, 10);
-        const token = crypto.randomBytes(32).toString('hex');
 
-        // Cập nhật token và mật khẩu mới
-        await db.query(
-            "UPDATE users SET verificationToken = ?, passwd = ? WHERE email = ?",
-            [token, hashedPassword, email]
-        );
+        // Sửa từ 'password' thành 'passwd' để khớp với tên cột trong database
+        await db.query("UPDATE users SET passwd = ? WHERE email = ?", [
+            hashedPassword,
+            email
+        ]);
 
-        // Gửi email xác nhận
-        try {
-            const templatePath = path.join(
-                __dirname,
-                "../../public/account/xacthuc.html"
-            );
-
-            const baseUrl = process.env.NODE_ENV === 'production'
-                ? 'https://truyxuatbuoi.xyz'
-                : 'http://localhost:3000';
-
-            await sendEmail(
-                email,
-                user.name,
-                `${baseUrl}/account/dangnhap.html`, // Gửi link đăng nhập trực tiếp
-                "Xác nhận đổi mật khẩu thành công",
-                templatePath
-            );
-
-            return res.status(200).json({
-                message: "Đặt lại mật khẩu thành công! Vui lòng đăng nhập lại."
-            });
-
-        } catch (emailError) {
-            console.error("Lỗi gửi email:", emailError);
-            return res.status(500).json({
-                message: "Đã đặt lại mật khẩu nhưng không gửi được email xác nhận"
-            });
-        }
+        return res.status(200).json({
+            message: "Đặt lại mật khẩu thành công"
+        });
 
     } catch (error) {
-        console.error("Lỗi server:", error);
+        console.error("Server error:", error);
         return res.status(500).json({
-            message: "Lỗi hệ thống, vui lòng thử lại sau"
+            message: "Lỗi hệ thống, vui lòng thử lại sau",
+            error: error.message
         });
     }
   });

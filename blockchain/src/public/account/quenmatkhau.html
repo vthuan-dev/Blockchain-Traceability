@@ -232,9 +232,9 @@
                                placeholder="Nhập lại mật khẩu mới">
                     </div>
                     <div class="g-recaptcha" 
-                         data-sitekey="6LfETuQqAAAAAHZCed5yyZOykLnZJ7VRSfUWu49x"
-                         data-callback="enableSubmit"
-                         data-size="normal">
+                         data-sitekey="6LfDTuQqAAAAAIF9W6igRufpO8e2iF7EPBb9HV_l"
+                         data-callback="onRecaptchaSuccess"
+                         data-expired-callback="onRecaptchaExpired">
                     </div>
                     <button type="submit" class="btn btn-primary" disabled>
                         <span class="spinner"></span>
@@ -251,35 +251,54 @@
     <script>
         const submitButton = document.querySelector('button[type="submit"]');
         const spinner = document.querySelector('.spinner');
+        let recaptchaResponse = null;
 
-        // Sửa lại hàm enableSubmit
-        function enableSubmit(response) {  // Thêm tham số response
-            if (response) {
-                submitButton.disabled = false;
-            }
+        function onRecaptchaSuccess(token) {
+            recaptchaResponse = token;
+            submitButton.disabled = false;
+            console.log("reCAPTCHA token received:", token);
+        }
+
+        function onRecaptchaExpired() {
+            recaptchaResponse = null;
+            submitButton.disabled = true;
+            grecaptcha.reset();
         }
 
         document.getElementById('resetPasswordForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            const email = document.getElementById('email').value;
-            const newPassword = document.getElementById('new-password').value;
-            const confirmPassword = document.getElementById('confirm-password').value;
-            const recaptchaResponse = grecaptcha.getResponse();
+            // Lấy token mới nhất
+            const token = recaptchaResponse || grecaptcha.getResponse();
+            console.log("Submitting with token:", token); // Debug log
 
-            if (!recaptchaResponse) {
+            if (!token) {
                 showAlert('Vui lòng xác nhận bạn không phải robot', 'danger');
                 return;
             }
+
+            const email = document.getElementById('email').value;
+            const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
 
             if (newPassword !== confirmPassword) {
                 showAlert('Mật khẩu xác nhận không khớp', 'danger');
                 return;
             }
 
-            // Show loading spinner
             submitButton.disabled = true;
             spinner.style.display = 'inline-block';
+
+            const requestData = {
+                email: email,
+                newPassword: newPassword,
+                recaptchaResponse: token
+            };
+
+            console.log("Sending request data:", {
+                ...requestData,
+                recaptchaResponse: !!requestData.recaptchaResponse
+            });
 
             try {
                 const response = await fetch('/api/reset-passwd', {
@@ -287,14 +306,12 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ 
-                        email, 
-                        newPassword,
-                        recaptchaResponse: recaptchaResponse  // Đảm bảo gửi đúng response
-                    })
+                    body: JSON.stringify(requestData),
+                    credentials: 'include'
                 });
 
                 const data = await response.json();
+                console.log("Server response:", data);
 
                 if (response.ok) {
                     showAlert('Đặt lại mật khẩu thành công! Vui lòng đăng nhập lại.', 'success');
@@ -303,21 +320,28 @@
                     }, 2000);
                 } else {
                     showAlert(data.message || 'Có lỗi xảy ra', 'danger');
-                    // Reset reCAPTCHA
                     grecaptcha.reset();
+                    recaptchaResponse = null;
                     submitButton.disabled = true;
                 }
             } catch (error) {
-                console.error('Lỗi:', error);  // Thêm log lỗi
+                console.error('Lỗi chi tiết:', error);
                 showAlert('Không thể kết nối đến server', 'danger');
                 grecaptcha.reset();
+                recaptchaResponse = null;
                 submitButton.disabled = true;
             } finally {
-                // Hide loading spinner
                 spinner.style.display = 'none';
-                submitButton.disabled = false;
             }
         });
+
+        // Kiểm tra reCAPTCHA khi load trang
+        window.onload = function() {
+            if (typeof grecaptcha === 'undefined') {
+                console.error('reCAPTCHA chưa được load');
+                showAlert('Không thể tải reCAPTCHA, vui lòng tải lại trang', 'danger');
+            }
+        };
 
         function showAlert(message, type) {
             const alertBox = document.getElementById('alertBox');
