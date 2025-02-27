@@ -7,6 +7,7 @@
     <title>Đăng Nhập</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <style>
         .container {
             max-width: 500px;
@@ -96,10 +97,26 @@
         .back-button i {
             margin-right: 5px;
         }
+        
+        /* Custom styles cho toast */
+        .toastify {
+            padding: 12px 20px;
+            color: #ffffff;
+            font-size: 15px;
+            border-radius: 6px;
+            max-width: 300px;
+        }
+
+        .toast-success {
+            background: linear-gradient(to right, #00b09b, #96c93d);
+        }
+
+        .toast-error {
+            background: linear-gradient(to right, #ff5f6d, #ffc371);
+        }
     </style>
 </head>
 <body>
-    <div id="messageContainer"></div>
     <div class="container">
         <!-- Thêm nút quay lại trang chủ -->
         <div class="back-button mb-3">
@@ -138,6 +155,7 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
     <script>
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
@@ -145,7 +163,6 @@
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const isAdmin = document.getElementById('adminCheck').checked;
-            const messageContainer = document.getElementById('messageContainer');
 
             try {
                 const response = await fetch('/api/dangnhap', {
@@ -161,20 +178,17 @@
                 console.log('Phản hồi đăng nhập:', data);
 
                 if (response.ok) {
-                    messageContainer.innerHTML = data.message;
-                    messageContainer.className = 'success';
-                    messageContainer.style.display = 'block';
-                    messageContainer.style.opacity = '1';
+                    // Hiển thị toast thành công
+                    Toastify({
+                        text: "Đăng nhập thành công!",
+                        duration: 2000,
+                        gravity: "top",
+                        position: "right",
+                        className: "toast-success",
+                        close: true,
+                    }).showToast();
 
-                    // Scroll to top to ensure message is visible
-                    window.scrollTo(0, 0);
-
-                    // Fade out the message after 1.5 seconds
-                    setTimeout(() => {
-                        messageContainer.style.opacity = '0';
-                    }, 1500);
-
-                    // Redirect after message has faded out
+                    // Chuyển hướng sau 2 giây
                     setTimeout(() => {
                         if (data.admin) {
                             window.location.href = '../admin/admintest.html';
@@ -193,26 +207,39 @@
                                     window.location.href = '../nha-kho/nha-kho.html';
                                     break;
                                 default:
-                                    messageContainer.innerHTML = 'Không có trang phù hợp cho vai trò của bạn';
-                                    messageContainer.className = 'error';
-                                    messageContainer.style.opacity = '1';
+                                    Toastify({
+                                        text: "Không có trang phù hợp cho vai trò của bạn",
+                                        duration: 3000,
+                                        gravity: "top",
+                                        position: "right",
+                                        className: "toast-error",
+                                        close: true,
+                                    }).showToast();
                             }
                         }
                     }, 2000);
                 } else {
-                    messageContainer.innerHTML = data.message || 'Đăng nhập thất bại';
-                    messageContainer.className = 'error';
-                    messageContainer.style.display = 'block';
-                    messageContainer.style.opacity = '1';
-                    window.scrollTo(0, 0);
+                    // Hiển thị toast lỗi
+                    Toastify({
+                        text: data.message || "Đăng nhập thất bại",
+                        duration: 3000,
+                        gravity: "top",
+                        position: "right",
+                        className: "toast-error",
+                        close: true,
+                    }).showToast();
                 }
             } catch (error) {
                 console.error('Lỗi khi đăng nhập:', error);
-                messageContainer.innerHTML = 'Đã xảy ra lỗi khi đăng nhập';
-                messageContainer.className = 'error';
-                messageContainer.style.display = 'block';
-                messageContainer.style.opacity = '1';
-                window.scrollTo(0, 0);
+                // Hiển thị toast lỗi
+                Toastify({
+                    text: "Đã xảy ra lỗi khi đăng nhập",
+                    duration: 3000,
+                    gravity: "top",
+                    position: "right",
+                    className: "toast-error",
+                    close: true,
+                }).showToast();
             }
         });
     </script>
