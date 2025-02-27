@@ -35,8 +35,9 @@ const io = socketIo(server, {
   cors: {
     origin: [
       "https://blockchain-truyxuat-54cfaa613f9c.herokuapp.com/", // Tên miền Heroku của bạn
-      "http://localhost:3000", 
-      "http://127.0.0.1:3000"
+      "https://truyxuatbuoi.xyz", 
+      "http://127.0.0.1:3000",
+
     ],
     methods: ["GET", "POST"],
     credentials: true,

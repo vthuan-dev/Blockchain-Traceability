@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const removePanel = document.querySelector(".remove");
   const overlay = document.getElementById("overlay");
   const mainContent = document.querySelector("main");
-  const baseUrl = window.location.hostname === 'localhost' ? 'http://localhost:3000/api' : 'http://www.tsroreee.com/api';
+  const baseUrl = window.location.hostname === 'localhost' ? 'https://truyxuatbuoi.xyz/api' : 'https://truyxuatbuoi.xyz/api';
 
 
   window.RegionManager = {

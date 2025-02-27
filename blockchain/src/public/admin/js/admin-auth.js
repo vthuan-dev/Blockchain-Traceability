@@ -3,7 +3,7 @@
 function initAdminSocket() {
   const ENDPOINT =
     window.location.hostname.indexOf("localhost") >= 0
-      ? "http://localhost:3000"
+      ? "https://truyxuatbuoi.xyz"
       : window.location.host;
   window.socket = io(ENDPOINT);
 

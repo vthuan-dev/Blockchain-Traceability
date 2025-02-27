@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const notificationList = document.getElementById("notificationList");
   const confirmReadButton = document.getElementById("confirmRead");
   const notificationIcon = document.getElementById("notificationIcon");
-  const baseUrl = window.location.hostname === "localhost" ? "http://localhost:3000/api" : "http://www.tsroreee.com/api";
+  const baseUrl = window.location.hostname === "localhost" ? "https://truyxuatbuoi.xyz/api" : "https://truyxuatbuoi.xyz/api";
 
   // Toggle dropdown menu
   if (profileIcon && dropdownMenu) {

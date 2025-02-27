@@ -1,4 +1,4 @@
-const baseUrl = window.location.hostname === 'localhost' ? 'http://localhost:3000/api' : 'http://www.tsroreee.com/api';
+const baseUrl = window.location.hostname === 'localhost' ? 'https://truyxuatbuoi.xyz/api' : 'https://truyxuatbuoi.xyz/api';
 // Tạo một đối tượng toàn cục để chứa các hàm và biến
 window.UserManager = {
   userData: [],
