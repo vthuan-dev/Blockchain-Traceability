@@ -239,15 +239,18 @@
       });
       async function loadPendingBatches() {
         try {
-          const response = await fetch("/api/pending-batches-by-region");
+          const baseUrl = window.location.origin;
+          const response = await fetch(`${baseUrl}/api/pending-batches-by-region`);
+          
           if (!response.ok) {
-            throw new Error("Network response was not ok");
+            const errorData = await response.json();
+            throw new Error(errorData.message || "Network response was not ok");
           }
           const batches = await response.json();
           displayPendingBatches(batches);
         } catch (error) {
           console.error("Lỗi khi lấy danh sách lô hàng chờ duyệt:", error);
-          alert("Không thể lấy danh sách lô hàng. Vui lòng thử lại sau.");
+          showToast('Không thể lấy danh sách lô hàng. Vui lòng thử lại sau.', 'error');
         }
       }
 
@@ -343,15 +346,17 @@
           spinner.classList.remove('d-none');
           text.textContent = 'Đang xử lý...';
 
-          // Lấy local batch ID trước
-          const localBatchResponse = await fetch(`/api/local-batch-id/${blockchainBatchId}`);
+          const baseUrl = window.location.origin;
+          
+          // Lấy local batch ID
+          const localBatchResponse = await fetch(`${baseUrl}/api/local-batch-id/${blockchainBatchId}`);
           if (!localBatchResponse.ok) {
             throw new Error("Không thể lấy local batch ID");
           }
           const localBatchData = await localBatchResponse.json();
           
-          // Gọi API approve với cả blockchain ID và local ID
-          const response = await fetch(`/approve-batch/${blockchainBatchId}`, {
+          // Gọi API approve
+          const response = await fetch(`${baseUrl}/approve-batch/${blockchainBatchId}`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -359,16 +364,17 @@
             body: JSON.stringify({ localBatchId: localBatchData.localBatchId })
           });
 
-          if (response.ok) {
-            showToast('Phê duyệt thành công!', 'success');
-            $("#batchDetailsModal").modal("hide");
-            await loadPendingBatches();
-          } else {
-            showToast('Phê duyệt thất bại!', 'error');
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || "Phê duyệt thất bại");
           }
+
+          showToast('Phê duyệt thành công!', 'success');
+          $("#batchDetailsModal").modal("hide");
+          await loadPendingBatches();
         } catch (error) {
-          showToast('Đã xảy ra lỗi!', 'error');
           console.error('Error:', error);
+          showToast(error.message || 'Đã xảy ra lỗi!', 'error');
         } finally {
           approveBtn.disabled = false;
           spinner.classList.add('d-none');

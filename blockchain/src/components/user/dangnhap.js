@@ -217,8 +217,6 @@ module.exports = function (db) {
     res.sendFile(path.join(__dirname, "../../public/account/quenmatkhau.html"));
   });
 
-  let globalNewPassword = "";
-
   router.post("/reset-passwd", async function (req, res) {
     const { email, newPassword, recaptchaResponse } = req.body;
 
@@ -254,55 +252,54 @@ module.exports = function (db) {
 
         // Kiểm tra user tồn tại
         const [users] = await db.query(
-            "SELECT * FROM users WHERE email = ? AND is_approved = true",
+            "SELECT * FROM users WHERE email = ?",
             [email]
         );
         const user = users[0];
 
         if (!user) {
             return res.status(400).json({
-                message: "Email không tồn tại hoặc tài khoản chưa được xác thực"
+                message: "Email không tồn tại trong hệ thống"
             });
         }
 
-        // Tạo token và lưu mật khẩu mới
+        // Hash mật khẩu mới ngay lập tức thay vì lưu vào biến global
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
         const token = crypto.randomBytes(32).toString('hex');
-        globalNewPassword = newPassword;
 
-        // Cập nhật token trong database
+        // Cập nhật token và mật khẩu mới
         await db.query(
-            "UPDATE users SET verificationToken = ? WHERE email = ?",
-            [token, email]
+            "UPDATE users SET verificationToken = ?, passwd = ? WHERE email = ?",
+            [token, hashedPassword, email]
         );
 
-        // Tạo link reset password
-        const baseUrl = process.env.NODE_ENV === 'production'
-            ? 'https://truyxuatbuoi.xyz'
-            : 'http://localhost:3000';
-        const resetLink = `${baseUrl}/api/reset-password/${token}`;
-
-        // Gửi email
+        // Gửi email xác nhận
         try {
             const templatePath = path.join(
                 __dirname,
                 "../../public/account/xacthuc.html"
             );
 
+            const baseUrl = process.env.NODE_ENV === 'production'
+                ? 'https://truyxuatbuoi.xyz'
+                : 'http://localhost:3000';
+
             await sendEmail(
                 email,
                 user.name,
-                resetLink,
-                "Xác thực đặt lại mật khẩu",
+                `${baseUrl}/account/dangnhap.html`, // Gửi link đăng nhập trực tiếp
+                "Xác nhận đổi mật khẩu thành công",
                 templatePath
             );
 
             return res.status(200).json({
-                message: "Link đặt lại mật khẩu đã được gửi vào email của bạn"
+                message: "Đặt lại mật khẩu thành công! Vui lòng đăng nhập lại."
             });
+
         } catch (emailError) {
             console.error("Lỗi gửi email:", emailError);
             return res.status(500).json({
-                message: "Lỗi khi gửi email xác thực, vui lòng thử lại"
+                message: "Đã đặt lại mật khẩu nhưng không gửi được email xác nhận"
             });
         }
 
