@@ -2,6 +2,8 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const path = require("path");
 const { sendEmail } = require("./sendmail");
+const axios = require("axios");
+const crypto = require("crypto");
 
 const router = express.Router();
 
@@ -218,9 +220,25 @@ module.exports = function (db) {
   let globalNewPassword = "";
 
   router.post("/reset-passwd", async function (req, res) {
-    const { email, newPassword, captcha } = req.body;
+    const { email, newPassword, recaptchaResponse } = req.body;
 
     try {
+      // Verify reCAPTCHA first
+      const recaptchaVerifyUrl = 'https://www.google.com/recaptcha/api/siteverify';
+      const verifyResponse = await axios.post(recaptchaVerifyUrl, null, {
+        params: {
+          secret: '6LfETuQqAAAAAJiJqnltTbrrprFcYytET3K9RWXD', // Secret key
+          response: recaptchaResponse
+        }
+      });
+
+      if (!verifyResponse.data.success) {
+        return res.status(400).json({ 
+          message: 'Xác thực reCAPTCHA thất bại' 
+        });
+      }
+
+      // Check if user exists
       const [users] = await db.query("SELECT * FROM users WHERE email = ?", [
         email,
       ]);
@@ -231,28 +249,31 @@ module.exports = function (db) {
       }
 
       if (!user.is_approved) {
-        return res
-          .status(400)
-          .json({ message: "Tài khoản chưa được phê duyệt" });
+        return res.status(400).json({ 
+          message: "Tài khoản chưa được phê duyệt" 
+        });
       }
 
+      // Generate verification token
+      const token = crypto.randomBytes(32).toString('hex');
       globalNewPassword = newPassword;
-      const [tokenResult] = await db.query(
-        "SELECT verificationToken FROM users WHERE email = ?",
-        [email]
+
+      // Update user's verification token
+      await db.query(
+        "UPDATE users SET verificationToken = ? WHERE email = ?",
+        [token, email]
       );
-      const token = tokenResult[0].verificationToken;
 
-      if (!token) {
-        return res.status(500).json({ message: "Lỗi khi lấy token" });
-      }
-
-      const baseUrl = window.location.hostname === "localhost" ? `https://truyxuatbuoi.xyz/api` : `https://truyxuatbuoi.xyz/api`;
+      // Send reset password email
+      const baseUrl = process.env.NODE_ENV === 'production' 
+        ? `https://truyxuatbuoi.xyz/api` 
+        : `https://truyxuatbuoi.xyz/api`;
       const resetLink = `${baseUrl}/reset-password/${token}`;
       const templatePath = path.join(
         __dirname,
         "../../public/account/xacthuc.html"
       );
+
       await sendEmail(
         email,
         user.name,
@@ -261,10 +282,14 @@ module.exports = function (db) {
         templatePath
       );
 
-      res.status(200).json({ message: "Yêu cầu đặt lại mật khẩu đã được gửi" });
+      res.status(200).json({ 
+        message: "Yêu cầu đặt lại mật khẩu đã được gửi" 
+      });
     } catch (error) {
       console.error("Lỗi:", error);
-      res.status(500).json({ message: "Lỗi khi đặt lại mật khẩu" });
+      res.status(500).json({ 
+        message: "Lỗi khi đặt lại mật khẩu" 
+      });
     }
   });
 

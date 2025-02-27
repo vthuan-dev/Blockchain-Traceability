@@ -19,6 +19,7 @@ const {
   adminBucket,
 } = require("../../firebase");
 const { registerNotification } = require("../../notification");
+const sharp = require("sharp");
 
 const jsonData = require("./data.json");
 
@@ -279,6 +280,9 @@ module.exports = (db) => {
       await connection.beginTransaction();
 
       console.log("Bắt đầu xử lý yêu cầu đăng ký");
+      console.log("Headers:", req.headers);
+      console.log("Body:", req.body);
+      console.log("File:", req.file);
 
       const {
         name,
@@ -294,27 +298,67 @@ module.exports = (db) => {
         district_id,
         ward_id,
       } = req.body;
-      const avatar = req.file;
-      console.log("Dữ liệu nhận được từ client:", req.body, req.file);
 
-      const missingFields = validateInput(req.body);
-
-      if (missingFields.length > 0) {
-        return res
-          .status(400)
-          .json({
-            message: `Yêu cầu nhập đúng dữ liệu đầu vào. Missing: ${missingFields.join(
-              ", "
-            )}`,
-          });
+      // Kiểm tra dữ liệu đầu vào
+      if (!name || !email || !password || !phone || !address || !dob || !gender || !role_id) {
+        return res.status(400).json({
+          message: "Vui lòng điền đầy đủ thông tin bắt buộc"
+        });
       }
 
+      // Kiểm tra định dạng email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({
+          message: "Email không hợp lệ"
+        });
+      }
+
+      // Kiểm tra số điện thoại
+      const phoneRegex = /^[0-9]{10}$/;
+      if (!phoneRegex.test(phone)) {
+        return res.status(400).json({
+          message: "Số điện thoại không hợp lệ"
+        });
+      }
+
+      // Xử lý avatar
+      if (req.file) {
+        try {
+          const avatarsDir = path.join(__dirname, '../../public/uploads/avatars');
+          if (!fs.existsSync(avatarsDir)) {
+            fs.mkdirSync(avatarsDir, { recursive: true });
+          }
+
+          const fileName = `${Date.now()}_${req.file.originalname.replace(/\s+/g, '_')}`;
+          const filePath = path.join(avatarsDir, fileName);
+
+          // Nén và lưu ảnh
+          await sharp(req.file.buffer)
+            .resize(800, 800, {
+              fit: 'inside',
+              withoutEnlargement: true
+            })
+            .jpeg({ quality: 80 })
+            .toFile(filePath);
+
+          tempImgUrl = `/uploads/avatars/${fileName}`;
+          console.log("Avatar đã được xử lý và lưu:", tempImgUrl);
+        } catch (uploadError) {
+          console.error("Lỗi xử lý avatar:", uploadError);
+          tempImgUrl = "/uploads/avatars/default_avatar.jpg";
+        }
+      } else {
+        tempImgUrl = "/uploads/avatars/default_avatar.jpg";
+      }
+
+      // Kiểm tra email đã tồn tại
       if (await emailExists(email)) {
         return res.status(400).json({
           message: "Email này đã được sử dụng. Vui lòng chọn email khác."
         });
       }
-    
+
       // Kiểm tra số điện thoại đã tồn tại
       const phoneExistsQuery = "SELECT * FROM users WHERE phone = ?";
       if (await recordExists(phoneExistsQuery, [phone])) {
@@ -322,7 +366,6 @@ module.exports = (db) => {
           message: "Số điện thoại này đã được sử dụng. Vui lòng chọn số khác."
         });
       }
-    
 
       console.log("Checking IDs:", { province_id, district_id, ward_id });
 
@@ -345,43 +388,9 @@ module.exports = (db) => {
         wardId: validWardId,
       } = validatedIds;
 
-      // Xử lý upload avatar
-      if (avatar) {
-        try {
-          const sanitizedFileName = avatar.originalname
-            .replace(/\s+/g, "_")
-            .toLowerCase();
-          const fileName = `${Date.now()}_${sanitizedFileName}`;
-          const avatarPath = path.join(__dirname, '../../public/uploads/avatars', fileName);
-
-          // Tạo thư mục avatars nếu chưa tồn tại
-          const avatarsDir = path.join(__dirname, '../../public/uploads/avatars');
-          if (!fs.existsSync(avatarsDir)) {
-            fs.mkdirSync(avatarsDir, { recursive: true });
-          }
-
-          // Lưu file vào thư mục avatars
-          await fs.promises.writeFile(avatarPath, avatar.buffer);
-
-          // Tạo URL cho avatar
-          tempImgUrl = `/uploads/avatars/${fileName}`;
-          console.log("Avatar đã được upload:", tempImgUrl);
-        } catch (uploadError) {
-          console.error("Lỗi khi upload avatar:", uploadError);
-          throw new Error("Lỗi khi upload avatar");
-        }
-      } else {
-        // Sử dụng avatar mặc định nếu không có file upload
-        tempImgUrl = "/uploads/avatars/default_avatar.jpg";
-      }
-
-      // Tạo fullAddress từ các thành phần địa ch
-      // const fullAddress = `${specific_address}, ${ward_id}, ${district_id}, ${province_id}`;
-
       const hashedPassword = await bcrypt.hash(password, 10);
       const verificationToken = crypto.randomBytes(20).toString("hex");
 
-      
       const sql =
         "INSERT INTO users (name, email, passwd, phone, address, dob, gender, role_id, region_id, province_id, district_id, ward_id, avatar, verificationToken) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
       const values = [
@@ -430,25 +439,24 @@ module.exports = (db) => {
         await connection.rollback();
       }
       console.error("Lỗi chi tiết khi đăng ký:", error);
-      if (error.code === "ENOENT") {
-        res
-          .status(500)
-          .json({
-            error:
-              "Không tìm thấy file template email. Vui lòng kiểm tra lại đường dẫn.",
+      
+      // Xử lý các loại lỗi cụ thể
+      if (error.code === 'ER_DUP_ENTRY') {
+        if (error.message.includes('email')) {
+          return res.status(400).json({
+            message: "Email này đã được sử dụng. Vui lòng chọn email khác."
           });
-      } else if (error.message.includes("email")) {
-        res
-          .status(500)
-          .json({
-            error:
-              "Không thể gửi email xác thực. Vui lòng kiểm tra email của bạn.",
+        }
+        if (error.message.includes('phone')) {
+          return res.status(400).json({
+            message: "Số điện thoại này đã được sử dụng. Vui lòng chọn số khác."
           });
-      } else {
-        res
-          .status(500)
-          .json({ error: `Lỗi khi xử lý yêu cầu đăng ký: ${error.message}` });
+        }
       }
+
+      res.status(500).json({
+        message: "Lỗi khi xử lý yêu cầu đăng ký. Vui lòng thử lại sau."
+      });
     } finally {
       if (connection) {
         connection.release();

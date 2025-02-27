@@ -398,33 +398,38 @@
 
     form.addEventListener('submit', async function(event) {
         event.preventDefault();
-        loadingModal.show();
-
+        
+        // Validate form trước khi submit
         const formData = new FormData(this);
+        if (!validateFormData(formData)) {
+            return;
+        }
 
         try {
+            loadingModal.show();
+            
             const response = await fetch('/api/register', {
                 method: 'POST',
                 body: formData,
                 headers: {
-                    'Accept': 'application/json',
+                    'Accept': 'application/json'
                 },
                 credentials: 'include'
             });
 
+            const data = await response.json();
             loadingModal.hide();
 
             if (!response.ok) {
-                const errorData = await response.json();
                 document.getElementById('errorMessage').textContent = 
-                    errorData.message || errorData.error || 'Đăng ký thất bại';
+                    data.message || data.error || 'Đăng ký thất bại';
                 errorModal.show();
                 return;
             }
 
-            const data = await response.json();
             successModal.show();
             form.reset();
+
         } catch (error) {
             console.error('Error:', error);
             loadingModal.hide();
@@ -433,6 +438,40 @@
             errorModal.show();
         }
     });
+
+    // Thêm hàm validate
+    function validateFormData(formData) {
+        // Kiểm tra các trường bắt buộc
+        const requiredFields = ['name', 'email', 'password', 'phone', 'dob', 'gender', 'role_id'];
+        for (let field of requiredFields) {
+            if (!formData.get(field)) {
+                document.getElementById('errorMessage').textContent = 
+                    `Vui lòng nhập đầy đủ thông tin ${field}`;
+                errorModal.show();
+                return false;
+            }
+        }
+
+        // Kiểm tra định dạng email
+        const email = formData.get('email');
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            document.getElementById('errorMessage').textContent = 
+                'Email không hợp lệ';
+            errorModal.show();
+            return false;
+        }
+
+        // Kiểm tra mật khẩu
+        const password = formData.get('password');
+        if (password.length < 6) {
+            document.getElementById('errorMessage').textContent = 
+                'Mật khẩu phải có ít nhất 6 ký tự';
+            errorModal.show();
+            return false;
+        }
+
+        return true;
+    }
 
     // Xử lý sự kiện óng modal thành công
     closeSuccessModalButton.addEventListener('click', function() {
