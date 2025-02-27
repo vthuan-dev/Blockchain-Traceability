@@ -223,73 +223,94 @@ module.exports = function (db) {
     const { email, newPassword, recaptchaResponse } = req.body;
 
     try {
-      // Verify reCAPTCHA first
-      const recaptchaVerifyUrl = 'https://www.google.com/recaptcha/api/siteverify';
-      const verifyResponse = await axios.post(recaptchaVerifyUrl, null, {
-        params: {
-          secret: '6LfETuQqAAAAAJiJqnltTbrrprFcYytET3K9RWXD', // Secret key
-          response: recaptchaResponse
+        // Kiểm tra dữ liệu đầu vào
+        if (!email || !newPassword || !recaptchaResponse) {
+            return res.status(400).json({
+                message: "Vui lòng điền đầy đủ thông tin"
+            });
         }
-      });
 
-      if (!verifyResponse.data.success) {
-        return res.status(400).json({ 
-          message: 'Xác thực reCAPTCHA thất bại' 
-        });
-      }
+        // Verify reCAPTCHA
+        try {
+            const recaptchaVerifyUrl = 'https://www.google.com/recaptcha/api/siteverify';
+            const verifyResponse = await axios.post(recaptchaVerifyUrl, null, {
+                params: {
+                    secret: '6LfETuQqAAAAAJiJqnltTbrrprFcYytET3K9RWXD',
+                    response: recaptchaResponse
+                }
+            });
 
-      // Check if user exists
-      const [users] = await db.query("SELECT * FROM users WHERE email = ?", [
-        email,
-      ]);
-      const user = users[0];
+            if (!verifyResponse.data.success) {
+                return res.status(400).json({
+                    message: 'Xác thực reCAPTCHA thất bại'
+                });
+            }
+        } catch (recaptchaError) {
+            console.error("Lỗi xác thực reCAPTCHA:", recaptchaError);
+            return res.status(500).json({
+                message: "Lỗi xác thực reCAPTCHA, vui lòng thử lại"
+            });
+        }
 
-      if (!user) {
-        return res.status(400).json({ message: "Email không tồn tại" });
-      }
+        // Kiểm tra user tồn tại
+        const [users] = await db.query(
+            "SELECT * FROM users WHERE email = ? AND is_approved = true",
+            [email]
+        );
+        const user = users[0];
 
-      if (!user.is_approved) {
-        return res.status(400).json({ 
-          message: "Tài khoản chưa được phê duyệt" 
-        });
-      }
+        if (!user) {
+            return res.status(400).json({
+                message: "Email không tồn tại hoặc tài khoản chưa được xác thực"
+            });
+        }
 
-      // Generate verification token
-      const token = crypto.randomBytes(32).toString('hex');
-      globalNewPassword = newPassword;
+        // Tạo token và lưu mật khẩu mới
+        const token = crypto.randomBytes(32).toString('hex');
+        globalNewPassword = newPassword;
 
-      // Update user's verification token
-      await db.query(
-        "UPDATE users SET verificationToken = ? WHERE email = ?",
-        [token, email]
-      );
+        // Cập nhật token trong database
+        await db.query(
+            "UPDATE users SET verificationToken = ? WHERE email = ?",
+            [token, email]
+        );
 
-      // Send reset password email
-      const baseUrl = process.env.NODE_ENV === 'production' 
-        ? `https://truyxuatbuoi.xyz/api` 
-        : `https://truyxuatbuoi.xyz/api`;
-      const resetLink = `${baseUrl}/reset-password/${token}`;
-      const templatePath = path.join(
-        __dirname,
-        "../../public/account/xacthuc.html"
-      );
+        // Tạo link reset password
+        const baseUrl = process.env.NODE_ENV === 'production'
+            ? 'https://truyxuatbuoi.xyz'
+            : 'http://localhost:3000';
+        const resetLink = `${baseUrl}/api/reset-password/${token}`;
 
-      await sendEmail(
-        email,
-        user.name,
-        resetLink,
-        "Xác thực đặt lại mật khẩu",
-        templatePath
-      );
+        // Gửi email
+        try {
+            const templatePath = path.join(
+                __dirname,
+                "../../public/account/xacthuc.html"
+            );
 
-      res.status(200).json({ 
-        message: "Yêu cầu đặt lại mật khẩu đã được gửi" 
-      });
+            await sendEmail(
+                email,
+                user.name,
+                resetLink,
+                "Xác thực đặt lại mật khẩu",
+                templatePath
+            );
+
+            return res.status(200).json({
+                message: "Link đặt lại mật khẩu đã được gửi vào email của bạn"
+            });
+        } catch (emailError) {
+            console.error("Lỗi gửi email:", emailError);
+            return res.status(500).json({
+                message: "Lỗi khi gửi email xác thực, vui lòng thử lại"
+            });
+        }
+
     } catch (error) {
-      console.error("Lỗi:", error);
-      res.status(500).json({ 
-        message: "Lỗi khi đặt lại mật khẩu" 
-      });
+        console.error("Lỗi server:", error);
+        return res.status(500).json({
+            message: "Lỗi hệ thống, vui lòng thử lại sau"
+        });
     }
   });
 
