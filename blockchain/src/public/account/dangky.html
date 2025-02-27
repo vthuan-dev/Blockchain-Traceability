@@ -14,20 +14,20 @@
             max-width: 600px;
             margin-top: 80px;
             margin-bottom: 40px;
-            background-color: rgba(255, 255, 255, 0.95);
+            background-color: rgba(255, 255, 255, 0.98);
             padding: 30px;
             border-radius: 15px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
             border: none;
             animation: fadeIn 0.5s ease-out;
         }
 
         /* Style cho heading */
         h1 {
-            color: #2d3436;
+            color: #1a1a1a;
             font-size: 28px;
             margin-bottom: 30px;
-            font-weight: 600;
+            font-weight: 700;
             text-align: center;
         }
 
@@ -39,9 +39,9 @@
 
         .form-group label {
             font-size: 14px;
-            color: #636e72;
+            color: #2d3436;
             margin-bottom: 8px;
-            font-weight: 500;
+            font-weight: 600;
             display: block;
         }
 
@@ -49,25 +49,26 @@
         .form-control {
             height: 45px;
             padding: 10px 15px;
-            border: 2px solid #e9ecef;
+            border: 2px solid #d1d8e0;
             border-radius: 8px;
             transition: all 0.3s ease;
             font-size: 15px;
-            background-color: white;
+            background-color: #ffffff;
+            color: #2d3436;
         }
 
         .form-control:focus {
-            border-color: #78e08f;
-            box-shadow: 0 0 0 0.2rem rgba(120, 224, 143, 0.25);
+            border-color: #55b563;
+            box-shadow: 0 0 0 0.2rem rgba(85, 181, 99, 0.3);
         }
 
         /* Style cho button */
         .btn-success {
             height: 45px;
-            background: linear-gradient(45deg, #78e08f, #38ada9);
+            background: linear-gradient(45deg, #55b563, #2d8659);
             border: none;
             border-radius: 8px;
-            font-weight: 500;
+            font-weight: 600;
             font-size: 16px;
             letter-spacing: 0.5px;
             transition: all 0.3s ease;
@@ -77,19 +78,19 @@
 
         .btn-success:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(56, 173, 169, 0.4);
-            background: linear-gradient(45deg, #38ada9, #78e08f);
+            box-shadow: 0 5px 15px rgba(45, 134, 89, 0.4);
+            background: linear-gradient(45deg, #2d8659, #55b563);
         }
 
         /* Style cho thông báo vai trò */
         .anncounce {
             text-align: center;
-            color: #e74c3c;
+            color: #c0392b;
             padding: 12px;
             margin-bottom: 25px;
-            font-weight: 500;
+            font-weight: 600;
             font-size: 15px;
-            background-color: rgba(231, 76, 60, 0.1);
+            background-color: rgba(192, 57, 43, 0.15);
             border-radius: 8px;
             animation: pulse 2s infinite;
         }
@@ -106,14 +107,14 @@
         }
 
         .dangnhap a {
-            color: #38ada9;
+            color: #2d8659;
             text-decoration: none;
-            font-weight: 500;
+            font-weight: 600;
             transition: color 0.3s ease;
         }
 
         .dangnhap a:hover {
-            color: #78e08f;
+            color: #55b563;
             text-decoration: underline;
         }
 
@@ -121,7 +122,8 @@
         .form-control:disabled,
         .form-control[readonly],
         select:disabled {
-            background-color: #f8f9fa !important;
+            background-color: #e9ecef !important;
+            color: #495057 !important;
             opacity: 0.8 !important;
             cursor: not-allowed !important;
         }
@@ -185,6 +187,17 @@
                 height: 40px;
                 font-size: 15px;
             }
+        }
+
+        /* Custom styles cho select */
+        select.form-control {
+            color: #2d3436;
+            background-color: #ffffff;
+        }
+
+        select.form-control option {
+            color: #2d3436;
+            background-color: #ffffff;
         }
     </style>
 </head>
