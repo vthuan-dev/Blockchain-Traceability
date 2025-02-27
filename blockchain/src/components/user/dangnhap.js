@@ -221,10 +221,10 @@ module.exports = function (db) {
     const { email, newPassword, recaptchaResponse } = req.body;
 
     try {
-        // Kiểm tra dữ liệu đầu vào
+        // Kiểm tra đầu vào
         if (!email || !newPassword || !recaptchaResponse) {
             return res.status(400).json({
-                message: "Vui lòng điền đầy đủ thông tin"
+                message: "Vui lòng điền đầy đủ thông tin và xác thực reCAPTCHA"
             });
         }
 
@@ -238,15 +238,18 @@ module.exports = function (db) {
                 }
             });
 
+            console.log('reCAPTCHA response:', verifyResponse.data); // Thêm log
+
             if (!verifyResponse.data.success) {
+                console.error('reCAPTCHA verification failed:', verifyResponse.data);
                 return res.status(400).json({
-                    message: 'Xác thực reCAPTCHA thất bại'
+                    message: 'Xác thực reCAPTCHA thất bại, vui lòng thử lại'
                 });
             }
         } catch (recaptchaError) {
             console.error("Lỗi xác thực reCAPTCHA:", recaptchaError);
             return res.status(500).json({
-                message: "Lỗi xác thực reCAPTCHA, vui lòng thử lại"
+                message: "Lỗi xác thực reCAPTCHA, vui lòng thử lại sau"
             });
         }
 
