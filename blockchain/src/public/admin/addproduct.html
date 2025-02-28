@@ -36,6 +36,270 @@
                 width: 100%;
             }
         }
+
+        /* Thêm CSS mới để ẩn nút xem trước trên desktop */
+        @media (min-width: 769px) {
+            #previewBtn {
+                display: none;
+            }
+        }
+
+        .btn-preview {
+            background: linear-gradient(135deg, #17a2b8 0%, #0056b3 100%);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(23, 162, 184, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-preview:hover {
+            background: linear-gradient(135deg, #148698 0%, #004494 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(23, 162, 184, 0.3);
+            color: white;
+        }
+
+        .btn-preview:active {
+            transform: translateY(1px);
+            box-shadow: 0 1px 3px rgba(23, 162, 184, 0.2);
+        }
+
+        .btn-preview i {
+            font-size: 1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .btn-preview:hover i {
+            transform: scale(1.1);
+        }
+
+        /* Giữ nguyên media query để ẩn nút trên desktop */
+        @media (min-width: 769px) {
+            #previewBtn {
+                display: none;
+            }
+        }
+
+        /* Thêm animation cho mobile */
+        @media (max-width: 768px) {
+            .btn-preview {
+                width: auto;
+                margin: 0 auto;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .btn-preview::after {
+                content: '';
+                position: absolute;
+                top: -50%;
+                left: -50%;
+                width: 200%;
+                height: 200%;
+                background: rgba(255, 255, 255, 0.1);
+                transform: rotate(45deg);
+                animation: shimmer 2s infinite;
+            }
+        }
+
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%) rotate(45deg);
+            }
+            100% {
+                transform: translateX(100%) rotate(45deg);
+            }
+        }
+
+        .button-group {
+            margin-top: 30px;
+        }
+
+        .btn {
+            position: relative;
+            padding: 10px 24px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn i {
+            font-size: 1.1rem;
+            transition: transform 0.3s ease;
+        }
+
+        /* Preview Button */
+        .btn-preview {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.2);
+        }
+
+        .btn-preview:hover {
+            background: linear-gradient(45deg, #2980b9, #2573a7);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* Save Button */
+        .btn-save {
+            background: linear-gradient(45deg, #2ecc71, #27ae60);
+            color: white;
+            box-shadow: 0 4px 15px rgba(46, 204, 113, 0.2);
+        }
+
+        .btn-save:hover {
+            background: linear-gradient(45deg, #27ae60, #219a52);
+            box-shadow: 0 6px 20px rgba(46, 204, 113, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* Cancel Button */
+        .btn-cancel {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            color: white;
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.2);
+        }
+
+        .btn-cancel:hover {
+            background: linear-gradient(45deg, #c0392b, #a93226);
+            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* Active state for all buttons */
+        .btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Hover effect for icons */
+        .btn:hover i {
+            transform: scale(1.2) rotate(-5deg);
+        }
+
+        /* Ripple effect */
+        .btn::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background: rgba(255, 255, 255, 0.2);
+            opacity: 0;
+            transition: all 0.5s ease;
+        }
+
+        .btn:active::after {
+            opacity: 1;
+            transform: scale(0);
+            transition: 0s;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .button-group {
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+                margin: 0 !important;
+                padding: 12px 24px;
+            }
+
+            .btn::before {
+                content: '';
+                position: absolute;
+                top: -50%;
+                left: -50%;
+                width: 200%;
+                height: 200%;
+                background: linear-gradient(
+                    to right,
+                    rgba(255, 255, 255, 0) 0%,
+                    rgba(255, 255, 255, 0.3) 50%,
+                    rgba(255, 255, 255, 0) 100%
+                );
+                transform: rotate(45deg);
+                animation: shine 2s infinite;
+            }
+        }
+
+        @keyframes shine {
+            0% {
+                transform: translateX(-100%) rotate(45deg);
+            }
+            100% {
+                transform: translateX(100%) rotate(45deg);
+            }
+        }
+
+        .preview-panel {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .preview-panel .card-header {
+            background: #f8f9fa;
+            border-bottom: 1px solid #eee;
+        }
+
+        .preview-panel img {
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .preview-panel h5 {
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .price-tag {
+            color: #28a745;
+            font-weight: 500;
+        }
+
+        .description-section, .uses-section, .process-section {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .preview-panel {
+                margin-top: 20px;
+            }
+        }
+
+        /* Ẩn header trên desktop */
+        @media (min-width: 769px) {
+            .preview-panel .card-header {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body onload="time()">
@@ -102,7 +366,7 @@
                     </div>
                 </div>
                 <div class="row mt-3">
-                    <div class="col-12">
+                    <div class="col-md-8">
                         <div class="card card-custom">
                             <div class="card-body">
                                 <form class="add-product-form" enctype="multipart/form-data">
@@ -137,11 +401,52 @@
                                         <label for="product-process">Quy trình</label>
                                         <textarea id="product-process" name="process" class="form-control" rows="5" required></textarea>
                                     </div>
-                                    <div class="form-group text-center">
-                                        <button type="submit" class="btn btn-primary mr-2">Lưu sản phẩm</button>
-                                        <button type="button" class="btn btn-secondary" onclick="window.location.href='product.html'">Hủy bỏ</button>
+                                    <div class="form-group text-center button-group">
+                                        <button type="button" class="btn btn-preview mr-2" id="previewBtn">
+                                            <i class="fas fa-eye"></i>
+                                            <span>Xem trước</span>
+                                        </button>
+                                        <button type="submit" class="btn btn-save mr-2">
+                                            <i class="fas fa-check-circle"></i>
+                                            <span>Lưu sản phẩm</span>
+                                        </button>
+                                        <button type="button" class="btn btn-cancel" onclick="window.location.href='product.html'">
+                                            <i class="fas fa-times-circle"></i>
+                                            <span>Hủy bỏ</span>
+                                        </button>
                                     </div>
                                 </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Preview Panel -->
+                    <div class="col-md-4">
+                        <div class="card card-custom preview-panel" style="position: sticky; top: 20px;">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Xem trước</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="text-center mb-3">
+                                    <img id="preview-image" src="../hinhanh/default-product.png" alt="Preview" 
+                                         style="max-width: 200px; max-height: 200px; object-fit: cover;">
+                                </div>
+                                <h4 id="preview-name" class="text-center mb-3">Tên sản phẩm</h4>
+                                <div class="price-tag text-center mb-3">
+                                    <span id="preview-price" class="h5">0</span> đ/kg
+                                </div>
+                                <div class="description-section mb-3">
+                                    <h5>Mô tả sản phẩm:</h5>
+                                    <p id="preview-description" class="text-muted">Chưa có mô tả</p>
+                                </div>
+                                <div class="uses-section mb-3">
+                                    <h5>Công dụng:</h5>
+                                    <div id="preview-uses" class="text-muted">Chưa có công dụng</div>
+                                </div>
+                                <div class="process-section">
+                                    <h5>Quy trình:</h5>
+                                    <div id="preview-process" class="text-muted">Chưa có quy trình</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -174,6 +479,49 @@
     <script src="./js/settings.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', applySettings);
+    </script>
+    <script>
+    // Hàm cập nhật preview
+    function updatePreview(field, value) {
+        const previewElement = document.getElementById(`preview-${field}`);
+        if (!previewElement) return;
+
+        switch(field) {
+            case 'name':
+                previewElement.textContent = value || 'Tên sản phẩm';
+                break;
+            case 'price':
+                previewElement.textContent = value ? 
+                    new Intl.NumberFormat('vi-VN').format(value) : '0';
+                break;
+            case 'description':
+            case 'uses':
+            case 'process':
+                if (!value.trim()) {
+                    previewElement.innerHTML = `Chưa có ${field === 'description' ? 'mô tả' : 
+                                                field === 'uses' ? 'công dụng' : 'quy trình'}`;
+                } else {
+                    const lines = value.split('\n')
+                        .filter(line => line.trim())
+                        .map(line => `<p class="mb-1">• ${line.trim()}</p>`)
+                        .join('');
+                    previewElement.innerHTML = lines;
+                }
+                break;
+        }
+    }
+
+    // Xử lý preview ảnh
+    document.getElementById('product-image').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('preview-image').src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+    });
     </script>
 </body>
 </html>

@@ -409,4 +409,89 @@ document.addEventListener("DOMContentLoaded", function () {
   if (table) {
     window.ProductManager.fetchProductData();
   }
+
+  // Preview functionality
+  function initializePreview() {
+    const productNameInput = document.getElementById('product-name');
+    const productPriceInput = document.getElementById('product-price');
+    const productDescInput = document.getElementById('product-description');
+    const productUsesInput = document.getElementById('product-uses');
+    const productProcessInput = document.getElementById('product-process');
+    const productImageInput = document.getElementById('product-image');
+    const previewBtn = document.getElementById('previewBtn');
+
+    // Live preview updates
+    function updatePreview(field, value) {
+      const previewElement = document.getElementById(`preview-${field}`);
+      if (previewElement) {
+        if (field === 'price') {
+          // Format price with thousand separator
+          previewElement.textContent = new Intl.NumberFormat('vi-VN').format(value);
+        } else if (field === 'uses' || field === 'process') {
+          // Convert newlines to bullet points
+          const bulletPoints = value.split('\n')
+            .filter(line => line.trim())
+            .map(line => `<li>${line.trim()}</li>`)
+            .join('');
+          previewElement.innerHTML = `<ul>${bulletPoints}</ul>`;
+        } else {
+          previewElement.textContent = value;
+        }
+      }
+    }
+
+    // Image preview
+    productImageInput.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          document.getElementById('preview-image').src = e.target.result;
+        }
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Live preview event listeners
+    productNameInput.addEventListener('input', e => updatePreview('name', e.target.value));
+    productPriceInput.addEventListener('input', e => updatePreview('price', e.target.value));
+    productDescInput.addEventListener('input', e => updatePreview('description', e.target.value));
+    productUsesInput.addEventListener('input', e => updatePreview('uses', e.target.value));
+    productProcessInput.addEventListener('input', e => updatePreview('process', e.target.value));
+
+    // Preview button click handler
+    previewBtn.addEventListener('click', function() {
+      // Scroll to preview panel on mobile
+      if (window.innerWidth < 768) {
+        document.querySelector('.preview-panel').scrollIntoView({ 
+          behavior: 'smooth' 
+        });
+      }
+    });
+  }
+
+  // Initialize preview if we're on the add product page
+  if (document.querySelector('.add-product-form')) {
+    initializePreview();
+  }
 });
+
+// Thêm CSS để ẩn tiêu đề "Xem trước" trên desktop
+const styles = `
+    @media (min-width: 769px) {
+        .preview-panel .card-header {
+            display: none;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .preview-panel .card-header {
+            display: block;
+        }
+    }
+`;
+
+// Add styles to document
+const styleSheet = document.createElement("style");
+styleSheet.innerText = styles;
+document.head.appendChild(styleSheet);
