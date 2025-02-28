@@ -410,7 +410,12 @@
                         </div>
                         <div class="form-group">
                             <label for="imageUrls">Ảnh hoạt động</label>
+                            <div class="file-upload-wrapper" onclick="document.getElementById('imageUrls').click()">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <span class="upload-text">Kéo thả hoặc click để tải ảnh lên</span>
+                            </div>
                             <input type="file" class="form-control-file" id="imageUrls" name="imageUrls" multiple>
+                            <div class="preview-container"></div>
                         </div>
                         <input type="hidden" name="isSystemGenerated" value="false">
                         <button type="submit" class="btn add-activity-btn">
