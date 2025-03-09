@@ -1668,10 +1668,12 @@ function setupRoutes(app, db) {
   });
 
   app.get("/api/batch-info-by-sscc-for-consumer/:sscc", async (req, res) => {
+    let connection;
     try {
       const sscc = req.params.sscc;
       const userId = req.session.userId;
 
+      // Lấy thông tin từ blockchain trước
       const batchInfo = await traceabilityContract.methods
         .getBatchBySSCC(sscc)
         .call();
@@ -1684,23 +1686,20 @@ function setupRoutes(app, db) {
 
       const producerInfo = await getProducerById(batchInfo.producerId);
 
-      // Lấy thông tin người dùng để xác định warehouseId
-      const [userInfo] = await db.query("SELECT * FROM users WHERE uid = ?", [
-        userId,
-      ]);
+      // Lấy kết nối từ pool
+      connection = await db.getConnection();
+      
+      // Thực hiện truy vấn với kết nối đã lấy
+      const [userResults] = await connection.query(
+        "SELECT * FROM users WHERE uid = ?", 
+        [userId]
+      );
+      const userInfo = userResults[0];
 
-      if (!userInfo || userInfo.role_id !== 8) {
-        // Giả sử role_id 8 là nhà kho
-        console.log("User is not a warehouse");
-        // Nếu không phải nhà kho, set warehouseConfirmed là false
-        var warehouseConfirmed = false;
-      } else {
-        const warehouseId = userInfo.warehouse_id; // Giả sử có trường warehouse_id trong bảng users
-        console.log(
-          "Calling isWarehouseConfirmed with:",
-          batchInfo.batchId,
-          warehouseId
-        );
+      // Xử lý logic với warehouseConfirmed
+      let warehouseConfirmed = false;
+      if (userInfo && userInfo.role_id === 8) {
+        const warehouseId = userInfo.warehouse_id;
         warehouseConfirmed = await traceabilityContract.methods
           .isWarehouseConfirmed(batchInfo.batchId, warehouseId)
           .call();
@@ -1768,12 +1767,16 @@ function setupRoutes(app, db) {
         JSON.stringify(serializedBatchInfo, null, 2)
       );
 
+      // Trả về kết quả
       res.json(serializedBatchInfo);
     } catch (error) {
       console.error("Lỗi khi lấy thông tin lô hàng từ SSCC:", error);
-      res
-        .status(500)
-        .json({ error: "Không thể lấy thông tin lô hàng: " + error.message });
+      res.status(500).json({ 
+        error: "Không thể lấy thông tin lô hàng: " + error.message 
+      });
+    } finally {
+      // Đảm bảo trả kết nối về pool
+      if (connection) connection.release();
     }
   });
 
