@@ -11,7 +11,7 @@
     <style>
         .container {
             max-width: 400px;
-            margin-top: 80px;
+            margin-top: 120px;
             background-color: rgba(255, 255, 255, 0.98);
             padding: 30px;
             border-radius: 15px;
@@ -156,7 +156,7 @@
         
         @media (max-width: 576px) {
             .container {
-                margin-top: 60px;
+                margin-top: 100px;
                 padding: 15px;
                 margin-bottom: 20px;
             }
@@ -265,14 +265,15 @@
     </style>
 </head>
 <body>
+    <!-- Di chuyển nút back ra ngoài container -->
+    <div class="back-button">
+        <a href="/" class="btn">
+            <i class="fas fa-arrow-left"></i>
+            Trang chủ
+        </a>
+    </div>
+
     <div class="container">
-        <div class="back-button">
-            <a href="/" class="btn">
-                <i class="fas fa-arrow-left"></i>
-                Trang chủ
-            </a>
-        </div>
-        
         <h1 class="text-center">Đăng Nhập</h1>
         <form id="loginForm" class="mt-4">
             <div class="form-group">
