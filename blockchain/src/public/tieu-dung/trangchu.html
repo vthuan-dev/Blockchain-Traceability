@@ -73,11 +73,19 @@
     </nav>
     <div class="container mt-4">
       <div class="banner d-flex justify-content-center">
-        <img
-          src=".\hinhanh\banner.jpg"
-          class="img-fluid custom-img"
-          alt="Responsive image"
-        />
+        <div id="bannerCarousel" class="carousel slide" data-ride="carousel">
+          <div class="carousel-inner">
+            <div class="carousel-item active">
+              <img src=".\hinhanh\banner.jpg" class="img-fluid custom-img" alt="Banner 1">
+            </div>
+            <div class="carousel-item">
+              <img src=".\hinhanh\advanced-1.png" class="img-fluid custom-img" alt="Banner 2">
+            </div>
+            <!-- <div class="carousel-item">
+              <img src=".\hinhanh\banner3.jpg" class="img-fluid custom-img" alt="Banner 3">
+            </div> -->
+          </div>
+        </div>
       </div>
 
       <div class="sanpham">
@@ -226,6 +234,14 @@
             navbarCollapse.classList.remove("show");
           }
         }
+      });
+    </script>
+    <script>
+      $(document).ready(function(){
+        $('#bannerCarousel').carousel({
+          interval: 2000,  // Thời gian chuyển đổi (3 giây)
+          ride: 'carousel' // Tự động chạy
+        });
       });
     </script>
   </body>
