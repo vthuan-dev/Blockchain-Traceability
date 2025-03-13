@@ -209,7 +209,7 @@
                 Hãy chọn vai trò bên dưới trước để nhập thông tin nhé !
             </div>
             <div class="form-group">
-                <label for="name">Họ và Tên:</label>
+                <label for="name" id="nameLabel">Họ và Tên:</label>
                 <input type="text" class="form-control" id="name" name="name" required>
             </div>
 
@@ -764,6 +764,21 @@
                     })
                     .catch(error => console.error('Lỗi khi lấy danh sách vùng sản xuất:', error));
             }
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const roleSelect = document.getElementById('role');
+            const nameLabel = document.getElementById('nameLabel');
+
+            roleSelect.addEventListener('change', function() {
+                // Nếu role là nhà kho (value = 8)
+                if (this.value === '8') {
+                    nameLabel.textContent = 'Tên nhà kho:';
+                } else {
+                    nameLabel.textContent = 'Họ và Tên:';
+                }
+            });
         });
     </script>
 </body>

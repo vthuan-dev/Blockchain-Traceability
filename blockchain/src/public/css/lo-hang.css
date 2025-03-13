@@ -57,48 +57,23 @@
         background-color: #4CAF50;
         color: white;
         border: none;
-        padding: 12px 25px;
-        border-radius: 50px;
-        font-size: 1rem;
-        font-weight: 600;
+        padding: 8px 16px;
+        border-radius: 4px;
         cursor: pointer;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .btn-view-image:before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(
-            120deg,
-            transparent,
-            rgba(255, 255, 255, 0.3),
-            transparent
-        );
-        transition: all 0.6s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
     }
 
     .btn-view-image:hover {
         background-color: #45a049;
-        transform: translateY(-3px);
-        box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        transform: translateY(-2px);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     }
 
-    .btn-view-image:hover:before {
-        left: 100%;
-    }
-
-    .btn-view-image:active {
-        transform: translateY(-1px);
-        box-shadow: 0 3px 10px rgba(76, 175, 80, 0.4);
+    .btn-view-image i {
+        font-size: 16px;
     }
 
     .btn-view-image:focus {
@@ -269,158 +244,33 @@
         }
     }
 
+    /* Style cho nhật ký lô hàng */
     .activity-log {
         background: #ffffff;
-        border-radius: 12px;
-        padding: 20px;
-        margin-bottom: 20px;
-        box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-        position: relative;
-        transition: all 0.3s ease;
-        border-left-width: 6px;
+        border-radius: 8px;
+        padding: 12px 15px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        border-left: 4px solid transparent;
+        transition: all 0.2s ease;
     }
 
-    .activity-log:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(0,0,0,0.12);
-    }
-
-    /* Gradient backgrounds cho từng loại */
-    .activity-log.producer {
-        background: linear-gradient(135deg, rgba(76,175,80,0.05) 0%, rgba(255,255,255,1) 100%);
-        border-left: 6px solid #4CAF50;
-    }
-
-    .activity-log.approver {
-        background: linear-gradient(135deg, rgba(33,150,243,0.03) 0%, rgba(255,255,255,1) 100%);
-        border-left: 6px solid #1976D2;
-        position: relative;
-    }
-
-    .activity-log.approver::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: 30px;
-        height: 30px;
-        background: linear-gradient(135deg, transparent 50%, rgba(25,118,210,0.1) 50%);
-        border-radius: 0 0 0 5px;
-    }
-
-    .activity-log.warehouse {
-        background: linear-gradient(135deg, rgba(255,152,0,0.05) 0%, rgba(255,255,255,1) 100%);
-        border-left: 6px solid #FF9800;
-    }
-
-    .activity-log.transporter {
-        background: linear-gradient(135deg, rgba(156,39,176,0.05) 0%, rgba(255,255,255,1) 100%);
-        border-left: 6px solid #9C27B0;
-    }
-
-    /* Style cho timestamp */
-    .activity-log .timestamp {
-        font-size: 0.9rem;
-        color: #78909c;
-        margin-bottom: 10px;
-    }
-
-    /* Style cho activity name */
-    .activity-log .activity-name {
-        font-size: 1.1rem;
-        color: #37474f;
-        margin: 12px 0;
-        display: flex;
-        align-items: center;
-    }
-
-    /* Style cho icons */
-    .activity-name i {
-        font-size: 1.8rem;  /* Tăng từ 1.2rem lên 1.8rem */
-        margin-right: 15px; /* Tăng margin để tạo khoảng cách đẹp hơn */
-        transition: all 0.3s ease;
-        vertical-align: middle;
-        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); /* Thêm đổ bóng nhẹ */
-    }
-
-    /* Màu sắc gradient cho icons */
-    .text-success i { 
-        background: linear-gradient(45deg, #2ecc71, #4CAF50);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        filter: drop-shadow(0 2px 2px rgba(76,175,80,0.2));
-    }
-
-    .text-primary i {
-        background: linear-gradient(45deg, #3498db, #2196F3);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        filter: drop-shadow(0 2px 2px rgba(33,150,243,0.2));
-    }
-
-    .text-warning i {
-        background: linear-gradient(45deg, #f1c40f, #FF9800);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        filter: drop-shadow(0 2px 2px rgba(255,152,0,0.2));
-    }
-
-    .text-purple i {
-        background: linear-gradient(45deg, #9b59b6, #9C27B0);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        filter: drop-shadow(0 2px 2px rgba(156,39,176,0.2));
-    }
-
-    .text-danger i {
-        background: linear-gradient(45deg, #e74c3c, #f44336);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        filter: drop-shadow(0 2px 2px rgba(244,67,54,0.2));
-    }
-
-    .text-secondary i {
-        background: linear-gradient(45deg, #95a5a6, #757575);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        filter: drop-shadow(0 2px 2px rgba(117,117,117,0.2));
-    }
-
-    /* Hiệu ứng hover cho icons */
-    .activity-name i:hover {
-        transform: scale(1.15);  /* Tăng scale khi hover */
-        transition: all 0.3s ease;
-        filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2)); /* Tăng đổ bóng khi hover */
-    }
-
-    /* Animation khi hover */
-    @keyframes iconFloat {
-        0% { transform: translateY(0); }
-        50% { transform: translateY(-5px); }
-        100% { transform: translateY(0); }
-    }
-
-    .activity-name i:hover {
-        animation: iconFloat 1s ease infinite;
-    }
-
-    /* Style cho participant info */
+    /* Style cho thông tin người tham gia */
     .participant-info {
         display: flex;
         align-items: center;
-        margin: 15px 0;
-        padding: 10px;
-        background: rgba(255,255,255,0.7);
-        border-radius: 10px;
+        padding: 8px;
+        background: rgba(0,0,0,0.02);
+        border-radius: 6px;
+        margin: 8px 0;
     }
 
     .participant-avatar {
-        width: 45px;
-        height: 45px;
+        width: 35px;
+        height: 35px;
         border-radius: 50%;
         object-fit: cover;
-        margin-right: 15px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        margin-right: 10px;
     }
 
     .participant-details {
@@ -430,80 +280,82 @@
     .participant-name {
         font-weight: 600;
         color: #2c3e50;
-        margin-bottom: 5px;
+        margin: 0;
+        font-size: 0.9rem;
     }
 
     .participant-role {
-        display: inline-block;
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-size: 0.85rem;
-        font-weight: 500;
-        letter-spacing: 0.5px;
-        text-transform: uppercase;
+        font-size: 0.8rem;
+        color: #666;
+        margin: 2px 0 0;
     }
 
-    /* Style cho description */
-    .activity-log .description {
-        background: rgba(255,255,255,0.7);
-        padding: 12px 15px;
-        border-radius: 8px;
-        margin: 10px 0;
-        line-height: 1.6;
-        color: #37474f;
+    /* Style cho timestamp */
+    .timestamp {
+        color: #95a5a6;
+        font-size: 0.8rem;
+        margin-bottom: 5px;
     }
 
-    /* Style cho image link */
-    .image-link {
-        display: inline-flex;
-        align-items: center;
-        background: #f5f6fa;
-        padding: 8px 15px;
-        border-radius: 20px;
-        color: #2c3e50;
-        text-decoration: none;
-        transition: all 0.3s ease;
+    /* Style cho tên hoạt động */
+    .activity-name {
         font-size: 0.9rem;
-        margin-top: 10px;
+        color: #34495e;
+        margin: 8px 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
     }
 
-    .image-link:hover {
-        background: #e3f2fd;
-        color: #1976d2;
+    /* Style cho mô tả */
+    .description {
+        color: #666;
+        font-size: 0.85rem;
+        margin: 8px 0;
+        padding-left: 10px;
+        border-left: 2px solid #eee;
+    }
+
+    /* Màu sắc cho từng loại người dùng */
+    .activity-log.producer {
+        border-color: #4CAF50;
+    }
+
+    .activity-log.approver {
+        border-color: #2196F3;
+    }
+
+    .activity-log.warehouse {
+        border-color: #FF9800;
+    }
+
+    .activity-log.transporter {
+        border-color: #9C27B0;
+    }
+
+    /* Hiệu ứng hover nhẹ nhàng */
+    .activity-log:hover {
         transform: translateY(-2px);
+        box-shadow: 0 3px 10px rgba(0,0,0,0.08);
     }
 
-    .image-link i {
-        margin-right: 8px;
-    }
-
-    /* Load more button */
+    /* Style cho nút xem thêm */
     #loadMoreLogs {
+        background: #4CAF50;
         color: white;
         border: none;
-        padding: 10px 25px;
-        border-radius: 25px;
-        cursor: pointer;
+        padding: 8px 20px;
+        border-radius: 20px;
+        font-size: 0.9rem;
         font-weight: 500;
-        margin: 20px auto;
+        margin: 15px auto;
         display: block;
-        transition: all 0.3s ease;
+        transition: all 0.2s ease;
     }
 
     #loadMoreLogs:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-    }
-
-    .participant-link {
-        text-decoration: none;
-        color: inherit;
-        transition: color 0.3s ease;
-    }
-
-    .participant-link:hover {
-        color: #007bff;
-        text-decoration: underline;
+        background: #45a049;
+        transform: translateY(-1px);
     }
 
     .product-card {

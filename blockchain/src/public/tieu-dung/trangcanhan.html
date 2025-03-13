@@ -88,14 +88,20 @@
                                 <li><strong>Vùng sản xuất:</strong> <span class="profile-region"></span></li>
                                 <li class="position-relative">
                                     <strong>Điện thoại:</strong>
-                                    <span id="phoneNumber" data-phone="0326714224" class="phone-number-trigger">0326714224</span>
-                                    <div class="contact-options-dropdown" id="contactOptions">
-                                        <a id="callOption" class="dropdown-item call-option">
-                                            <i class="fas fa-phone"></i> Gọi
-                                        </a>
-                                        <a id="zaloOption" class="dropdown-item zalo-option">
-                                            <i class="fab fa-facebook-messenger"></i> Zalo
-                                        </a>
+                                    <div class="position-relative">
+                                        <span id="phoneNumber" data-phone="904521281" class="phone-number-trigger">
+                                            <i class="fas fa-phone-alt"></i> 904521281
+                                        </span>
+                                        <div id="contactOptions" class="contact-options-dropdown">
+                                            <a href="#" id="callOption" class="dropdown-item call-option">
+                                                <i class="fas fa-phone-alt"></i>
+                                                Gọi điện
+                                            </a>
+                                            <a href="#" id="zaloOption" class="dropdown-item zalo-option">
+                                                <i class="fab fa-facebook-messenger"></i>
+                                                Nhắn Zalo
+                                            </a>
+                                        </div>
                                     </div>
                                 </li>
                             </ul>
@@ -227,30 +233,63 @@
 
         try {
             const response = await fetch(`/api/user/${userId}`);
-            const user = await response.json();
+            const userData = await response.json();
 
             if (!response.ok) {
-                throw new Error(user.error || 'Lỗi không xác định');
+                throw new Error(userData.error || 'Lỗi không xác định');
+            }
+
+            // Cập nhật thông tin người dùng
+            const phoneNumber = document.getElementById('phoneNumber');
+            const contactOptions = document.getElementById('contactOptions');
+            const callOption = document.getElementById('callOption');
+            const zaloOption = document.getElementById('zaloOption');
+
+            if (phoneNumber && userData.phone) {
+                phoneNumber.textContent = userData.phone;
+                phoneNumber.setAttribute('data-phone', userData.phone);
+                
+                // Xử lý click vào số điện thoại
+                phoneNumber.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    contactOptions.classList.toggle('show');
+                });
+
+                // Xử lý click vào nút gọi điện
+                callOption.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const phone = phoneNumber.getAttribute('data-phone');
+                    window.location.href = `tel:${phone}`;
+                });
+
+                // Xử lý click vào nút Zalo
+                zaloOption.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const phone = phoneNumber.getAttribute('data-phone');
+                    window.location.href = `https://zalo.me/${phone}`;
+                });
+
+                // Đóng dropdown khi click ra ngoài
+                document.addEventListener('click', function(e) {
+                    if (!phoneNumber.contains(e.target) && !contactOptions.contains(e.target)) {
+                        contactOptions.classList.remove('show');
+                    }
+                });
             }
 
             // Cập nhật selector cho đúng với cấu trúc HTML
             const profileImg = document.querySelector('.profile-img');
             const profileName = document.querySelector('.profile-name');
-            const phoneNumber = document.getElementById('phoneNumber'); // Thay đổi selector này
             const profileAddress = document.querySelector('.profile-address');
             const profileRegion = document.querySelector('.profile-region');
 
-            if (profileImg) profileImg.src = user.avatar || 'https://static.vecteezy.com/system/resources/previews/009/292/244/non_2x/default-avatar-icon-of-social-media-user-vector.jpg';
-            if (profileName) profileName.textContent = user.name;
-            if (phoneNumber) {
-                phoneNumber.textContent = user.phone;
-                phoneNumber.setAttribute('data-phone', user.phone);
-            }
-            if (profileAddress) profileAddress.textContent = user.address;
-            if (profileRegion) profileRegion.textContent = user.region_name || 'Không xác định';
+            if (profileImg) profileImg.src = userData.avatar || 'https://static.vecteezy.com/system/resources/previews/009/292/244/non_2x/default-avatar-icon-of-social-media-user-vector.jpg';
+            if (profileName) profileName.textContent = userData.name;
+            if (profileAddress) profileAddress.textContent = userData.address;
+            if (profileRegion) profileRegion.textContent = userData.region_name || 'Không xác định';
 
             // Thêm log để debug
-            console.log('Dữ liệu người dùng:', user);
+            console.log('Dữ liệu người dùng:', userData);
             console.log('Các phần tử DOM:', {
                 profileImg: !!profileImg,
                 profileName: !!profileName,
@@ -259,7 +298,7 @@
                 profileRegion: !!profileRegion
             });
         } catch (error) {
-            console.error('Lỗi khi lấy thông tin chi tiết người dùng:', error);
+            console.error('Lỗi khi lấy thông tin người dùng:', error);
         }
     });
 
@@ -372,73 +411,88 @@
     
     function createActivityLogElement(log, index) {
         const logElement = document.createElement('div');
-        logElement.className = 'activity-log container mt-4 border rounded';
+        logElement.className = 'activity-card';
         logElement.innerHTML = `
-            <div class="activity-header row align-items-center my-3">
-                <div class="col">
-                    <h5 class="activity-name mb-2">${log.activityName}</h5>
-                    <small class="activity-timestamp text-muted">Thời gian: ${new Date(log.timestamp).toLocaleString()}</small>
-                </div>
+            <div class="activity-header">
+                <h5 class="activity-name mb-1">${log.activityName}</h5>
+                <small class="text-muted">
+                    <i class="far fa-clock"></i> 
+                    ${new Date(log.timestamp).toLocaleString()}
+                </small>
             </div>
-            <div class="activity-content card mb-3">
-                <div class="card-body">
-                    <h6 class="card-subtitle mb-2 text-muted">Mô tả hoạt động:</h6>
-                    <p class="activity-description card-text">${log.description}</p>
-                    
-                    ${log.relatedProducts && log.relatedProducts.length > 0 ? `
-                        <div class="carousel-container">
-                            <h6 class="card-subtitle mb-2 mt-4 text-muted">Sản phẩm liên quan:</h6>
-                            <div id="carouselProducts${index}" class="carousel slide" data-bs-ride="carousel">
-                                <div class="carousel-inner">
-                                    ${createCarouselItems(log.relatedProducts, 4, true)}
-                                </div>
-                                <button class="carousel-control-prev" type="button" data-bs-target="#carouselProducts${index}" data-bs-slide="prev">
-                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                    <span class="visually-hidden">Previous</span>
-                                </button>
-                                <button class="carousel-control-next" type="button" data-bs-target="#carouselProducts${index}" data-bs-slide="next">
-                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                    <span class="visually-hidden">Next</span>
-                                </button>
-                            </div>
-                        </div>
-                    ` : ''}
-                    
-                    ${log.imageUrls && log.imageUrls.length > 0 ? `
-                        <h6 class="card-subtitle mb-2 mt-4 text-muted">Ảnh/video hoạt động:</h6>
-                        <div class="row">
-                            ${log.imageUrls.map(url => `
-                                <div class="col-6 col-md-4 col-lg-3 mb-3">
-                                    <img src="${url}" alt="Activity image" class="img-fluid rounded">
-                                </div>
-                            `).join('')}
-                        </div>
-                    ` : ''}
+            
+            <div class="activity-content">
+                <!-- Phần mô tả -->
+                <div class="activity-section">
+                    <div class="section-title">
+                        <i class="fas fa-info-circle"></i> Mô tả hoạt động
+                    </div>
+                    <div class="activity-description">${log.description}</div>
                 </div>
+
+                <!-- Phần sản phẩm liên quan -->
+                ${log.relatedProducts && log.relatedProducts.length > 0 ? `
+                <div class="activity-section">
+                    <div class="section-title">
+                        <i class="fas fa-box"></i> Sản phẩm liên quan
+                    </div>
+                    <div class="products-carousel">
+                        <div id="carouselProducts${index}" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-inner">
+                                ${createCarouselItems(log.relatedProducts, 4)}
+                            </div>
+                            ${log.relatedProducts.length > 4 ? `
+                                <button class="carousel-control-prev product-carousel-control" type="button" data-bs-target="#carouselProducts${index}" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                </button>
+                                <button class="carousel-control-next product-carousel-control" type="button" data-bs-target="#carouselProducts${index}" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
+
+                <!-- Phần gallery ảnh -->
+                ${log.imageUrls && log.imageUrls.length > 0 ? `
+                <div class="activity-section">
+                    <div class="section-title">
+                        <i class="fas fa-images"></i> Ảnh/video hoạt động
+                    </div>
+                    <div class="activity-gallery">
+                        ${log.imageUrls.map(url => `
+                            <div class="gallery-item">
+                                <img src="${url}" alt="Activity image" class="gallery-image" onclick="openImageModal(this.src)">
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                ` : ''}
             </div>
         `;
         return logElement;
     }
 
-    function createCarouselItems(items, itemsPerSlide, isProduct) {
-    let carouselItems = '';
-    for (let i = 0; i < items.length; i += itemsPerSlide) {
-        const slideItems = items.slice(i, i + itemsPerSlide);
-        carouselItems += `
-            <div class="carousel-item ${i === 0 ? 'active' : ''}">
-                <div class="row">
-                    ${slideItems.map(item => `
-                        <div class="col-6 col-md-4 col-lg-3"> <!-- Sử dụng col-6 cho mobile, col-md-4 cho tablet và col-lg-3 cho desktop -->
-                            <div class="product-card" onclick="goToProductPage('${item.product_id}')">
-                                <div class="product-name">${item.product_name}</div>
-                                <img class="product-image" src="${item.image_url}" alt="${item.product_name}">
+    function createCarouselItems(items, itemsPerSlide) {
+        let carouselItems = '';
+        for (let i = 0; i < items.length; i += itemsPerSlide) {
+            const slideItems = items.slice(i, i + itemsPerSlide);
+            carouselItems += `
+                <div class="carousel-item ${i === 0 ? 'active' : ''}">
+                    <div class="row">
+                        ${slideItems.map(item => `
+                            <div class="col-6 col-md-4 col-lg-3"> <!-- Sử dụng col-6 cho mobile, col-md-4 cho tablet và col-lg-3 cho desktop -->
+                                <div class="product-card" onclick="goToProductPage('${item.product_id}')">
+                                    <div class="product-name">${item.product_name}</div>
+                                    <img class="product-image" src="${item.image_url}" alt="${item.product_name}">
+                                </div>
                             </div>
-                        </div>
-                    `).join('')}
+                        `).join('')}
+                    </div>
                 </div>
-            </div>
-        `;
-    }
+            `;
+        }
         return carouselItems;
     }
     function goToProductPage(productId) {
@@ -526,6 +580,43 @@
                 });
             });
         });
+    </script>
+
+    <!-- Thêm Modal cho gallery images -->
+    <div id="galleryModal" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Xem ảnh</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center p-0">
+                    <img id="galleryModalImage" src="" alt="Gallery image" class="img-fluid">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // Thêm hàm mở modal
+    function openImageModal(imageSrc) {
+        const modal = document.getElementById('galleryModal');
+        const modalImg = document.getElementById('galleryModalImage');
+        modalImg.src = imageSrc;
+        $(modal).modal('show');
+    }
+
+    // Thêm sự kiện click cho tất cả ảnh trong gallery
+    document.addEventListener('DOMContentLoaded', function() {
+        const galleryImages = document.querySelectorAll('.gallery-image');
+        galleryImages.forEach(image => {
+            image.addEventListener('click', function() {
+                openImageModal(this.src);
+            });
+        });
+    });
     </script>
 </body>
 </html>

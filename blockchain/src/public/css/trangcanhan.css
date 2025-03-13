@@ -387,14 +387,18 @@ h2.text-danger:hover {
 .product-card {
     display: flex;
     flex-direction: column;
-    align-items: center;
     background-color: #ffffff;
     border-radius: 8px;
-    padding: 10px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     transition: all 0.3s ease;
+    cursor: pointer;
     height: 100%;
-    width: 100%;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
 }
 
 .product-name {
@@ -402,22 +406,21 @@ h2.text-danger:hover {
     font-weight: 600;
     color: #333;
     text-align: center;
-    margin-bottom: 8px;
-    height: 40px;
-    /* Giới hạn chiều cao của tên sản phẩm */
-    overflow: hidden;
+    margin-bottom: 10px;
+    min-height: 40px;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.3;
 }
 
 .product-image {
     width: 100%;
     height: 120px;
-    /* Giảm chiều cao của ảnh */
     object-fit: cover;
-    border-radius: 6px;
-    margin-top: 5px;
+    border-radius: 8px;
+    margin-top: auto;
 }
 
 .carousel-item .col-md-6 {
@@ -448,12 +451,12 @@ h2.text-danger:hover {
     .product-card {
         padding: 8px;
     }
-
+    
     .product-name {
         font-size: 0.8rem;
-        height: 36px;
+        min-height: 35px;
     }
-
+    
     .product-image {
         height: 100px;
     }
@@ -595,22 +598,27 @@ h2.text-danger:hover {
     display: inline-block;
 }
 
-/* Style cho số điện thoại */
+/* Style cho phone number trigger */
 .phone-number-trigger {
     color: #4CAF50;
-    padding: 5px 10px;
-    border-radius: 15px;
+    padding: 8px 15px;
+    border-radius: 20px;
     background-color: #e8f5e9;
     cursor: pointer;
     transition: all 0.3s ease;
-    display: inline-block;
-    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .phone-number-trigger:hover {
     background-color: #c8e6c9;
     transform: translateY(-1px);
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.phone-number-trigger i {
+    font-size: 14px;
 }
 
 /* Style cho dropdown */
@@ -646,7 +654,7 @@ h2.text-danger:hover {
 
 /* Style cho các options trong dropdown */
 .dropdown-item {
-    padding: 8px 15px;
+    padding: 10px 15px;
     color: #333;
     display: flex;
     align-items: center;
@@ -754,4 +762,206 @@ h2.text-danger:hover {
     border-top: 2px solid white;
     border-right: 2px solid white;
     transform: rotate(45deg);
+}
+
+/* Style cho card hoạt động */
+.activity-card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+    overflow: hidden;
+    border: none;
+}
+
+.activity-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid #f0f0f0;
+    background: linear-gradient(to right, #f8f9fa, #ffffff);
+}
+
+.activity-content {
+    padding: 20px;
+}
+
+.activity-section {
+    margin-bottom: 20px;
+}
+
+.section-title {
+    font-size: 0.9rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+
+.section-title i {
+    margin-right: 8px;
+    color: #4CAF50;
+}
+
+.activity-description {
+    background: #f8f9fa;
+    padding: 12px 15px;
+    border-radius: 8px;
+    color: #444;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+/* Style cho carousel sản phẩm */
+.products-carousel {
+    background: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 15px 0;
+}
+
+.product-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 12px;
+    transition: all 0.3s ease;
+    border: 1px solid #eee;
+    height: 100%;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.product-image {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 6px;
+    margin-bottom: 10px;
+}
+
+/* Style cho gallery ảnh */
+.activity-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.gallery-item {
+    position: relative;
+    padding-top: 100%;
+    overflow: hidden;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.gallery-item img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.gallery-item:hover img {
+    transform: scale(1.05);
+}
+
+/* Style cho gallery modal */
+#galleryModal .modal-dialog {
+    max-width: 90%;
+    margin: 1.75rem auto;
+}
+
+#galleryModal .modal-content {
+    background-color: #fff;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+#galleryModal .modal-header {
+    border-bottom: none;
+    padding: 1rem 1.5rem;
+}
+
+#galleryModal .modal-body {
+    padding: 0;
+    background-color: #000;
+    border-radius: 0 0 12px 12px;
+    overflow: hidden;
+}
+
+#galleryModal .modal-title {
+    color: #333;
+    font-weight: 600;
+}
+
+#galleryModalImage {
+    max-height: 80vh;
+    object-fit: contain;
+    width: auto;
+    margin: 0 auto;
+    display: block;
+}
+
+#galleryModal .close {
+    font-size: 1.5rem;
+    color: #666;
+    opacity: 1;
+    transition: all 0.2s ease;
+}
+
+#galleryModal .close:hover {
+    color: #333;
+    transform: scale(1.1);
+}
+
+/* Animation cho modal */
+.modal.fade .modal-dialog {
+    transform: scale(0.8);
+    transition: transform 0.3s ease-out;
+}
+
+.modal.show .modal-dialog {
+    transform: scale(1);
+}
+
+/* Style cho nút điều hướng carousel */
+.product-carousel-control {
+    width: 40px;
+    height: 40px;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.product-carousel-control:hover {
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+.carousel-control-prev {
+    left: -20px;
+}
+
+.carousel-control-next {
+    right: -20px;
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    width: 20px;
+    height: 20px;
+}
+
+/* Ẩn indicators (nút tròn) */
+.carousel-indicators {
+    display: none;
 }

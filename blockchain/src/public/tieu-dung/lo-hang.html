@@ -520,6 +520,14 @@ function translateActivityName(activityName) {
                     <td>${batchInfo.producer.name}</td>
                 </tr>
                 <tr>
+                    <th>Hình ảnh lô hàng</th>
+                    <td>
+                        <button class="btn-view-image" onclick="showProductImages('${batchInfo.batchImageUrls}')">
+                            <i class="fas fa-images mr-2"></i> Xem ảnh lô hàng
+                        </button>
+                    </td>
+                </tr>
+                <tr>
                     <th>Địa chỉ</th>
                     <td>
                         <a href="#" onclick="openGoogleMaps('${batchInfo.producer.address}')" class="address-link">
@@ -532,11 +540,6 @@ function translateActivityName(activityName) {
                     <td>${batchInfo.producer.phone || 'Không có thông tin'}</td>
                 </tr>
             </table>
-            <div class="text-center mt-4">
-                <button class="btn-view-image" onclick="showProductImages('${batchInfo.productImageUrls.join(',')}')">
-                    <i class="fas fa-camera mr-2"></i> Xem ảnh sản phẩm
-                </button>
-            </div>
         </div>
     `;
 }

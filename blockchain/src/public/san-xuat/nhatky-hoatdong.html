@@ -328,7 +328,8 @@
             <p></p>
             <div class="dashboard-table">
                 <button class="btn add-activity-btn" data-toggle="modal" data-target="#addActivityLogModal">
-                    <i class="fas fa-plus-circle mr-2"></i>Thêm nhật ký hoạt động
+                    <i class="fas fa-plus"></i>
+                    Thêm
                 </button>
             </div>
             <!-- Thêm spinner loading -->
@@ -383,7 +384,7 @@
     </div>
 
 
-    <div class="modal fade" id="addActivityLogModal" tabindex="-1" role="dialog" aria-labelledby="addActivityLogModalLabel" aria-hidden="true">
+    <div class="modal fade" id="addActivityLogModal" tabindex="-1" role="dialog" aria-labelledby="addActivityLogModalLabel" aria-modal="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -774,8 +775,10 @@
                     // Hiển thị toast thành công
                     showToast('Thêm nhật ký hoạt động thành công!', 'success');
                     
-                    // Đóng modal
+                    // Đóng modal và xóa backdrop
                     $('#addActivityLogModal').modal('hide');
+                    $('.modal-backdrop').remove();
+                    document.body.classList.remove('modal-open');
                     
                     // Reset form
                     this.reset();
@@ -785,25 +788,21 @@
                     if (previewContainer) {
                         previewContainer.innerHTML = '';
                     }
+
+                    // Đợi toast hiển thị 1 giây rồi reload trang
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
                     
-                    // Refresh danh sách hoạt động
-                    fetchAndDisplayAllActivities();
                 } else {
                     // Hiển thị toast lỗi
                     showToast(data.error || 'Có lỗi xảy ra khi thêm hoạt động', 'error');
+                    submitBtn.disabled = false;
                 }
             } catch (error) {
                 console.error('Lỗi:', error);
                 showToast('Có lỗi xảy ra khi thêm hoạt động', 'error');
-            } finally {
-                submitBtn.disabled = false; // Kích hoạt lại nút sau khi xử lý xong
-                
-                // Đảm bảo modal được đóng đúng cách
-                document.body.classList.remove('modal-open');
-                const modalBackdrop = document.querySelector('.modal-backdrop');
-                if (modalBackdrop) {
-                    modalBackdrop.remove();
-                }
+                submitBtn.disabled = false;
             }
         });
     </script>
@@ -812,5 +811,29 @@
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    // Xử lý sự kiện click nút "Thêm"
+    $('.add-activity-btn[data-toggle="modal"]').on('click', function(e) {
+        e.preventDefault();
+        $('#addActivityLogModal').modal({
+            backdrop: 'static',
+            keyboard: false,
+            show: true
+        });
+    });
+
+    // Xử lý sự kiện đóng modal
+    $('.close, .modal').on('click', function(e) {
+        if (e.target === this) {
+            $('#addActivityLogModal').modal('hide');
+            // Cleanup sau khi đóng modal
+            document.body.classList.remove('modal-open');
+            $('.modal-backdrop').remove();
+        }
+    });
+});
+</script>
 </body>
 </html>
