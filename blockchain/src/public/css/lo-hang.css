@@ -578,9 +578,12 @@
     .custom-img {
         max-width: 100%;
         height: auto;
+        max-height: 250px; /* Giảm chiều cao tối đa */
+        width: auto;
         border-radius: 12px;
         box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         transition: transform 0.3s ease;
+        object-fit: contain;
     }
 
     .custom-img:hover {
@@ -1131,5 +1134,21 @@
 
         .navbar-nav {
             background-color: #4CAF50 !important; /* Đảm bảo màu nền đúng */
+        }
+    }
+
+    /* Điều chỉnh container chứa ảnh */
+    .row.no-gutters.justify-content-center .col-md-8 {
+        max-width: 350px; /* Giảm chiều rộng tối đa của container */
+    }
+
+    /* Responsive cho màn hình nhỏ */
+    @media (max-width: 768px) {
+        .custom-img {
+            max-height: 200px; /* Giảm chiều cao trên mobile */
+        }
+        
+        .row.no-gutters.justify-content-center .col-md-8 {
+            max-width: 100%;
         }
     }
